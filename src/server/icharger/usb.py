@@ -259,7 +259,18 @@ class iChargerMaster(RtuMaster):
         Bit5-cell voltage flag
         Bit6-balance flag
         """
-        return self._modbus_read_input_registers(0x000, format="h12sHHHHHH")
+        data = self._modbus_read_input_registers(0x000, format="h12sHHHHHH")
+
+        return {
+            "device_id": data[0],
+            "device_sn": data[1],
+            "software_ver": data[2],
+            "hardware_ver": data[3],
+            "system_len": data[4],
+            "memory_len": data[5],
+            "ch1_status": data[6],
+            "ch2_status": data[7]
+        }
 
     def get_channel_status(self, channel):
         """"
