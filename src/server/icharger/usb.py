@@ -1,12 +1,7 @@
-# testing module, to check understanding of modbus-tk with iCharger 4010 DUO USB HUD interface
-
-import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
-from modbus_tk.utils import get_log_buffer
-from modbus_tk import LOGGER
 
 import usb.core
 import usb.util
@@ -15,8 +10,10 @@ import sys
 
 ICHARGER_VENDOR_ID = 0x483
 ICHARGER_PRODUCT_ID = 0x5751
+
 END_POINT_ADDRESS_WRITE = 0x01
 END_POINT_ADDRESS_READ = 0x81
+
 MAX_READWRITE_LEN = 64
 
 READ_REG_COUNT_MAX = 30
@@ -90,7 +87,7 @@ class iChargerQuery(Query):
 
         return final
 
-class USBSerialFacade:
+class iChargerUSBSerialFacade:
     """
     Implements facade such that the ModBus Master thinks it is using a serial
     device when talking to the iCharger via USB-HID.
@@ -101,7 +98,7 @@ class USBSerialFacade:
     be detached that's more of a problem and right now the USBSerialFacade throws a big fat
     exception from __init__.
     """
-    def __init__(self, vendorId, productId):
+    def __init__(self, vendorId = ICHARGER_VENDOR_ID, productId = ICHARGER_PRODUCT_ID):
         self._claimed = False
         self.dev = usb.core.find(idVendor=vendorId, idProduct=productId)
         if self.dev is None:
@@ -203,7 +200,9 @@ class iChargerMaster(RtuMaster):
     Modbus master interface to the iCharger, implements higher level routines to get the
     status / channel information from the device.
     """
-    def __init__(self, serial):
+    def __init__(self, serial = None):
+        if serial is None:
+            serial = iChargerUSBSerialFacade()
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):
@@ -299,17 +298,3 @@ class iChargerMaster(RtuMaster):
 
         return data1 + data2 + data3
 
-def main():
-    logger = modbus_tk.utils.create_logger("console")
-
-    master = iChargerMaster(USBSerialFacade(ICHARGER_VENDOR_ID, ICHARGER_PRODUCT_ID))
-    master.set_verbose(True)
-
-    res = master.get_device_info()
-    LOGGER.info(res)
-
-    LOGGER.info(master.get_channel_status(1))
-    LOGGER.info(master.get_channel_status(2))
-
-if __name__ == "__main__":
-    main()
