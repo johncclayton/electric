@@ -343,12 +343,12 @@ class iChargerMaster(RtuMaster):
         print("header addr:", addr, "header len: ", header_len)
 
         # cell 0-15 voltage
-        cell_volt_fmt = "15H"
+        cell_volt_fmt = "16H"
         cell_volt_addr = addr + header_len / 2
         cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
         cell_volt_len = struct.calcsize(cell_volt_fmt)
 
-        print("cell addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
+        print("cell volt addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
 
         # cell 0-15 balance
         cell_balance_fmt = "16B"
@@ -364,7 +364,7 @@ class iChargerMaster(RtuMaster):
         cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
         cell_ir_len = struct.calcsize(cell_ir_fmt)
 
-        print("cell ir len: ", cell_ir_len)
+        print("cell ir len: ", cell_ir_len, "cell ir start addr", cell_ir_addr)
 
         # total IR -> dialog box ID
         footer_fmt = "7H"
@@ -396,5 +396,4 @@ class iChargerMaster(RtuMaster):
             "control_status": footer[3],
             "run_status": footer[4],
             "run_error": footer[5],
-            "dlg_box_id": footer[6]
         }
