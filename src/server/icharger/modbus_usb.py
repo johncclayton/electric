@@ -237,7 +237,6 @@ class iChargerMaster(RtuMaster):
         quant = byte_len // 2
 
         assert (quant * 2) == byte_len
-
         print("reading from address:", addr, "requesting {0} words, total len expected: {1}".format(quant, (quant * 2) + 4))
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
@@ -327,24 +326,37 @@ class iChargerMaster(RtuMaster):
         """
         addr = 0x100 if channel == 1 else 0x200
 
-        # timestamp -> cell 0-15 voltage
+        # timestamp -> ext temp
         header_fmt = "LLhHHlhh"
         header_data = self._modbus_read_input_registers(addr, format=header_fmt)
+	header_len = struct.calcsize(header_fmt) 
+
+	print("channel:", channel)
+	print("header addr:", addr, "header len: ", header_len)
 
         # cell 0-15 voltage
-        cell_volt_fmt = "8H"
-        cell_volt_addr = addr + (struct.calcsize(header_fmt) / 2)
+        cell_volt_fmt = "15H"
+        cell_volt_addr = addr + header_len / 2
         cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
+	cell_volt_len = struct.calcsize(cell_volt_fmt)
+
+	print("cell addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
 
         # cell 0-15 balance
-        cell_balance_fmt = "8H"
-        cell_balance_addr = addr + (struct.calcsize(header_fmt) / 2)
+        cell_balance_fmt = "16B"
+        cell_balance_addr = cell_volt_addr + (cell_volt_len / 2)
         cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
+	cell_balance_len = struct.calcsize(cell_balance_fmt)
+
+	print("cell balance len: ", cell_volt_len, "cell balance start addr:", cell_balance_addr)
 
         # cell 0-15 IR
-        cell_ir_fmt = "15H"
-        cell_ir_addr = cell_balance_addr + (struct.calcsize(cell_balance_fmt) / 2)
+        cell_ir_fmt = "16H"
+        cell_ir_addr = cell_balance_addr + (cell_balance_len / 2)
         cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
+	cell_ir_len = struct.calcsize(cell_ir_fmt)
+
+	print("cell ir len: ", cell_ir_len)
 
         # total IR -> dialog box ID
         footer_fmt = "7H"
