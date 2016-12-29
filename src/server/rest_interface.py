@@ -9,3 +9,15 @@ class Status_iCharger(Resource):
         dev = iChargerMaster()
         return dev.get_device_info()
 
+class ChannelStatus_iCharger(Resource):
+    def __init__(self):
+        super(ChannelStatus_iCharger, self).__init__()
+
+    def get(self, channel_id):
+        dev = iChargerMaster()
+        return dev.get_channel_status(int(channel_id))
+
+
+
+
+
