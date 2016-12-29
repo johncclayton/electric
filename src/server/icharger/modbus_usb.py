@@ -19,6 +19,14 @@ MAX_READWRITE_LEN = 64
 READ_REG_COUNT_MAX = 30
 WRITE_REG_COUNT_MAX = 28
 
+STATUS_RUN = 0x01
+STATUS_ERROR = 0x02
+STATUS_CONTROL_STATUS = 0x04
+STATUS_RUN_STATUS = 0x08
+STATUS_DLG_BOX_STATUS = 0x10
+STATUS_CELL_VOLTAGE = 0x20
+STATUS_BALANCE = 0x40
+
 #
 #
 # relies on the following going into /etc/udev/rules.d/10-icharger4010.rules
@@ -237,6 +245,17 @@ class iChargerMaster(RtuMaster):
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
 
+    def _status_word_as_json(self, status):
+        return {
+            "run": status & STATUS_RUN,
+            "err": status & STATUS_ERROR,
+            "ctrl_status": status & STATUS_CONTROL_STATUS,
+            "run_status": status & STATUS_RUN_STATUS,
+            "dlg_box_status": status & STATUS_DLG_BOX_STATUS,
+            "cell_volt_status": status & STATUS_CELL_VOLTAGE,
+            "balance": status & STATUS_BALANCE
+        }
+
     def get_device_info(self):
         """
         Returns the following information from the iCharger, known as the 'device only reads message'
@@ -268,8 +287,8 @@ class iChargerMaster(RtuMaster):
             "hardware_ver": data[3],
             "system_len": data[4],
             "memory_len": data[5],
-            "ch1_status": data[6],
-            "ch2_status": data[7]
+            "ch1_status": self._status_word_as_json(data[6]),
+            "ch2_status": self._status_word_as_json(data[7])
         }
 
     def get_channel_status(self, channel):
