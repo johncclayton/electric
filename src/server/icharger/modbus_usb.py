@@ -1,12 +1,12 @@
-import modbus_tk.defines as cst
-from modbus_tk.modbus import Query
-from modbus_tk.modbus_rtu import RtuMaster
-from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
-
-import usb.core
-import usb.util
 import struct
 import sys
+
+import modbus_tk.defines as cst
+import usb.core
+import usb.util
+from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
+from modbus_tk.modbus import Query
+from modbus_tk.modbus_rtu import RtuMaster
 
 ICHARGER_VENDOR_ID = 0x483
 ICHARGER_PRODUCT_ID = 0x5751
@@ -26,6 +26,7 @@ STATUS_RUN_STATUS = 0x08
 STATUS_DLG_BOX_STATUS = 0x10
 STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
+
 
 #
 #
@@ -57,7 +58,7 @@ class iChargerQuery(Query):
 
     def build_request(self, pdu, slave):
         """ Constructs the output buffer for the request based on the func_code value """
-        (self.func_code, ) = struct.unpack(">B", pdu[0])
+        (self.func_code,) = struct.unpack(">B", pdu[0])
 
         if self.func_code == cst.READ_INPUT_REGISTERS:
             self.adu_len = 7
@@ -76,12 +77,15 @@ class iChargerQuery(Query):
         (self.response_length, self.adu_constant, self.response_func_code) = struct.unpack(">BBB", response[0:3])
 
         if self.adu_constant != 0x30:
-            raise ModbusInvalidResponseError("Response doesn't containt constant 0x30 in ADU portion, constant value found is {0}".format(self.adu_constant))
+            raise ModbusInvalidResponseError(
+                "Response doesn't containt constant 0x30 in ADU portion, constant value found is {0}".format(
+                    self.adu_constant))
 
         if self.response_func_code != self.func_code:
-            raise ModbusInvalidResponseError("Response func_code {0} isn't the same as the request func_code {1}".format(
-                self.response_func_code, self.func_code
-            ))
+            raise ModbusInvalidResponseError(
+                "Response func_code {0} isn't the same as the request func_code {1}".format(
+                    self.response_func_code, self.func_code
+                ))
 
         # primitive byte swap the entire thing...
         header = response[2:4]
@@ -95,6 +99,7 @@ class iChargerQuery(Query):
 
         return final
 
+
 class iChargerUSBSerialFacade:
     """
     Implements facade such that the ModBus Master thinks it is using a serial
@@ -106,7 +111,8 @@ class iChargerUSBSerialFacade:
     be detached that's more of a problem and right now the USBSerialFacade throws a big fat
     exception from __init__.
     """
-    def __init__(self, vendorId = ICHARGER_VENDOR_ID, productId = ICHARGER_PRODUCT_ID):
+
+    def __init__(self, vendorId=ICHARGER_VENDOR_ID, productId=ICHARGER_PRODUCT_ID):
         self._claimed = False
         self.dev = usb.core.find(idVendor=vendorId, idProduct=productId)
         if self.dev is None:
@@ -161,7 +167,7 @@ class iChargerUSBSerialFacade:
         return "! iCharger Not Connected !"
 
     def open(self):
-       return self._claim_interface()
+        return self._claim_interface()
 
     def close(self):
         return self._release_interface()
@@ -208,7 +214,8 @@ class iChargerMaster(RtuMaster):
     Modbus master interface to the iCharger, implements higher level routines to get the
     status / channel information from the device.
     """
-    def __init__(self, serial = None):
+
+    def __init__(self, serial=None):
         if serial is None:
             serial = iChargerUSBSerialFacade()
         super(iChargerMaster, self).__init__(serial)
@@ -237,7 +244,8 @@ class iChargerMaster(RtuMaster):
         quant = byte_len // 2
 
         assert (quant * 2) == byte_len
-        print("reading from address:", addr, "requesting {0} words, total len expected: {1}".format(quant, (quant * 2) + 4))
+        print(
+        "reading from address:", addr, "requesting {0} words, total len expected: {1}".format(quant, (quant * 2) + 4))
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
@@ -329,44 +337,42 @@ class iChargerMaster(RtuMaster):
         # timestamp -> ext temp
         header_fmt = "LLhHHlhh"
         header_data = self._modbus_read_input_registers(addr, format=header_fmt)
-	header_len = struct.calcsize(header_fmt) 
+        header_len = struct.calcsize(header_fmt)
 
-	print("channel:", channel)
-	print("header addr:", addr, "header len: ", header_len)
+        print("channel:", channel)
+        print("header addr:", addr, "header len: ", header_len)
 
         # cell 0-15 voltage
         cell_volt_fmt = "15H"
         cell_volt_addr = addr + header_len / 2
         cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
-	cell_volt_len = struct.calcsize(cell_volt_fmt)
+        cell_volt_len = struct.calcsize(cell_volt_fmt)
 
-	print("cell addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
+        print("cell addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
 
         # cell 0-15 balance
         cell_balance_fmt = "16B"
-        cell_balance_addr = cell_volt_addr + (cell_volt_len / 2)
+        cell_balance_addr = cell_volt_addr + cell_volt_len / 2
         cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
-	cell_balance_len = struct.calcsize(cell_balance_fmt)
+        cell_balance_len = struct.calcsize(cell_balance_fmt)
 
-	print("cell balance len: ", cell_volt_len, "cell balance start addr:", cell_balance_addr)
+        print("cell balance len: ", cell_volt_len, "cell balance start addr:", cell_balance_addr)
 
         # cell 0-15 IR
         cell_ir_fmt = "16H"
-        cell_ir_addr = cell_balance_addr + (cell_balance_len / 2)
+        cell_ir_addr = cell_balance_addr + cell_balance_len / 2
         cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
-	cell_ir_len = struct.calcsize(cell_ir_fmt)
+        cell_ir_len = struct.calcsize(cell_ir_fmt)
 
-	print("cell ir len: ", cell_ir_len)
+        print("cell ir len: ", cell_ir_len)
 
         # total IR -> dialog box ID
         footer_fmt = "7H"
-        footer_addr = cell_ir_addr + (struct.calcsize(cell_ir_fmt) / 2)
+        footer_addr = cell_ir_addr + cell_ir_len / 2
         footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
 
         print("cell volt: {0}, {1}, {2}".format(cell_volt_addr - addr, len(cell_volt), cell_volt))
-
         print("cell balance: {0}, {1}, {2}".format(cell_balance_addr - addr, len(cell_balance), cell_balance))
-
         print("cell ir: {0}, {1}, {2}".format(cell_ir_addr - addr, len(cell_ir), cell_ir))
 
         return {
@@ -382,7 +388,7 @@ class iChargerMaster(RtuMaster):
 
             "cells": [
                 self._cell_status_summary(str(i), cell_volt[i], cell_balance[i], cell_ir[i]) for i in range(0, 9)
-            ],
+                ],
 
             "cell_total_ir": footer[0],
             "line_intern_res": footer[1],
