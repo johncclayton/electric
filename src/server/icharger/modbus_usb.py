@@ -371,9 +371,9 @@ class iChargerMaster(RtuMaster):
         footer_addr = cell_ir_addr + cell_ir_len / 2
         footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
 
-        print("cell volt: {0}, {1}, {2}".format(cell_volt_addr - addr, len(cell_volt), cell_volt))
-        print("cell balance: {0}, {1}, {2}".format(cell_balance_addr - addr, len(cell_balance), cell_balance))
-        print("cell ir: {0}, {1}, {2}".format(cell_ir_addr - addr, len(cell_ir), cell_ir))
+        print("cell volt: {0}".format(cell_volt))
+        print("cell balance: {0}".format(cell_balance))
+        print("cell ir: {0}".format(cell_ir))
 
         return {
             "channel": channel,
