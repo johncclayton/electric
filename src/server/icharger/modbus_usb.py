@@ -324,51 +324,50 @@ class iChargerMaster(RtuMaster):
         addr = 0x100 if channel == 1 else 0x200
 
         # timestamp -> cell 0-15 voltage
-        data1_fmt = "LLhHHlhh15H"
-        data1 = self._modbus_read_input_registers(addr, format=data1_fmt)
+        header_fmt = "LLhHHlhh"
+        header_data = self._modbus_read_input_registers(addr, format=header_fmt)
+
+        # cell 0-15 voltage
+        cell_volt_fmt = "8H"
+        cell_volt_addr = addr + (struct.calcsize(header_fmt) / 2)
+        cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
 
         # cell 0-15 balance
-        data2_fmt = "8H"
-        data2_addr = addr + (struct.calcsize(data1_fmt) / 2)
-        cell_balance = self._modbus_read_input_registers(data2_addr, data2_fmt)
+        cell_balance_fmt = "8H"
+        cell_balance_addr = addr + (struct.calcsize(header_fmt) / 2)
+        cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
+
 
         # cell 0-15 IR
-        data3_fmt = "15H"
-        data3_addr = data2_addr + (struct.calcsize(data2_fmt) / 2)
-        cell_ir = self._modbus_read_input_registers(data3_addr, data3_fmt)
+        cell_ir_fmt = "15H"
+        cell_ir_addr = cell_balance_addr + (struct.calcsize(cell_balance_fmt) / 2)
+        cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
 
         # total IR -> dialog box ID
-        data4_fmt = "7H"
-        data4_addr = data3_addr + (struct.calcsize(data3_fmt) / 2)
-        data4 = self._modbus_read_input_registers(data4_addr, data4_fmt)
+        footer_fmt = "7H"
+        footer_addr = cell_ir_addr + (struct.calcsize(cell_ir_fmt) / 2)
+        footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
 
         return {
             "channel": channel,
-            "timestamp": data1[0],
-            "curr_out_power": data1[1],
-            "curr_out_amps": data1[2],
-            "curr_inp_volts": data1[3],
-            "curr_out_volts": data1[4],
-            "curr_out_capacity": data1[5],
-            "curr_int_temp": data1[6],
-            "curr_ext_temp": data1[7],
+            "timestamp": header_data[0],
+            "curr_out_power": header_data[1],
+            "curr_out_amps": header_data[2],
+            "curr_inp_volts": header_data[3],
+            "curr_out_volts": header_data[4],
+            "curr_out_capacity": header_data[5],
+            "curr_int_temp": header_data[6],
+            "curr_ext_temp": header_data[7],
+
             "cells": [
-                self._cell_status_summary("0", data1[8], cell_balance[0], cell_ir[0]),
-                self._cell_status_summary("1", data1[9], cell_balance[1], cell_ir[1]),
-                self._cell_status_summary("2", data1[10], cell_balance[2], cell_ir[2]),
-                self._cell_status_summary("3", data1[11], cell_balance[3], cell_ir[3]),
-                self._cell_status_summary("4", data1[12], cell_balance[4], cell_ir[4]),
-                self._cell_status_summary("5", data1[13], cell_balance[5], cell_ir[5]),
-                self._cell_status_summary("6", data1[14], cell_balance[6], cell_ir[6]),
-                self._cell_status_summary("7", data1[15], cell_balance[7], cell_ir[7]),
-                self._cell_status_summary("8", data1[16], cell_balance[8], cell_ir[8]),
-                self._cell_status_summary("9", data1[17], cell_balance[9], cell_ir[9]),
+                self._cell_status_summary(str(i), cell_volt[i], cell_balance[i], cell_ir[i]) for i in range(0, 9)
             ],
-            "cell_total_ir": data4[0],
-            "line_intern_res": data4[1],
-            "cycle_count": data4[2],
-            "control_status": data4[3],
-            "run_status": data4[4],
-            "run_error": data4[5],
-            "dlg_box_id": data4[6]
+
+            "cell_total_ir": footer[0],
+            "line_intern_res": footer[1],
+            "cycle_count": footer[2],
+            "control_status": footer[3],
+            "run_status": footer[4],
+            "run_error": footer[5],
+            "dlg_box_id": footer[6]
         }
