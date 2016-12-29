@@ -27,6 +27,24 @@ STATUS_DLG_BOX_STATUS = 0x10
 STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
+ModbusErrors = [
+    { "c": "MB_EOK", "v": 0x00 },
+    { "c": "MB_EX_ILLEGAL_FUNCTION", "v": 0x01 },
+    { "c": "MB_EX_ILLEGAL_DATA_ADDRESS", "v": 0x02 },
+    {"c": "MB_EX_ILLEGAL_DATA_VALUE", "v": 0x03 },
+    {"c": "MB_EX_SLAVE_DEVICE_FAILURE", "v": 0x04 },
+    {"c": "MB_EX_ACKNOWLEDGE", "v": 0x05 },
+    {"c": "MB_EX_SLAVE_BUSY", "v": 0x06 },
+    {"c": "MB_EX_MEMORY_PARITY_ERROR", "v": 0x08 },
+    {"c": "MB_EX_GATEWAY_PATH_FAILED", "v": 0x0A },
+    {"c": "MB_EX_GATEWAY_TGT_FAILED", "v": 0x0B },
+    {"c": "MB_ENOREG", "v": 0x80, "d": "Illegal register address" },
+    {"c": "MB_EILLFUNCTION", "v": 0x81, "d": "Illegal function code" },
+    {"c": "MB_EIO", "v": 0x82, "d": "I/O error"},
+    {"c": "MB_ERETURN", "v": 0x83, "d": "protocol stack in illegal state"},
+    {"c": "MB_ELEN", "v": 0x84, "d": "Pack len arg error"},
+    {"c": "MB_ETIMEDOUT", "v": 0x85, "d": "Timeout error occurred"},
+]
 
 #
 #
@@ -343,7 +361,7 @@ class iChargerMaster(RtuMaster):
         print("header addr:", addr, "header len: ", header_len)
 
         # cell 0-15 voltage
-        cell_volt_fmt = "15H"
+        cell_volt_fmt = "16H"
         cell_volt_addr = addr + header_len / 2
         cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
         cell_volt_len = struct.calcsize(cell_volt_fmt)
