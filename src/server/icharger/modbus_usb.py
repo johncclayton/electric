@@ -337,7 +337,6 @@ class iChargerMaster(RtuMaster):
         cell_balance_addr = addr + (struct.calcsize(header_fmt) / 2)
         cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
 
-
         # cell 0-15 IR
         cell_ir_fmt = "15H"
         cell_ir_addr = cell_balance_addr + (struct.calcsize(cell_balance_fmt) / 2)
@@ -347,6 +346,12 @@ class iChargerMaster(RtuMaster):
         footer_fmt = "7H"
         footer_addr = cell_ir_addr + (struct.calcsize(cell_ir_fmt) / 2)
         footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
+
+        print("cell volt: {0}, {1}, {2}".format(cell_volt_addr - addr, len(cell_volt), cell_volt))
+
+        print("cell balance: {0}, {1}, {2}".format(cell_balance_addr - addr, len(cell_balance), cell_balance))
+
+        print("cell ir: {0}, {1}, {2}".format(cell_ir_addr - addr, len(cell_ir), cell_ir))
 
         return {
             "channel": channel,
