@@ -100,7 +100,7 @@ class iChargerUSBSerialFacade:
     """
     def __init__(self, vendorId = ICHARGER_VENDOR_ID, productId = ICHARGER_PRODUCT_ID):
         self._claimed = False
-        self.dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+        self.dev = modbus_usb.core.find(idVendor=vendorId, idProduct=productId)
         if self.dev is None:
             return
 
@@ -116,13 +116,13 @@ class iChargerUSBSerialFacade:
         if self.dev.is_kernel_driver_active(0):
             try:
                 self.dev.detach_kernel_driver(0)
-            except usb.core.USBError as e:
+            except modbus_usb.core.USBError as e:
                 return False
         return True
 
     def _claim_interface(self):
         try:
-            usb.util.claim_interface(self.dev, 0)
+            modbus_usb.util.claim_interface(self.dev, 0)
             self._claimed = True
             return True
         except:
@@ -131,7 +131,7 @@ class iChargerUSBSerialFacade:
 
     def _release_interface(self):
         try:
-            usb.util.release_interface(self.dev, 0)
+            modbus_usb.util.release_interface(self.dev, 0)
             self._claimed = False
             return True
         except:
@@ -140,7 +140,7 @@ class iChargerUSBSerialFacade:
 
     @property
     def serial_number(self):
-        return usb.util.get_string(self.dev, self.dev.iSerialNumber) if self.valid else None
+        return modbus_usb.util.get_string(self.dev, self.dev.iSerialNumber) if self.valid else None
 
     @property
     def is_open(self):
