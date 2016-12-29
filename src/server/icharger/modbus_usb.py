@@ -291,6 +291,14 @@ class iChargerMaster(RtuMaster):
             "ch2_status": self._status_word_as_json(data[7])
         }
 
+    def _cell_status_summary(self, cell, voltage, balance, ir):
+        return {
+            "cell": cell,
+            "v": voltage,
+            "balance": balance,
+            "ir": ir
+        }
+
     def get_channel_status(self, channel):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
@@ -315,13 +323,52 @@ class iChargerMaster(RtuMaster):
         """
         addr = 0x100 if channel == 1 else 0x200
 
-        # Instead of writing some code to dynamically split the "longer than 64 bytes returned" request
-        # into smaller chunks - I just decided to manually split it up into 3 calls :-)
-        data1_fmt = "LLhHHlhhHHHHHHHHHHHHHHH"
+        # timestamp -> cell 0-15 voltage
+        data1_fmt = "LLhHHlhh15H"
         data1 = self._modbus_read_input_registers(addr, format=data1_fmt)
-        data3_fmt = "7cHHHHHHHH"
-        data3_addr = addr + (struct.calcsize(data1_fmt) / 2)
-        data3 = self._modbus_read_input_registers(data3_addr, data3_fmt)
 
-        return data1 + data3
+        # cell 0-15 balance
+        data2_fmt = "8H"
+        data2_addr = addr + (struct.calcsize(data1_fmt) / 2)
+        cell_balance = self._modbus_read_input_registers(data2_addr, data2_fmt)
 
+        # cell 0-15 IR
+        data3_fmt = "15H"
+        data3_addr = data2_addr + (struct.calcsize(data2_fmt) / 2)
+        cell_ir = self._modbus_read_input_registers(data3_addr, data3_fmt)
+
+        # total IR -> dialog box ID
+        data4_fmt = "7H"
+        data4_addr = data3_addr + (struct.calcsize(data3_fmt) / 2)
+        data4 = self._modbus_read_input_registers(data4_addr, data4_fmt)
+
+        return {
+            "channel": channel,
+            "timestamp": data1[0],
+            "curr_out_power": data1[1],
+            "curr_out_amps": data1[2],
+            "curr_inp_volts": data1[3],
+            "curr_out_volts": data1[4],
+            "curr_out_capacity": data1[5],
+            "curr_int_temp": data1[6],
+            "curr_ext_temp": data1[7],
+            "cells": [
+                self._cell_status_summary("0", data1[8], cell_balance[0], cell_ir[0]),
+                self._cell_status_summary("1", data1[9], cell_balance[1], cell_ir[1]),
+                self._cell_status_summary("2", data1[10], cell_balance[2], cell_ir[2]),
+                self._cell_status_summary("3", data1[11], cell_balance[3], cell_ir[3]),
+                self._cell_status_summary("4", data1[12], cell_balance[4], cell_ir[4]),
+                self._cell_status_summary("5", data1[13], cell_balance[5], cell_ir[5]),
+                self._cell_status_summary("6", data1[14], cell_balance[6], cell_ir[6]),
+                self._cell_status_summary("7", data1[15], cell_balance[7], cell_ir[7]),
+                self._cell_status_summary("8", data1[16], cell_balance[8], cell_ir[8]),
+                self._cell_status_summary("9", data1[17], cell_balance[9], cell_ir[9]),
+            ],
+            "cell_total_ir": data4[0],
+            "line_intern_res": data4[1],
+            "cycle_count": data4[2],
+            "control_status": data4[3],
+            "run_status": data4[4],
+            "run_error": data4[5],
+            "dlg_box_id": data4[6]
+        }
