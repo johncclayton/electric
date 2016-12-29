@@ -107,15 +107,8 @@ class iChargerQuery(Query):
 
         # primitive byte swap the entire thing...
         header = response[2:4]
-        # LOGGER.debug(get_log_buffer("header <- ", header))
-
         data = response[4:]
-        # LOGGER.debug(get_log_buffer("data <- ", data))
-
-        final = header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
-        # LOGGER.debug(get_log_buffer("final <- ", final))
-
-        return final
+        return header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
 
 
 class iChargerUSBSerialFacade:
@@ -385,7 +378,7 @@ class iChargerMaster(RtuMaster):
         print("cell ir len: ", cell_ir_len, "cell ir start addr", cell_ir_addr)
 
         # total IR -> dialog box ID
-        footer_fmt = "7H"
+        footer_fmt = "6H"
         footer_addr = cell_ir_addr + cell_ir_len / 2
         footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
 
