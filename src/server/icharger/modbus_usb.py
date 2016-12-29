@@ -317,14 +317,11 @@ class iChargerMaster(RtuMaster):
 
         # Instead of writing some code to dynamically split the "longer than 64 bytes returned" request
         # into smaller chunks - I just decided to manually split it up into 3 calls :-)
-        data1_fmt = "LLhHHlhh"
+        data1_fmt = "LLhHHlhhHHHHHHHHHHHHHHH"
         data1 = self._modbus_read_input_registers(addr, format=data1_fmt)
-        data2_fmt = "HHHHHHHHHHHHHHH"
-        data2_addr = addr + (struct.calcsize(data1_fmt) / 2)
-        data2 = self._modbus_read_input_registers(data2_addr, data2_fmt)
         data3_fmt = "7cHHHHHHHH"
-        data3_addr = data2_addr + (struct.calcsize(data2_fmt) / 2)
+        data3_addr = addr + (struct.calcsize(data1_fmt) / 2)
         data3 = self._modbus_read_input_registers(data3_addr, data3_fmt)
 
-        return data1 + data2 + data3
+        return data1 + data3
 
