@@ -332,14 +332,14 @@ class iChargerMaster(RtuMaster):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
         :return:
-        Timestamp (u32)
-        The current output power (u32)
-        The current output current (s16)
-        The current input voltage (u16)
-        The current output voltage (u16)
-        The current output capacity (s32)
-        The current internal temp (s16)
-        The current external temp (s16)
+        0 Timestamp (u32)
+        1 The current output power (u32)
+        2 The current output current (s16)
+        3 The current input voltage (u16)
+        4 The current output voltage (u16)
+        5 The current output capacity (s32)
+        6 The current internal temp (s16)
+        7 The current external temp (s16)
         Cell 0-15 voltage (each is u16, 4010DUO uses only first 10)
         Cell 0-15 balance status (each is u8, 4010DUO uses only first 10)
         Cell 0-15 internal resistance (each is u16, 4010DUO uses only first 10)
@@ -356,25 +356,21 @@ class iChargerMaster(RtuMaster):
         # timestamp -> ext temp
         header_fmt = "LLhHHlhh"
         header_data = self._modbus_read_input_registers(addr, format=header_fmt)
-        header_len = struct.calcsize(header_fmt)
 
         # cell 0-15 voltage
         cell_volt_fmt = "16H"
         cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
         cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
-        cell_volt_len = struct.calcsize(cell_volt_fmt)
 
         # cell 0-15 balance
         cell_balance_fmt = "16B"
         cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
         cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
-        cell_balance_len = struct.calcsize(cell_balance_fmt)
 
         # cell 0-15 IR
         cell_ir_fmt = "16H"
         cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
         cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
-        cell_ir_len = struct.calcsize(cell_ir_fmt)
 
         # total IR -> dialog box ID
         footer_fmt = "7H"
@@ -387,7 +383,7 @@ class iChargerMaster(RtuMaster):
             "curr_out_power": header_data[1],
             "curr_out_amps": header_data[2],
             "curr_inp_volts": header_data[3] / 1000.0,
-            "curr_out_volts": header_data[4],
+            "curr_out_volts": header_data[4] / 1000.0,
             "curr_out_capacity": header_data[5],
             "curr_int_temp": header_data[6] / 1000.0,
             "curr_ext_temp": header_data[7] / 1000.0,
