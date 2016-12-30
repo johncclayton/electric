@@ -356,7 +356,7 @@ class iChargerMaster(RtuMaster):
         # cell 0-15 voltage
         cell_volt_fmt = "16H"
         cell_volt_addr = addr + header_len / 2
-        cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
+        cell_volt = self._modbus_read_input_registers(cell_volt_addr - 1, cell_volt_fmt)
         cell_volt_len = struct.calcsize(cell_volt_fmt)
 
         print("cell volt addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
