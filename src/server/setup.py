@@ -3,12 +3,12 @@ from distutils.core import setup
 setup(
     name = 'electric',
     packages = ['electric', 'electric.icharger'],
-    version = '0.6.1',
+    version = '0.6.2',
     description = "Battery charger integration, information and provisioning server",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.1',
+    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.2',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     classifiers = [],
     data_files = [
