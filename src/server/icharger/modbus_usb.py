@@ -389,18 +389,18 @@ class iChargerMaster(RtuMaster):
             "timestamp": header_data[0],
             "curr_out_power": header_data[1],
             "curr_out_amps": header_data[2],
-            "curr_inp_volts": header_data[3],
+            "curr_inp_volts": header_data[3] / 1000.0,
             "curr_out_volts": header_data[4],
             "curr_out_capacity": header_data[5],
-            "curr_int_temp": header_data[6],
-            "curr_ext_temp": header_data[7],
+            "curr_int_temp": header_data[6] / 1000.0,
+            "curr_ext_temp": header_data[7] / 1000.0,
 
             "cells": [
                 self._cell_status_summary(str(i), cell_volt[i], cell_balance[i], cell_ir[i]) for i in range(0, 9)
                 ],
 
             "cell_total_ir": footer[0],
-            "line_intern_res": footer[1],
+            "line_intern_resistance": footer[1],
             "cycle_count": footer[2],
             "control_status": footer[3],
             "run_status": footer[4],

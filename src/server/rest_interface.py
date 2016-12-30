@@ -15,7 +15,8 @@ class ChannelStatus_iCharger(Resource):
 
     def get(self, channel_id):
         dev = iChargerMaster()
-        return dev.get_channel_status(int(channel_id))
+        channel = 1 if int(channel_id) == 1 else 2
+        return dev.get_channel_status(int(channel))
 
 
 
