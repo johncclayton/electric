@@ -316,7 +316,7 @@ class iChargerMaster(RtuMaster):
     def _cell_status_summary(self, cell, voltage, balance, ir):
         return {
             "cell": cell,
-            "v": voltage,
+            "v": voltage / 1000.0,
             "balance": balance,
             "ir": ir
         }
