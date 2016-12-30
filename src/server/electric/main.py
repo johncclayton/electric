@@ -1,7 +1,7 @@
 from flask_restful import Api
 
-from app import AppInterface
-from rest_interface import Status_iCharger, ChannelStatus_iCharger
+from .app import AppInterface
+from .rest_interface import Status_iCharger, ChannelStatus_iCharger
 
 try:
     flask_app = AppInterface()

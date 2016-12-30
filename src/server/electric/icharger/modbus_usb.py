@@ -9,11 +9,8 @@ from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 
 CHANNEL_INPUT_FOOTER_OFFSET = 51
-
 CHANNEL_INPUT_CELL_IR_FORMAT = 35
-
 CHANNEL_INPUT_CELL_BALANCE_OFFSET = 27
-
 CHANNEL_INPUT_CELL_VOLT_OFFSET = 11
 
 ICHARGER_VENDOR_ID = 0x483
