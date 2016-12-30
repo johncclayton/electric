@@ -1,8 +1,8 @@
 # testing module, to check understanding of modbus-tk with iCharger 4010 DUO USB HUD interface
 import modbus_tk
-from server.icharger.modbus_usb import iChargerMaster
-# from modbus_tk.utils import get_log_buffer
 from modbus_tk import LOGGER
+
+from electric.icharger.modbus_usb import iChargerMaster
 
 def main():
     logger = modbus_tk.utils.create_logger("console")

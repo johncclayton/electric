@@ -10,5 +10,8 @@ setup(
     url = 'https://github.com/johncclayton/electric',
     download_url = 'https://github.com/johncclayton/electric/tarball/0.1',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
-    classifiers = []
+    classifiers = [],
+    entry_points = {
+        'console_scripts': ['electric-server=electric.main:run_server']
+    }
 )

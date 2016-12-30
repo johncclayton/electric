@@ -1,4 +1,5 @@
 from flask_restful import Resource
+
 from icharger.modbus_usb import iChargerMaster
 
 class Status_iCharger(Resource):

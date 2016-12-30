@@ -1,6 +1,7 @@
+from flask_restful import Api
+
 from app import AppInterface
 from rest_interface import Status_iCharger, ChannelStatus_iCharger
-from flask_restful import Api
 
 try:
     flask_app = AppInterface()
@@ -13,5 +14,8 @@ except Exception as r:
     print("error starting app:", r)
     raise r
 
+def run_server():
+    flask_app.app.run(debug=True, host='0.0.0.0', port=5000)
+
 if __name__ == "__main__":
-    flask_app.app.run(debug=True, host='0.0.0.0')
+    run_server()
