@@ -264,9 +264,6 @@ class iChargerMaster(RtuMaster):
         quant = byte_len // 2
 
         assert (quant * 2) == byte_len
-        print(
-            "reading from address:", addr,
-            "requesting {0} words, total len expected: {1}".format(quant, (quant * 2) + 4))
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
