@@ -2,15 +2,18 @@ from distutils.core import setup
 
 setup(
     name = 'electric',
-    packages = ['electric'],
-    version = '0.4',
+    packages = ['electric', 'electric.icharger'],
+    version = '0.6.1',
     description = "Battery charger integration, information and provisioning server",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/0.4',
+    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.1',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     classifiers = [],
+    data_files = [
+        ('/etc', ['electric/electric.cfg'])
+    ],
     install_requires = [
         'aniso8601==1.2.0',
         'click==6.6',
