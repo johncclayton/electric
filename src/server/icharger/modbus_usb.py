@@ -343,48 +343,41 @@ class iChargerMaster(RtuMaster):
         Run error (u16)
         Dialog Box ID (u16)
         """
-        addr = 0x100 if channel == 1 else 0x200
+        
+	addr = 0x100 if channel == 1 else 0x200
 
         # timestamp -> ext temp
         header_fmt = "LLhHHlhh"
         header_data = self._modbus_read_input_registers(addr, format=header_fmt)
         header_len = struct.calcsize(header_fmt)
 
-        print("channel:", channel)
-        print("header addr:", addr, "header len: ", header_len)
-
         # cell 0-15 voltage
         cell_volt_fmt = "16H"
-        cell_volt_addr = addr + header_len / 2
-        cell_volt = self._modbus_read_input_registers(cell_volt_addr - 1, cell_volt_fmt)
+        cell_volt_addr = addr + 11
+        cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
         cell_volt_len = struct.calcsize(cell_volt_fmt)
-
-        print("cell volt addr:", cell_volt_addr, "cell volt len: ", cell_volt_len)
 
         # cell 0-15 balance
         cell_balance_fmt = "16B"
-        cell_balance_addr = cell_volt_addr + cell_volt_len / 2
+        cell_balance_addr = addr + 27
         cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
         cell_balance_len = struct.calcsize(cell_balance_fmt)
 
-        print("cell balance len: ", cell_volt_len, "cell balance start addr:", cell_balance_addr)
-
         # cell 0-15 IR
         cell_ir_fmt = "16H"
-        cell_ir_addr = cell_balance_addr + cell_balance_len / 2
+        cell_ir_addr = addr + 35
         cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
         cell_ir_len = struct.calcsize(cell_ir_fmt)
 
-        print("cell ir len: ", cell_ir_len, "cell ir start addr", cell_ir_addr)
-
         # total IR -> dialog box ID
-        footer_fmt = "6H"
-        footer_addr = cell_ir_addr + cell_ir_len / 2
+        footer_fmt = "7H"
+        footer_addr = addr + 51
         footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
 
         print("cell volt: {0}".format(cell_volt))
         print("cell balance: {0}".format(cell_balance))
         print("cell ir: {0}".format(cell_ir))
+	print("footer : {0}".format(footer))
 
         return {
             "channel": channel,
@@ -407,4 +400,5 @@ class iChargerMaster(RtuMaster):
             "control_status": footer[3],
             "run_status": footer[4],
             "run_error": footer[5],
+            "dlg_box_id": footer[6],
         }
