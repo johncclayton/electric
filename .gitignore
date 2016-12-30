@@ -1,3 +1,5 @@
 .idea/
 *.pyc
 
+src/server/dist/
+src/server/MANIFEST
