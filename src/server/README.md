@@ -12,8 +12,16 @@ Install the server from PyPi, e.g.
 
     $ pip install electric
     
+If you have already installed a previous version, use this variant instead
+
+    $ pip install electric --upgrade
+    
 Then you can run it as a web service using the following command:
 
     $ electric-server
     
-    
+The web service runs on port *5000*.  If you want to change it, you are out of luck
+at present until we properly handle configuration params within the deployed configuration file.
+
+# configuration
+A configuration file called electric.cfg is deployed to the /etc directory.

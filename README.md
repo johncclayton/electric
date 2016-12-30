@@ -10,7 +10,7 @@ The idea is that you'll get a notification when the current charge cycle has com
 To use this, you will need the following:
 1. iCharger 4010 DUO
 1. A mini-USB cable 
-1. A Raspberry PI 2 -or- 3 
+1. A Raspberry PI 3 
 
 ## how - my iCharger aka next steps
 To make the channel status information of your iCharger available to the desktop and mobile apps, you will need to set up a Raspberry PI computer and plug it into the mini-USB port of the iCharger. 
