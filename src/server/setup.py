@@ -11,9 +11,6 @@ setup(
     download_url = 'https://github.com/johncclayton/electric/tarball/0.6.2',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     classifiers = [],
-    data_files = [
-        ('/etc', ['electric/electric.cfg'])
-    ],
     install_requires = [
         'aniso8601==1.2.0',
         'click==6.6',
