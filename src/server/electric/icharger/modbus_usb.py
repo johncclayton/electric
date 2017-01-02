@@ -1,5 +1,6 @@
 import struct
 import sys
+
 import modbus_tk.defines as cst
 import usb.core
 import usb.util
@@ -270,7 +271,7 @@ class iChargerMaster(RtuMaster):
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
 
-    def _status_word_as_json(self, status):
+    def _status_word_as_dict(self, status):
         return {
             "run": status & STATUS_RUN,
             "err": status & STATUS_ERROR,
@@ -313,8 +314,8 @@ class iChargerMaster(RtuMaster):
                 "hardware_ver": data[3],
                 "system_len": data[4],
                 "memory_len": data[5],
-                "ch1_status": self._status_word_as_json(data[6]),
-                "ch2_status": self._status_word_as_json(data[7]),
+                "ch1_status": self._status_word_as_dict(data[6]),
+                "ch2_status": self._status_word_as_dict(data[7]),
                 "charger_presence": "connected"
             }
         except Exception, me:
@@ -322,7 +323,7 @@ class iChargerMaster(RtuMaster):
                 "charger_presence": "disconnected"
             }
 
-    def _cell_status_summary(self, cell, voltage, balance, ir):
+    def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
         return {
             "cell": cell,
             "v": voltage / 1000.0,
@@ -355,50 +356,58 @@ class iChargerMaster(RtuMaster):
 
         addr = 0x100 if channel == 1 else 0x200
 
-        # timestamp -> ext temp
-        header_fmt = "LLhHHlhh"
-        header_data = self._modbus_read_input_registers(addr, format=header_fmt)
+        try:
+            # timestamp -> ext temp
+            header_fmt = "LLhHHlhh"
+            header_data = self._modbus_read_input_registers(addr, format=header_fmt)
 
-        # cell 0-15 voltage
-        cell_volt_fmt = "16H"
-        cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
-        cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
+            # cell 0-15 voltage
+            cell_volt_fmt = "16H"
+            cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
+            cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
 
-        # cell 0-15 balance
-        cell_balance_fmt = "16B"
-        cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
-        cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
+            # cell 0-15 balance
+            cell_balance_fmt = "16B"
+            cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
+            cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
 
-        # cell 0-15 IR
-        cell_ir_fmt = "16H"
-        cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
-        cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
+            # cell 0-15 IR
+            cell_ir_fmt = "16H"
+            cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
+            cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
 
-        # total IR -> dialog box ID
-        footer_fmt = "7H"
-        footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
-        footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
+            # total IR -> dialog box ID
+            footer_fmt = "7H"
+            footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
+            footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
 
-        return {
-            "channel": channel,
-            "timestamp": header_data[0],
-            "curr_out_power": header_data[1],
-            "curr_out_amps": header_data[2],
-            "curr_inp_volts": header_data[3] / 1000.0,
-            "curr_out_volts": header_data[4] / 1000.0,
-            "curr_out_capacity": header_data[5],
-            "curr_int_temp": header_data[6] / 1000.0,
-            "curr_ext_temp": header_data[7] / 1000.0,
+            return {
+                "channel": channel,
+                "timestamp": header_data[0],
+                "curr_out_power": header_data[1],
+                "curr_out_amps": header_data[2],
+                "curr_inp_volts": header_data[3] / 1000.0,
+                "curr_out_volts": header_data[4] / 1000.0,
+                "curr_out_capacity": header_data[5],
+                "curr_int_temp": header_data[6] / 1000.0,
+                "curr_ext_temp": header_data[7] / 1000.0,
 
-            "cells": [
-                self._cell_status_summary(str(i), cell_volt[i], cell_balance[i], cell_ir[i]) for i in range(0, 9)
-                ],
+                "cells": [
+                    self._cell_status_summary_as_dict(str(i), cell_volt[i], cell_balance[i], cell_ir[i]) for i in
+                    range(0, 9)
+                    ],
 
-            "cell_total_ir": footer[0],
-            "line_intern_resistance": footer[1],
-            "cycle_count": footer[2],
-            "control_status": footer[3],
-            "run_status": footer[4],
-            "run_error": footer[5],
-            "dlg_box_id": footer[6]
-        }
+                "cell_total_ir": footer[0],
+                "line_intern_resistance": footer[1],
+                "cycle_count": footer[2],
+                "control_status": footer[3],
+                "run_status": footer[4],
+                "run_error": footer[5],
+                "dlg_box_id": footer[6],
+                "charger_presence": "connected"
+            }
+
+        except Exception, you:
+            return {
+                "charger_presence": "disconnected"
+            }
