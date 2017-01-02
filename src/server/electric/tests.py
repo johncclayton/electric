@@ -14,5 +14,10 @@ class iChargerModUsbTestCase(unittest.TestCase):
         self.assertIsNone(i.serial_number)
         self.assertFalse(i.valid)
 
+    def test_disconnected_charger_has_correct_presence_in_json(self):
+        # TODO: validate that a crap iChargerUSBSerialFacade results in the charger being disconnected
+        # for valid URIs
+        pass
+
 if __name__ == "__main__":
     unittest.main()
