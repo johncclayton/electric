@@ -4,6 +4,7 @@ import sys
 import modbus_tk.defines as cst
 import usb.core
 import usb.util
+
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
@@ -130,8 +131,15 @@ class iChargerUSBSerialFacade:
     """
 
     def __init__(self, vendorId=ICHARGER_VENDOR_ID, productId=ICHARGER_PRODUCT_ID):
+        self.dev = None
         self._claimed = False
-        self.dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+        self.cfg = None
+
+        try:
+            self.dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+        except usb.core.NoBackendError:
+            return
+
         if self.dev is None:
             return
 
