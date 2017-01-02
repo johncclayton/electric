@@ -28,6 +28,8 @@ The web service runs on port *5000*.  If you want to change it, you are out of l
 at present until we properly handle configuration params within the deployed configuration file.
 
 # running from the github repo
+Setup a virtualenv for the project, and load the required modules via a pip install -r requirements.txt.
+
 Use the run_server.sh script within this directory to start the server.  This assumes your current python
 environment has all the required modules installed into it.
 
