@@ -6,7 +6,7 @@ that exposes your charger information via a RESTful web server.
 To use this, you will need the following:
 1. iCharger 4010 DUO
 1. A mini-USB cable 
-1. A Raspberry PI 2 -or- 3 
+1. A Raspberry PI 3 
 
 Install the server from PyPi, e.g.
 
