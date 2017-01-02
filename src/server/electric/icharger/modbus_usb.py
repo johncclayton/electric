@@ -1,6 +1,5 @@
 import struct
 import sys
-
 import modbus_tk.defines as cst
 import usb.core
 import usb.util
@@ -304,18 +303,24 @@ class iChargerMaster(RtuMaster):
         Bit5-cell voltage flag
         Bit6-balance flag
         """
-        data = self._modbus_read_input_registers(0x000, format="h12sHHHHHH")
+        try:
+            data = self._modbus_read_input_registers(0x000, format="h12sHHHHHH")
 
-        return {
-            "device_id": data[0],
-            "device_sn": data[1],
-            "software_ver": data[2],
-            "hardware_ver": data[3],
-            "system_len": data[4],
-            "memory_len": data[5],
-            "ch1_status": self._status_word_as_json(data[6]),
-            "ch2_status": self._status_word_as_json(data[7])
-        }
+            return {
+                "device_id": data[0],
+                "device_sn": data[1],
+                "software_ver": data[2],
+                "hardware_ver": data[3],
+                "system_len": data[4],
+                "memory_len": data[5],
+                "ch1_status": self._status_word_as_json(data[6]),
+                "ch2_status": self._status_word_as_json(data[7]),
+                "charger_presence": "connected"
+            }
+        except Exception, me:
+            return {
+                "charger_presence": "disconnected"
+            }
 
     def _cell_status_summary(self, cell, voltage, balance, ir):
         return {
