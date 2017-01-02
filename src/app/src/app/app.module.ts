@@ -9,8 +9,8 @@ import { TabsPage } from '../pages/tabs/tabs';
 @NgModule({
   declarations: [
     MyApp,
-    AboutPage,
-    ContactPage,
+    // AboutPage,
+    // ContactPage,
     HomePage,
     TabsPage
   ],
@@ -20,8 +20,8 @@ import { TabsPage } from '../pages/tabs/tabs';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    AboutPage,
-    ContactPage,
+    // AboutPage,
+    // ContactPage,
     HomePage,
     TabsPage
   ],
