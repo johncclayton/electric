@@ -347,6 +347,7 @@ class iChargerMaster(RtuMaster):
                 "hardware_ver": data[3],
                 "system_len": data[4],
                 "memory_len": data[5],
+                "channel_count": 2,
                 "ch1_status": self._status_word_as_dict(data[6]),
                 "ch2_status": self._status_word_as_dict(data[7]),
                 "charger_presence": "connected"
@@ -355,6 +356,10 @@ class iChargerMaster(RtuMaster):
             return exception_dict(me)
 
     def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
+        if voltage == 1024:
+            # 1024 appears to be a dummy value for either unused cells or just not plugged in
+            voltage = 0
+
         return {
             "cell": cell,
             "v": voltage / 1000.0,
