@@ -1,3 +1,4 @@
+import logging
 import struct
 import sys
 
@@ -147,7 +148,7 @@ class iChargerUSBSerialFacade:
             sys.exit("failed to detach kernel driver")
 
         # don't do this - fails every time on the Pi3, regardless of permissions.
-        # self.dev.set_configuration()
+        #self.dev.set_configuration()
 
         self.cfg = self.dev.get_active_configuration()
 
@@ -164,8 +165,9 @@ class iChargerUSBSerialFacade:
             usb.util.claim_interface(self.dev, 0)
             self._claimed = True
             return True
-        except:
-            pass
+        except Exception, e:
+            logging.info("Failed to _claim interface with {0}".format(e))
+            print("Failed to _claim interface with {0}".format(e))
         return False
 
     def _release_interface(self):
@@ -328,7 +330,8 @@ class iChargerMaster(RtuMaster):
             }
         except Exception, me:
             return {
-                "charger_presence": "disconnected"
+                "charger_presence": "disconnected",
+                "error" : "{0}".format(me)
             }
 
     def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
@@ -417,5 +420,6 @@ class iChargerMaster(RtuMaster):
 
         except Exception, you:
             return {
-                "charger_presence": "disconnected"
+                "charger_presence": "disconnected",
+                "error" : "{0}".format(you)
             }
