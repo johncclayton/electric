@@ -1,16 +1,19 @@
 from distutils.core import setup
-from pip.req import parse_requirements
+
+# WARNING: don't edit this file it is generated from the setup.txt
+# within the scripts/ directory - changes made to this file will be lost!
 
 setup(
     name = 'electric',
     packages = ['electric', 'electric.icharger'],
-    version = "0.6.7",
+    version = "0.6.8",
     description = "Battery charger integration, information and notification server",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.7',
+    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.8',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
+    license = "GPLv3",
     classifiers = [],
     install_requires = [
         

@@ -1,5 +1,7 @@
 from distutils.core import setup
-from pip.req import parse_requirements
+
+# WARNING: don't edit this file it is generated from the setup.txt
+# within the scripts/ directory - changes made to this file will be lost!
 
 setup(
     name = 'electric',
@@ -11,6 +13,7 @@ setup(
     url = 'https://github.com/johncclayton/electric',
     download_url = 'https://github.com/johncclayton/electric/tarball/{{ version }}',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
+    license = "GPLv3",
     classifiers = [],
     install_requires = [
         {% for req in requirements %}
