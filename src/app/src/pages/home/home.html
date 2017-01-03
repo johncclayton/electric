@@ -5,22 +5,40 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-card *ngIf="!isConnected">
+  <ion-card *ngIf="!isConnectedToServer()">
+    <ion-card-header>
+      No charger/electric server can be found. Sadness.
+    </ion-card-header>
+    <ion-card-content>
+      It seems the app cannot connect to the server.
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="isConnectedToServer() && !isConnectedToCharger()">
     <ion-card-header>
       Charger disconnected
     </ion-card-header>
     <ion-card-content>
-      It seems the charger isn't connected. Please check connection from charger to the Pi, and also that the Pi is happy.
+      We can talk to the app server, but it seems the charger isn't connected the Pi.
+      Please check connection from charger to the Pi, and also that the Pi is
+      happy.
+
+      <ion-list>
+        <ion-item *ngFor="let key of chargerStatus|keys">
+          <ion-icon name="sad"></ion-icon>
+          {{key}} = {{chargerStatus[key]}}
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
 
 
-  <ion-card *ngIf="isConnected">
+  <ion-card *ngIf="isConnectedToServer() && isConnectedToCharger()">
     <ion-card-header>
-      Charger Connected
+      Charger Status
     </ion-card-header>
     <ion-card-content>
-      Hellooo!
+      {{chargerStatus|json}}
     </ion-card-content>
   </ion-card>
 
