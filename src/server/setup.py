@@ -1,8 +1,8 @@
 from distutils.core import setup
 from pip.req import parse_requirements
 
-install_reqs = parse_requirements('requirements.txt')
-production_version = '0.6.4'
+install_reqs = [ str(ir.req) for ir in parse_requirements('requirements.txt') ]
+production_version = '0.6.5'
 
 setup(
     name = 'electric',
