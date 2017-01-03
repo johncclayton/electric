@@ -15,3 +15,10 @@ class TestRestfulAPI(unittest.TestCase):
         self.assertIn("exception", d.keys())
         self.assertIn("charger_presence", d.keys())
         self.assertEqual("disconnected", d["charger_presence"])
+
+    def test_can_request_storage_area(self):
+        resp = self.client.get("/system")
+        d = json.loads(resp.data)
+        self.assertIn("exception", d.keys())
+        self.assertIn("charger_presence", d.keys())
+        self.assertEqual("disconnected", d["charger_presence"])

@@ -22,6 +22,9 @@ SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY = 5
 SYSTEM_STORAGE_OFFSET_CALIBRATION = 22
 SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
 
+MEMORY_MAX = 64
+MODBUS_HID_FRAME_TYPE = 0x30
+
 ICHARGER_VENDOR_ID = 0x0483
 ICHARGER_PRODUCT_ID = 0x5751
 
@@ -108,7 +111,7 @@ class iChargerQuery(Query):
         else:
             raise ModbusInvalidRequestError("Request func code not recognized (code is: {0})".format(self.func_code))
 
-        return struct.pack(">BB", self.adu_len, 0x30) + pdu
+        return struct.pack(">BB", self.adu_len, MODBUS_HID_FRAME_TYPE) + pdu
 
     def parse_response(self, response):
         if len(response) < 3:
@@ -118,9 +121,9 @@ class iChargerQuery(Query):
         # 64 byte packets.  If you want to read more, then send multiple read requests.
         (self.response_length, self.adu_constant, self.response_func_code) = struct.unpack(">BBB", response[0:3])
 
-        if self.adu_constant != 0x30:
+        if self.adu_constant != MODBUS_HID_FRAME_TYPE:
             raise ModbusInvalidResponseError(
-                "Response doesn't containt constant 0x30 in ADU portion, constant value found is {0}".format(
+                "Response does not contain the expected frame type constant (0x30) in ADU portion of the result, constant value found is {0}".format(
                     self.adu_constant))
 
         if self.response_func_code != self.func_code:
@@ -469,6 +472,14 @@ class iChargerMaster(RtuMaster):
             "type": type
         }
 
+    def _power_priority_description(self, pri):
+        if pri == 0:
+            "average"
+        if pri == 1:
+            return "ch1 priority"
+        if pri == 2:
+            return "ch2 priority"
+
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
         base = 0x8400
@@ -492,7 +503,7 @@ class iChargerMaster(RtuMaster):
             self._modbus_read_input_registers(addr, "11H")
 
         return {
-            "temp_unit": temp_unit,
+            "temp_unit": "C" if  temp_unit == 0 else "F",
             "temp_stop": temp_stop,
             "temp_fans_on": temp_fans_on,
             "temp_reduce": temp_reduce,
@@ -531,6 +542,7 @@ class iChargerMaster(RtuMaster):
                 discharge_power_1
             ],
             "power_priority": power_priority,
+            "power_priority_desc": self._power_priority_description(power_priority),
             "logging_sample_interval": logging_sample_interval,
             "logging_save_to_sdcard": logging_save_to_sdcard,
             "servo": {

@@ -14,6 +14,7 @@ class Status_iCharger(Resource):
         except Exception, e:
             return exception_dict(e)
 
+
 class ChannelStatus_iCharger(Resource):
     def __init__(self):
         super(ChannelStatus_iCharger, self).__init__()
