@@ -15,6 +15,7 @@ setup(
         'aniso8601==1.2.0',
         'click==6.6',
         'Flask==0.12',
+        'Flask-Cors==3.0.2',
         'Flask-RESTful==0.3.5',
         'itsdangerous==0.24',
         'Jinja2==2.8',
