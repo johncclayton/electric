@@ -276,7 +276,7 @@ class iChargerMaster(RtuMaster):
     def _make_query(self):
         return iChargerQuery()
 
-    def _modbus_read_input_registers(self, addr, format):
+    def _modbus_read_registers(self, addr, format):
         """
         Uses the modbus_tk framework to acquire data from the device.
 
@@ -302,6 +302,25 @@ class iChargerMaster(RtuMaster):
         devices but as this is iCharger via USB-HID this is irrelevant."""
         return self.execute(1,
                             cst.READ_INPUT_REGISTERS,
+                            addr,
+                            data_format=format,
+                            quantity_of_x=quant,
+                            expected_length=(quant * 2) + 4)
+
+    def _modbus_write_registers(self, addr, format, data):
+        """
+        Writes data using modbus_tk to the modbus slave given an address to write to.
+        :param addr: the address to begin writing values at
+        :param format: the data format to write - don't specify byte order here, just the format
+        :param data: tuple of data to be written given a specific format
+        :return:
+        """
+        byte_len = struct.calcsize(format)
+        quant = byte_len // 2
+        assert (quant * 2) == byte_len
+
+        return self.execute(1,
+                            cst.WRITE_MULTIPLE_REGISTERS,
                             addr,
                             data_format=format,
                             quantity_of_x=quant,
@@ -341,7 +360,7 @@ class iChargerMaster(RtuMaster):
         Bit6-balance flag
         """
         try:
-            data = self._modbus_read_input_registers(0x000, format="h12sHHHHHH")
+            data = self._modbus_read_registers(0x000, format="h12sHHHHHH")
 
             return {
                 "device_id": data[0],
@@ -398,27 +417,27 @@ class iChargerMaster(RtuMaster):
         try:
             # timestamp -> ext temp
             header_fmt = "LLhHHlhh"
-            header_data = self._modbus_read_input_registers(addr, format=header_fmt)
+            header_data = self._modbus_read_registers(addr, format=header_fmt)
 
             # cell 0-15 voltage
             cell_volt_fmt = "16H"
             cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
-            cell_volt = self._modbus_read_input_registers(cell_volt_addr, cell_volt_fmt)
+            cell_volt = self._modbus_read_registers(cell_volt_addr, cell_volt_fmt)
 
             # cell 0-15 balance
             cell_balance_fmt = "16B"
             cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
-            cell_balance = self._modbus_read_input_registers(cell_balance_addr, cell_balance_fmt)
+            cell_balance = self._modbus_read_registers(cell_balance_addr, cell_balance_fmt)
 
             # cell 0-15 IR
             cell_ir_fmt = "16H"
             cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
-            cell_ir = self._modbus_read_input_registers(cell_ir_addr, cell_ir_fmt)
+            cell_ir = self._modbus_read_registers(cell_ir_addr, cell_ir_fmt)
 
             # total IR -> dialog box ID
             footer_fmt = "7H"
             footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
-            footer = self._modbus_read_input_registers(footer_addr, footer_fmt)
+            footer = self._modbus_read_registers(footer_addr, footer_fmt)
 
             return {
                 "channel": channel,
@@ -449,20 +468,54 @@ class iChargerMaster(RtuMaster):
         except Exception, you:
             return exception_dict(you)
 
+    def _op_description(self, op):
+        if op == 0:
+            return "charge"
+        if op == 1:
+            return "storage"
+        if op == 2:
+            return "discharge"
+        if op == 3:
+            return "cycle"
+        if op == 4:
+            return "balance only"
+
+    def _order_description(self, order):
+        if order == 0:
+            return "run"
+        if order == 1:
+            return "modify"
+        if order == 2:
+            return "write system"
+        if order == 3:
+            return "write memory head"
+        if order == 4:
+            return "write memory"
+        if order == 5:
+            return "trans log on"
+        if order == 6:
+            return "trans log off"
+        if order == 7:
+            return "msgbox yes"
+        if order == 8:
+            return "msgbox no"
+
     def get_control_register(self):
         "Returns the current run state of a particular channel"
         addr = 0x8000
         (op, memory, channel, order_lock, order, limit_current, limit_volt) = \
-            self._modbus_read_input_registers(addr, "7H")
+            self._modbus_read_registers(addr, "7H")
 
         return {
-            "operation": op,
+            "op": op,
+            "op_description": self._op_description(op),
             "memory": memory,
             "channel": channel,
             "order_lock": order_lock,
             "order": order,
-            "limit_current": limit_current,
-            "limit_volt": limit_volt
+            "order_description": self._order_description(order),
+            "limit_current": limit_current / 1000.0,
+            "limit_volt": limit_volt / 1000.0
         }
 
     def _beep_summary_dict(self, enabled, volume, type):
@@ -484,23 +537,23 @@ class iChargerMaster(RtuMaster):
         """Returns the system storage area of the iCharger"""
         base = 0x8400
         (temp_unit, temp_stop, temp_fans_on, temp_reduce, dummy1) \
-            = self._modbus_read_input_registers(base, "5H")
+            = self._modbus_read_registers(base, "5H")
 
         addr = base + SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY
         (fans_off_delay, lcd_contrast, light_value, dump2, beep_type_key, beep_type_hint, beep_type_alarm,
          beep_type_done, beep_enable_key, beep_enable_hint, beep_enable_alarm, beep_enable_done,
          beep_vol_key, beep_vol_hint, beep_vol_alarm, beep_vol_done, dummy3) \
-            = self._modbus_read_input_registers(addr, "17H")
+            = self._modbus_read_registers(addr, "17H")
 
         addr = base + SYSTEM_STORAGE_OFFSET_CALIBRATION
         (calibration, dump4, sel_input_device, dc_inp_low_volt, dc_inp_over_volt, dc_inp_curr_limit,
          batt_inp_low_volt, batt_inp_over_volt, batt_input_curr_limit, regen_enable, regen_volt_limit, regen_curr_limit) = \
-            self._modbus_read_input_registers(addr, "12H")
+            self._modbus_read_registers(addr, "12H")
 
         addr = base + SYSTEM_STORAGE_OFFSET_CHARGER_POWER
         (charger_power_0, charger_power_1, discharge_power_0, discharge_power_1, power_priority,
          logging_sample_interval, logging_save_to_sdcard, servo_type, servo_user_center, servo_user_rate, servo_op_angle) = \
-            self._modbus_read_input_registers(addr, "11H")
+            self._modbus_read_registers(addr, "11H")
 
         return {
             "temp_unit": "C" if  temp_unit == 0 else "F",
