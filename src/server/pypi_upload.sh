@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python setup.py sdist upload -r pypi
+python create_setup.py && python setup.py sdist upload -r pypi

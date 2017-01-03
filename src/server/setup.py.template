@@ -1,0 +1,23 @@
+from distutils.core import setup
+from pip.req import parse_requirements
+
+setup(
+    name = 'electric',
+    packages = ['electric', 'electric.icharger'],
+    version = "{{ version }}",
+    description = "Battery charger integration, information and notification server",
+    author = "John Clayton",
+    author_email = "electric_charge@icloud.com",
+    url = 'https://github.com/johncclayton/electric',
+    download_url = 'https://github.com/johncclayton/electric/tarball/{{ version }}',
+    keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
+    classifiers = [],
+    install_requires = [
+        {% for req in requirements %}
+            '{{ req }}',
+        {% endfor %}
+    ],
+    entry_points = {
+        'console_scripts': ['electric-server=electric.main:run_server']
+    }
+)

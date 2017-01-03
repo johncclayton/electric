@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python setup.py sdist upload -r pypitest
+python create_setup.py && python setup.py sdist upload -r pypitest
