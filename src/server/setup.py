@@ -6,16 +6,16 @@ from distutils.core import setup
 setup(
     name = 'electric',
     packages = ['electric', 'electric.icharger'],
-    version = "None",
+    version = "0.6.9",
     description = "Battery charger integration, information and notification server",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/None',
+    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.9',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     license = "GPLv3",
     data_files = [
-        ('/etc/udev/rules.d/', 'scripts/10-icharger.rules')
+        ('/etc/udev/rules.d/', ['scripts/10-icharger.rules'])
     ],
     classifiers = [
     ],

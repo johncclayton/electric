@@ -15,7 +15,7 @@ setup(
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     license = "GPLv3",
     data_files = [
-        ('/etc/udev/rules.d/', 'scripts/10-icharger.rules')
+        ('/etc/udev/rules.d/', ['scripts/10-icharger.rules'])
     ],
     classifiers = [
     ],

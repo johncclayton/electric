@@ -10,7 +10,7 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--generate', default=True, action="store_true", help='regenerate setup.py')
     parser.add_argument('-p', '--publish', default=False, action="store_true", help='publish the package')
     parser.add_argument('-v', '--version', default=None, help="specify the version embedded into the setup.py file")
-    parser.add_argument('-t', '--test', default=False, help="publish to the pypitest repository, by default this util publishes to the real live repo")
+    parser.add_argument('-t', '--test', default=False, action="store_true", help="publish to the pypitest repository, by default this util publishes to the real live repo")
     args = parser.parse_args()
 
     rendered = False
