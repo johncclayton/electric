@@ -14,7 +14,11 @@ setup(
     download_url = 'https://github.com/johncclayton/electric/tarball/{{ version }}',
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     license = "GPLv3",
-    classifiers = [],
+    data_files = [
+        ('/etc/udev/rules.d/', 'scripts/10-icharger.rules')
+    ],
+    classifiers = [
+    ],
     install_requires = [
         {% for req in requirements %}
             '{{ req }}',

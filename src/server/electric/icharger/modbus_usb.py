@@ -94,14 +94,17 @@ def exception_dict(exc):
         "charger_presence": "disconnected"
     }
 
-
 #
+# Want user-land access to the device?  Looking for an easier way, tired of sudo <command>
+# and having op-sec experts scorn you at the water cooler?
 #
-# relies on the following going into /etc/udev/rules.d/10-icharger4010.rules
-#
-# apply user land permissions so we don't require root to read/write it
+# HINT, you can use the following single line in /etc/udev/rules.d/10-icharger4010.rules
 # SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"
 #
+# Once you have added this single line of text to the file, ask udevd to re-read configuration:
+# $ udevadm control --reload-rules
+#
+# But you NEED to unplug/plug-in the device for this to work - otherwise REBOOT the device.
 #
 
 class iChargerQuery(Query):
