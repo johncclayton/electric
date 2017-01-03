@@ -446,6 +446,22 @@ class iChargerMaster(RtuMaster):
         except Exception, you:
             return exception_dict(you)
 
+    def get_control_register(self):
+        "Returns the current run state of a particular channel"
+        addr = 0x8000
+        (op, memory, channel, order_lock, order, limit_current, limit_volt) = \
+            self._modbus_read_input_registers(addr, "7H")
+
+        return {
+            "operation": op,
+            "memory": memory,
+            "channel": channel,
+            "order_lock": order_lock,
+            "order": order,
+            "limit_current": limit_current,
+            "limit_volt": limit_volt
+        }
+
     def _beep_summary_dict(self, enabled, volume, type):
         return {
             "enabled": enabled,
