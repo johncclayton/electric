@@ -6,6 +6,7 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 import {KeysPipe} from "../utils/pipes";
+import {iChargerService} from "../services/icharger.service";
 
 @NgModule({
   declarations: [
@@ -27,6 +28,6 @@ import {KeysPipe} from "../utils/pipes";
     HomePage,
     TabsPage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}]
+  providers: [iChargerService, {provide: ErrorHandler, useClass: IonicErrorHandler}]
 })
 export class AppModule {}

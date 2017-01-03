@@ -5,32 +5,41 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-card *ngIf="!isConnectedToServer()">
-    <ion-card-header>
-      No charger/electric server can be found. Sadness.
-    </ion-card-header>
-    <ion-card-content>
-      It seems the app cannot connect to the server.
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card *ngIf="isConnectedToServer() && !isConnectedToCharger()">
-    <ion-card-header>
-      Charger disconnected
-    </ion-card-header>
-    <ion-card-content>
-      We can talk to the app server, but it seems the charger isn't connected the Pi.
-      Please check connection from charger to the Pi, and also that the Pi is
-      happy.
+  <div *ngIf="!isConnectedToServer() || !isConnectedToCharger()">
+    <ion-card>
+      <ion-card-header>
+        <span *ngIf></span>
+        Connection Status
+      </ion-card-header>
 
       <ion-list>
-        <ion-item *ngFor="let key of chargerStatus|keys">
-          <ion-icon name="sad"></ion-icon>
-          {{key}} = {{chargerStatus[key]}}
+        <ion-item *ngIf="!isConnectedToServer()">
+          <ion-icon name="close-circle" color="danger"></ion-icon>
+          It seems the app cannot connect to the server.
+        </ion-item>
+
+        <ion-item *ngIf="isConnectedToServer()">
+          <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
+          Server connection OK
+        </ion-item>
+
+        <ion-item *ngIf="!isConnectedToCharger()">
+          <ion-icon name="close-circle" color="danger"></ion-icon>
+          Can't see status from the charger (charger not connected)
+        </ion-item>
+
+        <ion-item *ngIf="isConnectedToCharger()">
+          <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
+          Charger OK!
         </ion-item>
       </ion-list>
-    </ion-card-content>
-  </ion-card>
+    </ion-card>
+    <ion-list-header>
+      Well then. It looks like we've some problems.
+    </ion-list-header>
+    <!--{{channelStatus['exception']}}-->
+    <p>TODO: Add some stuff here about what to look for, fix.</p>
+  </div>
 
 
   <ion-card *ngIf="isConnectedToServer() && isConnectedToCharger()">
@@ -38,9 +47,12 @@
       Charger Status
     </ion-card-header>
     <ion-card-content>
-      {{chargerStatus|json}}
+      <!--{{chargerService.chargerStatus|json}}-->
+      {{chargerService.channelStatus[1]|json}}
     </ion-card-content>
   </ion-card>
+
+  <!--<button ion-button (click)="showtoast()">Disconnect</button>-->
 
 </ion-content>
 
