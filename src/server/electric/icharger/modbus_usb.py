@@ -10,12 +10,19 @@ from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidRespons
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 
+CHANNEL_INPUT_HEADER_OFFSET = 0
 CHANNEL_INPUT_FOOTER_OFFSET = 51
 CHANNEL_INPUT_CELL_IR_FORMAT = 35
 CHANNEL_INPUT_CELL_BALANCE_OFFSET = 27
 CHANNEL_INPUT_CELL_VOLT_OFFSET = 11
 
-ICHARGER_VENDOR_ID = 0x483
+# see the helper/main.cpp module I created that tells me these
+# offset values more reliably than Mr Blind Man.
+SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY = 5
+SYSTEM_STORAGE_OFFSET_CALIBRATION = 22
+SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
+
+ICHARGER_VENDOR_ID = 0x0483
 ICHARGER_PRODUCT_ID = 0x5751
 
 END_POINT_ADDRESS_WRITE = 0x01
@@ -433,3 +440,82 @@ class iChargerMaster(RtuMaster):
 
         except Exception, you:
             return exception_dict(you)
+
+    def _beep_summary_dict(self, enabled, volume, type):
+        return {
+            "enabled": enabled,
+            "volume": volume,
+            "type": type
+        }
+
+    def get_system_storage(self):
+        """Returns the system storage area of the iCharger"""
+        base = 0x8400
+        (temp_unit, temp_stop, temp_fans_on, temp_reduce, dummy1) \
+            = self._modbus_read_input_registers(base, "5H")
+
+        addr = base + SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY
+        (fans_off_delay, lcd_contrast, light_value, dump2, beep_type_key, beep_type_hint, beep_type_alarm,
+         beep_type_done, beep_enable_key, beep_enable_hint, beep_enable_alarm, beep_enable_done,
+         beep_vol_key, beep_vol_hint, beep_vol_alarm, beep_vol_done, dummy3) \
+            = self._modbus_read_input_registers(addr, "17H")
+
+        addr = base + SYSTEM_STORAGE_OFFSET_CALIBRATION
+        (calibration, dump4, sel_input_device, dc_inp_low_volt, dc_inp_over_volt, dc_inp_curr_limit,
+         batt_inp_low_volt, batt_inp_over_volt, batt_input_curr_limit, regen_enable, regen_volt_limit, regen_curr_limit) = \
+            self._modbus_read_input_registers(addr, "12H")
+
+        addr = base + SYSTEM_STORAGE_OFFSET_CHARGER_POWER
+        (charger_power_0, charger_power_1, discharge_power_0, discharge_power_1, power_priority,
+         logging_sample_interval, logging_save_to_sdcard, servo_type, servo_user_center, servo_user_rate, servo_op_angle) = \
+            self._modbus_read_input_registers(addr, "11H")
+
+        return {
+            "temp_unit": temp_unit,
+            "temp_stop": temp_stop,
+            "temp_fans_on": temp_fans_on,
+            "temp_reduce": temp_reduce,
+            "fans_off_delay": fans_off_delay,
+            "lcd_contrast": lcd_contrast,
+            "light_value": light_value,
+            "beep": {
+                "key": self._beep_summary_dict(beep_enable_key, beep_vol_key, beep_type_key),
+                "hint": self._beep_summary_dict(beep_enable_hint, beep_vol_hint, beep_type_hint),
+                "alarm": self._beep_summary_dict(beep_enable_alarm, beep_vol_alarm, beep_type_alarm),
+                "done": self._beep_summary_dict(beep_enable_done, beep_vol_done, beep_type_done)
+            },
+            "calibration": calibration,
+            "selected_input_device": sel_input_device,
+            "dc_input": {
+                "low_volt": dc_inp_low_volt,
+                "over_volt": dc_inp_over_volt,
+                "curr_limit": dc_inp_curr_limit,
+            },
+            "batt_input": {
+                "low_volt": batt_inp_low_volt,
+                "over_volt": batt_inp_over_volt,
+                "curr_limit": batt_input_curr_limit
+            },
+            "regeneration": {
+                "enabled": regen_enable,
+                "curr_limit": regen_curr_limit,
+                "volt_limit": regen_volt_limit
+            },
+            "charger_power": [
+                charger_power_0,
+                charger_power_1
+            ],
+            "discharge_power": [
+                discharge_power_0,
+                discharge_power_1
+            ],
+            "power_priority": power_priority,
+            "logging_sample_interval": logging_sample_interval,
+            "logging_save_to_sdcard": logging_save_to_sdcard,
+            "servo": {
+                "type": servo_type,
+                "user_center": servo_user_center,
+                "user_rate": servo_user_rate,
+                "op_angle": servo_op_angle
+            }
+        }

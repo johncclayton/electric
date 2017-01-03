@@ -6,8 +6,8 @@ class TestRestfulAPI(unittest.TestCase):
         self.app = AppInterface()
         self.client = self.app.app.test_client()
 
-    def tearDown(self):
-        pass
+    # def tearDown(self):
+    #     pass
 
     def test_can_get_with_no_icharger_attached(self):
         resp = self.client.get("/status")

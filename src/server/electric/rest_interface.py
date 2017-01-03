@@ -27,5 +27,16 @@ class ChannelStatus_iCharger(Resource):
             return exception_dict(e)
 
 
+class SystemStorage_iCharger(Resource):
+    def __init__(self):
+        super(SystemStorage_iCharger, self).__init__()
+
+    def get(self):
+        try:
+            dev = iChargerMaster()
+            return dev.get_system_storage()
+        except Exception, e:
+            return exception_dict(e)
+
 
 

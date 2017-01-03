@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 
-from electric.rest_interface import Status_iCharger, ChannelStatus_iCharger
+from electric.rest_interface import Status_iCharger, SystemStorage_iCharger, ChannelStatus_iCharger
 
 class AppInterface(object):
     def __init__(self):
@@ -11,6 +11,7 @@ class AppInterface(object):
 
         self.api = Api(self.app)
         self.api.add_resource(Status_iCharger, "/status")
+        self.api.add_resource(SystemStorage_iCharger, "/system")
         self.api.add_resource(ChannelStatus_iCharger, "/channel/<channel_id>")
 
 
