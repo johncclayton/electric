@@ -1,34 +1,21 @@
 from distutils.core import setup
+from pip.req import parse_requirements
+
+install_reqs = parse_requirements('requirements.txt')
+production_version = '0.6.4'
 
 setup(
     name = 'electric',
     packages = ['electric', 'electric.icharger'],
-    version = '0.6.3',
+    version = production_version,
     description = "Battery charger integration, information and notification server",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/0.6.3',
+    download_url = 'https://github.com/johncclayton/electric/tarball/' + production_version,
     keywords = [ 'icharger', 'fma', 'hobby', 'charger' ],
     classifiers = [],
-    install_requires = [
-        'aniso8601==1.2.0',
-        'click==6.6',
-        'Flask==0.12',
-        'Flask-Cors==3.0.2',
-        'Flask-RESTful==0.3.5',
-        'itsdangerous==0.24',
-        'Jinja2==2.8',
-        'MarkupSafe==0.23',
-        'modbus-tk==0.5.4',
-        'pyserial==3.1',
-        'python-dateutil==2.6.0',
-        'pytz==2016.10',
-        'pyusb==1.0.0',
-        'six==1.10.0',
-        'Werkzeug==0.11.13',
-        'wheel==0.24.0',
-    ],
+    install_requires = install_reqs,
     entry_points = {
         'console_scripts': ['electric-server=electric.main:run_server']
     }
