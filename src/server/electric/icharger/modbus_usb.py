@@ -53,6 +53,15 @@ ModbusErrors = [
     {"c": "MB_ETIMEDOUT", "v": 0x85, "d": "Timeout error occurred"},
 ]
 
+def exception_dict(exc):
+    """
+    Returns a dict that wraps up the information provided by the exception as well as
+    the connection state of the charger
+    """
+    return {
+        "exception": str(exc),
+        "charger_presence": "disconnected"
+    }
 
 #
 #
@@ -132,47 +141,54 @@ class iChargerUSBSerialFacade:
     """
 
     def __init__(self, vendorId=ICHARGER_VENDOR_ID, productId=ICHARGER_PRODUCT_ID):
-        self.dev = None
+        self._dev = None
         self._claimed = False
-        self.cfg = None
+        self._cfg = None
 
         try:
-            self.dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+            self._dev = usb.core.find(idVendor=vendorId, idProduct=productId)
         except usb.core.NoBackendError:
-            return
+            logging.error("There is no USB backend - the service cannot start")
+            raise
 
-        if self.dev is None:
+        if self._dev is None:
             return
 
         if not self._detach_kernel_driver():
+            logging.error("Failed to detach from the kernel")
             sys.exit("failed to detach kernel driver")
 
-        # don't do this - fails every time on the Pi3, regardless of permissions.
-        #self.dev.set_configuration()
+        self._cfg = self._dev.get_active_configuration()
+        if self._cfg is None:
+            logging.error("No active USB configuration for the iCharger was found")
 
-        self.cfg = self.dev.get_active_configuration()
 
     def _detach_kernel_driver(self):
-        if self.dev.is_kernel_driver_active(0):
+        if self._dev.is_kernel_driver_active(0):
             try:
-                self.dev.detach_kernel_driver(0)
+                self._dev.detach_kernel_driver(0)
             except usb.core.USBError as e:
                 return False
         return True
 
     def _claim_interface(self):
+        if not self._dev:
+            return False
+
         try:
-            usb.util.claim_interface(self.dev, 0)
+            usb.util.claim_interface(self._dev, 0)
             self._claimed = True
             return True
         except Exception, e:
             logging.info("Failed to _claim interface with {0}".format(e))
-            print("Failed to _claim interface with {0}".format(e))
         return False
 
     def _release_interface(self):
+        if not self._dev:
+            return False
+
         try:
-            usb.util.release_interface(self.dev, 0)
+            usb.util.release_interface(self._dev, 0)
             self._claimed = False
             return True
         except:
@@ -181,11 +197,11 @@ class iChargerUSBSerialFacade:
 
     @property
     def serial_number(self):
-        return usb.util.get_string(self.dev, self.dev.iSerialNumber) if self.valid else None
+        return usb.util.get_string(self._dev, self._dev.iSerialNumber) if self.valid else None
 
     @property
     def is_open(self):
-        return self.dev is not None and self._claimed
+        return self._dev is not None and self._claimed
 
     @property
     def name(self):
@@ -214,7 +230,7 @@ class iChargerUSBSerialFacade:
 
     @property
     def valid(self):
-        return self.dev is not None
+        return self._dev is not None
 
     def reset_input_buffer(self):
         """There are no internal buffers so this method is a no-op"""
@@ -225,14 +241,14 @@ class iChargerUSBSerialFacade:
         pass
 
     def write(self, content):
-        if self.dev is not None and self._claimed:
+        if self._dev is not None and self._claimed:
             pad_len = MAX_READWRITE_LEN - len(content)
-            self.dev.write(END_POINT_ADDRESS_WRITE, content + ("\0" * pad_len))
+            self._dev.write(END_POINT_ADDRESS_WRITE, content + ("\0" * pad_len))
         return 0
 
     def read(self, expected_length):
-        if self.dev is not None and self._claimed:
-            return self.dev.read(END_POINT_ADDRESS_READ, expected_length).tostring()
+        if self._dev is not None and self._claimed:
+            return self._dev.read(END_POINT_ADDRESS_READ, expected_length).tostring()
         return 0
 
 
@@ -329,10 +345,7 @@ class iChargerMaster(RtuMaster):
                 "charger_presence": "connected"
             }
         except Exception, me:
-            return {
-                "charger_presence": "disconnected",
-                "error" : "{0}".format(me)
-            }
+            return exception_dict(me)
 
     def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
         return {
@@ -419,7 +432,4 @@ class iChargerMaster(RtuMaster):
             }
 
         except Exception, you:
-            return {
-                "charger_presence": "disconnected",
-                "error" : "{0}".format(you)
-            }
+            return exception_dict(you)
