@@ -44,6 +44,26 @@ STATUS_DLG_BOX_STATUS = 0x10
 STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
+Control_RunOperations = [
+    (0, "charge"),
+    (1, "storage"),
+    (2, "discharge"),
+    (3, "cycle"),
+    (4, "balance only"),
+]
+
+Control_OrderOperations = [
+    (0, "run"),
+    (1, "modify"),
+    (2, "write system"),
+    (3, "write memory head"),
+    (4, "write memory"),
+    (5, "trans log on"),
+    (6, "trans log off"),
+    (7, "msgbox yes"),
+    (8, "msgbox no")
+]
+
 ModbusErrors = [
     {"c": "MB_EOK", "v": 0x00},
     {"c": "MB_EX_ILLEGAL_FUNCTION", "v": 0x01},
@@ -63,6 +83,7 @@ ModbusErrors = [
     {"c": "MB_ETIMEDOUT", "v": 0x85, "d": "Timeout error occurred"},
 ]
 
+
 def exception_dict(exc):
     """
     Returns a dict that wraps up the information provided by the exception as well as
@@ -72,6 +93,7 @@ def exception_dict(exc):
         "exception": str(exc),
         "charger_presence": "disconnected"
     }
+
 
 #
 #
@@ -103,11 +125,12 @@ class iChargerQuery(Query):
 
     def build_request(self, pdu, slave):
         """ Constructs the output buffer for the request based on the func_code value """
-        (self.func_code,) = struct.unpack(">B", pdu[0])
+        (self.func_code, self.start_addr, self.quantity) = struct.unpack(">BHH", pdu[0:5])
 
-        if self.func_code == cst.READ_INPUT_REGISTERS:
+        if self.func_code == cst.READ_INPUT_REGISTERS or self.func_code == cst.READ_HOLDING_REGISTERS:
             self.adu_len = 7
-            (self.start_addr, self.quantity) = struct.unpack(">HH", pdu[1:5])
+        elif self.func_code == cst.WRITE_MULTIPLE_REGISTERS:
+            self.adu_len = 7 + (self.quantity * 2) + 1
         else:
             raise ModbusInvalidRequestError("Request func code not recognized (code is: {0})".format(self.func_code))
 
@@ -171,7 +194,6 @@ class iChargerUSBSerialFacade:
         self._cfg = self._dev.get_active_configuration()
         if self._cfg is None:
             logging.error("No active USB configuration for the iCharger was found")
-
 
     def _detach_kernel_driver(self):
         if self._dev.is_kernel_driver_active(0):
@@ -312,10 +334,11 @@ class iChargerMaster(RtuMaster):
         Writes data using modbus_tk to the modbus slave given an address to write to.
         :param addr: the address to begin writing values at
         :param format: the data format to write - don't specify byte order here, just the format
-        :param data: tuple of data to be written given a specific format
+        :param data: tuple of data to be written - these are integers (words)
         :return:
         """
         byte_len = struct.calcsize(format)
+
         quant = byte_len // 2
         assert (quant * 2) == byte_len
 
@@ -323,7 +346,7 @@ class iChargerMaster(RtuMaster):
                             cst.WRITE_MULTIPLE_REGISTERS,
                             addr,
                             data_format=format,
-                            quantity_of_x=quant,
+                            output_value=data,
                             expected_length=(quant * 2) + 4)
 
     def _status_word_as_dict(self, status):
@@ -468,37 +491,19 @@ class iChargerMaster(RtuMaster):
         except Exception, you:
             return exception_dict(you)
 
-    def _op_description(self, op):
-        if op == 0:
-            return "charge"
-        if op == 1:
-            return "storage"
-        if op == 2:
-            return "discharge"
-        if op == 3:
-            return "cycle"
-        if op == 4:
-            return "balance only"
+    @staticmethod
+    def op_description(op):
+        for (num, name) in Control_RunOperations:
+            if op == num:
+                return name
+        return None
 
-    def _order_description(self, order):
-        if order == 0:
-            return "run"
-        if order == 1:
-            return "modify"
-        if order == 2:
-            return "write system"
-        if order == 3:
-            return "write memory head"
-        if order == 4:
-            return "write memory"
-        if order == 5:
-            return "trans log on"
-        if order == 6:
-            return "trans log off"
-        if order == 7:
-            return "msgbox yes"
-        if order == 8:
-            return "msgbox no"
+    @staticmethod
+    def order_description(order):
+        for (num, name) in Control_OrderOperations:
+            if order == num:
+                return name
+        return None
 
     def get_control_register(self):
         "Returns the current run state of a particular channel"
@@ -508,12 +513,12 @@ class iChargerMaster(RtuMaster):
 
         return {
             "op": op,
-            "op_description": self._op_description(op),
+            "op_description": self.op_description(op),
             "memory": memory,
             "channel": channel,
             "order_lock": order_lock,
             "order": order,
-            "order_description": self._order_description(order),
+            "order_description": self.order_description(order),
             "limit_current": limit_current / 1000.0,
             "limit_volt": limit_volt / 1000.0
         }
@@ -547,16 +552,18 @@ class iChargerMaster(RtuMaster):
 
         addr = base + SYSTEM_STORAGE_OFFSET_CALIBRATION
         (calibration, dump4, sel_input_device, dc_inp_low_volt, dc_inp_over_volt, dc_inp_curr_limit,
-         batt_inp_low_volt, batt_inp_over_volt, batt_input_curr_limit, regen_enable, regen_volt_limit, regen_curr_limit) = \
+         batt_inp_low_volt, batt_inp_over_volt, batt_input_curr_limit, regen_enable, regen_volt_limit,
+         regen_curr_limit) = \
             self._modbus_read_registers(addr, "12H")
 
         addr = base + SYSTEM_STORAGE_OFFSET_CHARGER_POWER
         (charger_power_0, charger_power_1, discharge_power_0, discharge_power_1, power_priority,
-         logging_sample_interval, logging_save_to_sdcard, servo_type, servo_user_center, servo_user_rate, servo_op_angle) = \
+         logging_sample_interval, logging_save_to_sdcard, servo_type, servo_user_center, servo_user_rate,
+         servo_op_angle) = \
             self._modbus_read_registers(addr, "11H")
 
         return {
-            "temp_unit": "C" if  temp_unit == 0 else "F",
+            "temp_unit": "C" if temp_unit == 0 else "F",
             "temp_stop": temp_stop,
             "temp_fans_on": temp_fans_on,
             "temp_reduce": temp_reduce,
