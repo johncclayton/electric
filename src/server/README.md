@@ -11,7 +11,7 @@ To use this, you will need the following:
 Please note: a Raspberry PI 2 WILL NOT suffice as this project uses Bluetooth BLE and WIFI, both
 of which are present on the v3 PI and NOT on the v2 PI.
 
-# running from PyPi installed server
+# running from the PyPi distribution
 There are two ways to run the server - either from a module installed via PyPi, or via a
 copy of the GitHub repo.
 
@@ -27,13 +27,15 @@ Then you can run it as a web service using the following command:
 
     $ electric-server
 
-The web service runs on port *5000*.
+The web service runs on port 5000 - you have no choice.  Thank you for your co-operation.
 
 # running from the github repo
-Setup a virtualenv for the project, and load the required modules via a pip install -r requirements.txt.
+Setup a virtualenv for the project, and load the required modules using the requirements.txt file
+
+    $  pip install -r requirements.txt
 
 Use the run_server.sh script within this directory to start the server.  This assumes your current python
-environment has all the required modules installed into it.
+environment has all the required modules installed of course.
 
 # publish to pypi or pypitest repository
 The server code can be published to the pypi repo as long as you have account credentials for the pypi
