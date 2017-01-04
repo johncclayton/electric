@@ -163,6 +163,8 @@ class iChargerQuery(Query):
                 "Response func_code {0} isn't the same as the request func_code {1}".format(
                     self.response_func_code, self.func_code
                 ))
+        else:
+            self.modbus_error = 0
 
         # primitive byte swap the entire thing...
         header = response[2:4]
