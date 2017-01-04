@@ -44,6 +44,26 @@ STATUS_DLG_BOX_STATUS = 0x10
 STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
+class TestingControlException(Exception):
+    pass
+
+class TestingControl:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        # Holds the global testing flags that modify the interface behaviour in simple ways to enable testing
+        self.usb_device_present = True
+        # If the kernel detach should fail
+        self.usb_detach_from_kernel_should_fail = False
+        # If a read operation should fail and throw an exception
+        self.modbus_read_should_fail = False
+        # If a write operation should fail and throw an exception
+        self.modbus_write_should_fail = False
+
+testing_control = TestingControl()
+
+
 Control_RunOperations = [
     (0, "charge"),
     (1, "storage"),
@@ -84,15 +104,20 @@ ModbusErrors = [
 ]
 
 
-def exception_dict(exc):
+def connection_state_dict(exc=None):
     """
     Returns a dict that wraps up the information provided by the exception as well as
     the connection state of the charger
     """
-    return {
-        "exception": str(exc),
-        "charger_presence": "disconnected"
+
+    value = {
+        "charger_presence": "disconnected" if exc is not None else "connected"
     }
+
+    if exc is not None:
+        value.update({"exception": str(exc)})
+
+    return value
 
 #
 # Want user-land access to the device?  Looking for an easier way, tired of sudo <command>
@@ -181,7 +206,8 @@ class iChargerQuery(Query):
 
         return "Unknown Code"
 
-class iChargerUSBSerialFacade:
+
+class USBSerialFacade:
     """
     Implements facade such that the ModBus Master thinks it is using a serial
     device when talking to the iCharger via USB-HID.
@@ -200,6 +226,8 @@ class iChargerUSBSerialFacade:
 
         try:
             self._dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+            if not testing_control.usb_device_present:
+                raise usb.core.NoBackendError("TEST_FAKE_CANNOT_FIND_DEVICE")
         except usb.core.NoBackendError:
             logging.error("There is no USB backend - the service cannot start")
             raise
@@ -207,9 +235,9 @@ class iChargerUSBSerialFacade:
         if self._dev is None:
             return
 
-        if not self._detach_kernel_driver():
+        if not self._detach_kernel_driver() or testing_control.usb_detach_from_kernel_should_fail:
             logging.error("Failed to detach from the kernel")
-            sys.exit("failed to detach kernel driver")
+            raise usb.core.USBError("Failed to detach from the kernel")
 
         self._cfg = self._dev.get_active_configuration()
         if self._cfg is None:
@@ -312,7 +340,7 @@ class iChargerMaster(RtuMaster):
 
     def __init__(self, serial=None):
         if serial is None:
-            serial = iChargerUSBSerialFacade()
+            serial = USBSerialFacade()
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):
@@ -339,6 +367,9 @@ class iChargerMaster(RtuMaster):
         quant = byte_len // 2
 
         assert (quant * 2) == byte_len
+
+        if testing_control.modbus_read_should_fail:
+            raise TestingControlException("_modbus_read_registers")
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
@@ -414,11 +445,10 @@ class iChargerMaster(RtuMaster):
                 "memory_len": data[5],
                 "channel_count": 2,
                 "ch1_status": self._status_word_as_dict(data[6]),
-                "ch2_status": self._status_word_as_dict(data[7]),
-                "charger_presence": "connected"
+                "ch2_status": self._status_word_as_dict(data[7])
             }
         except Exception, me:
-            return exception_dict(me)
+            return connection_state_dict(me)
 
     def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
         if voltage == 1024:
@@ -504,12 +534,11 @@ class iChargerMaster(RtuMaster):
                 "control_status": footer[3],
                 "run_status": footer[4],
                 "run_error": footer[5],
-                "dlg_box_id": footer[6],
-                "charger_presence": "connected"
+                "dlg_box_id": footer[6]
             }
 
         except Exception, you:
-            return exception_dict(you)
+            return connection_state_dict(you)
 
     @staticmethod
     def op_description(op):
