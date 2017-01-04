@@ -153,3 +153,11 @@ class TestMasterDevice(unittest.TestCase):
         self.assertEqual(2, len(status.keys()))
         self.assertIn("exception", status.keys())
 
+    def test_can_change_key_tone_and_volume(self):
+        charger = iChargerMaster()
+        new_volume = 2
+        charger.set_beep_properties(beep_index=0, enabled=True, volume=new_volume)
+        resp = charger.get_system_storage()
+        self.assertEqual(resp["beep"]["key"]["enabled"], 1)
+        self.assertEqual(resp["beep"]["key"]["volume"], new_volume)
+

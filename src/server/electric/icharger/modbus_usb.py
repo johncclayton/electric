@@ -159,7 +159,7 @@ class iChargerQuery(Query):
         if self.func_code == cst.READ_INPUT_REGISTERS or self.func_code == cst.READ_HOLDING_REGISTERS:
             self.adu_len = 7
         elif self.func_code == cst.WRITE_MULTIPLE_REGISTERS:
-            self.adu_len = 7 + (self.quantity * 2) + 1
+            self.adu_len = 7 + (self.quantity * 2)
         else:
             raise ModbusInvalidRequestError("Request func code not recognized (code is: {0})".format(self.func_code))
 
@@ -170,7 +170,7 @@ class iChargerQuery(Query):
             raise ModbusInvalidResponseError("Response length is invalid {0}".format(len(response)))
 
         # check for max length problem, the iCharger HID based Modbus protocol handles only
-        # 64 byte packets.  If you want to read more, then send multiple read requests.
+        # 64 byte packets.  If you want to read/write more, then send multiple requests.
         (self.response_length, self.adu_constant, self.response_func_code, self.modbus_error) = struct.unpack(">BBBB", response[0:4])
 
         if self.adu_constant != MODBUS_HID_FRAME_TYPE:
@@ -191,10 +191,17 @@ class iChargerQuery(Query):
         else:
             self.modbus_error = 0
 
-        # primitive byte swap the entire thing...
-        header = response[2:4]
-        data = response[4:]
-        return header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
+        # primitive byte swap the entire thing... but only if this is the READ INPUT/HOLDING type
+        if self.func_code == cst.READ_HOLDING_REGISTERS or self.func_code == cst.READ_INPUT_REGISTERS:
+            header = response[2:4]
+            data = response[4:]
+            response = header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
+        else:
+            response = response[2:]
+
+        print("response length:", len(response))
+
+        return response
 
     @staticmethod
     def _modbus_error_string(code):
@@ -380,25 +387,20 @@ class iChargerMaster(RtuMaster):
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
 
-    def _modbus_write_registers(self, addr, format, data):
+    def _modbus_write_registers(self, addr, data):
         """
         Writes data using modbus_tk to the modbus slave given an address to write to.
         :param addr: the address to begin writing values at
-        :param format: the data format to write - don't specify byte order here, just the format
-        :param data: tuple of data to be written - these are integers (words)
+        :param data: tuple of data to be written - these are int words
         :return:
         """
-        byte_len = struct.calcsize(format)
-
-        quant = byte_len // 2
-        assert (quant * 2) == byte_len
 
         return self.execute(1,
                             cst.WRITE_MULTIPLE_REGISTERS,
                             addr,
-                            data_format=format,
+                            data_format="B",
                             output_value=data,
-                            expected_length=(quant * 2) + 4)
+                            expected_length=4)
 
     def _status_word_as_dict(self, status):
         return {
@@ -587,6 +589,21 @@ class iChargerMaster(RtuMaster):
             return "ch1 priority"
         if pri == 2:
             return "ch2 priority"
+
+    def set_beep_properties(self, beep_index = 0, enabled = True, volume = 5):
+        # for now we only access beep type values
+        base = 0x8400
+
+        results = self._modbus_read_registers(base + 13, "8H", function_code=cst.READ_HOLDING_REGISTERS)
+
+        value_enabled = list(results[:4])
+        value_volume = list(results[4:])
+
+        value_enabled[beep_index] = int(enabled)
+        value_volume[beep_index] = volume
+
+        return self._modbus_write_registers(base + 13, value_enabled + value_volume)
+
 
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
