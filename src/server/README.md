@@ -41,6 +41,11 @@ environment has all the required modules installed of course.
 The server code can be published to the pypi repo as long as you have account credentials for the pypi
 repository set up in your ~/.pypirc file.  See the pypirc_template for an example of this file. 
 
+Note: for this to work properly you must install the Python GIT libraries by hand, as these are not
+part of the normal release requirement they are handled differently.
+
+  $ pip install -r dev_requirements.txt
+
 The setup.py is generated from a template so that we can easily inject requirements and version information
 into the file on any platform without having to duplicate information in two places. 
 
@@ -48,3 +53,8 @@ into the file on any platform without having to duplicate information in two pla
 
     $ python scripts/distribute.py -v "0.6.8" -p -t
     
+# PyCharm is warning me that the parent module isn't found while handling absolute imports
+Check this link: https://youtrack.jetbrains.com/oauth?state=%2Fissue%2FPY-20171
+
+specifically, the file here should replace the one you have installed: 
+https://youtrack.jetbrains.com/_persistent/utrunner.py?file=74-332199&c=true

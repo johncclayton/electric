@@ -199,8 +199,6 @@ class iChargerQuery(Query):
         else:
             response = response[2:]
 
-        print("response length:", len(response))
-
         return response
 
     @staticmethod
