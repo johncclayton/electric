@@ -7,7 +7,9 @@ from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, iCharge
 from electric.icharger.modbus_usb import testing_control
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
+from icharger.junsi_types import Control
 from icharger.modbus_usb import TestingControlException
+
 
 class TestChargerQuery(unittest.TestCase):
     def setUp(self):
@@ -114,25 +116,26 @@ class TestMasterDevice(unittest.TestCase):
         obj = iChargerMaster()
         status = obj.get_device_info()
         self.assertIsNotNone(status)
-        self.assertIn("channel_count", status.keys())
+        self.assertEqual(status.channel_count, 2)
+        self.assertIn("channel_count", status.to_dict().keys())
 
     def test_order_description(self):
-        self.assertEqual(iChargerMaster.order_description(0), "run")
-        self.assertEqual(iChargerMaster.order_description(1), "modify")
-        self.assertEqual(iChargerMaster.order_description(2), "write system")
-        self.assertEqual(iChargerMaster.order_description(3), "write memory head")
-        self.assertEqual(iChargerMaster.order_description(4), "write memory")
-        self.assertEqual(iChargerMaster.order_description(5), "trans log on")
-        self.assertEqual(iChargerMaster.order_description(6), "trans log off")
-        self.assertEqual(iChargerMaster.order_description(7), "msgbox yes")
-        self.assertEqual(iChargerMaster.order_description(8), "msgbox no")
+        self.assertEqual(Control.order_description(0), "run")
+        self.assertEqual(Control.order_description(1), "modify")
+        self.assertEqual(Control.order_description(2), "write system")
+        self.assertEqual(Control.order_description(3), "write memory head")
+        self.assertEqual(Control.order_description(4), "write memory")
+        self.assertEqual(Control.order_description(5), "trans log on")
+        self.assertEqual(Control.order_description(6), "trans log off")
+        self.assertEqual(Control.order_description(7), "msgbox yes")
+        self.assertEqual(Control.order_description(8), "msgbox no")
 
     def test_op_description(self):
-        self.assertEqual(iChargerMaster.op_description(0), "charge")
-        self.assertEqual(iChargerMaster.op_description(1), "storage")
-        self.assertEqual(iChargerMaster.op_description(2), "discharge")
-        self.assertEqual(iChargerMaster.op_description(3), "cycle")
-        self.assertEqual(iChargerMaster.op_description(4), "balance only")
+        self.assertEqual(Control.op_description(0), "charge")
+        self.assertEqual(Control.op_description(1), "storage")
+        self.assertEqual(Control.op_description(2), "discharge")
+        self.assertEqual(Control.op_description(3), "cycle")
+        self.assertEqual(Control.op_description(4), "balance only")
 
     def test_opening_claims_usb_interface(self):
         serial = USBSerialFacade()
@@ -147,10 +150,13 @@ class TestMasterDevice(unittest.TestCase):
 
     def test_modbus_read_throws_exception(self):
         testing_control.modbus_read_should_fail = True
-        charger = iChargerMaster()
-        status = charger.get_device_info()
-        self.assertEqual(2, len(status.keys()))
-        self.assertIn("exception", status.keys())
+
+        try:
+            charger = iChargerMaster()
+            charger.get_device_info()
+            self.assertTrue(False)
+        except TestingControlException, me:
+            pass
 
     def test_can_change_key_tone_and_volume(self):
         charger = iChargerMaster()

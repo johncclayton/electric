@@ -6,6 +6,8 @@ import modbus_tk.defines as cst
 import usb.core
 import usb.util
 
+from junsi_types import DeviceInfo, ChannelStatus, Control
+
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
@@ -36,16 +38,10 @@ MAX_READWRITE_LEN = 64
 READ_REG_COUNT_MAX = 30
 WRITE_REG_COUNT_MAX = 28
 
-STATUS_RUN = 0x01
-STATUS_ERROR = 0x02
-STATUS_CONTROL_STATUS = 0x04
-STATUS_RUN_STATUS = 0x08
-STATUS_DLG_BOX_STATUS = 0x10
-STATUS_CELL_VOLTAGE = 0x20
-STATUS_BALANCE = 0x40
 
 class TestingControlException(Exception):
     pass
+
 
 class TestingControl:
     def __init__(self):
@@ -62,27 +58,6 @@ class TestingControl:
         self.modbus_write_should_fail = False
 
 testing_control = TestingControl()
-
-
-Control_RunOperations = [
-    (0, "charge"),
-    (1, "storage"),
-    (2, "discharge"),
-    (3, "cycle"),
-    (4, "balance only"),
-]
-
-Control_OrderOperations = [
-    (0, "run"),
-    (1, "modify"),
-    (2, "write system"),
-    (3, "write memory head"),
-    (4, "write memory"),
-    (5, "trans log on"),
-    (6, "trans log off"),
-    (7, "msgbox yes"),
-    (8, "msgbox no")
-]
 
 ModbusErrors = [
     {"c": "MB_EOK", "v": 0x00},
@@ -400,182 +375,50 @@ class iChargerMaster(RtuMaster):
                             output_value=data,
                             expected_length=4)
 
-    def _status_word_as_dict(self, status):
-        return {
-            "run": status & STATUS_RUN,
-            "err": status & STATUS_ERROR,
-            "ctrl_status": status & STATUS_CONTROL_STATUS,
-            "run_status": status & STATUS_RUN_STATUS,
-            "dlg_box_status": status & STATUS_DLG_BOX_STATUS,
-            "cell_volt_status": status & STATUS_CELL_VOLTAGE,
-            "balance": status & STATUS_BALANCE
-        }
-
     def get_device_info(self):
         """
         Returns the following information from the iCharger, known as the 'device only reads message'
-        :return: a tuple containing the response of 'device reads only message'
-        Device ID (u16)
-        Device SN (S8[12])
-        Software Version (u16)
-        Hardware Version (u16)
-        SYSTEM length (u16 - see also SYSTEM storage area)
-        MEMORY length (u16)
-        ch1 status word (u16)
-        ch2 status word (u16)
-
-        The channel 1/2 status words following this bit-mask:
-        Bit0-run flag
-        Bit1-error flag
-        Bit2-control status flag
-        Bit3-run status flag
-        Bit4-dialog box status flag
-        Bit5-cell voltage flag
-        Bit6-balance flag
+        :return: a DeviceInfo instance
         """
-        try:
-            data = self._modbus_read_registers(0x000, format="h12sHHHHHH")
-
-            return {
-                "device_id": data[0],
-                "device_sn": data[1],
-                "software_ver": data[2],
-                "hardware_ver": data[3],
-                "system_len": data[4],
-                "memory_len": data[5],
-                "channel_count": 2,
-                "ch1_status": self._status_word_as_dict(data[6]),
-                "ch2_status": self._status_word_as_dict(data[7])
-            }
-        except Exception, me:
-            return connection_state_dict(me)
-
-    def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
-        # 1024 appears to be a dummy value for either unused cells or just not plugged in
-        if voltage == 1024:
-            voltage = 0
-        if ir == 1024:
-            ir = 0
-        if balance == 1024:
-            balance = 0
-
-        return {
-            "cell": cell,
-            "v": voltage / 1000.0,
-            "balance": balance,
-            "ir": ir
-        }
+        return DeviceInfo(self._modbus_read_registers(0x000, format="h12sHHHHHH"))
 
     def get_channel_status(self, channel):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
-        :return:
-        0 Timestamp (u32)
-        1 The current output power (u32)
-        2 The current output current (s16)
-        3 The current input voltage (u16)
-        4 The current output voltage (u16)
-        5 The current output capacity (s32)
-        6 The current internal temp (s16)
-        7 The current external temp (s16)
-        Cell 0-15 voltage (each is u16, 4010DUO uses only first 10)
-        Cell 0-15 balance status (each is u8, 4010DUO uses only first 10)
-        Cell 0-15 internal resistance (each is u16, 4010DUO uses only first 10)
-        The cells total IR (u16)
-        Cycle count (u16)
-        Control status (u16)
-        Run status (u16)
-        Run error (u16)
-        Dialog Box ID (u16)
+        :return: ChannelStatus instance
         """
 
         addr = 0x100 if channel == 0 else 0x200
 
-        try:
-            # timestamp -> ext temp
-            header_fmt = "LLhHHlhh"
-            header_data = self._modbus_read_registers(addr, format=header_fmt)
+        # timestamp -> ext temp
+        header_fmt = "LLhHHlhh"
+        header_data = self._modbus_read_registers(addr, format=header_fmt)
 
-            # cell 0-15 voltage
-            cell_volt_fmt = "16H"
-            cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
-            cell_volt = self._modbus_read_registers(cell_volt_addr, cell_volt_fmt)
+        # cell 0-15 voltage
+        cell_volt_fmt = "16H"
+        cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
+        cell_volt = self._modbus_read_registers(cell_volt_addr, cell_volt_fmt)
 
-            # cell 0-15 balance
-            cell_balance_fmt = "16B"
-            cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
-            cell_balance = self._modbus_read_registers(cell_balance_addr, cell_balance_fmt)
+        # cell 0-15 balance
+        cell_balance_fmt = "16B"
+        cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
+        cell_balance = self._modbus_read_registers(cell_balance_addr, cell_balance_fmt)
 
-            # cell 0-15 IR
-            cell_ir_fmt = "16H"
-            cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
-            cell_ir = self._modbus_read_registers(cell_ir_addr, cell_ir_fmt)
+        # cell 0-15 IR
+        cell_ir_fmt = "16H"
+        cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
+        cell_ir = self._modbus_read_registers(cell_ir_addr, cell_ir_fmt)
 
-            # total IR -> dialog box ID
-            footer_fmt = "7H"
-            footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
-            footer = self._modbus_read_registers(footer_addr, footer_fmt)
+        # total IR -> dialog box ID
+        footer_fmt = "7H"
+        footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
+        footer = self._modbus_read_registers(footer_addr, footer_fmt)
 
-            return {
-                "channel": 0 if channel == 0 else 1,
-                "timestamp": header_data[0],
-                "curr_out_power": header_data[1],
-                "curr_out_amps": header_data[2],
-                "curr_inp_volts": header_data[3] / 1000.0,
-                "curr_out_volts": header_data[4] / 1000.0,
-                "curr_out_capacity": header_data[5],
-                "curr_int_temp": header_data[6] / 1000.0,
-                "curr_ext_temp": header_data[7] / 1000.0,
-
-                "cells": [
-                    self._cell_status_summary_as_dict(str(i), cell_volt[i], cell_balance[i], cell_ir[i]) for i in
-                    range(0, 9)
-                    ],
-
-                "cell_total_ir": footer[0],
-                "line_intern_resistance": footer[1],
-                "cycle_count": footer[2],
-                "control_status": footer[3],
-                "run_status": footer[4],
-                "run_error": footer[5],
-                "dlg_box_id": footer[6]
-            }
-
-        except Exception, you:
-            return connection_state_dict(you)
-
-    @staticmethod
-    def op_description(op):
-        for (num, name) in Control_RunOperations:
-            if op == num:
-                return name
-        return None
-
-    @staticmethod
-    def order_description(order):
-        for (num, name) in Control_OrderOperations:
-            if order == num:
-                return name
-        return None
+        return ChannelStatus(channel, header_data, cell_volt, cell_balance, cell_ir, footer)
 
     def get_control_register(self):
         "Returns the current run state of a particular channel"
-        addr = 0x8000
-
-        (op, memory, channel, order_lock, order, limit_current, limit_volt) = \
-            self._modbus_read_registers(addr, "7H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        return {
-            "op": op,
-            "op_description": self.op_description(op),
-            "memory": memory,
-            "channel": channel,
-            "order_lock": order_lock,
-            "order": order,
-            "order_description": self.order_description(order),
-            "limit_current": limit_current / 1000.0,
-            "limit_volt": limit_volt / 1000.0
-        }
+        return Control(self._modbus_read_registers(0x8000, "7H", function_code=cst.READ_HOLDING_REGISTERS))
 
     def _beep_summary_dict(self, enabled, volume, type):
         return {

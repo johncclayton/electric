@@ -7,8 +7,11 @@ class Status_iCharger(Resource):
     def get(self):
         try:
             dev = iChargerMaster()
-            obj = dev.get_device_info()
+            info = dev.get_device_info()
+
+            obj = info.to_dict()
             obj.update(connection_state_dict())
+
             return obj
         except Exception, e:
             return connection_state_dict(e)
@@ -21,8 +24,11 @@ class ChannelStatus_iCharger(Resource):
             channel = int(channel_id)
             if not (channel == 0 or channel == 1):
                 raise ValueError("Channel part of URI must be 0 or 1")
-            obj = dev.get_channel_status(int(channel))
+            status = dev.get_channel_status(int(channel))
+
+            obj = status.to_dict()
             obj.update(connection_state_dict())
+
             return obj
         except Exception, e:
             return connection_state_dict(e)
@@ -32,7 +38,8 @@ class ControlRegister_iCharger(Resource):
     def get(self):
         try:
             dev = iChargerMaster()
-            obj = dev.get_control_register()
+            control = dev.get_control_register()
+            obj = control.to_dict()
             return obj
         except Exception, e:
             return connection_state_dict(e)
@@ -59,6 +66,7 @@ class Memory_iCharger(Resource):
 
 class MemoryList_iCharger(Resource):
     def get(self):
+        # request all of the settings, providing their index value for lookup.
         pass
 
     def post(self):
