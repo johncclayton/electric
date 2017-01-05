@@ -1,18 +1,19 @@
-import { NgModule, ErrorHandler } from '@angular/core';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
-import { MyApp } from './app.component';
-// import { AboutPage } from '../pages/about/about';
-// import { ContactPage } from '../pages/contact/contact';
-import { HomePage } from '../pages/home/home';
-import { TabsPage } from '../pages/tabs/tabs';
+import {NgModule, ErrorHandler} from "@angular/core";
+import {Storage} from '@ionic/storage';
+import {IonicApp, IonicModule, IonicErrorHandler} from "ionic-angular";
+import {MyApp} from "./app.component";
+import {HomePage} from "../pages/home/home";
+import {TabsPage} from "../pages/tabs/tabs";
 import {KeysPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
+import {Configuration} from "../services/configuration.service";
+import {ConfigPage} from "../pages/config/config";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
     MyApp,
-    // AboutPage,
-    // ContactPage,
+    ConfigPage,
     HomePage,
     TabsPage,
     KeysPipe
@@ -23,11 +24,11 @@ import {iChargerService} from "../services/icharger.service";
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    // AboutPage,
-    // ContactPage,
     HomePage,
+    ConfigPage,
     TabsPage
   ],
-  providers: [iChargerService, {provide: ErrorHandler, useClass: IonicErrorHandler}]
+  providers: [iChargerService, Configuration, Storage, {provide: ErrorHandler, useClass: IonicErrorHandler}]
 })
-export class AppModule {}
+export class AppModule {
+}
