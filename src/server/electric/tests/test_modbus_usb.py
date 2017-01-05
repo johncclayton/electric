@@ -161,3 +161,12 @@ class TestMasterDevice(unittest.TestCase):
         self.assertEqual(resp["beep"]["key"]["enabled"], 1)
         self.assertEqual(resp["beep"]["key"]["volume"], new_volume)
 
+    def test_setting_active_channel(self):
+        charger = iChargerMaster()
+        self.assertIsNone(charger.set_active_channel(-1))
+        self.assertIsNone(charger.set_active_channel(2))
+        resp = charger.set_active_channel(0)
+        self.assertIsNotNone(resp)
+        resp = charger.set_active_channel(1)
+        self.assertIsNotNone(resp)
+

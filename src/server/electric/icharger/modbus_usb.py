@@ -602,6 +602,11 @@ class iChargerMaster(RtuMaster):
 
         return self._modbus_write_registers(base + 13, value_enabled + value_volume)
 
+    def set_active_channel(self, channel):
+        base = 0x8000 + 2
+        if channel not in (0, 1):
+            return None
+        return self._modbus_write_registers(base, (channel,))
 
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
