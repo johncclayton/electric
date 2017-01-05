@@ -31,7 +31,6 @@ class ControlRegister_iCharger(Resource):
         try:
             dev = iChargerMaster()
             obj = dev.get_control_register()
-            obj.update(connection_state_dict())
             return obj
         except Exception, e:
             return connection_state_dict(e)
@@ -48,4 +47,17 @@ class SystemStorage_iCharger(Resource):
             return connection_state_dict(e)
 
 
+class Memory_iCharger(Resource):
+    def get(self):
+        pass
 
+    def put(self):
+        pass
+
+
+class MemoryList_iCharger(Resource):
+    def get(self):
+        pass
+
+    def post(self):
+        pass
