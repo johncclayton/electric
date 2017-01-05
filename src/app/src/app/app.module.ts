@@ -1,5 +1,5 @@
 import {NgModule, ErrorHandler} from "@angular/core";
-import {Storage} from '@ionic/storage';
+import {Storage} from "@ionic/storage";
 import {IonicApp, IonicModule, IonicErrorHandler} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
@@ -8,7 +8,8 @@ import {KeysPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
 import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config";
-import {FormsModule} from "@angular/forms";
+import {iChargerMockService} from "../services/icharger.mock.service";
+import {ChannelComponent} from "../components/channel/channel";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import {FormsModule} from "@angular/forms";
     ConfigPage,
     HomePage,
     TabsPage,
-    KeysPipe
+    KeysPipe,
+    ChannelComponent
   ],
   imports: [
     IonicModule.forRoot(MyApp)
@@ -26,9 +28,16 @@ import {FormsModule} from "@angular/forms";
     MyApp,
     HomePage,
     ConfigPage,
-    TabsPage
+    TabsPage,
+    ChannelComponent
   ],
-  providers: [iChargerService, Configuration, Storage, {provide: ErrorHandler, useClass: IonicErrorHandler}]
+  providers: [
+    Configuration,
+    Storage,
+    {provide: iChargerService, useClass: iChargerService},
+    // {provide: iChargerService, useClass: iChargerMockService},
+    {provide: ErrorHandler, useClass: IonicErrorHandler}
+  ]
 })
 export class AppModule {
 }

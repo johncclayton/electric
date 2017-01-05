@@ -11,15 +11,15 @@ const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 @Injectable()
 export class iChargerService {
   chargerStatus: {} = {};
-  channelStatus: any[] = [];
+  channelSnapshots: any[] = [];
   numberOfChannels: number = 0;
 
-  private channelStateObservable: Observable<any>;
+  private channelStateObservable;
 
   public constructor(public http: Http,
                      public events: Events,
                      public config: Configuration) {
-    this.channelStateObservable = null;
+    this.channelStateObservable = [];
   }
 
   isConnectedToServer(): boolean {
@@ -31,10 +31,14 @@ export class iChargerService {
       return false;
     }
 
-    if (this.channelStatus) {
+    if (this.channelSnapshots) {
       let statusString = this.chargerStatus['charger_presence'];
       let channelCount = Number(this.chargerStatus['channel_count']);
-      return statusString === 'connected' && channelCount > 0;
+      let yay = statusString === 'connected' && channelCount > 0;
+      // if(yay) {
+      //   console.warn("ooo! ", this.chargerStatus);
+      // }
+      return yay;
     }
     return false;
   }
@@ -46,40 +50,7 @@ export class iChargerService {
     return this.numberOfChannels;
   }
 
-  chargerDidAppear(statusDict) {
-    this.numberOfChannels = statusDict['channel_count'];
-    console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
-
-    if (this.getNumberOfChannels() > 0) {
-      this.channelStateObservable = Observable
-        .range(1, this.getNumberOfChannels())
-        .filter((v) => { // Only do these if we're connected
-          return this.isConnectedToCharger();
-        })
-        .flatMap((channelNum) => {
-          let url = this.getChargerURL(`/channel/${channelNum}`);
-          this.events.publish(CHARGER_CHANNEL_EVENT, channelNum);
-          return this.http.get(url);
-        }).map((response) => {
-          let jsonResponse = response.json();
-          let channel = Number(jsonResponse["channel"]);
-          this.channelStatus[channel] = jsonResponse;
-        }).retry();
-      console.log("Created channel observable: ", this.channelStateObservable);
-    } else {
-      this.channelStateObservable = null;
-    }
-
-    this.events.publish(CHARGER_CONNECTED_EVENT);
-  }
-
-  // Gets the status of the charger
-  getChargerURL(path) {
-    let hostName = this.config.getHostName();
-    return "http://" + hostName + path;
-  }
-
-  getChargerStatus() {
+  getChargerStatus(): Observable<any> {
     return Observable.timer(1000, 1000)
       .flatMap((v) => {
         return this.http.get(this.getChargerURL("/status"));
@@ -104,17 +75,56 @@ export class iChargerService {
   }
 
   getChargerChannelRequests() {
-    if (this.channelStateObservable) {
-      return Observable
-        .timer(1000, 500)
-        .flatMap((v) => {
-          return this.channelStateObservable;
-        });
-    }
-    console.log("Service warning: request channel state observable, but there isn't any!");
-    return null;
+    return this.channelStateObservable;
   }
 
+  // Gets the status of the charger
+  private getChargerURL(path) {
+    let hostName = this.config.getHostName();
+    return "http://" + hostName + path;
+  }
+
+  private chargerDidAppear(statusDict) {
+    this.numberOfChannels = statusDict['channel_count'];
+    console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
+
+    // Clear existing observables
+    // TODO: do we need to clean these up?
+    this.channelStateObservable = [];
+
+    // Creates a series of hot observables for channel data from the charger
+    for (let i = 0; i < this.getNumberOfChannels(); i++) {
+      console.log(`Creating hot channel observable: ${i}`);
+      this.channelStateObservable.push(Observable
+        .timer(500, 500)
+        .flatMap((v) => {
+          return this.http.get(this.getChargerURL(`/channel/${i}`));
+        })
+        .filter(() => {
+          return this.isConnectedToCharger();
+        })
+        .map((response) => {
+          this.events.publish(CHARGER_CHANNEL_EVENT, i);
+          let jsonResponse = response.json();
+          // console.log(`Channel ${i} data... `, response);
+          let channel = Number(jsonResponse["channel"]);
+          this.channelSnapshots[channel] = {
+            index: i,
+            realChannel: channel,
+            json: jsonResponse
+          };
+          return jsonResponse;
+        })
+        .retry()
+      );
+    }
+
+    // Now need to sort them based on their actual channel number
+    // But can't do that until we get the data (which is async)
+
+    console.log("Subscriptions are: ", this.channelStateObservable);
+    this.events.publish(CHARGER_CONNECTED_EVENT);
+  }
 }
 
 export {

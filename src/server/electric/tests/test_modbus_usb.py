@@ -9,7 +9,6 @@ from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidRespons
 
 from icharger.modbus_usb import TestingControlException
 
-
 class TestChargerQuery(unittest.TestCase):
     def setUp(self):
         testing_control.usb_device_present = True

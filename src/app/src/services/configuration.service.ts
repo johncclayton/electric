@@ -87,6 +87,7 @@ export class Configuration {
     this.configDict = {
       "hostname": "localhost:5000",
       "isnew": true,
+      "mockCharger" : false,
     };
   }
 }
