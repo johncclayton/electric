@@ -44,6 +44,26 @@ STATUS_DLG_BOX_STATUS = 0x10
 STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
+class TestingControlException(Exception):
+    pass
+
+class TestingControl:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        # Holds the global testing flags that modify the interface behaviour in simple ways to enable testing
+        self.usb_device_present = True
+        # If the kernel detach should fail
+        self.usb_detach_from_kernel_should_fail = False
+        # If a read operation should fail and throw an exception
+        self.modbus_read_should_fail = False
+        # If a write operation should fail and throw an exception
+        self.modbus_write_should_fail = False
+
+testing_control = TestingControl()
+
+
 Control_RunOperations = [
     (0, "charge"),
     (1, "storage"),
@@ -84,15 +104,20 @@ ModbusErrors = [
 ]
 
 
-def exception_dict(exc):
+def connection_state_dict(exc=None):
     """
     Returns a dict that wraps up the information provided by the exception as well as
     the connection state of the charger
     """
-    return {
-        "exception": str(exc),
-        "charger_presence": "disconnected"
+
+    value = {
+        "charger_presence": "disconnected" if exc is not None else "connected"
     }
+
+    if exc is not None:
+        value.update({"exception": str(exc)})
+
+    return value
 
 #
 # Want user-land access to the device?  Looking for an easier way, tired of sudo <command>
@@ -125,6 +150,7 @@ class iChargerQuery(Query):
         self.adu_len = None
         self.start_addr = None
         self.quantity = None
+        self.modbus_error = None
 
     def build_request(self, pdu, slave):
         """ Constructs the output buffer for the request based on the func_code value """
@@ -133,7 +159,7 @@ class iChargerQuery(Query):
         if self.func_code == cst.READ_INPUT_REGISTERS or self.func_code == cst.READ_HOLDING_REGISTERS:
             self.adu_len = 7
         elif self.func_code == cst.WRITE_MULTIPLE_REGISTERS:
-            self.adu_len = 7 + (self.quantity * 2) + 1
+            self.adu_len = 7 + (self.quantity * 2)
         else:
             raise ModbusInvalidRequestError("Request func code not recognized (code is: {0})".format(self.func_code))
 
@@ -144,8 +170,8 @@ class iChargerQuery(Query):
             raise ModbusInvalidResponseError("Response length is invalid {0}".format(len(response)))
 
         # check for max length problem, the iCharger HID based Modbus protocol handles only
-        # 64 byte packets.  If you want to read more, then send multiple read requests.
-        (self.response_length, self.adu_constant, self.response_func_code) = struct.unpack(">BBB", response[0:3])
+        # 64 byte packets.  If you want to read/write more, then send multiple requests.
+        (self.response_length, self.adu_constant, self.response_func_code, self.modbus_error) = struct.unpack(">BBBB", response[0:4])
 
         if self.adu_constant != MODBUS_HID_FRAME_TYPE:
             raise ModbusInvalidResponseError(
@@ -153,18 +179,40 @@ class iChargerQuery(Query):
                     self.adu_constant))
 
         if self.response_func_code != self.func_code:
+            if self.response_func_code == self.func_code | 0x80:
+                raise ModbusInvalidResponseError(
+                    "Response contains error code {0}: {1}".format(self.modbus_error, self._modbus_error_string(self.modbus_error))
+                )
+
             raise ModbusInvalidResponseError(
                 "Response func_code {0} isn't the same as the request func_code {1}".format(
                     self.response_func_code, self.func_code
                 ))
+        else:
+            self.modbus_error = 0
 
-        # primitive byte swap the entire thing...
-        header = response[2:4]
-        data = response[4:]
-        return header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
+        # primitive byte swap the entire thing... but only if this is the READ INPUT/HOLDING type
+        if self.func_code == cst.READ_HOLDING_REGISTERS or self.func_code == cst.READ_INPUT_REGISTERS:
+            header = response[2:4]
+            data = response[4:]
+            response = header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
+        else:
+            response = response[2:]
+
+        return response
+
+    @staticmethod
+    def _modbus_error_string(code):
+        for err in ModbusErrors:
+            if err["v"] == code:
+                if "d" in err:
+                    return "{0} ({1})".format(err["c"], err["d"])
+                return err["c"]
+
+        return "Unknown Code"
 
 
-class iChargerUSBSerialFacade:
+class USBSerialFacade:
     """
     Implements facade such that the ModBus Master thinks it is using a serial
     device when talking to the iCharger via USB-HID.
@@ -183,6 +231,8 @@ class iChargerUSBSerialFacade:
 
         try:
             self._dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+            if not testing_control.usb_device_present:
+                raise usb.core.NoBackendError("TEST_FAKE_CANNOT_FIND_DEVICE")
         except usb.core.NoBackendError:
             logging.error("There is no USB backend - the service cannot start")
             raise
@@ -190,9 +240,9 @@ class iChargerUSBSerialFacade:
         if self._dev is None:
             return
 
-        if not self._detach_kernel_driver():
+        if not self._detach_kernel_driver() or testing_control.usb_detach_from_kernel_should_fail:
             logging.error("Failed to detach from the kernel")
-            sys.exit("failed to detach kernel driver")
+            raise usb.core.USBError("Failed to detach from the kernel")
 
         self._cfg = self._dev.get_active_configuration()
         if self._cfg is None:
@@ -295,13 +345,13 @@ class iChargerMaster(RtuMaster):
 
     def __init__(self, serial=None):
         if serial is None:
-            serial = iChargerUSBSerialFacade()
+            serial = USBSerialFacade()
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):
         return iChargerQuery()
 
-    def _modbus_read_registers(self, addr, format):
+    def _modbus_read_registers(self, addr, format, function_code = cst.READ_INPUT_REGISTERS):
         """
         Uses the modbus_tk framework to acquire data from the device.
 
@@ -323,34 +373,32 @@ class iChargerMaster(RtuMaster):
 
         assert (quant * 2) == byte_len
 
+        if testing_control.modbus_read_should_fail:
+            raise TestingControlException("_modbus_read_registers")
+
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
         return self.execute(1,
-                            cst.READ_INPUT_REGISTERS,
+                            function_code,
                             addr,
                             data_format=format,
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
 
-    def _modbus_write_registers(self, addr, format, data):
+    def _modbus_write_registers(self, addr, data):
         """
         Writes data using modbus_tk to the modbus slave given an address to write to.
         :param addr: the address to begin writing values at
-        :param format: the data format to write - don't specify byte order here, just the format
-        :param data: tuple of data to be written - these are integers (words)
+        :param data: tuple of data to be written - these are int words
         :return:
         """
-        byte_len = struct.calcsize(format)
-
-        quant = byte_len // 2
-        assert (quant * 2) == byte_len
 
         return self.execute(1,
                             cst.WRITE_MULTIPLE_REGISTERS,
                             addr,
-                            data_format=format,
+                            data_format="B",
                             output_value=data,
-                            expected_length=(quant * 2) + 4)
+                            expected_length=4)
 
     def _status_word_as_dict(self, status):
         return {
@@ -397,11 +445,10 @@ class iChargerMaster(RtuMaster):
                 "memory_len": data[5],
                 "channel_count": 2,
                 "ch1_status": self._status_word_as_dict(data[6]),
-                "ch2_status": self._status_word_as_dict(data[7]),
-                "charger_presence": "connected"
+                "ch2_status": self._status_word_as_dict(data[7])
             }
         except Exception, me:
-            return exception_dict(me)
+            return connection_state_dict(me)
 
     def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
         if voltage == 1024:
@@ -487,12 +534,11 @@ class iChargerMaster(RtuMaster):
                 "control_status": footer[3],
                 "run_status": footer[4],
                 "run_error": footer[5],
-                "dlg_box_id": footer[6],
-                "charger_presence": "connected"
+                "dlg_box_id": footer[6]
             }
 
         except Exception, you:
-            return exception_dict(you)
+            return connection_state_dict(you)
 
     @staticmethod
     def op_description(op):
@@ -511,8 +557,9 @@ class iChargerMaster(RtuMaster):
     def get_control_register(self):
         "Returns the current run state of a particular channel"
         addr = 0x8000
+
         (op, memory, channel, order_lock, order, limit_current, limit_volt) = \
-            self._modbus_read_registers(addr, "7H")
+            self._modbus_read_registers(addr, "7H", function_code=cst.READ_HOLDING_REGISTERS)
 
         return {
             "op": op,
@@ -535,41 +582,57 @@ class iChargerMaster(RtuMaster):
 
     def _power_priority_description(self, pri):
         if pri == 0:
-            "average"
+            return "average"
         if pri == 1:
             return "ch1 priority"
         if pri == 2:
             return "ch2 priority"
 
+    def set_beep_properties(self, beep_index = 0, enabled = True, volume = 5):
+        # for now we only access beep type values
+        base = 0x8400
+
+        results = self._modbus_read_registers(base + 13, "8H", function_code=cst.READ_HOLDING_REGISTERS)
+
+        value_enabled = list(results[:4])
+        value_volume = list(results[4:])
+
+        value_enabled[beep_index] = int(enabled)
+        value_volume[beep_index] = volume
+
+        return self._modbus_write_registers(base + 13, value_enabled + value_volume)
+
+
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
         base = 0x8400
         (temp_unit, temp_stop, temp_fans_on, temp_reduce, dummy1) \
-            = self._modbus_read_registers(base, "5H")
+            = self._modbus_read_registers(base, "5H", function_code=cst.READ_HOLDING_REGISTERS)
 
         addr = base + SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY
         (fans_off_delay, lcd_contrast, light_value, dump2, beep_type_key, beep_type_hint, beep_type_alarm,
          beep_type_done, beep_enable_key, beep_enable_hint, beep_enable_alarm, beep_enable_done,
          beep_vol_key, beep_vol_hint, beep_vol_alarm, beep_vol_done, dummy3) \
-            = self._modbus_read_registers(addr, "17H")
+            = self._modbus_read_registers(addr, "17H", function_code=cst.READ_HOLDING_REGISTERS)
 
         addr = base + SYSTEM_STORAGE_OFFSET_CALIBRATION
         (calibration, dump4, sel_input_device, dc_inp_low_volt, dc_inp_over_volt, dc_inp_curr_limit,
          batt_inp_low_volt, batt_inp_over_volt, batt_input_curr_limit, regen_enable, regen_volt_limit,
          regen_curr_limit) = \
-            self._modbus_read_registers(addr, "12H")
+            self._modbus_read_registers(addr, "12H", function_code=cst.READ_HOLDING_REGISTERS)
 
         addr = base + SYSTEM_STORAGE_OFFSET_CHARGER_POWER
         (charger_power_0, charger_power_1, discharge_power_0, discharge_power_1, power_priority,
-         logging_sample_interval, logging_save_to_sdcard, servo_type, servo_user_center, servo_user_rate,
-         servo_op_angle) = \
-            self._modbus_read_registers(addr, "11H")
+         logging_sample_interval_0, logging_sample_interval_1,
+         logging_save_to_sdcard_0, logging_save_to_sdcard_1,
+         servo_type, servo_user_center, servo_user_rate, servo_op_angle) = \
+            self._modbus_read_registers(addr, "13H", function_code=cst.READ_HOLDING_REGISTERS)
 
         return {
             "temp_unit": "C" if temp_unit == 0 else "F",
-            "temp_stop": temp_stop,
-            "temp_fans_on": temp_fans_on,
-            "temp_reduce": temp_reduce,
+            "temp_stop": temp_stop / 10.0,
+            "temp_fans_on": temp_fans_on / 10.0,
+            "temp_reduce": temp_reduce / 10.0,
             "fans_off_delay": fans_off_delay,
             "lcd_contrast": lcd_contrast,
             "light_value": light_value,
@@ -581,6 +644,7 @@ class iChargerMaster(RtuMaster):
             },
             "calibration": calibration,
             "selected_input_device": sel_input_device,
+            "selected_input_device_type": "dc" if sel_input_device == 0 else "battery",
             "dc_input": {
                 "low_volt": dc_inp_low_volt,
                 "over_volt": dc_inp_over_volt,
@@ -606,8 +670,14 @@ class iChargerMaster(RtuMaster):
             ],
             "power_priority": power_priority,
             "power_priority_desc": self._power_priority_description(power_priority),
-            "logging_sample_interval": logging_sample_interval,
-            "logging_save_to_sdcard": logging_save_to_sdcard,
+            "logging_sample_interval": [
+                logging_sample_interval_0,
+                logging_sample_interval_1
+            ],
+            "logging_save_to_sdcard": [
+                logging_save_to_sdcard_0,
+                logging_save_to_sdcard_1
+            ],
             "servo": {
                 "type": servo_type,
                 "user_center": servo_user_center,
