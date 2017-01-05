@@ -65,8 +65,19 @@
       Charger Status
     </ion-card-header>
     <ion-card-content>
-      <!--{{chargerService.chargerStatus|json}}-->
-      <!--{{chargerService.channelStatus[1]|json}}-->
+        Stuff here
+    </ion-card-content>
+    <ion-card-header>
+      Channel 1
+    </ion-card-header>
+    <ion-card-content>
+        <channel [channelObserver]="channelSubscriptions()[0]"></channel>
+    </ion-card-content>
+    <ion-card-header>
+      Channel 2
+    </ion-card-header>
+    <ion-card-content>
+        <channel [channelObserver]="channelSubscriptions()[1]"></channel>
     </ion-card-content>
   </ion-card>
 

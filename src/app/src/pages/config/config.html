@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="primary">
     <ion-title>
       Configuration
     </ion-title>
@@ -13,6 +13,14 @@
       <ion-label stacked>IP Address of Pi</ion-label>
       <ion-input type="text" [(ngModel)]="config.configDict.hostname"></ion-input>
     </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>Debug</ion-list-header>
+    <ion-item>
+      <ion-label>Mock Charger</ion-label>
+      <ion-toggle [(ngModel)]="config.configDict.mockCharger"></ion-toggle>
+    </ion-item>
+    <p padding>You must restart the app for this to take effect</p>
 
   </ion-list>
 

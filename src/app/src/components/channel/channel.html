@@ -1,0 +1,5 @@
+<ion-grid>
+  <ion-row *ngFor="let r of chunkedCells()">
+    <ion-col *ngFor="let cell of r" width-33>{{cell.v|number:'1.4-4'}}</ion-col>
+  </ion-row>
+</ion-grid>

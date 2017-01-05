@@ -10,7 +10,6 @@ import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} fr
 })
 export class HomePage {
   private chargerStatusSubscription: Subscription;
-  private channelSubscription: Subscription;
 
   constructor(public navCtrl: NavController,
               public events: Events,
@@ -45,22 +44,23 @@ export class HomePage {
     this.showToast('Welcome');
 
     // Cleanup old ones, if they still exist.
-    this.cleanupChannelSubscription();
     console.log("Subscribing to charger channel events...");
-    this.channelSubscription = this.chargerService.getChargerChannelRequests().subscribe();
+  }
+
+  channelSubscriptions() {
+    if (this.isConnectedToCharger()) {
+      let chargerChannelRequests = this.chargerService.getChargerChannelRequests();
+      if (chargerChannelRequests) {
+        if (chargerChannelRequests.length) {
+          return chargerChannelRequests;
+        }
+      }
+    }
+    return [];
   }
 
   chargerDisconnected() {
-    this.cleanupChannelSubscription();
     this.showToast('Connection to server was lost');
-  }
-
-  cleanupChannelSubscription() {
-    if (this.channelSubscription) {
-      console.log("Cleaning up channel subscription...");
-      this.channelSubscription.unsubscribe();
-      this.channelSubscription = null;
-    }
   }
 
   cleanupStatusSubscription() {
@@ -83,7 +83,6 @@ export class HomePage {
 
   ionViewWillLeave() {
     this.cleanupStatusSubscription();
-    this.cleanupChannelSubscription();
   }
 
 }
