@@ -27,6 +27,7 @@ Control_OrderOperations = [
     (8, "msgbox no")
 ]
 
+
 class DeviceInfoStatus:
     def __init__(self, value = 0):
         self.run = 0
@@ -89,15 +90,15 @@ class CellStatus:
         self.set_from_modbus_data(c, volt, bal, i)
 
     def set_from_modbus_data(self, c, volt, bal, i):
-        if volt == 1024:
-            volt = 0
-        if i == 1024:
-            i = 0
-        if bal == 1024:
-            bal = 0
+        # if volt == 1024:
+        #     volt = 0
+        # if i == 1024:
+        #     i = 0
+        # if bal == 1024:
+        #     bal = 0
 
         self.cell = c
-        self.voltage = volt
+        self.voltage = volt / 1000.0
         self.balance = bal
         self.ir = i
 
