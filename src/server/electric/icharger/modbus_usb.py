@@ -513,7 +513,7 @@ class iChargerMaster(RtuMaster):
             footer = self._modbus_read_registers(footer_addr, footer_fmt)
 
             return {
-                "channel": channel,
+                "channel": 1 if channel == 1 else 2,
                 "timestamp": header_data[0],
                 "curr_out_power": header_data[1],
                 "curr_out_amps": header_data[2],
