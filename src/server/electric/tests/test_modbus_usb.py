@@ -2,9 +2,9 @@ import unittest, struct
 import modbus_tk.defines as cst
 from usb.core import USBError
 
-from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, testing_control, \
+from icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, \
     MODBUS_HID_FRAME_TYPE
-from electric.icharger.modbus_usb import testing_control
+from icharger.modbus_usb import testing_control
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
 from icharger.junsi_types import Control
@@ -151,12 +151,9 @@ class TestMasterDevice(unittest.TestCase):
     def test_modbus_read_throws_exception(self):
         testing_control.modbus_read_should_fail = True
 
-        try:
+        with self.assertRaises(TestingControlException) as context:
             charger = iChargerMaster()
             charger.get_device_info()
-            self.assertTrue(False)
-        except TestingControlException, me:
-            pass
 
     def test_can_change_key_tone_and_volume(self):
         charger = iChargerMaster()

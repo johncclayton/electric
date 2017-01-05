@@ -1,8 +1,6 @@
 import logging
 import struct
-import sys
 
-import modbus_tk.defines as cst
 import usb.core
 import usb.util
 
@@ -11,6 +9,7 @@ from junsi_types import DeviceInfo, ChannelStatus, Control
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
+import modbus_tk.defines as cst
 
 CHANNEL_INPUT_HEADER_OFFSET = 0
 CHANNEL_INPUT_FOOTER_OFFSET = 51

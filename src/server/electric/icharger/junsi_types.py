@@ -27,6 +27,7 @@ Control_OrderOperations = [
     (8, "msgbox no")
 ]
 
+
 class DeviceInfoStatus:
     def __init__(self, value = 0):
         self.run = 0
