@@ -1,18 +1,16 @@
 import {Component} from "@angular/core";
 import {NavController, ToastController, Events} from "ionic-angular";
-import {Observable} from "rxjs";
+import {Subscription} from "rxjs";
 import {Http} from "@angular/http";
-import {
-  iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT,
-  CHARGER_CHANNEL_EVENT
-} from "../../services/icharger.service";
+import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} from "../../services/icharger.service";
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
-  private chargerStatusSubscription: Observable<any>;
+  private chargerStatusSubscription: Subscription;
+  private channelSubscription: Subscription;
 
   constructor(public navCtrl: NavController,
               public events: Events,
@@ -38,18 +36,39 @@ export class HomePage {
 
   ionViewWillEnter() {
     // Use rxjs to poll for charger state continuously
-    console.log("Streaming charger status");
-    this.chargerStatusSubscription = this.chargerService.getChargerStatus();
-    this.chargerStatusSubscription.subscribe();
+    console.log("Subscribing to charger status events...");
+    this.chargerStatusSubscription = this.chargerService.getChargerStatus().subscribe();
   }
 
   chargerConnected() {
     // Start getting channel data
     this.showToast('Welcome');
+
+    // Cleanup old ones, if they still exist.
+    this.cleanupChannelSubscription();
+    console.log("Subscribing to charger channel events...");
+    this.channelSubscription = this.chargerService.getChargerChannelRequests().subscribe();
   }
 
   chargerDisconnected() {
+    this.cleanupChannelSubscription();
     this.showToast('Connection to server was lost');
+  }
+
+  cleanupChannelSubscription() {
+    if (this.channelSubscription) {
+      console.log("Cleaning up channel subscription...");
+      this.channelSubscription.unsubscribe();
+      this.channelSubscription = null;
+    }
+  }
+
+  cleanupStatusSubscription() {
+    if (this.chargerStatusSubscription) {
+      console.log("Cleaning up status subscription...");
+      this.chargerStatusSubscription.unsubscribe();
+      this.chargerStatusSubscription = null;
+    }
   }
 
   showToast(message: string) {
@@ -63,7 +82,8 @@ export class HomePage {
   }
 
   ionViewWillLeave() {
-    this.chargerStatusSubscription = null;
+    this.cleanupStatusSubscription();
+    this.cleanupChannelSubscription();
   }
 
 }

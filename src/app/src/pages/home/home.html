@@ -4,7 +4,7 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
   <div *ngIf="!isConnectedToServer() || !isConnectedToCharger()">
     <ion-card>
       <ion-card-header>
@@ -15,17 +15,17 @@
       <ion-list>
         <ion-item *ngIf="!isConnectedToServer()">
           <ion-icon name="close-circle" color="danger"></ion-icon>
-          It seems the app cannot connect to the server.
+          Can't see the Pi 'server'.
         </ion-item>
 
         <ion-item *ngIf="isConnectedToServer()">
           <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
-          Server connection OK
+          Server/Pi connection is good!
         </ion-item>
 
         <ion-item *ngIf="!isConnectedToCharger()">
           <ion-icon name="close-circle" color="danger"></ion-icon>
-          Can't see status from the charger (charger not connected)
+          Can't see the charger
         </ion-item>
 
         <ion-item *ngIf="isConnectedToCharger()">
@@ -34,11 +34,29 @@
         </ion-item>
       </ion-list>
     </ion-card>
+
     <ion-list-header>
-      Well then. It looks like we've some problems.
+      Houston, we have a problem.
     </ion-list-header>
-    <!--{{channelStatus['exception']}}-->
-    <p>TODO: Add some stuff here about what to look for, fix.</p>
+
+    <ion-list padding>
+      <p *ngIf="!isConnectedToServer()">
+        <ion-icon name="bulb-outline"></ion-icon>
+        Check that you have the correct host URL in your Configuration.
+      </p>
+      <p *ngIf="!isConnectedToServer()">
+        <ion-icon name="bulb-outline"></ion-icon>
+        Do you have network connectivity to the Pi?
+      </p>
+      <p *ngIf="isConnectedToCharger">
+        <ion-icon name="bulb-outline"></ion-icon>
+        Is the charger on?
+      </p>
+      <p *ngIf="isConnectedToCharger">
+        <ion-icon name="bulb-outline"></ion-icon>
+        Is the charger USB plugged into the Pi?
+      </p>
+    </ion-list>
   </div>
 
 
@@ -48,7 +66,7 @@
     </ion-card-header>
     <ion-card-content>
       <!--{{chargerService.chargerStatus|json}}-->
-      {{chargerService.channelStatus[1]|json}}
+      <!--{{chargerService.channelStatus[1]|json}}-->
     </ion-card-content>
   </ion-card>
 
