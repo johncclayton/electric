@@ -451,9 +451,13 @@ class iChargerMaster(RtuMaster):
             return connection_state_dict(me)
 
     def _cell_status_summary_as_dict(self, cell, voltage, balance, ir):
+        # 1024 appears to be a dummy value for either unused cells or just not plugged in
         if voltage == 1024:
-            # 1024 appears to be a dummy value for either unused cells or just not plugged in
             voltage = 0
+        if ir == 1024:
+            ir = 0
+        if balance == 1024:
+            balance = 0
 
         return {
             "cell": cell,
@@ -485,7 +489,7 @@ class iChargerMaster(RtuMaster):
         Dialog Box ID (u16)
         """
 
-        addr = 0x100 if channel == 1 else 0x200
+        addr = 0x100 if channel == 0 else 0x200
 
         try:
             # timestamp -> ext temp
@@ -513,7 +517,7 @@ class iChargerMaster(RtuMaster):
             footer = self._modbus_read_registers(footer_addr, footer_fmt)
 
             return {
-                "channel": 1 if channel == 1 else 2,
+                "channel": 0 if channel == 0 else 1,
                 "timestamp": header_data[0],
                 "curr_out_power": header_data[1],
                 "curr_out_amps": header_data[2],
