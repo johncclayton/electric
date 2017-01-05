@@ -18,7 +18,9 @@ class ChannelStatus_iCharger(Resource):
     def get(self, channel_id):
         try:
             dev = iChargerMaster()
-            channel = 0 if int(channel_id) == 0 else 1
+            channel = int(channel_id)
+            if not (channel == 0 or channel == 1):
+                raise ValueError("Channel part of URI must be 0 or 1")
             obj = dev.get_channel_status(int(channel))
             obj.update(connection_state_dict())
             return obj

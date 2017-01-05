@@ -40,10 +40,18 @@ class TestRestfulAPI(unittest.TestCase):
         d = json.loads(resp.data)
         self.assertEqual("connected", d["charger_presence"])
 
+        resp = self.client.get("/channel/0")
+        d = json.loads(resp.data)
+        self.assertEqual("connected", d["charger_presence"])
+        self.assertEqual(d["channel"], 0)
+
         resp = self.client.get("/channel/1")
         d = json.loads(resp.data)
         self.assertEqual("connected", d["charger_presence"])
+        self.assertEqual(d["channel"], 1)
 
         resp = self.client.get("/channel/2")
         d = json.loads(resp.data)
-        self.assertEqual("connected", d["charger_presence"])
+        self.assertEqual("disconnected", d["charger_presence"])
+        self.assertIn("exception", d)
+        self.assertEqual(d["exception"], "Channel part of URI must be 0 or 1")
