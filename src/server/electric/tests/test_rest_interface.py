@@ -34,7 +34,7 @@ class TestRestfulAPI(unittest.TestCase):
 
         resp = self.client.get("/control")
         d = json.loads(resp.data)
-        self.assertEqual("connected", d["charger_presence"])
+        self.assertNotIn("charger_presence", d)
 
         resp = self.client.get("/system")
         d = json.loads(resp.data)
