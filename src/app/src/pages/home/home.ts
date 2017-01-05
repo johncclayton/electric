@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {NavController, ToastController, Events} from "ionic-angular";
-import {Subscription} from "rxjs";
+import {Subscription, Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} from "../../services/icharger.service";
 
@@ -9,6 +9,7 @@ import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} fr
   templateUrl: 'home.html'
 })
 export class HomePage {
+  private chargerStatusObserver: Observable<any>;
   private chargerStatusSubscription: Subscription;
 
   constructor(public navCtrl: NavController,
@@ -36,7 +37,8 @@ export class HomePage {
   ionViewWillEnter() {
     // Use rxjs to poll for charger state continuously
     console.log("Subscribing to charger status events...");
-    this.chargerStatusSubscription = this.chargerService.getChargerStatus().subscribe();
+    this.chargerStatusObserver = this.chargerService.getChargerStatus();
+    this.chargerStatusSubscription = this.chargerStatusObserver.subscribe();
   }
 
   chargerConnected() {

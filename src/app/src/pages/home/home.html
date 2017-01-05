@@ -65,19 +65,23 @@
       Charger Status
     </ion-card-header>
     <ion-card-content>
-        Stuff here
+      <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
+      <charger-status
+        [status]="chargerStatusObserver"
+        [channel]="channelSubscriptions()[0]">
+      </charger-status>
     </ion-card-content>
     <ion-card-header>
       Channel 1
     </ion-card-header>
     <ion-card-content>
-        <channel [channelObserver]="channelSubscriptions()[0]"></channel>
+      <channel [channelObserver]="channelSubscriptions()[0]"></channel>
     </ion-card-content>
     <ion-card-header>
       Channel 2
     </ion-card-header>
     <ion-card-content>
-        <channel [channelObserver]="channelSubscriptions()[1]"></channel>
+      <channel [channelObserver]="channelSubscriptions()[1]"></channel>
     </ion-card-content>
   </ion-card>
 

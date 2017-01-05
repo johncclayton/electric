@@ -1,5 +1,17 @@
 <ion-grid>
-  <ion-row *ngFor="let r of chunkedCells()">
-    <ion-col *ngFor="let cell of r" width-33>{{cell.v|number:'1.4-4'}}</ion-col>
+
+  <ion-row>
+    <ion-col>{{channel.curr_out_volts|number:'1.3-3'}}</ion-col>V
   </ion-row>
+  <ion-row>
+    <ion-col>{{channel.curr_out_amps|number:'1.3-3'}}</ion-col>A
+  </ion-row>
+  <ion-row>
+    <ion-col>{{channel.curr_out_capacity|number:'1.3-3'}}</ion-col>mAh
+  </ion-row>
+
+  <ion-row *ngFor="let r of chunkedCells()">
+    <ion-col *ngFor="let cell of r" width-33>{{cell.v|number:'1.3-3'}}v</ion-col>
+  </ion-row>
+  Cell Total IR: {{channel.cell_total_ir|number:'1.3-3'}} mΩ
 </ion-grid>

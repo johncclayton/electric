@@ -10,10 +10,6 @@ export class ChannelComponent {
 
   @Input() channelObserver;
 
-  hasData() {
-    return this.channel;
-  }
-
   chunkedCells() {
     if (this.channel) {
       return _.chunk(this.channel['cells'], 3);

@@ -34,11 +34,7 @@ export class iChargerService {
     if (this.channelSnapshots) {
       let statusString = this.chargerStatus['charger_presence'];
       let channelCount = Number(this.chargerStatus['channel_count']);
-      let yay = statusString === 'connected' && channelCount > 0;
-      // if(yay) {
-      //   console.warn("ooo! ", this.chargerStatus);
-      // }
-      return yay;
+      return statusString === 'connected' && channelCount > 0;
     }
     return false;
   }
@@ -71,7 +67,8 @@ export class iChargerService {
         this.chargerStatus = {};
         return Observable.throw(error);
       })
-      .retry();
+      .retry()
+      .share();
   }
 
   getChargerChannelRequests() {
@@ -116,6 +113,7 @@ export class iChargerService {
           return jsonResponse;
         })
         .retry()
+        .share()
       );
     }
 

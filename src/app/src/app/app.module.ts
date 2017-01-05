@@ -10,6 +10,7 @@ import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config";
 import {iChargerMockService} from "../services/icharger.mock.service";
 import {ChannelComponent} from "../components/channel/channel";
+import {ChargerStatusComponent} from "../components/charger-status/charger-status";
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import {ChannelComponent} from "../components/channel/channel";
     HomePage,
     TabsPage,
     KeysPipe,
-    ChannelComponent
+    ChannelComponent,
+    ChargerStatusComponent
   ],
   imports: [
     IonicModule.forRoot(MyApp)
