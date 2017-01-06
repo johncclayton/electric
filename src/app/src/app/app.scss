@@ -30,15 +30,21 @@
 
   // Per channel
   channel {
+    .number {
+      margin: 2px;
+      border-radius: 3px;
+      border-color: green;
+      border-style: solid;
+      border-width: 1px;
+    }
     .status {
-
+      //padding-right: 10px;
     }
     .label {
       font-size: 0.8em;
     }
-
     .unused {
-      opacity: 0.5;
+      opacity: 0.3;
     }
   }
 }
