@@ -81,7 +81,6 @@ class TestRestfulAPI(unittest.TestCase):
     def test_can_request_channel(self):
         resp = self.client.get("/channel/0")
         d = json.loads(resp.data)
-        print(d)
         self.assertEqual("connected", d["charger_presence"])
         self.assertEqual(d["channel"], 0)
 

@@ -5,7 +5,7 @@ import usb.util
 import usb.core
 import platform
 
-from junsi_types import DeviceInfo, ChannelStatus, Control
+from junsi_types import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset
 
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
@@ -231,7 +231,7 @@ class USBSerialFacade:
 
     def _claim_interface(self):
         if not self._dev or testing_control.usb_claim_interface_should_fail:
-            raise usb.core.USBError("Must be able to claim the interface or read/write won't work")
+            raise usb.core.USBError("Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
 
         try:
             usb.util.claim_interface(self._dev, 0)
@@ -536,3 +536,21 @@ class iChargerMaster(RtuMaster):
                 "op_angle": servo_op_angle
             }
         }
+
+    def get_preset_list(self):
+        (count, ) = self._modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
+
+        number = count
+        offset = 0
+        indexes = ()
+
+        while(count > 0):
+            to_read = min(count, 2)
+            if (to_read % 2) != 0:
+                to_read += 1
+            data = self._modbus_read_registers(0x8801 + offset, "{0}B".format(to_read), function_code=cst.READ_HOLDING_REGISTERS)
+            count -= len(data)
+            indexes += data
+            offset += len(data) / 2
+
+        return PresetIndex(number, indexes[:number])

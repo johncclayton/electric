@@ -83,20 +83,9 @@ class DeviceInfo:
 
 class CellStatus:
     def __init__(self, c = 0, volt = 0, bal = 0, i = 0):
-        self.cell = 0
-        self.voltage = 0
-        self.balance = 0
-        self.ir = 0
         self.set_from_modbus_data(c, volt, bal, i)
 
     def set_from_modbus_data(self, c, volt, bal, i):
-        # if volt == 1024:
-        #     volt = 0
-        # if i == 1024:
-        #     i = 0
-        # if bal == 1024:
-        #     bal = 0
-
         self.cell = c
         self.voltage = volt / 1000.0
         self.balance = bal
@@ -127,7 +116,7 @@ class ChannelStatus:
 
         self.cell_total_ir = 0
         self.cell_total_voltage = 0
-        self.cell_total_with_voltage = 0
+        self.cell_count_with_voltage_values = 0
         self.cycle_count = 0
         self.control_status = 0
         self.run_status = 0
@@ -150,13 +139,13 @@ class ChannelStatus:
         self.curr_int_temp = data[6] / 10.0
         self.curr_ext_temp = data[7] / 10.0
 
-        self.cell_total_with_voltage = 0
+        self.cell_count_with_voltage_values = 0
         self.cell_total_voltage = 0
         for x in range(0, 10):
             self.cells[x].set_from_modbus_data(x, cell_v[x], cell_b[x], cell_i[x])
             self.cell_total_voltage += self.cells[x].voltage
             if self.cells[x].voltage > 0:
-                self.cell_total_with_voltage += 1
+                self.cell_count_with_voltage_values += 1
 
         self.cell_total_ir = footer[0] / 10.0
         self.line_intern_resistance = footer[1] / 10.0
@@ -232,17 +221,38 @@ class Voltage:
         self.discharge_voltage = 0
 
 
+class PresetIndex:
+    MAX_PRESETS = 64
+
+    def __init__(self, count = None, indexes = None):
+        self.count = 0
+        self.indexes = []
+        if count is not None and indexes is not None:
+            self.set_from_modbus_data(count, indexes)
+
+    def set_from_modbus_data(self, count, indexes):
+        self.count = count
+        self.indexes = indexes
+
+    def to_dict(self):
+        d = dict()
+        d["count"] = self.count
+        d["indexes"] = list(self.indexes)
+        return d
+
+
 class Preset:
     def __init__(self):
-        self.use_flag = 0
+        self.use_flag = 0 # 0xffff=empty, 0x55aa=used, 0x0000=fixed
         self.name = ""
         self.capacity = 0
         self.auto_save = False
         self.li_balance_end_mode = 0
         self.op_enable_mask = 0xff
+
         self.channel_mode = 0
         self.save_to_sd = False
-        self.log_interval = 0
+        self.log_interval = 0 # 0.1s
         self.run_counter = 0
 
         self.type = 0
@@ -251,13 +261,13 @@ class Preset:
         self.pb_cell = 0
 
         self.li_mode_c = 0
-        self.li_mode_c = 0
+        self.li_mode_d = 0
         self.ni_mode_c = 0
-        self.ni_mode_c = 0
+        self.ni_mode_d = 0
         self.pb_mode_c = 0
-        self.pb_mode_c = 0
+        self.pb_mode_d = 0
 
-        self.bal_speed = 0
+        self.bal_speed = 0 # 0=slow, 1=normal, 2=fast
         self.bal_start_mode = 0
         self.bal_start_voltage = 0
         self.bal_diff = 0
@@ -282,9 +292,10 @@ class Preset:
         self.ni_trickle_enable = 0
         self.ni_trickle_current = 0
         self.ni_trickle_time = 0
-        self.ni_zero_enable = 0
-        self.ni_discharge_voltage = 0
 
+        self.ni_zero_enable = 0
+
+        self.ni_discharge_voltage = 0
         self.pb_charge_voltage = 0
         self.pb_discharge_voltage = 0
         self.pb_cell_float_enable = 0
@@ -298,3 +309,18 @@ class Preset:
         self.cycle_delay = 0
         self.cycle_mode = 0
 
+        self.safety_time_c = 0
+        self.safety_cap_c = 0
+        self.safety_temp_c = 0
+
+        self.safety_time_d = 0
+        self.safety_cap_d = 0
+        self.safety_temp_d = 0
+
+        self.reg_ch_mode = 0
+        self.reg_ch_volt = 0
+        self.reg_ch_current = 0
+
+        self.ni_zn_charge_cell_volt = 0
+        self.ni_zn_discharge_cell_volt = 0
+        self.ni_zn_cell = 0

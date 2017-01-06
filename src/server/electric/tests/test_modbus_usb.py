@@ -119,10 +119,15 @@ class TestMasterDevice(unittest.TestCase):
         self.assertEqual(status.channel_count, 2)
         self.assertIn("channel_count", status.to_dict().keys())
 
+    def test_get_preset_index_list(self):
+        obj = iChargerMaster()
+        presets = obj.get_preset_list()
+        self.assertIsNotNone(presets)
+        self.assertTrue(presets.count == len(presets.indexes))
+
     def test_fetch_status(self):
         obj = iChargerMaster()
         resp = obj.get_channel_status(0)
-        print("resp:", resp.to_dict())
         self.assertIsNotNone(resp)
 
     def test_order_description(self):
