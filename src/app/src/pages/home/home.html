@@ -1,91 +1,87 @@
 <ion-header>
-  <ion-navbar color="primary">
-    <ion-title>Home</ion-title>
-  </ion-navbar>
+    <ion-navbar color="primary">
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title text-center>
+            <span class="chargername">
+                {{chargerService.getChargerName()}}
+                <span class="tag">{{chargerService.getChargerTag()}}</span>
+            </span>
+        </ion-title>
+    </ion-navbar>
 </ion-header>
 
-<ion-content>
-  <div *ngIf="!isConnectedToServer() || !isConnectedToCharger()">
-    <ion-card>
-      <ion-card-header>
-        <span *ngIf></span>
-        Connection Status
-      </ion-card-header>
+<ion-nav #content [root]="rootPage"></ion-nav>
 
-      <ion-list>
-        <ion-item *ngIf="!isConnectedToServer()">
-          <ion-icon name="close-circle" color="danger"></ion-icon>
-          Can't see the Pi 'server'.
-        </ion-item>
+<ion-content class="charger">
+    <div *ngIf="!isConnectedToServer() || !isConnectedToCharger()">
+        <ion-card>
+            <ion-card-header>
+                <span *ngIf></span>
+                Connection Status
+            </ion-card-header>
 
-        <ion-item *ngIf="isConnectedToServer()">
-          <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
-          Server/Pi connection is good!
-        </ion-item>
+            <ion-list>
+                <ion-item *ngIf="!isConnectedToServer()">
+                    <ion-icon name="close-circle" color="danger"></ion-icon>
+                    Can't see the Pi 'server'.
+                </ion-item>
 
-        <ion-item *ngIf="!isConnectedToCharger()">
-          <ion-icon name="close-circle" color="danger"></ion-icon>
-          Can't see the charger
-        </ion-item>
+                <ion-item *ngIf="isConnectedToServer()">
+                    <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
+                    Server/Pi connection is good!
+                </ion-item>
 
-        <ion-item *ngIf="isConnectedToCharger()">
-          <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
-          Charger OK!
-        </ion-item>
-      </ion-list>
-    </ion-card>
+                <ion-item *ngIf="!isConnectedToCharger()">
+                    <ion-icon name="close-circle" color="danger"></ion-icon>
+                    Can't see the charger
+                </ion-item>
 
-    <ion-list-header>
-      Houston, we have a problem.
-    </ion-list-header>
+                <ion-item *ngIf="isConnectedToCharger()">
+                    <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
+                    Charger OK!
+                </ion-item>
+            </ion-list>
+        </ion-card>
 
-    <ion-list padding>
-      <p *ngIf="!isConnectedToServer()">
-        <ion-icon name="bulb-outline"></ion-icon>
-        Check that you have the correct host URL in your Configuration.
-      </p>
-      <p *ngIf="!isConnectedToServer()">
-        <ion-icon name="bulb-outline"></ion-icon>
-        Do you have network connectivity to the Pi?
-      </p>
-      <p *ngIf="isConnectedToCharger">
-        <ion-icon name="bulb-outline"></ion-icon>
-        Is the charger on?
-      </p>
-      <p *ngIf="isConnectedToCharger">
-        <ion-icon name="bulb-outline"></ion-icon>
-        Is the charger USB plugged into the Pi?
-      </p>
-    </ion-list>
-  </div>
+        <ion-list-header>
+            Houston, we have a problem.
+        </ion-list-header>
+
+        <ion-list padding>
+            <p *ngIf="!isConnectedToServer()">
+                <ion-icon name="bulb-outline"></ion-icon>
+                Check that you have the correct host URL in your Configuration.
+            </p>
+            <p *ngIf="!isConnectedToServer()">
+                <ion-icon name="bulb-outline"></ion-icon>
+                Do you have network connectivity to the Pi?
+            </p>
+            <p *ngIf="isConnectedToCharger">
+                <ion-icon name="bulb-outline"></ion-icon>
+                Is the charger on?
+            </p>
+            <p *ngIf="isConnectedToCharger">
+                <ion-icon name="bulb-outline"></ion-icon>
+                Is the charger USB plugged into the Pi?
+            </p>
+        </ion-list>
+    </div>
 
 
-  <ion-card *ngIf="isConnectedToServer() && isConnectedToCharger()">
-    <ion-card-header>
-      Charger Status
-    </ion-card-header>
-    <ion-card-content>
-      <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
-      <charger-status
-        [status]="chargerStatusObserver"
-        [channel]="channelSubscriptions()[0]">
-      </charger-status>
-    </ion-card-content>
-    <ion-card-header>
-      Channel 1
-    </ion-card-header>
-    <ion-card-content>
-      <channel [channelObserver]="channelSubscriptions()[0]"></channel>
-    </ion-card-content>
-    <ion-card-header>
-      Channel 2
-    </ion-card-header>
-    <ion-card-content>
-      <channel [channelObserver]="channelSubscriptions()[1]"></channel>
-    </ion-card-content>
-  </ion-card>
+    <div *ngIf="isConnectedToServer() && isConnectedToCharger()">
+        <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
+        <charger-status
+                [status]="chargerStatusObserver"
+                [channel]="channelSubscriptions()[0]">
+        </charger-status>
 
-  <!--<button ion-button (click)="showtoast()">Disconnect</button>-->
+        <channel name="Channel 1" [channelObserver]="channelSubscriptions()[0]"></channel>
+        <channel name="Channel 2" [channelObserver]="channelSubscriptions()[1]"></channel>
+    </div>
+
+    <!--<button ion-button (click)="showtoast()">Disconnect</button>-->
 
 </ion-content>
 
