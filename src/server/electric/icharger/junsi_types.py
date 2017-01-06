@@ -126,12 +126,14 @@ class ChannelStatus:
         self.cells = [ CellStatus(c) for c in range(0, 10) ]
 
         self.cell_total_ir = 0
-        self.line_intern_resistance = 0
+        self.cell_total_voltage = 0
+        self.cell_total_with_voltage = 0
         self.cycle_count = 0
         self.control_status = 0
         self.run_status = 0
         self.run_error = 0
         self.dlg_box_id = 0
+        self.line_intern_resistance = 0
 
         if header is not None and cell_v is not None and cell_b is not None and cell_i is not None and footer is not None:
             self.set_from_modbus_data(channel, header, cell_v, cell_b, cell_i, footer)
@@ -148,8 +150,13 @@ class ChannelStatus:
         self.curr_int_temp = data[6] / 10.0
         self.curr_ext_temp = data[7] / 10.0
 
+        self.cell_total_with_voltage = 0
+        self.cell_total_voltage = 0
         for x in range(0, 10):
             self.cells[x].set_from_modbus_data(x, cell_v[x], cell_b[x], cell_i[x])
+            self.cell_total_voltage += self.cells[x].voltage
+            if self.cells[x].voltage > 0:
+                self.cell_total_with_voltage += 1
 
         self.cell_total_ir = footer[0] / 10.0
         self.line_intern_resistance = footer[1] / 10.0
@@ -162,6 +169,15 @@ class ChannelStatus:
     def to_dict(self):
         d = self.__dict__
         d["cells"] = [ self.cells[x].to_dict() for x in range(0, 10) ]
+
+        # additional annotations:
+        # - no pack plugged in
+        # - pack plugged in, no balance leads
+        # - pack plugged in, with balance lead
+        # - balance lead only
+        d["battery_plugged_in"] = (self.curr_out_volts - self.cell_total_voltage) < 1
+        d["balance_leads_plugged_in"] = self.cell_total_voltage > 0
+
         return d
 
 
