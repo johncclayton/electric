@@ -139,9 +139,9 @@ class ChannelStatus:
     def set_from_modbus_data(self, channel, data, cell_v, cell_b, cell_i, footer):
         self.channel = channel
 
-        self.timestamp = data[0]
-        self.curr_out_power = data[1]
-        self.curr_out_amps = data[2]
+        self.timestamp = data[0] / 1000.0
+        self.curr_out_power = data[1] / 1000.0
+        self.curr_out_amps = data[2] / 100.0
         self.curr_inp_volts = data[3] / 1000.0
         self.curr_out_volts = data[4] / 1000.0
         self.curr_out_capacity = data[5]

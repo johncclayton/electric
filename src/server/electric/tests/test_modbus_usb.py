@@ -119,6 +119,12 @@ class TestMasterDevice(unittest.TestCase):
         self.assertEqual(status.channel_count, 2)
         self.assertIn("channel_count", status.to_dict().keys())
 
+    def test_fetch_status(self):
+        obj = iChargerMaster()
+        resp = obj.get_channel_status(0)
+        print("resp:", resp.to_dict())
+        self.assertIsNotNone(resp)
+
     def test_order_description(self):
         self.assertEqual(Control.order_description(0), "run")
         self.assertEqual(Control.order_description(1), "modify")
@@ -147,6 +153,12 @@ class TestMasterDevice(unittest.TestCase):
         charger.close()
         self.assertEqual(serial.is_open, False)
         self.assertEqual(serial._claimed, False)
+
+    def test_usb_claim_interface_fails(self):
+        testing_control.usb_claim_interface_should_fail = True
+        with self.assertRaises(USBError) as c:
+            serial = USBSerialFacade()
+            serial.open()
 
     def test_modbus_read_throws_exception(self):
         testing_control.modbus_read_should_fail = True

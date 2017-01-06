@@ -1,8 +1,9 @@
 import logging
 import struct
 
-import usb.core
 import usb.util
+import usb.core
+import platform
 
 from junsi_types import DeviceInfo, ChannelStatus, Control
 
@@ -51,6 +52,8 @@ class TestingControl:
         self.usb_device_present = True
         # If the kernel detach should fail
         self.usb_detach_from_kernel_should_fail = False
+        # claiming the interface should fail
+        self.usb_claim_interface_should_fail = False
         # If a read operation should fail and throw an exception
         self.modbus_read_should_fail = False
         # If a write operation should fail and throw an exception
@@ -143,9 +146,8 @@ class iChargerQuery(Query):
         if len(response) < 3:
             raise ModbusInvalidResponseError("Response length is invalid {0}".format(len(response)))
 
-        # check for max length problem, the iCharger HID based Modbus protocol handles only
-        # 64 byte packets.  If you want to read/write more, then send multiple requests.
-        (self.response_length, self.adu_constant, self.response_func_code, self.modbus_error) = struct.unpack(">BBBB", response[0:4])
+        (self.response_length, self.adu_constant, self.response_func_code, self.modbus_error) = \
+            struct.unpack("=BBBB", response[0:4])
 
         if self.adu_constant != MODBUS_HID_FRAME_TYPE:
             raise ModbusInvalidResponseError(
@@ -201,7 +203,6 @@ class USBSerialFacade:
     def __init__(self, vendorId=ICHARGER_VENDOR_ID, productId=ICHARGER_PRODUCT_ID):
         self._dev = None
         self._claimed = False
-        self._cfg = None
 
         try:
             self._dev = usb.core.find(idVendor=vendorId, idProduct=productId)
@@ -214,25 +215,23 @@ class USBSerialFacade:
         if self._dev is None:
             return
 
-        if not self._detach_kernel_driver() or testing_control.usb_detach_from_kernel_should_fail:
-            logging.error("Failed to detach from the kernel")
-            raise usb.core.USBError("Failed to detach from the kernel")
+        # odd but true, if you remove this then read/writes to the USB bus while the
+        # charger is actually doing its charge/discharge job WILL FAIL on the PI3
+        self._dev.reset()
 
-        self._cfg = self._dev.get_active_configuration()
-        if self._cfg is None:
-            logging.error("No active USB configuration for the iCharger was found")
+        if platform.system() != "Windows":
+            self._detach_kernel_driver()
 
     def _detach_kernel_driver(self):
+        if self._dev is None or testing_control.usb_detach_from_kernel_should_fail:
+            raise usb.core.USBError("Failed to detach from the kernel")
+
         if self._dev.is_kernel_driver_active(0):
-            try:
-                self._dev.detach_kernel_driver(0)
-            except usb.core.USBError as e:
-                return False
-        return True
+            self._dev.detach_kernel_driver(0)
 
     def _claim_interface(self):
-        if not self._dev:
-            return False
+        if not self._dev or testing_control.usb_claim_interface_should_fail:
+            raise usb.core.USBError("Must be able to claim the interface or read/write won't work")
 
         try:
             usb.util.claim_interface(self._dev, 0)
@@ -302,14 +301,13 @@ class USBSerialFacade:
     def write(self, content):
         if self._dev is not None and self._claimed:
             pad_len = MAX_READWRITE_LEN - len(content)
-            self._dev.write(END_POINT_ADDRESS_WRITE, content + ("\0" * pad_len))
-        return 0
+            return self._dev.write(END_POINT_ADDRESS_WRITE, content + ("\0" * pad_len), 5000)
+        raise usb.core.USBError("Device write failure - either not present or not claimed")
 
     def read(self, expected_length):
         if self._dev is not None and self._claimed:
-            data = self._dev.read(END_POINT_ADDRESS_READ, expected_length)
-            return data.tostring()
-        return 0
+            return self._dev.read(END_POINT_ADDRESS_READ, expected_length, 5000).tostring()
+        raise usb.core.USBError("Device read failure - either not present or not claimed")
 
 
 class iChargerMaster(RtuMaster):
@@ -321,6 +319,7 @@ class iChargerMaster(RtuMaster):
     def __init__(self, serial=None):
         if serial is None:
             serial = USBSerialFacade()
+
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):
@@ -368,7 +367,6 @@ class iChargerMaster(RtuMaster):
         :param data: tuple of data to be written - these are int words
         :return:
         """
-
         return self.execute(1,
                             cst.WRITE_MULTIPLE_REGISTERS,
                             addr,
@@ -392,7 +390,7 @@ class iChargerMaster(RtuMaster):
         addr = 0x100 if channel == 0 else 0x200
 
         # timestamp -> ext temp
-        header_fmt = "LLhHHlhh"
+        header_fmt = "LlhHHlhh"
         header_data = self._modbus_read_registers(addr, header_fmt)
 
         # cell 0-15 voltage
