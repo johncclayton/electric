@@ -307,7 +307,8 @@ class USBSerialFacade:
 
     def read(self, expected_length):
         if self._dev is not None and self._claimed:
-            return self._dev.read(END_POINT_ADDRESS_READ, expected_length).tostring()
+            data = self._dev.read(END_POINT_ADDRESS_READ, expected_length)
+            return data.tostring()
         return 0
 
 
@@ -342,6 +343,7 @@ class iChargerMaster(RtuMaster):
         :param format: the structure of the data being received, assumes struct.unpack()
         :return: the tuples of unpacked and byte swapped data
         """
+        format = "=" + format
         byte_len = struct.calcsize(format)
         quant = byte_len // 2
 
@@ -391,7 +393,7 @@ class iChargerMaster(RtuMaster):
 
         # timestamp -> ext temp
         header_fmt = "LLhHHlhh"
-        header_data = self._modbus_read_registers(addr, format=header_fmt)
+        header_data = self._modbus_read_registers(addr, header_fmt)
 
         # cell 0-15 voltage
         cell_volt_fmt = "16H"
