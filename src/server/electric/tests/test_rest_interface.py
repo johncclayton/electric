@@ -29,22 +29,22 @@ class TestRestfulAPI(unittest.TestCase):
         self.assertTrue(d["device_id"] > 0)
 
         s1 = d["ch1_status"]
-        self.assertEqual(0, s1["run"])
-        self.assertEqual(0, s1["err"])
-        self.assertEqual(0, s1["run_status"])
-        self.assertEqual(0, s1["dlg_box_status"])
-        self.assertEqual(0, s1["cell_volt_status"])
-        self.assertEqual(0, s1["ctrl_status"])
-        self.assertEqual(0, s1["balance"])
+        self.assertTrue(s1["run"] >= 0)
+        self.assertTrue(s1["err"] >= 0)
+        self.assertTrue(s1["run_status"] >= 0)
+        self.assertTrue(s1["dlg_box_status"] >= 0)
+        self.assertTrue(s1["cell_volt_status"] >= 0)
+        self.assertTrue(s1["ctrl_status"] >= 0)
+        self.assertTrue(s1["balance"] >= 0)
 
         s2 = d["ch2_status"]
-        self.assertEqual(0, s2["run"])
-        self.assertEqual(0, s2["err"])
-        self.assertEqual(0, s2["run_status"])
-        self.assertEqual(0, s2["dlg_box_status"])
-        self.assertEqual(0, s2["cell_volt_status"])
-        self.assertEqual(0, s2["ctrl_status"])
-        self.assertEqual(0, s2["balance"])
+        self.assertTrue(s2["run"] >= 0)
+        self.assertTrue(s2["err"] >= 0)
+        self.assertTrue(s2["run_status"] >= 0)
+        self.assertTrue(s2["dlg_box_status"] >= 0)
+        self.assertTrue(s2["cell_volt_status"] >= 0)
+        self.assertTrue(s2["ctrl_status"] >= 0)
+        self.assertTrue(s2["balance"] >= 0)
 
     def test_can_request_storage_area(self):
         testing_control.reset()
@@ -81,11 +81,12 @@ class TestRestfulAPI(unittest.TestCase):
     def test_can_request_channel(self):
         resp = self.client.get("/channel/0")
         d = json.loads(resp.data)
+        print(d)
         self.assertEqual("connected", d["charger_presence"])
         self.assertEqual(d["channel"], 0)
 
         # validate presence of specific keys in the output - this ensures any protocol changes will break unit tests
-        self.assertEqual(d["timestamp"], 0)
+        self.assertTrue(d["timestamp"] >= 0)
         self.assertTrue(d["curr_out_power"] >= 0)
         self.assertTrue(d["curr_out_amps"] >= 0)
         self.assertTrue(d["curr_inp_volts"] >= 0)

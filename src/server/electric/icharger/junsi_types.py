@@ -100,7 +100,7 @@ class CellStatus:
         self.cell = c
         self.voltage = volt / 1000.0
         self.balance = bal
-        self.ir = i
+        self.ir = i / 10.0
 
     def to_dict(self):
         return {
@@ -138,21 +138,21 @@ class ChannelStatus:
 
     def set_from_modbus_data(self, channel, data, cell_v, cell_b, cell_i, footer):
         self.channel = channel
-        self.timestamp = data[0]
 
+        self.timestamp = data[0]
         self.curr_out_power = data[1]
         self.curr_out_amps = data[2]
         self.curr_inp_volts = data[3] / 1000.0
         self.curr_out_volts = data[4] / 1000.0
         self.curr_out_capacity = data[5]
-        self.curr_int_temp = data[6] / 1000.0
-        self.curr_ext_temp = data[7] / 1000.0
+        self.curr_int_temp = data[6] / 100.0
+        self.curr_ext_temp = data[7] / 100.0
 
         for x in range(0, 10):
             self.cells[x].set_from_modbus_data(x, cell_v[x], cell_b[x], cell_i[x])
 
-        self.cell_total_ir = footer[0]
-        self.line_intern_resistance = footer[1]
+        self.cell_total_ir = footer[0] / 10.0
+        self.line_intern_resistance = footer[1] / 10.0
         self.cycle_count = footer[2]
         self.control_status = footer[3]
         self.run_status = footer[4]
