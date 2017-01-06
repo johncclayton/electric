@@ -11,9 +11,12 @@ export class ChannelComponent {
     @Input() channelObserver;
     @Input() name: string;
 
+    cellChunking() {
+        return 3;
+    }
     chunkedCells() {
         if (this.channel) {
-            return _.chunk(this.channel['cells'], 3);
+            return _.chunk(this.channel['cells'], this.cellChunking());
         }
         return null;
     }

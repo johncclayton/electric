@@ -29,7 +29,7 @@
   }
 
   // Per channel
-  .channel {
+  channel {
     .status {
 
     }
@@ -58,11 +58,6 @@
 // Why I2 has padding on grids by default, I don't know ...
 ion-grid {
   padding: 0;
-
-  ion-row {
-    //padding-left: 5px;
-    //padding-right: 5px;
-  }
 }
 
 

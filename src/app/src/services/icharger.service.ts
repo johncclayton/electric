@@ -115,7 +115,13 @@ export class iChargerService {
 
           // TODO: Take this out when the server doesn't return 1024 cells
           channels = channels.filter((c) => {
-            return c['ir'] != 1024 && c['v'] != 1.024;
+            if(c.hasOwnProperty('v')) {
+              if(c['v'] == 1.024) { return false; }
+            }
+            if(c.hasOwnProperty('ir')) {
+              if(c['ir'] == 1024) { return false; }
+            }
+            return true;
           });
           jsonResponse["cells"] = channels;
 
