@@ -14,20 +14,21 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
-.charger {
-  //background: map-get($colors, 'dark');
 
+// This is the CSS for the charger, as a whole.
+.charger {
+
+  // This controls what you see at the top of the dashboard
+  // The main amps, volts area...
   .overview {
     .status {
       .number {
         font-size: 1.4em;
       }
-      .label {
-
-      }
     }
   }
 
+  // Per channel
   .channel {
     .status {
 
@@ -44,17 +45,19 @@
 
 .chargername {
   .tag {
+    display: inline-block;
     background: white;
     border-radius: 2px;
     color: map-get($colors, 'primary');
     margin-left: 5px;
-    padding: 0 4px 0px 4px;
+    padding: 0 4px 0 4px;
+    transform: skewX(-5deg);
   }
 }
 
 // Why I2 has padding on grids by default, I don't know ...
 ion-grid {
-  padding: 0px;
+  padding: 0;
 
   ion-row {
     //padding-left: 5px;
