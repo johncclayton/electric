@@ -145,8 +145,8 @@ class ChannelStatus:
         self.curr_inp_volts = data[3] / 1000.0
         self.curr_out_volts = data[4] / 1000.0
         self.curr_out_capacity = data[5]
-        self.curr_int_temp = data[6] / 100.0
-        self.curr_ext_temp = data[7] / 100.0
+        self.curr_int_temp = data[6] / 10.0
+        self.curr_ext_temp = data[7] / 10.0
 
         for x in range(0, 10):
             self.cells[x].set_from_modbus_data(x, cell_v[x], cell_b[x], cell_i[x])
@@ -199,7 +199,7 @@ class Control:
         self.op_description = Control.op_description(self.op)
         self.memory = data[1]
         self.channel = data[2]
-        self.order_lock = data[3]
+        self.order_lock = "0x%0.4X" % data[3]
         self.order = data[4]
         self.order_description = Control.order_description(self.order)
         self.limit_current = data[5] / 1000.0
