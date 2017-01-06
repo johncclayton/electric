@@ -29,6 +29,6 @@ export class ChannelComponent {
     }
 
     isCellUnused(cell) {
-        return Number(cell.v) == 0.0;
+        return Number(cell.v) < 0.001;
     }
 }

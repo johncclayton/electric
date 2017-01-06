@@ -112,8 +112,10 @@ export class iChargerService {
           let jsonResponse = response.json();
 
           let channels = jsonResponse["cells"];
+
+          // TODO: Take this out when the server doesn't return 1024 cells
           channels = channels.filter((c) => {
-            return c['ir'] != 1024;
+            return c['ir'] != 1024 && c['v'] != 1.024;
           });
           jsonResponse["cells"] = channels;
 
