@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {iChargerService} from "../../services/icharger.service";
 
 @Component({
   selector: 'charger-status',
@@ -11,7 +12,7 @@ export class ChargerStatusComponent {
   chargerStatus: {} = {};
   channelData: {} = {};
 
-  constructor() {
+  constructor(public chargerService: iChargerService) {
   }
 
   ngOnChanges(changes) {
@@ -22,7 +23,6 @@ export class ChargerStatusComponent {
     }
     if (this.channel) {
       this.channel.subscribe((data) => {
-        console.log("got: ", data);
         this.channelData = data;
       })
     }

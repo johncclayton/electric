@@ -31,7 +31,7 @@ export class Configuration {
   }
 
   getHostName(): string {
-    return this.configDict["hostname"];
+    return this.configDict["ipAddress"] + ":" + this.configDict["port"];
   }
 
   // Has this been configured before?
@@ -85,7 +85,8 @@ export class Configuration {
 
   setConfigToDefaults() {
     this.configDict = {
-      "hostname": "localhost:5000",
+      "ipAddress": "localhost",
+      "port": "5000",
       "isnew": true,
       "mockCharger" : false,
     };

@@ -81,6 +81,13 @@ export class iChargerService {
     return "http://" + hostName + path;
   }
 
+  getChargerName() {
+    return 'iCharger 308';
+  }
+  getChargerTag() {
+    return 'DUO';
+  }
+
   private chargerDidAppear(statusDict) {
     this.numberOfChannels = statusDict['channel_count'];
     console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
@@ -103,7 +110,13 @@ export class iChargerService {
         .map((response) => {
           this.events.publish(CHARGER_CHANNEL_EVENT, i);
           let jsonResponse = response.json();
-          // console.log(`Channel ${i} data... `, response);
+
+          let channels = jsonResponse["cells"];
+          channels = channels.filter((c) => {
+            return c['ir'] != 1024;
+          });
+          jsonResponse["cells"] = channels;
+
           let channel = Number(jsonResponse["channel"]);
           this.channelSnapshots[channel] = {
             index: i,

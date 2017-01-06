@@ -2,29 +2,33 @@ import {Component, Input} from "@angular/core";
 import * as _ from "lodash";
 
 @Component({
-  selector: 'channel',
-  templateUrl: 'channel.html'
+    selector: 'channel',
+    templateUrl: 'channel.html'
 })
 export class ChannelComponent {
-  public channel: {} = {};
+    public channel: {} = {};
 
-  @Input() channelObserver;
+    @Input() channelObserver;
+    @Input() name: string;
 
-  chunkedCells() {
-    if (this.channel) {
-      return _.chunk(this.channel['cells'], 3);
+    chunkedCells() {
+        if (this.channel) {
+            return _.chunk(this.channel['cells'], 3);
+        }
+        return null;
     }
-    return null;
-  }
 
-  ngOnChanges(changes) {
-    console.log("Channel is seeing change to bound data: ", changes);
-    if (this.channelObserver) {
-      console.log("Channel binding to ", this.channelObserver);
-      this.channelObserver.subscribe((data) => {
-        this.channel = data;
-      });
+    ngOnChanges(changes) {
+        console.log("Channel is seeing change to bound data: ", changes);
+        if (this.channelObserver) {
+            console.log("Channel binding to ", this.channelObserver);
+            this.channelObserver.subscribe((data) => {
+                this.channel = data;
+            });
+        }
     }
-  }
 
+    isCellUnused(cell) {
+        return Number(cell.v) == 0.0;
+    }
 }

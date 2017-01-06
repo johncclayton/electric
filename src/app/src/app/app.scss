@@ -1,6 +1,5 @@
 // http://ionicframework.com/docs/v2/theming/
 
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -14,3 +13,53 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+
+.charger {
+  //background: map-get($colors, 'dark');
+
+  .overview {
+    .status {
+      .number {
+        font-size: 1.4em;
+      }
+      .label {
+
+      }
+    }
+  }
+
+  .channel {
+    .status {
+
+    }
+    .label {
+      font-size: 0.8em;
+    }
+
+    .unused {
+      opacity: 0.5;
+    }
+  }
+}
+
+.chargername {
+  .tag {
+    background: white;
+    border-radius: 2px;
+    color: map-get($colors, 'primary');
+    margin-left: 5px;
+    padding: 0 4px 0px 4px;
+  }
+}
+
+// Why I2 has padding on grids by default, I don't know ...
+ion-grid {
+  padding: 0px;
+
+  ion-row {
+    //padding-left: 5px;
+    //padding-right: 5px;
+  }
+}
+
+

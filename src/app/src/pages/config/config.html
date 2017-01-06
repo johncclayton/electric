@@ -1,8 +1,9 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>
-      Configuration
-    </ion-title>
+    <button ion-button menuToggle icon-only>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title text-center>Configuration</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -11,7 +12,11 @@
   <ion-list>
     <ion-item>
       <ion-label stacked>IP Address of Pi</ion-label>
-      <ion-input type="text" [(ngModel)]="config.configDict.hostname"></ion-input>
+      <ion-input type="text" [(ngModel)]="config.configDict.ipAddress"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Port of Pi</ion-label>
+      <ion-input type="text" [(ngModel)]="config.configDict.port"></ion-input>
     </ion-item>
   </ion-list>
   <ion-list>

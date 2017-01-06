@@ -17,7 +17,6 @@ import {ChargerStatusComponent} from "../components/charger-status/charger-statu
     MyApp,
     ConfigPage,
     HomePage,
-    TabsPage,
     KeysPipe,
     ChannelComponent,
     ChargerStatusComponent
@@ -30,7 +29,6 @@ import {ChargerStatusComponent} from "../components/charger-status/charger-statu
     MyApp,
     HomePage,
     ConfigPage,
-    TabsPage,
     ChannelComponent
   ],
   providers: [
