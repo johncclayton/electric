@@ -167,8 +167,8 @@ class TestGatewayCommunications(unittest.TestCase):
         new_volume = 2
         charger.set_beep_properties(beep_index=0, enabled=True, volume=new_volume)
         resp = charger.get_system_storage()
-        self.assertEqual(resp["beep"]["key"]["enabled"], 1)
-        self.assertEqual(resp["beep"]["key"]["volume"], new_volume)
+        self.assertEqual(resp.beep_enabled_key, 1)
+        self.assertEqual(resp.beep_volume_key, new_volume)
 
     def test_setting_active_channel(self):
         charger = iChargerGateway()

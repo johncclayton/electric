@@ -13,6 +13,7 @@ class TestRestfulAPI(unittest.TestCase):
 
         resp = self.client.get("/status")
         d = json.loads(resp.data)
+
         self.assertIn("exception", d.keys())
         self.assertIn("charger_presence", d.keys())
         self.assertEqual("disconnected", d["charger_presence"])

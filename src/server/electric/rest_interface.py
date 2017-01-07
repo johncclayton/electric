@@ -1,4 +1,5 @@
 from flask_restful import Resource
+
 from electric.icharger.modbus_usb import connection_state_dict
 from icharger.gateway import iChargerGateway
 
@@ -49,8 +50,11 @@ class SystemStorage_iCharger(Resource):
     def get(self):
         try:
             dev = iChargerGateway()
-            obj = dev.get_system_storage()
+            syst = dev.get_system_storage()
+
+            obj = syst.to_dict()
             obj.update(connection_state_dict())
+
             return obj
         except Exception, e:
             return connection_state_dict(e)

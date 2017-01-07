@@ -305,10 +305,10 @@ class SystemStorage:
         self.power_priority = 0
         self.power_priority_description = ""
 
-        self.charge_power = (0, 0)
-        self.discharge_power = (0, 0)
-        self.monitor_log_interval = (0, 0)
-        self.monitor_save_to_sd = (0, 0)
+        self.charge_power = [0, 0]
+        self.discharge_power = [0, 0]
+        self.monitor_log_interval = [0, 0]
+        self.monitor_save_to_sd = [0, 0]
 
         self.servo_type = 0
         self.servo_user_center = 0

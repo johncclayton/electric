@@ -1,14 +1,13 @@
 import logging
+import platform
 import struct
 
-import usb.util
+import modbus_tk.defines as cst
 import usb.core
-import platform
-
+import usb.util
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
-import modbus_tk.defines as cst
 
 MEMORY_MAX = 64
 MODBUS_HID_FRAME_TYPE = 0x30
@@ -82,6 +81,7 @@ def connection_state_dict(exc=None):
 
     return value
 
+
 #
 # Want user-land access to the device?  Looking for an easier way, tired of sudo <command>
 # and having op-sec experts scorn you at the water cooler?
@@ -143,7 +143,8 @@ class iChargerQuery(Query):
         if self.response_func_code != self.func_code:
             if self.response_func_code == self.func_code | 0x80:
                 raise ModbusInvalidResponseError(
-                    "Response contains error code {0}: {1}".format(self.modbus_error, self._modbus_error_string(self.modbus_error))
+                    "Response contains error code {0}: {1}".format(self.modbus_error,
+                                                                   self._modbus_error_string(self.modbus_error))
                 )
 
             raise ModbusInvalidResponseError(
@@ -217,7 +218,8 @@ class USBSerialFacade:
 
     def _claim_interface(self):
         if not self._dev or testing_control.usb_claim_interface_should_fail:
-            raise usb.core.USBError("Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
+            raise usb.core.USBError(
+                "Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
 
         try:
             usb.util.claim_interface(self._dev, 0)
@@ -311,7 +313,7 @@ class iChargerMaster(RtuMaster):
     def _make_query(self):
         return iChargerQuery()
 
-    def modbus_read_registers(self, addr, format, function_code = cst.READ_INPUT_REGISTERS):
+    def modbus_read_registers(self, addr, format, function_code=cst.READ_INPUT_REGISTERS):
         """
         Uses the modbus_tk framework to acquire data from the device.
 
@@ -359,4 +361,3 @@ class iChargerMaster(RtuMaster):
                             data_format="B",
                             output_value=data,
                             expected_length=4)
-
