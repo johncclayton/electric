@@ -5,24 +5,10 @@ import usb.util
 import usb.core
 import platform
 
-from junsi_types import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset
-
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 import modbus_tk.defines as cst
-
-CHANNEL_INPUT_HEADER_OFFSET = 0
-CHANNEL_INPUT_FOOTER_OFFSET = 51
-CHANNEL_INPUT_CELL_IR_FORMAT = 35
-CHANNEL_INPUT_CELL_BALANCE_OFFSET = 27
-CHANNEL_INPUT_CELL_VOLT_OFFSET = 11
-
-# see the helper/main.cpp module I created that tells me these
-# offset values more reliably than Mr Blind Man.
-SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY = 5
-SYSTEM_STORAGE_OFFSET_CALIBRATION = 22
-SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
 
 MEMORY_MAX = 64
 MODBUS_HID_FRAME_TYPE = 0x30
@@ -34,7 +20,6 @@ END_POINT_ADDRESS_WRITE = 0x01
 END_POINT_ADDRESS_READ = 0x81
 
 MAX_READWRITE_LEN = 64
-
 READ_REG_COUNT_MAX = 30
 WRITE_REG_COUNT_MAX = 28
 
@@ -58,6 +43,7 @@ class TestingControl:
         self.modbus_read_should_fail = False
         # If a write operation should fail and throw an exception
         self.modbus_write_should_fail = False
+
 
 testing_control = TestingControl()
 
@@ -325,7 +311,7 @@ class iChargerMaster(RtuMaster):
     def _make_query(self):
         return iChargerQuery()
 
-    def _modbus_read_registers(self, addr, format, function_code = cst.READ_INPUT_REGISTERS):
+    def modbus_read_registers(self, addr, format, function_code = cst.READ_INPUT_REGISTERS):
         """
         Uses the modbus_tk framework to acquire data from the device.
 
@@ -349,7 +335,7 @@ class iChargerMaster(RtuMaster):
         assert (quant * 2) == byte_len
 
         if testing_control.modbus_read_should_fail:
-            raise TestingControlException("_modbus_read_registers")
+            raise TestingControlException("modbus_read_registers")
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
@@ -360,7 +346,7 @@ class iChargerMaster(RtuMaster):
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
 
-    def _modbus_write_registers(self, addr, data):
+    def modbus_write_registers(self, addr, data):
         """
         Writes data using modbus_tk to the modbus slave given an address to write to.
         :param addr: the address to begin writing values at
@@ -374,183 +360,3 @@ class iChargerMaster(RtuMaster):
                             output_value=data,
                             expected_length=4)
 
-    def get_device_info(self):
-        """
-        Returns the following information from the iCharger, known as the 'device only reads message'
-        :return: a DeviceInfo instance
-        """
-        return DeviceInfo(self._modbus_read_registers(0x000, format="h12sHHHHHH"))
-
-    def get_channel_status(self, channel):
-        """"
-        Returns the following information from the iCharger, known as the 'channel input read only' message:
-        :return: ChannelStatus instance
-        """
-
-        addr = 0x100 if channel == 0 else 0x200
-
-        # timestamp -> ext temp
-        header_fmt = "LlhHHlhh"
-        header_data = self._modbus_read_registers(addr, header_fmt)
-
-        # cell 0-15 voltage
-        cell_volt_fmt = "16H"
-        cell_volt_addr = addr + CHANNEL_INPUT_CELL_VOLT_OFFSET
-        cell_volt = self._modbus_read_registers(cell_volt_addr, cell_volt_fmt)
-
-        # cell 0-15 balance
-        cell_balance_fmt = "16B"
-        cell_balance_addr = addr + CHANNEL_INPUT_CELL_BALANCE_OFFSET
-        cell_balance = self._modbus_read_registers(cell_balance_addr, cell_balance_fmt)
-
-        # cell 0-15 IR
-        cell_ir_fmt = "16H"
-        cell_ir_addr = addr + CHANNEL_INPUT_CELL_IR_FORMAT
-        cell_ir = self._modbus_read_registers(cell_ir_addr, cell_ir_fmt)
-
-        # total IR -> dialog box ID
-        footer_fmt = "7H"
-        footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
-        footer = self._modbus_read_registers(footer_addr, footer_fmt)
-
-        return ChannelStatus(channel, header_data, cell_volt, cell_balance, cell_ir, footer)
-
-    def get_control_register(self):
-        "Returns the current run state of a particular channel"
-        return Control(self._modbus_read_registers(0x8000, "7H", function_code=cst.READ_HOLDING_REGISTERS))
-
-    def _beep_summary_dict(self, enabled, volume, type):
-        return {
-            "enabled": enabled,
-            "volume": volume,
-            "type": type
-        }
-
-    def _power_priority_description(self, pri):
-        if pri == 0:
-            return "average"
-        if pri == 1:
-            return "ch1 priority"
-        if pri == 2:
-            return "ch2 priority"
-
-    def set_beep_properties(self, beep_index = 0, enabled = True, volume = 5):
-        # for now we only access beep type values
-        base = 0x8400
-
-        results = self._modbus_read_registers(base + 13, "8H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        value_enabled = list(results[:4])
-        value_volume = list(results[4:])
-
-        value_enabled[beep_index] = int(enabled)
-        value_volume[beep_index] = volume
-
-        return self._modbus_write_registers(base + 13, value_enabled + value_volume)
-
-    def set_active_channel(self, channel):
-        base = 0x8000 + 2
-        if channel not in (0, 1):
-            return None
-        return self._modbus_write_registers(base, (channel,))
-
-    def get_system_storage(self):
-        """Returns the system storage area of the iCharger"""
-        base = 0x8400
-        (temp_unit, temp_stop, temp_fans_on, temp_reduce, dummy1) \
-            = self._modbus_read_registers(base, "5H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        addr = base + SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY
-        (fans_off_delay, lcd_contrast, light_value, dump2, beep_type_key, beep_type_hint, beep_type_alarm,
-         beep_type_done, beep_enable_key, beep_enable_hint, beep_enable_alarm, beep_enable_done,
-         beep_vol_key, beep_vol_hint, beep_vol_alarm, beep_vol_done, dummy3) \
-            = self._modbus_read_registers(addr, "17H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        addr = base + SYSTEM_STORAGE_OFFSET_CALIBRATION
-        (calibration, dump4, sel_input_device, dc_inp_low_volt, dc_inp_over_volt, dc_inp_curr_limit,
-         batt_inp_low_volt, batt_inp_over_volt, batt_input_curr_limit, regen_enable, regen_volt_limit,
-         regen_curr_limit) = \
-            self._modbus_read_registers(addr, "12H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        addr = base + SYSTEM_STORAGE_OFFSET_CHARGER_POWER
-        (charger_power_0, charger_power_1, discharge_power_0, discharge_power_1, power_priority,
-         logging_sample_interval_0, logging_sample_interval_1,
-         logging_save_to_sdcard_0, logging_save_to_sdcard_1,
-         servo_type, servo_user_center, servo_user_rate, servo_op_angle) = \
-            self._modbus_read_registers(addr, "13H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        return {
-            "temp_unit": "C" if temp_unit == 0 else "F",
-            "temp_stop": temp_stop / 10.0,
-            "temp_fans_on": temp_fans_on / 10.0,
-            "temp_reduce": temp_reduce / 10.0,
-            "fans_off_delay": fans_off_delay,
-            "lcd_contrast": lcd_contrast,
-            "light_value": light_value,
-            "beep": {
-                "key": self._beep_summary_dict(beep_enable_key, beep_vol_key, beep_type_key),
-                "hint": self._beep_summary_dict(beep_enable_hint, beep_vol_hint, beep_type_hint),
-                "alarm": self._beep_summary_dict(beep_enable_alarm, beep_vol_alarm, beep_type_alarm),
-                "done": self._beep_summary_dict(beep_enable_done, beep_vol_done, beep_type_done)
-            },
-            "calibration": calibration,
-            "selected_input_device": sel_input_device,
-            "selected_input_device_type": "dc" if sel_input_device == 0 else "battery",
-            "dc_input": {
-                "low_volt": dc_inp_low_volt,
-                "over_volt": dc_inp_over_volt,
-                "curr_limit": dc_inp_curr_limit,
-            },
-            "batt_input": {
-                "low_volt": batt_inp_low_volt,
-                "over_volt": batt_inp_over_volt,
-                "curr_limit": batt_input_curr_limit
-            },
-            "regeneration": {
-                "enabled": regen_enable,
-                "curr_limit": regen_curr_limit,
-                "volt_limit": regen_volt_limit
-            },
-            "charger_power": [
-                charger_power_0,
-                charger_power_1
-            ],
-            "discharge_power": [
-                discharge_power_0,
-                discharge_power_1
-            ],
-            "power_priority": power_priority,
-            "power_priority_desc": self._power_priority_description(power_priority),
-            "logging_sample_interval": [
-                logging_sample_interval_0,
-                logging_sample_interval_1
-            ],
-            "logging_save_to_sdcard": [
-                logging_save_to_sdcard_0,
-                logging_save_to_sdcard_1
-            ],
-            "servo": {
-                "type": servo_type,
-                "user_center": servo_user_center,
-                "user_rate": servo_user_rate,
-                "op_angle": servo_op_angle
-            }
-        }
-
-    def get_preset_list(self):
-        (count, ) = self._modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
-
-        number = count
-        offset = 0
-        indexes = ()
-
-        while(count > 0):
-            to_read = min(count, 2)
-            if (to_read % 2) != 0:
-                to_read += 1
-            data = self._modbus_read_registers(0x8801 + offset, "{0}B".format(to_read), function_code=cst.READ_HOLDING_REGISTERS)
-            count -= len(data)
-            indexes += data
-            offset += len(data) / 2
-
-        return PresetIndex(number, indexes[:number])

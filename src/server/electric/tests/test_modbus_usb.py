@@ -2,6 +2,7 @@ import unittest, struct
 import modbus_tk.defines as cst
 from usb.core import USBError
 
+from icharger.gateway import iChargerGateway
 from icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, \
     MODBUS_HID_FRAME_TYPE
 from icharger.modbus_usb import testing_control
@@ -23,7 +24,7 @@ class TestChargerQuery(unittest.TestCase):
         self.assertEquals(str(context.exception), "unpack requires a string argument of length 5")
 
     def test_query_build_request_fails_with_invalid_pdu(self):
-        with self.assertRaises(ModbusInvalidRequestError) as context:
+        with self.assertRaises(ModbusInvalidRequestError):
             self.query.build_request("abcdefghjik", "doesnt matter what this is")
 
     def test_query_request_can_read_input_registers(self):
@@ -92,41 +93,47 @@ class TestSerialFacade(unittest.TestCase):
     def test_kernel_detach_fails(self):
         testing_control.usb_detach_from_kernel_should_fail = True
 
-        charger = None
         with self.assertRaises(USBError) as context:
-            charger = USBSerialFacade()
+            USBSerialFacade()
 
-        self.assertIsNone(charger)
         self.assertIn("Failed to detach from the kernel", str(context.exception))
-
-
-class TestMasterDevice(unittest.TestCase):
-    def setUp(self):
-        testing_control.reset()
 
     def test_bad_vendor_product_combo(self):
         charger = USBSerialFacade(0x9999, 0x9999)
         self.assertIsNotNone(charger)
         self.assertIsNone(charger._dev)
 
-    def test_disconnected_charger_has_correct_presence_in_json(self):
-        pass
+    def test_opening_claims_usb_interface(self):
+        serial = USBSerialFacade()
+        charger = iChargerMaster(serial=serial)
+        self.assertEqual(serial.is_open, False)
+        charger.open()
+        self.assertEqual(serial.is_open, True)
+        self.assertEqual(serial._claimed, True)
+        charger.close()
+        self.assertEqual(serial.is_open, False)
+        self.assertEqual(serial._claimed, False)
+
+    def test_usb_claim_interface_fails(self):
+        testing_control.usb_claim_interface_should_fail = True
+        with self.assertRaises(USBError) as c:
+            serial = USBSerialFacade()
+            serial.open()
+
+
+class TestGatewayCommunications(unittest.TestCase):
+    def setUp(self):
+        testing_control.reset()
 
     def test_status_contains_num_channels(self):
-        obj = iChargerMaster()
+        obj = iChargerGateway()
         status = obj.get_device_info()
         self.assertIsNotNone(status)
         self.assertEqual(status.channel_count, 2)
         self.assertIn("channel_count", status.to_dict().keys())
 
-    def test_get_preset_index_list(self):
-        obj = iChargerMaster()
-        presets = obj.get_preset_list()
-        self.assertIsNotNone(presets)
-        self.assertTrue(presets.count == len(presets.indexes))
-
     def test_fetch_status(self):
-        obj = iChargerMaster()
+        obj = iChargerGateway()
         resp = obj.get_channel_status(0)
         self.assertIsNotNone(resp)
 
@@ -148,32 +155,15 @@ class TestMasterDevice(unittest.TestCase):
         self.assertEqual(Control.op_description(3), "cycle")
         self.assertEqual(Control.op_description(4), "balance only")
 
-    def test_opening_claims_usb_interface(self):
-        serial = USBSerialFacade()
-        charger = iChargerMaster(serial=serial)
-        self.assertEqual(serial.is_open, False)
-        charger.open()
-        self.assertEqual(serial.is_open, True)
-        self.assertEqual(serial._claimed, True)
-        charger.close()
-        self.assertEqual(serial.is_open, False)
-        self.assertEqual(serial._claimed, False)
-
-    def test_usb_claim_interface_fails(self):
-        testing_control.usb_claim_interface_should_fail = True
-        with self.assertRaises(USBError) as c:
-            serial = USBSerialFacade()
-            serial.open()
-
     def test_modbus_read_throws_exception(self):
         testing_control.modbus_read_should_fail = True
 
         with self.assertRaises(TestingControlException) as context:
-            charger = iChargerMaster()
+            charger = iChargerGateway()
             charger.get_device_info()
 
     def test_can_change_key_tone_and_volume(self):
-        charger = iChargerMaster()
+        charger = iChargerGateway()
         new_volume = 2
         charger.set_beep_properties(beep_index=0, enabled=True, volume=new_volume)
         resp = charger.get_system_storage()
@@ -181,11 +171,22 @@ class TestMasterDevice(unittest.TestCase):
         self.assertEqual(resp["beep"]["key"]["volume"], new_volume)
 
     def test_setting_active_channel(self):
-        charger = iChargerMaster()
+        charger = iChargerGateway()
         self.assertIsNone(charger.set_active_channel(-1))
         self.assertIsNone(charger.set_active_channel(2))
         resp = charger.set_active_channel(0)
         self.assertIsNotNone(resp)
         resp = charger.set_active_channel(1)
         self.assertIsNotNone(resp)
+
+    def test_get_first_preset(self):
+        charger = iChargerGateway()
+        one_preset = charger.get_preset(0)
+        print(one_preset.to_dict())
+
+    def test_get_preset_index_list(self):
+        obj = iChargerGateway()
+        presets = obj.get_preset_list()
+        self.assertIsNotNone(presets)
+        self.assertTrue(presets.count == len(presets.indexes))
 

@@ -1,12 +1,12 @@
 from flask_restful import Resource
-
-from electric.icharger.modbus_usb import iChargerMaster
 from electric.icharger.modbus_usb import connection_state_dict
+from icharger.gateway import iChargerGateway
+
 
 class Status_iCharger(Resource):
     def get(self):
         try:
-            dev = iChargerMaster()
+            dev = iChargerGateway()
             info = dev.get_device_info()
 
             obj = info.to_dict()
@@ -20,7 +20,7 @@ class Status_iCharger(Resource):
 class ChannelStatus_iCharger(Resource):
     def get(self, channel_id):
         try:
-            dev = iChargerMaster()
+            dev = iChargerGateway()
             channel = int(channel_id)
             if not (channel == 0 or channel == 1):
                 raise ValueError("Channel part of URI must be 0 or 1")
@@ -37,7 +37,7 @@ class ChannelStatus_iCharger(Resource):
 class ControlRegister_iCharger(Resource):
     def get(self):
         try:
-            dev = iChargerMaster()
+            dev = iChargerGateway()
             control = dev.get_control_register()
             obj = control.to_dict()
             return obj
@@ -48,7 +48,7 @@ class ControlRegister_iCharger(Resource):
 class SystemStorage_iCharger(Resource):
     def get(self):
         try:
-            dev = iChargerMaster()
+            dev = iChargerGateway()
             obj = dev.get_system_storage()
             obj.update(connection_state_dict())
             return obj
