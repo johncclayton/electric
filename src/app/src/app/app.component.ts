@@ -5,6 +5,7 @@ import {Configuration} from "../services/configuration.service";
 import {HomePage} from "../pages/home/home";
 import {ConfigPage} from "../pages/config/config";
 import {iChargerService} from "../services/icharger.service";
+import {PresetListPage} from "../pages/preset-list/preset-list";
 
 
 @Component({
@@ -22,7 +23,6 @@ export class MyApp {
         platform.ready().then(() => {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
-            console.log("have service: ", this.chargerService);
             StatusBar.styleDefault();
             Splashscreen.hide();
 
@@ -31,6 +31,7 @@ export class MyApp {
 
         this.pages = [
             // {title: 'Dashboard', component: HomePage},
+            {title: 'Presets', component: PresetListPage},
             {title: 'Config', component: ConfigPage},
         ]
     }

@@ -9,32 +9,35 @@ import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config";
 import {ChannelComponent} from "../components/channel/channel";
 import {ChargerStatusComponent} from "../components/charger-status/charger-status";
+import {PresetListPage} from "../pages/preset-list/preset-list";
 
 @NgModule({
-  declarations: [
-    MyApp,
-    ConfigPage,
-    HomePage,
-    KeysPipe,
-    ChannelComponent,
-    ChargerStatusComponent
-  ],
-  imports: [
-    IonicModule.forRoot(MyApp)
-  ],
-  bootstrap: [IonicApp],
-  entryComponents: [
-    MyApp,
-    HomePage,
-    ConfigPage,
-    ChannelComponent
-  ],
-  providers: [
-    Configuration,
-    Storage,
-    {provide: iChargerService, useClass: iChargerService},
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
-  ]
+    declarations: [
+        MyApp,
+        ConfigPage,
+        HomePage,
+        KeysPipe,
+        ChannelComponent,
+        PresetListPage,
+        ChargerStatusComponent
+    ],
+    imports: [
+        IonicModule.forRoot(MyApp)
+    ],
+    bootstrap: [IonicApp],
+    entryComponents: [
+        MyApp,
+        HomePage,
+        ConfigPage,
+        PresetListPage,
+        ChannelComponent
+    ],
+    providers: [
+        Configuration,
+        Storage,
+        {provide: iChargerService, useClass: iChargerService},
+        {provide: ErrorHandler, useClass: IonicErrorHandler}
+    ]
 })
 export class AppModule {
 }

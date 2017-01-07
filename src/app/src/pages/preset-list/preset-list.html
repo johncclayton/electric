@@ -1,0 +1,22 @@
+<ion-header>
+
+    <ion-navbar>
+        <ion-title>Presets</ion-title>
+        <ion-buttons end>
+            <button ion-button item-right icon-only (click)="addPreset()">
+                <ion-icon name="add"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+    <ion-list>
+        <button ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
+            {{preset.name}}
+            <div class="mini-badge">test</div>
+        </button>
+    </ion-list>
+</ion-content>

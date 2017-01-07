@@ -14,7 +14,6 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
-
 // This is the CSS for the charger, as a whole.
 .charger {
 
@@ -24,9 +23,22 @@
     .status {
       .number {
         font-size: 1.4em;
+        .label {
+          font-size: 0.7em;
+        }
       }
     }
   }
+
+  //.volts {
+  //  background: lightsalmon;
+  //}
+  //.amps {
+  //  background: lightblue;
+  //}
+  //.mah {
+  //  background: lightgreen;
+  //}
 
   // Per channel
   channel {
@@ -36,12 +48,12 @@
       border-color: green;
       border-style: solid;
       border-width: 1px;
-    }
-    .status {
-      //padding-right: 10px;
+
     }
     .label {
       font-size: 0.8em;
+    }
+    .status {
     }
     .unused {
       opacity: 0.3;
@@ -67,3 +79,9 @@ ion-grid {
 }
 
 
+.mini-badge {
+  font-size: 0.7em;
+  background: green;
+  margin-right: auto;
+  margin-left: auto;
+}
