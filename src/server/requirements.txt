@@ -18,6 +18,7 @@ pyserial==3.1
 python-dateutil==2.6.0
 pytz==2016.10
 pyusb==1.0.0
+schematics==1.1.1
 six==1.10.0
 Werkzeug==0.11.13
 wrapt==1.10.8
