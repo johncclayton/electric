@@ -2,7 +2,7 @@ import unittest, struct
 import modbus_tk.defines as cst
 from usb.core import USBError
 
-from icharger.gateway import iChargerGateway
+from icharger.comms_layer import ChargerCommsManager
 from icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, \
     MODBUS_HID_FRAME_TYPE
 from icharger.modbus_usb import testing_control
@@ -126,44 +126,42 @@ class TestGatewayCommunications(unittest.TestCase):
         testing_control.reset()
 
     def test_status_contains_num_channels(self):
-        obj = iChargerGateway()
+        obj = ChargerCommsManager()
         status = obj.get_device_info()
         self.assertIsNotNone(status)
         self.assertEqual(status.channel_count, 2)
-        self.assertIn("channel_count", status.to_dict().keys())
+        self.assertIn("channel_count", status.to_primitive().keys())
 
     def test_fetch_status(self):
-        obj = iChargerGateway()
+        obj = ChargerCommsManager()
         resp = obj.get_channel_status(0)
         self.assertIsNotNone(resp)
 
     def test_order_description(self):
-        self.assertEqual(Control.order_description(0), "run")
-        self.assertEqual(Control.order_description(1), "modify")
-        self.assertEqual(Control.order_description(2), "write system")
-        self.assertEqual(Control.order_description(3), "write memory head")
-        self.assertEqual(Control.order_description(4), "write memory")
-        self.assertEqual(Control.order_description(5), "trans log on")
-        self.assertEqual(Control.order_description(6), "trans log off")
-        self.assertEqual(Control.order_description(7), "msgbox yes")
-        self.assertEqual(Control.order_description(8), "msgbox no")
+        c = Control()
+        c.order = 0
+        self.assertEqual(c.order_description, "run")
+
+        c.order = 1
+        self.assertEqual(c.order_description, "modify")
 
     def test_op_description(self):
-        self.assertEqual(Control.op_description(0), "charge")
-        self.assertEqual(Control.op_description(1), "storage")
-        self.assertEqual(Control.op_description(2), "discharge")
-        self.assertEqual(Control.op_description(3), "cycle")
-        self.assertEqual(Control.op_description(4), "balance only")
+        c = Control()
+        c.op = 0
+        self.assertEqual(c.op_description, "charge")
+
+        c.op = 1
+        self.assertEqual(c.op_description, "storage")
 
     def test_modbus_read_throws_exception(self):
         testing_control.modbus_read_should_fail = True
 
         with self.assertRaises(TestingControlException) as context:
-            charger = iChargerGateway()
+            charger = ChargerCommsManager()
             charger.get_device_info()
 
     def test_can_change_key_tone_and_volume(self):
-        charger = iChargerGateway()
+        charger = ChargerCommsManager()
         new_volume = 2
         charger.set_beep_properties(beep_index=0, enabled=True, volume=new_volume)
         resp = charger.get_system_storage()
@@ -171,7 +169,7 @@ class TestGatewayCommunications(unittest.TestCase):
         self.assertEqual(resp.beep_volume_key, new_volume)
 
     def test_setting_active_channel(self):
-        charger = iChargerGateway()
+        charger = ChargerCommsManager()
         self.assertIsNone(charger.set_active_channel(-1))
         self.assertIsNone(charger.set_active_channel(2))
         resp = charger.set_active_channel(0)
@@ -180,12 +178,12 @@ class TestGatewayCommunications(unittest.TestCase):
         self.assertIsNotNone(resp)
 
     def test_get_first_preset(self):
-        charger = iChargerGateway()
+        charger = ChargerCommsManager()
         one_preset = charger.get_preset(0)
-        print(one_preset.to_dict())
+        print(one_preset.to_primitive())
 
     def test_get_preset_index_list(self):
-        obj = iChargerGateway()
+        obj = ChargerCommsManager()
         presets = obj.get_preset_list()
         self.assertIsNotNone(presets)
         self.assertTrue(presets.count == len(presets.indexes))

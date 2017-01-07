@@ -1,9 +1,10 @@
 from flask import Flask
-from flask_restful import Api
 from flask_cors import CORS
+from flask_restful import Api
 
-from electric.rest_interface import Status_iCharger, \
+from rest_interface import Status_iCharger, \
     SystemStorage_iCharger, ChannelStatus_iCharger, ControlRegister_iCharger
+
 
 class AppInterface(object):
     def __init__(self):

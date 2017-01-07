@@ -1,16 +1,16 @@
 from flask_restful import Resource
 
 from electric.icharger.modbus_usb import connection_state_dict
-from icharger.gateway import iChargerGateway
+from icharger.comms_layer import ChargerCommsManager
 
 
 class Status_iCharger(Resource):
     def get(self):
         try:
-            dev = iChargerGateway()
+            dev = ChargerCommsManager()
             info = dev.get_device_info()
 
-            obj = info.to_dict()
+            obj = info.to_primitive()
             obj.update(connection_state_dict())
 
             return obj
@@ -21,13 +21,15 @@ class Status_iCharger(Resource):
 class ChannelStatus_iCharger(Resource):
     def get(self, channel_id):
         try:
-            dev = iChargerGateway()
+            dev = ChargerCommsManager()
+
             channel = int(channel_id)
             if not (channel == 0 or channel == 1):
                 raise ValueError("Channel part of URI must be 0 or 1")
+
             status = dev.get_channel_status(int(channel))
 
-            obj = status.to_dict()
+            obj = status.to_primitive()
             obj.update(connection_state_dict())
 
             return obj
@@ -38,10 +40,11 @@ class ChannelStatus_iCharger(Resource):
 class ControlRegister_iCharger(Resource):
     def get(self):
         try:
-            dev = iChargerGateway()
+            dev = ChargerCommsManager()
             control = dev.get_control_register()
-            obj = control.to_dict()
-            return obj
+
+            # note: intentionally no connection state
+            return control.to_primitive()
         except Exception, e:
             return connection_state_dict(e)
 
@@ -49,10 +52,10 @@ class ControlRegister_iCharger(Resource):
 class SystemStorage_iCharger(Resource):
     def get(self):
         try:
-            dev = iChargerGateway()
+            dev = ChargerCommsManager()
             syst = dev.get_system_storage()
 
-            obj = syst.to_dict()
+            obj = syst.to_primitive()
             obj.update(connection_state_dict())
 
             return obj

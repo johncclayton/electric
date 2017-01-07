@@ -7,6 +7,6 @@ def run_server():
 
 if __name__ == "__main__":
     if platform.system() == "Darwin":
-        print("WARNING: libusb doesnt work on Mac, and this program requires it - things WILL NOT out so well without it so this program will abort now")
+        print("WARNING: libusb doesnt work well for HID devices on the Mac, and this program requires it - things WILL NOT out so well without it so this program will abort now")
     else:
         run_server()

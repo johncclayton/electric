@@ -1,5 +1,10 @@
 import struct
 import modbus_tk.defines as cst
+from schematics.models import  Model
+from schematics.transforms import blacklist
+from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
+from schematics.types.serializable import serializable
+from schematics.types.compound import ModelType, ListType
 
 STATUS_RUN = 0x01
 STATUS_ERROR = 0x02
@@ -53,47 +58,61 @@ class DataSegment:
         self.data = charger.modbus_read_registers(self.addr, format, function_code=self.func_code)
 
 
-class DeviceInfoStatus:
+class DeviceInfoStatus(Model):
+    value = IntType(required=True, min_value=0, max_value=0x7f)
+
+    class Options:
+        # this means that value won't appear in the JSON output by default
+        roles = {'default': blacklist('value')}
+
     def __init__(self, value = 0):
-        self.run = 0
-        self.err = 0
-        self.ctrl_status = 0
-        self.run_status = 0
-        self.dlg_box_status = 0
-        self.cell_volt_status = 0
-        self.balance = 0
-        self.set_from_modbus_data(value)
+        super(DeviceInfoStatus, self).__init__()
+        self.value = value
 
-    def set_from_modbus_data(self, value):
-        self.run = value & STATUS_RUN
-        self.err = value & STATUS_ERROR
-        self.ctrl_status = value & STATUS_CONTROL_STATUS
-        self.run_status = value & STATUS_RUN_STATUS
-        self.dlg_box_status = value & STATUS_DLG_BOX_STATUS
-        self.cell_volt_status = value & STATUS_CELL_VOLTAGE
-        self.balance = value & STATUS_BALANCE
+    @serializable
+    def run(self):
+        return self.value & STATUS_RUN
+
+    @serializable
+    def err(self):
+        return self.value & STATUS_ERROR
+
+    @serializable
+    def ctrl_status(self):
+        return self.value & STATUS_CONTROL_STATUS
+
+    @serializable
+    def run_status(self):
+        return self.value & STATUS_RUN_STATUS
+
+    @serializable
+    def dlg_box_status(self):
+        return self.value & STATUS_DLG_BOX_STATUS
+
+    @serializable
+    def cell_volt_status(self):
+        return self.value & STATUS_CELL_VOLTAGE
+
+    @serializable
+    def balance(self):
+        return self.value & STATUS_BALANCE
 
 
-class DeviceInfo:
+class DeviceInfo(Model):
+    device_id = IntType(required=True)
+    device_sn = StringType(required=True)
+    software_ver = LongType(required=True)
+    hardware_ver = LongType(required=True)
+    system_len = IntType(required=True)
+    memory_len = IntType(required=True)
+    channel_count = IntType(required=True, default=2)
+    ch1_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
+    ch2_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
+
     def __init__(self, modbus_data = None):
-        self.device_id = 0
-        self.device_sn = ""
-        self.software_ver = 0
-        self.hardware_ver = 0
-        self.system_len = 0
-        self.memory_len = 0
-        self.channel_count = 2
-        self.ch1_status = DeviceInfoStatus(0)
-        self.ch2_status = DeviceInfoStatus(0)
-
+        super(DeviceInfo, self).__init__()
         if modbus_data is not None:
             self.set_from_modbus_data(modbus_data)
-
-    def to_dict(self):
-        d = self.__dict__
-        d["ch1_status"] = self.ch1_status.__dict__
-        d["ch2_status"] = self.ch2_status.__dict__
-        return d
 
     def set_from_modbus_data(self, data):
         self.device_id = data[0]
@@ -102,12 +121,18 @@ class DeviceInfo:
         self.hardware_ver = data[3]
         self.system_len = data[4]
         self.memory_len = data[5]
-        self.ch1_status.set_from_modbus_data(data[6])
-        self.ch2_status.set_from_modbus_data(data[7])
+        self.ch1_status = DeviceInfoStatus(data[6])
+        self.ch2_status = DeviceInfoStatus(data[7])
 
 
-class CellStatus:
+class CellStatus(Model):
+    cell = IntType(required=True, min_value=0, max_value=9)
+    voltage = FloatType(required=True, serialized_name="v")
+    balance = IntType(required=True)
+    ir = FloatType(required=True)
+
     def __init__(self, c = 0, volt = 0, bal = 0, i = 0):
+        super(CellStatus, self).__init__()
         self.set_from_modbus_data(c, volt, bal, i)
 
     def set_from_modbus_data(self, c, volt, bal, i):
@@ -116,39 +141,32 @@ class CellStatus:
         self.balance = bal
         self.ir = i / 10.0
 
-    def to_dict(self):
-        return {
-            "cell": self.cell,
-            "v": self.voltage,
-            "balance": self.balance,
-            "ir": self.ir
-        }
 
+class ChannelStatus(Model):
+    channel = IntType(required=True, min_value=0, max_value=1)
+    timestamp = LongType(required=True, default=0)
+    curr_out_power = FloatType(required=True)
+    curr_out_amps = FloatType(required=True)
+    curr_inp_volts = FloatType(required=True)
+    curr_out_volts = FloatType(required=True)
+    curr_out_capacity = FloatType(required=True)
+    curr_int_temp = FloatType(required=True)
+    curr_ext_temp = FloatType(required=True)
 
-class ChannelStatus:
+    cells = ListType(ModelType(CellStatus))
+
+    cell_total_ir = FloatType(required=True)
+    cell_total_voltage = FloatType(required=True)
+    cell_count_with_voltage_values = FloatType(required=True)
+    cycle_count = IntType(required=True)
+    control_status = IntType(required=True)
+    run_status = IntType(required=True)
+    run_error = IntType(required=True)
+    dlg_box_id = IntType(required=True)
+    line_intern_resistance = FloatType(required=True)
+
     def __init__(self, channel = 0, header = None, cell_v = None, cell_b = None, cell_i = None, footer = None):
-        self.channel = 0
-        self.timestamp = 0
-        self.curr_out_power = 0
-        self.curr_out_amps = 0
-        self.curr_inp_volts = 0
-        self.curr_out_volts = 0
-        self.curr_out_capacity = 0
-        self.curr_int_temp = 0
-        self.curr_ext_temp = 0
-
-        self.cells = [ CellStatus(c) for c in range(0, 10) ]
-
-        self.cell_total_ir = 0
-        self.cell_total_voltage = 0
-        self.cell_count_with_voltage_values = 0
-        self.cycle_count = 0
-        self.control_status = 0
-        self.run_status = 0
-        self.run_error = 0
-        self.dlg_box_id = 0
-        self.line_intern_resistance = 0
-
+        super(ChannelStatus, self).__init__()
         if header is not None and cell_v is not None and cell_b is not None and cell_i is not None and footer is not None:
             self.set_from_modbus_data(channel, header, cell_v, cell_b, cell_i, footer)
 
@@ -166,11 +184,16 @@ class ChannelStatus:
 
         self.cell_count_with_voltage_values = 0
         self.cell_total_voltage = 0
+
+        cells = []
         for x in range(0, 10):
-            self.cells[x].set_from_modbus_data(x, cell_v[x], cell_b[x], cell_i[x])
-            self.cell_total_voltage += self.cells[x].voltage
-            if self.cells[x].voltage > 0:
+            c = CellStatus(x, cell_v[x], cell_b[x], cell_i[x])
+            cells.append(c)
+            self.cell_total_voltage += c.voltage
+            if c.voltage > 0:
                 self.cell_count_with_voltage_values += 1
+
+        self.cells = cells
 
         self.cell_total_ir = footer[0] / 10.0
         self.line_intern_resistance = footer[1] / 10.0
@@ -180,146 +203,112 @@ class ChannelStatus:
         self.run_error = footer[5]
         self.dlg_box_id = footer[6]
 
-    def to_dict(self):
-        d = self.__dict__
-        d["cells"] = [ self.cells[x].to_dict() for x in range(0, 10) ]
+    @serializable
+    def battery_plugged_in(self):
+        return (self.curr_out_volts - self.cell_total_voltage) < 1
 
-        # additional annotations:
-        # - no pack plugged in
-        # - pack plugged in, no balance leads
-        # - pack plugged in, with balance lead
-        # - balance lead only
-        d["battery_plugged_in"] = (self.curr_out_volts - self.cell_total_voltage) < 1
-        d["balance_leads_plugged_in"] = self.cell_total_voltage > 0
-
-        return d
+    @serializable
+    def battery_leads_plugged_in(self):
+        return self.cell_total_voltage > 0
 
 
-class Control:
+class Control(Model):
+    op = IntType(required=True)
+    memory = IntType(required=True)
+    channel = IntType(required=True, min_value=0, max_value=1)
+    order_lock = StringType(required=True)
+    order = IntType(default=0)
+    limit_current = FloatType(required=True)
+    limit_volt = FloatType(required=True)
+
     def __init__(self, modbus_data=None):
-        self.op = 0
-        self.op_description = ""
-        self.memory = 0
-        self.channel = 0
-        self.order_lock = 0
-        self.order = 0
-        self.order_description = ""
-        self.limit_current = 0
-        self.limit_volt = 0
-
+        super(Control, self).__init__()
         if modbus_data is not None:
             self.set_from_modbus_data(modbus_data)
 
-    @staticmethod
-    def op_description(op):
+    @serializable
+    def op_description(self):
         for (num, name) in Control_RunOperations:
-            if op == num:
+            if self.op == num:
                 return name
         return None
 
-    @staticmethod
-    def order_description(order):
+    @serializable
+    def order_description(self):
         for (num, name) in Control_OrderOperations:
-            if order == num:
+            if self.order == num:
                 return name
         return None
 
     def set_from_modbus_data(self, data):
         self.op = data[0]
-        self.op_description = Control.op_description(self.op)
         self.memory = data[1]
         self.channel = data[2]
         self.order_lock = "0x%0.4X" % data[3]
         self.order = data[4]
-        self.order_description = Control.order_description(self.order)
         self.limit_current = data[5] / 1000.0
         self.limit_volt = data[6] / 1000.0
 
-    def to_dict(self):
-        return self.__dict__
 
+class SystemStorage(Model):
+    temp_unit = StringType(required=True, min_length=1, max_length=1)
+    temp_stop = FloatType(required=True)
+    temp_fans_on = FloatType(required=True)
+    temp_reduce = FloatType(required=True)
 
-class PresetIndex:
-    MAX_PRESETS = 64
+    fans_off_delay = IntType(required=True)
+    lcd_contrast = IntType(required=True)
+    light_value = IntType(required=True)
 
-    def __init__(self, count = None, indexes = None):
-        self.count = 0
-        self.indexes = []
-        if count is not None and indexes is not None:
-            self.set_from_modbus_data(count, indexes)
+    beep_type_key = IntType(required=True)
+    beep_type_hint = IntType(required=True)
+    beep_type_alarm = IntType(required=True)
+    beep_type_done = IntType(required=True)
 
-    def set_from_modbus_data(self, count, indexes):
-        self.count = count
-        self.indexes = indexes
+    beep_enabled_key = BooleanType(required=True)
+    beep_enabled_hint = BooleanType(required=True)
+    beep_enabled_alarm = BooleanType(required=True)
+    beep_enabled_done = BooleanType(required=True)
 
-    def to_dict(self):
-        d = dict()
-        d["count"] = self.count
-        d["indexes"] = list(self.indexes)
-        return d
+    beep_volume_key = IntType(required=True, min_value=0, max_value=10)
+    beep_volume_hint = IntType(required=True, min_value=0, max_value=10)
+    beep_volume_alarm = IntType(required=True, min_value=0, max_value=10)
+    beep_volume_done = IntType(required=True, min_value=0, max_value=10)
 
+    calibration = IntType(required=True)
+    selected_input_source = IntType(required=True)
 
-class SystemStorage:
+    dc_input_low_voltage = FloatType(required=True)
+    dc_input_over_voltage = FloatType(required=True)
+    dc_input_current_limit = FloatType(required=True)
+
+    batt_input_low_voltage = FloatType(required=True)
+    batt_input_over_voltage = FloatType(required=True)
+    batt_input_current_limit = FloatType(required=True)
+
+    regenerative_enable = IntType(required=True)
+    regenerative_volt_limit = FloatType(required=True)
+    regenerative_current_limit = FloatType(required=True)
+
+    power_priority = IntType(required=True)
+
+    charge_power = ListType(IntType)
+    discharge_power = ListType(IntType)
+    monitor_log_interval = ListType(IntType)
+    monitor_save_to_sd = ListType(BooleanType)
+
+    servo_type = LongType(required=True)
+    servo_user_center = LongType(required=True)
+    server_user_rate = LongType(required=True)
+    server_user_op_angle = LongType(required=True)
+
+    modbus_mode = LongType(required=True)
+    modbus_serial_addr = LongType(required=True)
+    modbus_serial_baud_rate = LongType(required=True)
+    modbus_serial_parity = LongType(required=True)
+
     def __init__(self, ds1 = None, ds2 = None, ds3 = None):
-        self.temp_unit = 0
-        self.temp_stop = 0
-        self.temp_fans_on = 0
-        self.temp_reduce = 0
-
-        self.fans_off_delay = 0
-        self.lcd_contrast = 0
-        self.light_value = 0
-
-        self.beep_type_key = 0
-        self.beep_type_hint = 0
-        self.beep_type_alarm = 0
-        self.beep_type_done = 0
-
-        self.beep_enabled_key = 0
-        self.beep_enabled_hint = 0
-        self.beep_enabled_alarm = 0
-        self.beep_enabled_done = 0
-
-        self.beep_volume_key = 0
-        self.beep_volume_hint = 0
-        self.beep_volume_alarm = 0
-        self.beep_volume_done = 0
-
-        self.calibration = 0
-        self.selected_input_source = 0
-        self.selected_input_source_type = "dc"
-
-        self.dc_input_low_voltage = 0
-        self.dc_input_over_voltage = 0
-        self.dc_input_current_limit = 0
-
-        self.batt_input_low_voltage = 0
-        self.batt_input_over_voltage = 0
-        self.batt_input_current_limit = 0
-
-        self.regenerative_enable = 0
-        self.regenerative_volt_limit = 0
-        self.regenerative_current_limit = 0
-
-        # per channel settings
-        self.power_priority = 0
-        self.power_priority_description = ""
-
-        self.charge_power = [0, 0]
-        self.discharge_power = [0, 0]
-        self.monitor_log_interval = [0, 0]
-        self.monitor_save_to_sd = [0, 0]
-
-        self.servo_type = 0
-        self.servo_user_center = 0
-        self.server_user_rate = 0
-        self.server_user_op_angle = 0
-
-        self.modbus_mode = 0
-        self.modbus_serial_addr = 0
-        self.modbus_serial_baud_rate = 0
-        self.modbus_serial_parity = 0
-
+        super(SystemStorage, self).__init__()
         if ds1 is not None and ds2 is not None and ds3 is not None:
             self.set_from_modbus_data(ds1, ds2, ds3)
 
@@ -336,6 +325,11 @@ class SystemStorage:
          self.batt_input_low_voltage, self.batt_input_over_voltage, self.batt_input_current_limit,
          self.regenerative_enable, self.regenerative_volt_limit, self.regenerative_current_limit) = ds2.data
 
+        self.charge_power = [0, 0]
+        self.discharge_power = [0, 0]
+        self.monitor_log_interval = [0, 0]
+        self.monitor_save_to_sd = [False, False]
+
         (self.charge_power[0], self.charge_power[1],
          self.discharge_power[0], self.discharge_power[1],
          self.power_priority,
@@ -351,119 +345,150 @@ class SystemStorage:
         self.temp_fans_on /= 10.0
         self.temp_reduce /= 10.0
 
-        self.selected_input_source_type = "dc" if self.selected_input_source == 0 else "battery"
+    @serializable
+    def selected_input_source_type(self):
+        return "dc" if self.selected_input_source == 0 else "battery"
 
+    @serializable
+    def power_priority_description(self):
         if self.power_priority == 0:
-            self.power_priority_description = "average"
+            return "average"
         if self.power_priority == 1:
-            self.power_priority_description = "ch1 priority"
+            return "ch1 priority"
         if self.power_priority == 2:
-            self.power_priority_description = "ch2 priority"
-
-    def to_dict(self):
-        d = self.__dict__
-        return d
+            return "ch2 priority"
 
 
-class Preset:
+class PresetIndex(Model):
+    count = IntType(required=True, min_value=0, max_value=63, default=0)
+    indexes = ListType(IntType, required=True, min_size=0, max_size=63, default=[])
+
+    def __init__(self, count = None, indexes = None):
+        super(PresetIndex, self).__init__()
+        if count is not None and indexes is not None:
+            self.set_from_modbus_data(count, indexes)
+
+    def set_from_modbus_data(self, count, indexes):
+        self.count = count
+        self.indexes = indexes
+
+
+class Preset(Model):
+    index = IntType(required=True, min_value=0, max_value=63)
+
+    use_flag = IntType(required=True, choices=[0xffff, 0x55aa, 0x0000])
+    name = StringType(required=True, max_length=37)
+    capacity = LongType(required=True)
+    auto_save = BooleanType(required=True, default=False)
+    li_balance_end_mode = IntType(required=True, default=0)
+    op_enable_mask = IntType(required=True, default=0xff)
+
+    channel_mode = IntType(required=True, choices=[0, 1])
+    save_to_sd = BooleanType(required=True, default=True)
+    log_interval = IntType(required=True)
+    run_counter = IntType(required=True)
+
+    type = IntType(required=True, choices=[0, 1, 2, 3, 4, 5])
+    li_cell = IntType(required=True)
+    ni_cell = IntType(required=True)
+    pb_cell = IntType(required=True)
+
+    li_mode_c = IntType(required=True, choices=[0, 1])
+    li_mode_d = IntType(required=True, choices=[0, 1])
+    ni_mode_c = IntType(required=True, choices=[0, 1])
+    ni_mode_d = IntType(required=True, choices=[0, 1])
+    pb_mode_c = IntType(required=True, choices=[0, 1])
+    pb_mode_d = IntType(required=True, choices=[0, 1])
+
+    bal_speed = IntType(required=True, choices=[0, 1, 2, 3])  # 0=slow, 1=normal, 2=fast, 3=user
+    bal_start_mode = IntType(required=True)
+    bal_start_voltage = IntType(required=True)
+    bal_diff = IntType(required=True)
+    bal_over_point = IntType(required=True)
+    bal_set_point = IntType(required=True)
+    bal_delay = IntType(required=True)
+
+    keep_charge_enable = BooleanType(required=True)
+
+    lipo_charge_cell_voltage = FloatType(required=True)
+    lilo_charge_cell_voltage = FloatType(required=True)
+    lifcharge_cell_voltage = FloatType(required=True)
+
+    lipo_storage_cell_voltage = FloatType(required=True)
+    lilo_storage_cell_voltage = FloatType(required=True)
+    life_storage_cell_voltage = FloatType(required=True)
+
+    lipo_discharge_cell_voltage = FloatType(required=True)
+    lilo_discharge_cell_voltage = FloatType(required=True)
+    life_discharge_cell_voltage = FloatType(required=True)
+
+    charge_current = FloatType(required=True)
+    discharge_current = FloatType(required=True)
+    end_charge = FloatType(required=True)
+    end_discharge = FloatType(required=True)
+    regen_discharge_mode = IntType(required=True, choices=[0, 1, 2, 3])
+
+    ni_peak = FloatType(required=True)
+    ni_peak_delay = IntType(required=True)
+    ni_trickle_enable = BooleanType(required=True)
+    ni_trickle_current = FloatType(required=True)
+    ni_trickle_time = IntType(required=True)
+
+    ni_zero_enable = BooleanType(required=True)
+
+    ni_discharge_voltage = FloatType(required=True)
+    pb_charge_voltage = FloatType(required=True)
+    pb_discharge_voltage = FloatType(required=True)
+    pb_cell_float_enable = BooleanType(required=True)
+    pb_cell_float_voltage = FloatType(required=True)
+
+    restore_voltage = FloatType(required=True)
+    restore_time = IntType(required=True)
+    restore_current = FloatType(required=True)
+
+    cycle_count = IntType(required=True)
+    cycle_delay = IntType(required=True)
+    cycle_mode = IntType(required=True)
+
+    safety_time_c = IntType(required=True)
+    safety_cap_c = IntType(required=True)
+    safety_temp_c = FloatType(required=True)
+
+    safety_time_d = IntType(required=True)
+    safety_cap_d = IntType(required=True)
+    safety_temp_d = FloatType(required=True)
+
+    reg_ch_mode = IntType(required=True)
+    reg_ch_volt = FloatType(required=True)
+    reg_ch_current = FloatType(required=True)
+
+    fast_store = BooleanType(required=True, default=True)
+    store_compensation = IntType(required=True)
+
+    ni_zn_charge_cell_volt = FloatType(required=True)
+    ni_zn_discharge_cell_volt = FloatType(required=True)
+    ni_zn_cell = IntType(required=True, default=0)
+
     def __init__(self, index, ds1 = None, ds2 = None, ds3 = None, ds4 = None, ds5 = None):
+        super(Preset, self).__init__()
         self.index = index
-
-        self.use_flag = 0  # 0xffff=empty, 0x55aa=used, 0x0000=fixed
-        self.name = ""
-        self.capacity = 0
-        self.auto_save = False
-        self.li_balance_end_mode = 0
-        self.op_enable_mask = 0xff
-
-        self.channel_mode = 0
-        self.save_to_sd = False
-        self.log_interval = 0  # 0.1s
-        self.run_counter = 0
-
-        self.type = 0
-        self.li_cell = 0
-        self.ni_cell = 0
-        self.pb_cell = 0
-
-        self.li_mode_c = 0
-        self.li_mode_d = 0
-        self.ni_mode_c = 0
-        self.ni_mode_d = 0
-        self.pb_mode_c = 0
-        self.pb_mode_d = 0
-
-        self.bal_speed = 0  # 0=slow, 1=normal, 2=fast
-        self.bal_start_mode = 0
-        self.bal_start_voltage = 0
-        self.bal_diff = 0
-        self.bal_over_point = 0
-        self.bal_set_point = 0
-        self.bal_delay = 0
-
-        self.keep_charge_enable = 0
-
-        self.lipo_charge_cell_voltage = 0
-        self.lilo_charge_cell_voltage = 0
-        self.life_charge_cell_voltage = 0
-
-        self.lipo_storage_cell_voltage = 0
-        self.lilo_storage_cell_voltage = 0
-        self.life_storage_cell_voltage = 0
-
-        self.lipo_discharge_cell_voltage = 0
-        self.lilo_discharge_cell_voltage = 0
-        self.life_discharge_cell_voltage = 0
-
-        self.charge_current = 0
-        self.discharge_current = 0
-        self.end_charge = 0
-        self.end_discharge = 0
-        self.regen_discharge_mode = 0
-
-        self.ni_peak = 0
-        self.ni_peak_delay = 0
-        self.ni_trickle_enable = 0
-        self.ni_trickle_current = 0
-        self.ni_trickle_time = 0
-
-        self.ni_zero_enable = 0
-
-        self.ni_discharge_voltage = 0
-        self.pb_charge_voltage = 0
-        self.pb_discharge_voltage = 0
-        self.pb_cell_float_enable = 0
-        self.pb_cell_float_voltage = 0
-
-        self.restore_voltage = 0
-        self.restore_time = 0
-        self.restore_current = 0
-
-        self.cycle_count = 0
-        self.cycle_delay = 0
-        self.cycle_mode = 0
-
-        self.safety_time_c = 0
-        self.safety_cap_c = 0
-        self.safety_temp_c = 0
-
-        self.safety_time_d = 0
-        self.safety_cap_d = 0
-        self.safety_temp_d = 0
-
-        self.reg_ch_mode = 0
-        self.reg_ch_volt = 0
-        self.reg_ch_current = 0
-
-        self.fast_store = 0
-        self.store_compensation = 0
-
-        self.ni_zn_charge_cell_volt = 0
-        self.ni_zn_discharge_cell_volt = 0
-        self.ni_zn_cell = 0
-
         if ds1 is not None and ds2 is not None and ds3 is not None and ds4 is not None and ds5 is not None:
             self.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
+
+    @serializable
+    def type_str(self):
+        if self.type == 0:
+            return "LiPo"
+        elif self.type == 1:
+            return "LiLo"
+        elif self.type == 2:
+            return "LiFe"
+        elif self.type == 3:
+            return "NiMH"
+        elif self.type == 4:
+            return "Nicd"
+        elif self.type == 5:
+            return "Pb"
 
     def set_from_modbus_data(self, ds1, ds2, ds3, ds4, ds5):
         (self.use_flag, self.name, self.capacity, self.auto_save, self.li_balance_end_mode,
@@ -512,18 +537,3 @@ class Preset:
         self.lipo_discharge_cell_voltage /= 1000.0
         self.lipo_storage_cell_voltage /= 1000.0
 
-        if self.type == 0:
-            self.type = "LiPo"
-        elif self.type == 1:
-            self.type = "LiLo"
-        elif self.type == 2:
-            self.type = "LiFe"
-        elif self.type == 3:
-            self.type = "NiMH"
-        elif self.type == 4:
-            self.type = "Nicd"
-        elif self.type == 5:
-            self.type = "Pb"
-
-    def to_dict(self):
-        return self.__dict__

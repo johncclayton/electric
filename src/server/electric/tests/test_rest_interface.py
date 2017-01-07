@@ -2,6 +2,7 @@ from electric.app import AppInterface
 from electric.icharger.modbus_usb import testing_control
 import unittest, json
 
+
 class TestRestfulAPI(unittest.TestCase):
     def setUp(self):
         self.app = AppInterface()
