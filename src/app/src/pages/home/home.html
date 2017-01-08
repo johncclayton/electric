@@ -58,15 +58,16 @@
                 <ion-icon name="bulb-outline"></ion-icon>
                 Do you have network connectivity to the Pi?
             </p>
-            <p *ngIf="isConnectedToCharger">
+            <p *ngIf="!isConnectedToCharger">
                 <ion-icon name="bulb-outline"></ion-icon>
                 Is the charger on?
             </p>
-            <p *ngIf="isConnectedToCharger">
+            <p *ngIf="!isConnectedToCharger">
                 <ion-icon name="bulb-outline"></ion-icon>
                 Is the charger USB plugged into the Pi?
             </p>
         </ion-list>
+        <button ion-button full color="danger" *ngIf="exception">{{exception}}</button>
     </div>
 
 

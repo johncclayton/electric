@@ -1,11 +1,20 @@
-.balancecontainer {
-  $balance-width: 4px;
-  $balance-offset: $balance-width + 1;
-  $balance-height: 16px;
-  $balance-off-color: lightgrey;
+$balance-width: 4px;
+$balance-right-margin: 2px;
+$balance-height: 16px;
+$balance-off-color: lightgrey;
+$balance-offset: $balance-width + 1;
 
+// Small phone devices
+// Grr. Why doesn't this work? Currently it overrides everything!!!
+//@include media("<=phone") {
+//  $balance-width: 2px;
+//  $balance-right-margin: 0px;
+//  $balance-offset: $balance-width;
+//}
+
+.balancecontainer {
   z-index: 1;
-  margin-right: 2px;
+  margin-right: $balance-right-margin;
   position: relative;
   display: block;
 
@@ -19,17 +28,17 @@
   }
   .b1 {
     right: $balance-offset * 4;
-    height: 6px;
+    height: 5px;
     background: mix(red, yellow, 8%);
   }
   .b2 {
     right: $balance-offset * 3;
-    height: 9px;
+    height: 8px;
     background: mix(red, yellow, 25%);
   }
   .b3 {
     right: $balance-offset * 2;
-    height: 12px;
+    height: 11px;
     background: mix(red, yellow, 50%);
   }
   .b4 {
@@ -45,4 +54,5 @@
   .off {
     background: $balance-off-color !important;
   }
+
 }

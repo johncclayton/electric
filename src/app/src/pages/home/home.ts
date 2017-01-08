@@ -9,8 +9,10 @@ import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} fr
     templateUrl: 'home.html'
 })
 export class HomePage {
+    public exception: string = "";
     private chargerStatusObserver: Observable<any>;
     private chargerStatusSubscription: Subscription;
+
 
     constructor(public navCtrl: NavController,
                 public events: Events,
@@ -38,7 +40,14 @@ export class HomePage {
         // Use rxjs to poll for charger state continuously
         console.log("Subscribing to charger status events...");
         this.chargerStatusObserver = this.chargerService.getChargerStatus();
-        this.chargerStatusSubscription = this.chargerStatusObserver.subscribe();
+        this.chargerStatusSubscription = this.chargerStatusObserver.subscribe(status => {
+            if (status['exception']) {
+                this.exception = status['exception'];
+            } else {
+                this.exception = "";
+            }
+
+        });
     }
 
     chargerConnected() {

@@ -13,6 +13,7 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 @import "../../bourbon/bourbon";
+@import "../../node_modules/include-media/dist/include-media";
 
 // This is the CSS for the charger, as a whole.
 .charger {
@@ -58,7 +59,7 @@
       opacity: 0.25;
     }
 
-    @import "balance";
+    @import "../theme/balance";
   }
 }
 
