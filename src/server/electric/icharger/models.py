@@ -116,7 +116,7 @@ class DeviceInfo(Model):
 
     def set_from_modbus_data(self, data):
         self.device_id = data[0]
-        self.device_sn = data[1]
+        self.device_sn = data[1].split('\0')[0]
         self.software_ver = data[2]
         self.hardware_ver = data[3]
         self.system_len = data[4]
@@ -495,8 +495,6 @@ class Preset(Model):
          a, b, c, d, e, f, g,  # 7 reserved bytes
          self.op_enable_mask, self.channel_mode) = ds1.data
 
-        self.name = self.name.decode('unicode-escape').encode('ascii', 'ignore')
-
         (self.save_to_sd, self.log_interval,
          self.run_counter,
          self.type,
@@ -538,4 +536,6 @@ class Preset(Model):
         self.lipo_charge_cell_voltage /= 1000.0
         self.lipo_discharge_cell_voltage /= 1000.0
         self.lipo_storage_cell_voltage /= 1000.0
+
+        self.name = self.name.split('\0')[0]
 
