@@ -495,6 +495,8 @@ class Preset(Model):
          a, b, c, d, e, f, g,  # 7 reserved bytes
          self.op_enable_mask, self.channel_mode) = ds1.data
 
+        self.name = self.name.decode('unicode-escape').encode('ascii', 'ignore')
+
         (self.save_to_sd, self.log_interval,
          self.run_counter,
          self.type,

@@ -1,3 +1,5 @@
+import struct
+
 from icharger.models import SystemStorage
 from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, DataSegment
 
@@ -112,8 +114,21 @@ class ChargerCommsManager:
 
         return SystemStorage(ds1, ds2, ds3)
 
-    def get_preset_list(self):
+    def _get_memory_program_preset_index(self, index):
+        preset_list = self.get_preset_list()
+        if index > preset_list.count - 1:
+            raise ValueError("Preset index too large")
+        return preset_list.indexes[index]
+
+    def select_memory_program(self, preset_index):
+        control = self.get_control_register()
+        return self.charger.modbus_write_registers(0x8000 + 1,
+                                                   (preset_index, control.channel, 0x55aa))
+
+    def get_preset_list(self, count_only = False):
         (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
+        if count_only:
+            return count
 
         number = count
         offset = 0
@@ -132,6 +147,9 @@ class ChargerCommsManager:
         return PresetIndex(number, indexes[:number])
 
     def get_preset(self, index):
+        preset_index = self._get_memory_program_preset_index(index)
+        self.select_memory_program(preset_index)
+
         # use-flag -> channel mode
         vars1 = DataSegment(self.charger, "vars1", "H38sLBB7cHB", base=0x8c00)
         # save to sd -> bal-set-point

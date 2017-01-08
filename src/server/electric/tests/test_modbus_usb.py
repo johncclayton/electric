@@ -156,7 +156,7 @@ class TestGatewayCommunications(unittest.TestCase):
     def test_modbus_read_throws_exception(self):
         testing_control.modbus_read_should_fail = True
 
-        with self.assertRaises(TestingControlException) as context:
+        with self.assertRaises(TestingControlException):
             charger = ChargerCommsManager()
             charger.get_device_info()
 
@@ -177,10 +177,12 @@ class TestGatewayCommunications(unittest.TestCase):
         resp = charger.set_active_channel(1)
         self.assertIsNotNone(resp)
 
-    def test_get_first_preset(self):
+    def test_get_all_presets(self):
         charger = ChargerCommsManager()
-        one_preset = charger.get_preset(0)
-        print(one_preset.to_primitive())
+        preset_count = charger.get_preset_list(count_only=True)
+        for index in range(0, preset_count):
+            one_preset = charger.get_preset(index)
+            print(one_preset.name)
 
     def test_get_preset_index_list(self):
         obj = ChargerCommsManager()
