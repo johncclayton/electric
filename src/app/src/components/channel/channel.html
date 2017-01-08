@@ -24,8 +24,16 @@
                     *ngFor="let cell of r; let x=index"
                     text-center>
                 <div>
-                {{1 + ((y * cellChunking()) + x)}}. {{cell.v|number:'1.3-3'}}v
+                    {{1 + ((y * cellChunking()) + x)}}. {{cell.v|number:'1.3-3'}}v
                 </div>
+                <span class="balancecontainer">
+                    <div
+                            *ngFor="let b of balanceRange(cell.balance)"
+                            class="balance b{{b}}"
+                            [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
+                    >
+                    </div>
+                </span>
             </ion-col>
         </ion-row>
     </div>
@@ -33,6 +41,7 @@
     <ion-row padding-top>
         <ion-col no-padding>
             Total IR: {{channel.cell_total_ir|number:'1.3-3'}} mΩ
+            Max balance seen: {{maxBalanceSeen}}
         </ion-col>
     </ion-row>
 

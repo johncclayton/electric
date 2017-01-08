@@ -1,5 +1,4 @@
 // http://ionicframework.com/docs/v2/theming/
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -13,6 +12,7 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+@import "../../bourbon/bourbon";
 
 // This is the CSS for the charger, as a whole.
 .charger {
@@ -45,10 +45,9 @@
     .number {
       margin: 2px;
       border-radius: 3px;
-      border-color: green;
+      border-color: gray;
       border-style: solid;
       border-width: 1px;
-
     }
     .label {
       font-size: 0.8em;
@@ -56,8 +55,10 @@
     .status {
     }
     .unused {
-      opacity: 0.3;
+      opacity: 0.25;
     }
+
+    @import "balance";
   }
 }
 
@@ -77,7 +78,6 @@
 ion-grid {
   padding: 0;
 }
-
 
 .mini-badge {
   font-size: 0.7em;

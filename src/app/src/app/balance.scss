@@ -1,0 +1,48 @@
+.balancecontainer {
+  $balance-width: 4px;
+  $balance-offset: $balance-width + 1;
+  $balance-height: 16px;
+  $balance-off-color: lightgrey;
+
+  z-index: 1;
+  margin-right: 2px;
+  position: relative;
+  display: block;
+
+  .balance {
+    border-radius: 2px;
+    position: absolute;
+    width: $balance-width;
+    top: -$balance-height;
+    @include transform-origin(right top);
+    @include transform(scale(-1) translateY(-$balance-height));
+  }
+  .b1 {
+    right: $balance-offset * 4;
+    height: 6px;
+    background: mix(red, yellow, 8%);
+  }
+  .b2 {
+    right: $balance-offset * 3;
+    height: 9px;
+    background: mix(red, yellow, 25%);
+  }
+  .b3 {
+    right: $balance-offset * 2;
+    height: 12px;
+    background: mix(red, yellow, 50%);
+  }
+  .b4 {
+    right: $balance-offset;
+    height: 14px;
+    background: mix(red, yellow, 75%);
+  }
+  .b5 {
+    right: 0;
+    height: 16px;
+    background: mix(red, yellow, 100%);
+  }
+  .off {
+    background: $balance-off-color !important;
+  }
+}
