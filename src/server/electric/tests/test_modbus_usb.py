@@ -8,7 +8,7 @@ from icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, 
 from icharger.modbus_usb import testing_control
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
-from icharger.junsi_types import Control
+from icharger.models import Control
 from icharger.modbus_usb import TestingControlException
 
 

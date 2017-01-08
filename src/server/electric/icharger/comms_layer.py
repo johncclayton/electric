@@ -1,5 +1,5 @@
-from icharger.junsi_types import SystemStorage
-from junsi_types import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, DataSegment
+from icharger.models import SystemStorage
+from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, DataSegment
 
 import modbus_tk.defines as cst
 from modbus_usb import iChargerMaster
@@ -15,7 +15,6 @@ CHANNEL_INPUT_CELL_VOLT_OFFSET = 11
 SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY = 5
 SYSTEM_STORAGE_OFFSET_CALIBRATION = 22
 SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
-
 
 class ChargerCommsManager:
     """

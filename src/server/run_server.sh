@@ -1,7 +1,3 @@
 #!/usr/bin/env bash
-export PYTHONPATH="."
-
-# when you want to debug, use the following
-#python -m pdb electric/main.py
-
-python electric/main.py
+# do NOT make workers anything other than 1 unless you can solve the "usb bus/icharger is a single resource" problem
+gunicorn --reload --pythonpath=.,electric --bind 0.0.0.0:5000 --workers 1 wsgi

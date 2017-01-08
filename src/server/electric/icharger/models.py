@@ -208,7 +208,7 @@ class ChannelStatus(Model):
         return (self.curr_out_volts - self.cell_total_voltage) < 1
 
     @serializable
-    def battery_leads_plugged_in(self):
+    def balance_leads_plugged_in(self):
         return self.cell_total_voltage > 0
 
 

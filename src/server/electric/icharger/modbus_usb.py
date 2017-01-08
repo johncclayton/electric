@@ -5,6 +5,7 @@ import struct
 import modbus_tk.defines as cst
 import usb.core
 import usb.util
+
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster

@@ -3,12 +3,12 @@ from flask_restful import Resource
 from electric.icharger.modbus_usb import connection_state_dict
 from icharger.comms_layer import ChargerCommsManager
 
+comms = ChargerCommsManager()
 
 class Status_iCharger(Resource):
     def get(self):
         try:
-            dev = ChargerCommsManager()
-            info = dev.get_device_info()
+            info = comms.get_device_info()
 
             obj = info.to_primitive()
             obj.update(connection_state_dict())
@@ -21,13 +21,11 @@ class Status_iCharger(Resource):
 class ChannelStatus_iCharger(Resource):
     def get(self, channel_id):
         try:
-            dev = ChargerCommsManager()
-
             channel = int(channel_id)
             if not (channel == 0 or channel == 1):
                 raise ValueError("Channel part of URI must be 0 or 1")
 
-            status = dev.get_channel_status(int(channel))
+            status = comms.get_channel_status(int(channel))
 
             obj = status.to_primitive()
             obj.update(connection_state_dict())
@@ -40,8 +38,7 @@ class ChannelStatus_iCharger(Resource):
 class ControlRegister_iCharger(Resource):
     def get(self):
         try:
-            dev = ChargerCommsManager()
-            control = dev.get_control_register()
+            control = comms.get_control_register()
 
             # note: intentionally no connection state
             return control.to_primitive()
@@ -52,8 +49,7 @@ class ControlRegister_iCharger(Resource):
 class SystemStorage_iCharger(Resource):
     def get(self):
         try:
-            dev = ChargerCommsManager()
-            syst = dev.get_system_storage()
+            syst = comms.get_system_storage()
 
             obj = syst.to_primitive()
             obj.update(connection_state_dict())

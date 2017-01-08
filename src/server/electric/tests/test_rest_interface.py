@@ -1,12 +1,11 @@
-from electric.app import AppInterface
-from electric.icharger.modbus_usb import testing_control
+from app import application
+from icharger.modbus_usb import testing_control
 import unittest, json
 
 
 class TestRestfulAPI(unittest.TestCase):
     def setUp(self):
-        self.app = AppInterface()
-        self.client = self.app.app.test_client()
+        self.client = application.test_client()
         testing_control.reset()
 
     def test_can_get_with_no_icharger_attached(self):
@@ -17,6 +16,7 @@ class TestRestfulAPI(unittest.TestCase):
 
         self.assertIn("exception", d.keys())
         self.assertIn("charger_presence", d.keys())
+
         self.assertEqual("disconnected", d["charger_presence"])
 
     def test_can_request_status(self):
