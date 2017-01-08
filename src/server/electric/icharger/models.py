@@ -1,6 +1,6 @@
 import struct
 import modbus_tk.defines as cst
-from schematics.models import  Model
+from schematics.models import Model
 from schematics.transforms import blacklist
 from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
 from schematics.types.serializable import serializable
@@ -43,19 +43,18 @@ class DataSegment:
     auto calculates the correct offset based off a prior read if required.
     """
 
-    def __init__(self, charger, name, format, base=None, prev_format=None):
+    def __init__(self, charger, name, fmt, base=None, prev_format=None):
         self.func_code = cst.READ_INPUT_REGISTERS
 
         self.name = name
-        self.format = format
+        self.format = fmt
         self.size = struct.calcsize("=" + self.format)
         self.addr = base if base is not None else prev_format.addr + prev_format.size / 2
 
         if self.addr >= 0x8000:
             self.func_code = cst.READ_HOLDING_REGISTERS
 
-        # print("segment:", self.name, " has byte size:", self.size, ", with base addr:", "0x%0.4X" % self.addr)
-        self.data = charger.modbus_read_registers(self.addr, format, function_code=self.func_code)
+        self.data = charger.modbus_read_registers(self.addr, fmt, function_code=self.func_code)
 
 
 class DeviceInfoStatus(Model):
@@ -65,7 +64,7 @@ class DeviceInfoStatus(Model):
         # this means that value won't appear in the JSON output by default
         roles = {'default': blacklist('value')}
 
-    def __init__(self, value = 0):
+    def __init__(self, value=0):
         super(DeviceInfoStatus, self).__init__()
         self.value = value
 
@@ -109,7 +108,7 @@ class DeviceInfo(Model):
     ch1_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
     ch2_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
 
-    def __init__(self, modbus_data = None):
+    def __init__(self, modbus_data=None):
         super(DeviceInfo, self).__init__()
         if modbus_data is not None:
             self.set_from_modbus_data(modbus_data)
@@ -131,7 +130,7 @@ class CellStatus(Model):
     balance = IntType(required=True)
     ir = FloatType(required=True)
 
-    def __init__(self, c = 0, volt = 0, bal = 0, i = 0):
+    def __init__(self, c=0, volt=0, bal=0, i=0):
         super(CellStatus, self).__init__()
         self.set_from_modbus_data(c, volt, bal, i)
 
@@ -165,7 +164,7 @@ class ChannelStatus(Model):
     dlg_box_id = IntType(required=True)
     line_intern_resistance = FloatType(required=True)
 
-    def __init__(self, channel = 0, header = None, cell_v = None, cell_b = None, cell_i = None, footer = None):
+    def __init__(self, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
         super(ChannelStatus, self).__init__()
         if header is not None and cell_v is not None and cell_b is not None and cell_i is not None and footer is not None:
             self.set_from_modbus_data(channel, header, cell_v, cell_b, cell_i, footer)
@@ -178,7 +177,7 @@ class ChannelStatus(Model):
         self.curr_out_amps = data[2] / 100.0
         self.curr_inp_volts = data[3] / 1000.0
         self.curr_out_volts = data[4] / 1000.0
-        self.curr_out_capacity = data[5] # mAh sent or taken from batt
+        self.curr_out_capacity = data[5]  # mAh sent or taken from batt
         self.curr_int_temp = data[6] / 10.0
         self.curr_ext_temp = data[7] / 10.0
 
@@ -307,7 +306,7 @@ class SystemStorage(Model):
     modbus_serial_baud_rate = LongType(required=True)
     modbus_serial_parity = LongType(required=True)
 
-    def __init__(self, ds1 = None, ds2 = None, ds3 = None):
+    def __init__(self, ds1=None, ds2=None, ds3=None):
         super(SystemStorage, self).__init__()
         if ds1 is not None and ds2 is not None and ds3 is not None:
             self.set_from_modbus_data(ds1, ds2, ds3)
@@ -363,7 +362,7 @@ class PresetIndex(Model):
     count = IntType(required=True, min_value=0, max_value=63, default=0)
     indexes = ListType(IntType, required=True, min_size=0, max_size=63, default=[])
 
-    def __init__(self, count = None, indexes = None):
+    def __init__(self, count=None, indexes=None):
         super(PresetIndex, self).__init__()
         if count is not None and indexes is not None:
             self.set_from_modbus_data(count, indexes)
@@ -469,7 +468,7 @@ class Preset(Model):
     ni_zn_discharge_cell_volt = FloatType(required=True)
     ni_zn_cell = IntType(required=True, default=0)
 
-    def __init__(self, index, ds1 = None, ds2 = None, ds3 = None, ds4 = None, ds5 = None):
+    def __init__(self, index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
         super(Preset, self).__init__()
         self.index = index
         if ds1 is not None and ds2 is not None and ds3 is not None and ds4 is not None and ds5 is not None:
