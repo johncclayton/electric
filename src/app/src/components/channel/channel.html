@@ -5,9 +5,9 @@
 
 <ion-grid class="channel" padding>
     <ion-row class="status">
-        <ion-col class="number" text-center>{{channel.curr_out_volts|number:'1.3-3'}}</ion-col>
-        <ion-col class="number" text-center>{{channel.curr_out_amps|number:'1.2-2'}}</ion-col>
-        <ion-col class="number" text-center>{{channel.curr_out_capacity|number:'1.0-0'}}</ion-col>
+        <ion-col class="cellcontainer" text-center>{{channel.curr_out_volts|number:'1.3-3'}}</ion-col>
+        <ion-col class="cellcontainer" text-center>{{channel.curr_out_amps|number:'1.2-2'}}</ion-col>
+        <ion-col class="cellcontainer" text-center>{{channel.curr_out_capacity|number:'1.0-0'}}</ion-col>
     </ion-row>
 
     <ion-row class="labels">
@@ -17,23 +17,25 @@
     </ion-row>
 
     <div padding-top>
-        <ion-row *ngFor="let r of chunkedCells(); let y=index">
+        <ion-row *ngFor="let r of chunkedCells(); let y=index" class="channelrow">
             <ion-col
-                    class="number"
+                    class="cellcontainer"
                     [ngClass]="{'unused' : isCellUnused(cell)}"
+                    no-padding
                     *ngFor="let cell of r; let x=index"
                     text-center>
-                <div>
-                    {{1 + ((y * cellChunking()) + x)}}. {{cell.v|number:'1.3-3'}}v
-                </div>
-                <span class="balancecontainer">
-                    <div
-                            *ngFor="let b of balanceRange(cell.balance)"
-                            class="balance b{{b}}"
-                            [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
-                    >
-                    </div>
-                </span>
+                <ion-row class="cell">
+                    <ion-col width-15 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
+                    <ion-col width-70 text-center>{{cell.v|number:'1.3-3'}}v</ion-col>
+                    <ion-col width-15 class="balancecontainer">
+                        <div
+                                *ngFor="let b of balanceRange(cell.balance)"
+                                class="balance b{{b}}"
+                                [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
+                        >
+                        </div>
+                    </ion-col>
+                </ion-row>
             </ion-col>
         </ion-row>
     </div>

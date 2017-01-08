@@ -22,7 +22,7 @@
   // The main amps, volts area...
   .overview {
     .status {
-      .number {
+      .cellcontainer {
         font-size: 1.4em;
         .label {
           font-size: 0.7em;
@@ -42,18 +42,38 @@
   //}
 
   // Per channel
+  .channel0 {
+    background: lightblue;
+  }
+  .channel1 {
+    background: lightgreen;
+
+  }
   channel {
-    .number {
+
+    .cellcontainer {
+      border-radius: 4px;
       margin: 2px;
-      border-radius: 3px;
+      margin-right: 4px;
       border-color: gray;
       border-style: solid;
       border-width: 1px;
-    }
-    .label {
-      font-size: 0.8em;
-    }
-    .status {
+
+      // The channel number sits off on the edge of the cell
+      .channelnum {
+        background: map_get($colors, 'primary');
+        color: white;
+        z-index: 1;
+        float: left;
+        padding-right: 4px;
+        padding-left: 3px;
+      }
+
+      .label {
+        font-size: 0.8em;
+      }
+      .status {
+      }
     }
     .unused {
       opacity: 0.25;

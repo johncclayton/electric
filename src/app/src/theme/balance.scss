@@ -19,35 +19,37 @@ $balance-offset: $balance-width + 1;
   display: block;
 
   .balance {
-    border-radius: 2px;
+    border-radius: 5px;
     position: absolute;
     width: $balance-width;
     top: -$balance-height;
+    margin-top: 21px;
+    margin-right: 5px;
     @include transform-origin(right top);
     @include transform(scale(-1) translateY(-$balance-height));
   }
   .b1 {
-    right: $balance-offset * 4;
+    right: ($balance-width / 2.0) + $balance-offset * 4;
     height: 5px;
     background: mix(red, yellow, 8%);
   }
   .b2 {
-    right: $balance-offset * 3;
+    right: ($balance-width / 2.0) + $balance-offset * 3;
     height: 8px;
     background: mix(red, yellow, 25%);
   }
   .b3 {
-    right: $balance-offset * 2;
+    right: ($balance-width / 2.0) + $balance-offset * 2;
     height: 11px;
     background: mix(red, yellow, 50%);
   }
   .b4 {
-    right: $balance-offset;
+    right: ($balance-width / 2.0) + $balance-offset;
     height: 14px;
     background: mix(red, yellow, 75%);
   }
   .b5 {
-    right: 0;
+    right: ($balance-width / 2.0);
     height: 16px;
     background: mix(red, yellow, 100%);
   }

@@ -1,16 +1,16 @@
 <ion-grid class="overview">
 
     <ion-row class="status">
-        <ion-col wrap class="number volts" text-center padding>
+        <ion-col wrap class="cellcontainer volts" text-center padding>
             {{channelData.curr_inp_volts|number:'1.3-3'}}<br/><div class="label">volts</div>
         </ion-col>
-        <ion-col class="number amps" text-center padding>
-            0<br/><div class="label">amps</div> <!--|number:'1.2-2'-->
+        <ion-col class="cellcontainer amps" text-center padding>
+            {{channelData.curr_out_amps|number:'1.2-2'}}<br/><div class="label">amps</div>
         </ion-col>
-        <ion-col class="number mah" text-center padding>
-            0<br/><div class="label">mAh</div>
+        <ion-col class="cellcontainer mah" text-center padding>
+            {{channelData.curr_out_capacity}}<br/><div class="label">mAh</div>
         </ion-col>
-        <ion-col class="number hhmm" text-center padding>
+        <ion-col class="cellcontainer hhmm" text-center padding>
             {{channelData.timestamp|duration}}<br/><div class="label">time</div>
         </ion-col>
     </ion-row>

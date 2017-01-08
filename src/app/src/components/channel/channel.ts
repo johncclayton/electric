@@ -5,6 +5,7 @@ import * as _ from "lodash";
  control_status: 3, run_status: 13 - discharging
  control_status: 0, run_status: 1 - pressed stop after discharging
  control_status: 0, run_status: 0 - pressed stop again, idle
+ control_status: 0, run_status: 40 - end of charge, done
  */
 @Component({
     selector: 'channel',
