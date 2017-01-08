@@ -1,7 +1,7 @@
 import struct
 
 from icharger.models import SystemStorage
-from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, DataSegment
+from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
 import modbus_tk.defines as cst
 from modbus_usb import iChargerMaster
@@ -36,7 +36,7 @@ class ChargerCommsManager:
         Returns the following information from the iCharger, known as the 'device only reads message'
         :return: a DeviceInfo instance
         """
-        vars = DataSegment(self.charger, "vars", "h12sHHHHHH", base=0x0000)
+        vars = ReadDataSegment(self.charger, "vars", "h12sHHHHHH", base=0x0000)
         return DeviceInfo(vars.data)
 
     def get_channel_status(self, channel):
@@ -88,7 +88,7 @@ class ChargerCommsManager:
         # for now we only access beep type values
         base = 0x8400
 
-        results = DataSegment(self.charger, "temp", "8H", base=0x8400 + 13)
+        results = ReadDataSegment(self.charger, "temp", "8H", base=0x8400 + 13)
         value_enabled = list(results.data[:4])
         value_volume = list(results.data[4:])
 
@@ -106,11 +106,11 @@ class ChargerCommsManager:
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
         # temp-unit -> beep-vol
-        ds1 = DataSegment(self.charger, "vars1", "21H", base=0x8400)
+        ds1 = ReadDataSegment(self.charger, "vars1", "21H", base=0x8400)
         # dump3 -> reg current limit
-        ds2 = DataSegment(self.charger, "vars2", "13H", prev_format=ds1)
+        ds2 = ReadDataSegment(self.charger, "vars2", "13H", prev_format=ds1)
         # charge/discharge power -> modbus_serial_parity
-        ds3 = DataSegment(self.charger, "vars3", "17H", prev_format=ds2)
+        ds3 = ReadDataSegment(self.charger, "vars3", "17H", prev_format=ds2)
 
         return SystemStorage(ds1, ds2, ds3)
 
@@ -151,15 +151,24 @@ class ChargerCommsManager:
         self.select_memory_program(preset_index)
 
         # use-flag -> channel mode
-        vars1 = DataSegment(self.charger, "vars1", "H38sLBB7cHB", base=0x8c00)
+        vars1 = ReadDataSegment(self.charger, "vars1", "H38sLBB7cHB", base=0x8c00)
         # save to sd -> bal-set-point
-        vars2 = DataSegment(self.charger, "vars2", "BHH12BHBBB", prev_format=vars1)
+        vars2 = ReadDataSegment(self.charger, "vars2", "BHH12BHBBB", prev_format=vars1)
         # bal-delay, keep-charge-enable -> reg discharge mode
-        vars3 = DataSegment(self.charger, "vars3", "BB14H", prev_format=vars2)
+        vars3 = ReadDataSegment(self.charger, "vars3", "BB14H", prev_format=vars2)
         # ni-peak -> cycle-delay
-        vars4 = DataSegment(self.charger, "vars4", "16H", prev_format=vars3)
+        vars4 = ReadDataSegment(self.charger, "vars4", "16H", prev_format=vars3)
         # cycle-mode -> ni-zn-cell
-        vars5 = DataSegment(self.charger, "vars5", "B6HB2HB3HB", prev_format=vars4)
+        vars5 = ReadDataSegment(self.charger, "vars5", "B6HB2HB3HB", prev_format=vars4)
 
         return Preset(index, vars1, vars2, vars3, vars4, vars5)
+
+    def set_preset(self, index, preset):
+        preset_index = self._get_memory_program_preset_index(index)
+        self.select_memory_program(preset_index)
+
+        # ask the preset for its data segments
+        (v1, v2, v3, v4, v5) = preset.to_modbus_data()
+
+
 

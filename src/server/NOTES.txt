@@ -33,7 +33,7 @@ least the following information associated with it:
 Decisions:
 
 ChargerCommsManager is responsible for:
-- reading modbus segments (DataSegment instances) and constructing python objects with attributes
+- reading modbus segments (ReadDataSegment instances) and constructing python objects with attributes
 - using the data objects to obtain data segments that can be written to modbus API
 
 Data-Object is responsible for:

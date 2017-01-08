@@ -1,10 +1,11 @@
 import struct
+
 import modbus_tk.defines as cst
 from schematics.models import Model
 from schematics.transforms import blacklist
 from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
-from schematics.types.serializable import serializable
 from schematics.types.compound import ModelType, ListType
+from schematics.types.serializable import serializable
 
 STATUS_RUN = 0x01
 STATUS_ERROR = 0x02
@@ -35,7 +36,7 @@ Control_OrderOperations = (
 )
 
 
-class DataSegment:
+class ReadDataSegment:
     """
     The iCharger USB HID API cannot read more than 64 bytes at a time, yet some of the data structures are much
     larger than this.  To accommodate multiple reads this class captures all the information about a segment of
@@ -384,7 +385,7 @@ class Preset(Model):
 
     channel_mode = IntType(required=True, choices=[0, 1])
     save_to_sd = BooleanType(required=True, default=True)
-    log_interval = IntType(required=True)
+    log_interval_sec = FloatType(required=True)
     run_counter = IntType(required=True)
 
     type = IntType(required=True, choices=[0, 1, 2, 3, 4, 5])
@@ -411,7 +412,7 @@ class Preset(Model):
 
     lipo_charge_cell_voltage = FloatType(required=True)
     lilo_charge_cell_voltage = FloatType(required=True)
-    lifcharge_cell_voltage = FloatType(required=True)
+    life_charge_cell_voltage = FloatType(required=True)
 
     lipo_storage_cell_voltage = FloatType(required=True)
     lilo_storage_cell_voltage = FloatType(required=True)
@@ -489,39 +490,170 @@ class Preset(Model):
         elif self.type == 5:
             return "Pb"
 
-    def set_from_modbus_data(self, ds1, ds2, ds3, ds4, ds5):
-        (self.use_flag, self.name, self.capacity, self.auto_save, self.li_balance_end_mode,
-         a, b, c, d, e, f, g,  # 7 reserved bytes
-         self.op_enable_mask, self.channel_mode) = ds1.data
+    def to_modbus_data(self):
+        v1 = (self.use_flag,
+              self.name,
+              self.capacity,
+              self.auto_save,
+              self.li_balance_end_mode,
+              0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  # 7 reserved bytes
+              self.op_enable_mask,
+              self.channel_mode)
 
-        (self.save_to_sd, self.log_interval,
+        v2 = (self.save_to_sd,
+              int(self.log_interval_sec * 10),
+              self.run_counter,
+              self.type,
+              self.li_cell,
+              self.ni_cell,
+              self.pb_cell,
+              self.li_mode_c,
+              self.li_mode_d,
+              self.ni_mode_c,
+              self.ni_mode_d,
+              self.pb_mode_c,
+              self.pb_mode_d,
+              self.bal_speed,
+              self.bal_start_mode,
+              int(self.bal_start_voltage * 1000),
+              self.bal_diff,
+              self.bal_over_point,
+              self.bal_set_point)
+
+        v3 = (self.bal_delay,
+              self.keep_charge_enable,
+
+              int(self.lipo_charge_cell_voltage * 1000),
+              int(self.lilo_charge_cell_voltage * 1000),
+              int(self.life_charge_cell_voltage * 1000),
+
+              int(self.lipo_storage_cell_voltage * 1000),
+              int(self.lilo_storage_cell_voltage * 1000),
+              int(self.life_storage_cell_voltage * 1000),
+
+              int(self.lipo_discharge_cell_voltage * 1000),
+              int(self.lilo_discharge_cell_voltage * 1000),
+              int(self.life_discharge_cell_voltage * 1000),
+
+              int(self.charge_current * 100),
+              int(self.discharge_current * 100),
+              self.end_charge,
+              self.end_discharge,
+              self.regen_discharge_mode)
+
+        v4 = (self.ni_peak,
+              self.ni_peak_delay,
+              self.ni_trickle_enable,
+              int(self.ni_trickle_current * 100),
+              self.ni_trickle_time,
+              self.ni_zero_enable,
+              int(self.ni_discharge_voltage * 1000),
+              int(self.pb_charge_voltage * 1000),
+              int(self.pb_discharge_voltage * 1000),
+              self.pb_cell_float_enable,
+              int(self.pb_cell_float_voltage * 1000),
+              int(self.restore_voltage * 1000),
+              self.restore_time,
+              int(self.restore_current * 100),
+              self.cycle_count,
+              self.cycle_delay)
+
+        v5 = (self.cycle_mode,
+              self.safety_time_c,
+              self.safety_cap_c,
+              int(self.safety_temp_c * 10),
+              self.safety_time_d,
+              self.safety_cap_d,
+              int(self.safety_temp_d * 10),
+              self.reg_ch_mode,
+              int(self.reg_ch_volt * 1000),
+              int(self.reg_ch_current * 100),
+              self.fast_store,
+              self.store_compensation,
+              int(self.ni_zn_charge_cell_volt * 1000),
+              int(self.ni_zn_discharge_cell_volt * 1000),
+              self.ni_zn_cell)
+
+        return v1, v2, v3, v4, v5
+
+    def set_from_modbus_data(self, ds1, ds2, ds3, ds4, ds5):
+        (self.use_flag,
+         self.name,
+         self.capacity,
+         self.auto_save,
+         self.li_balance_end_mode,
+         a, b, c, d, e, f, g,  # 7 reserved bytes
+         self.op_enable_mask,
+         self.channel_mode) = ds1.data
+
+        (self.save_to_sd,
+         self.log_interval_sec,
          self.run_counter,
          self.type,
-         self.li_cell, self.ni_cell, self.pb_cell,
-         self.li_mode_c, self.li_mode_d,
-         self.ni_mode_c, self.ni_mode_d,
-         self.pb_mode_c, self.pb_mode_d,
-         self.bal_speed, self.bal_start_mode, self.bal_start_voltage, self.bal_diff,
-         self.bal_over_point, self.bal_set_point) = ds2.data
+         self.li_cell,
+         self.ni_cell,
+         self.pb_cell,
+         self.li_mode_c,
+         self.li_mode_d,
+         self.ni_mode_c,
+         self.ni_mode_d,
+         self.pb_mode_c,
+         self.pb_mode_d,
+         self.bal_speed,
+         self.bal_start_mode,
+         self.bal_start_voltage,
+         self.bal_diff,
+         self.bal_over_point,
+         self.bal_set_point) = ds2.data
 
-        (self.bal_delay, self.keep_charge_enable,
-         self.lipo_charge_cell_voltage, self.lilo_charge_cell_voltage, self.life_charge_cell_voltage,
-         self.lipo_storage_cell_voltage, self.lilo_storage_cell_voltage, self.life_storage_cell_voltage,
-         self.lipo_discharge_cell_voltage, self.lilo_discharge_cell_voltage, self.life_discharge_cell_voltage,
-         self.charge_current, self.discharge_current, self.end_charge, self.end_discharge,
+        (self.bal_delay,
+         self.keep_charge_enable,
+         self.lipo_charge_cell_voltage,
+         self.lilo_charge_cell_voltage,
+         self.life_charge_cell_voltage,
+         self.lipo_storage_cell_voltage,
+         self.lilo_storage_cell_voltage,
+         self.life_storage_cell_voltage,
+         self.lipo_discharge_cell_voltage,
+         self.lilo_discharge_cell_voltage,
+         self.life_discharge_cell_voltage,
+         self.charge_current,
+         self.discharge_current,
+         self.end_charge,
+         self.end_discharge,
          self.regen_discharge_mode) = ds3.data
 
-        (self.ni_peak, self.ni_peak_delay,
-         self.ni_trickle_enable, self.ni_trickle_current, self.ni_trickle_time,
+        (self.ni_peak,
+         self.ni_peak_delay,
+         self.ni_trickle_enable,
+         self.ni_trickle_current,
+         self.ni_trickle_time,
          self.ni_zero_enable,
-         self.ni_discharge_voltage, self.pb_charge_voltage, self.pb_discharge_voltage, self.pb_cell_float_enable,
-         self.pb_cell_float_voltage, self.restore_voltage, self.restore_time, self.restore_current,
-         self.cycle_count, self.cycle_delay) = ds4.data
+         self.ni_discharge_voltage,
+         self.pb_charge_voltage,
+         self.pb_discharge_voltage,
+         self.pb_cell_float_enable,
+         self.pb_cell_float_voltage,
+         self.restore_voltage,
+         self.restore_time,
+         self.restore_current,
+         self.cycle_count,
+         self.cycle_delay) = ds4.data
 
         (self.cycle_mode,
-         self.safety_time_c, self.safety_cap_c, self.safety_temp_c, self.safety_time_d, self.safety_cap_d,
-         self.safety_temp_d, self.reg_ch_mode, self.reg_ch_volt, self.reg_ch_current, self.fast_store,
-         self.store_compensation, self.ni_zn_charge_cell_volt, self.ni_zn_discharge_cell_volt,
+         self.safety_time_c,
+         self.safety_cap_c,
+         self.safety_temp_c,
+         self.safety_time_d,
+         self.safety_cap_d,
+         self.safety_temp_d,
+         self.reg_ch_mode,
+         self.reg_ch_volt,
+         self.reg_ch_current,
+         self.fast_store,
+         self.store_compensation,
+         self.ni_zn_charge_cell_volt,
+         self.ni_zn_discharge_cell_volt,
          self.ni_zn_cell) = ds5.data
 
         self.life_charge_cell_voltage /= 1000.0
@@ -536,5 +668,27 @@ class Preset(Model):
         self.lipo_discharge_cell_voltage /= 1000.0
         self.lipo_storage_cell_voltage /= 1000.0
 
-        self.name = self.name.split('\0')[0]
+        self.ni_discharge_voltage /= 1000.0
 
+        self.bal_start_voltage /= 1000.0
+        self.charge_current /= 100.0
+        self.discharge_current /= 100.0
+
+        self.ni_trickle_current /= 100.0
+        self.ni_zn_charge_cell_volt /= 1000.0
+        self.ni_zn_discharge_cell_volt /= 1000.0
+
+        self.pb_cell_float_voltage /= 1000.0
+        self.pb_charge_voltage /= 1000.0
+        self.pb_discharge_voltage /= 1000.0
+
+        self.reg_ch_current /= 100
+        self.reg_ch_volt /= 1000.0
+        self.restore_current /= 100.0
+        self.restore_voltage /= 1000.0
+
+        self.log_interval_sec /= 10.0
+        self.safety_temp_d /= 10.0
+        self.safety_temp_c /= 10.0
+
+        self.name = self.name.split('\0')[0]

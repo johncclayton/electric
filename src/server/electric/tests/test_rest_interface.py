@@ -19,13 +19,6 @@ class TestRestfulAPI(unittest.TestCase):
 
         self.assertEqual("disconnected", d["charger_presence"])
 
-    def test_can_get_preset_index_list(self):
-        resp = self.client.get("/preset_indexes")
-        d = json.loads(resp.data)
-        self.assertIn("count", d)
-        self.assertTrue(d["count"] >= 2)
-        self.assertIn("indexes", d)
-
     def test_can_request_status(self):
         resp = self.client.get("/status")
         d = json.loads(resp.data)
