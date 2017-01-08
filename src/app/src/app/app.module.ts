@@ -3,7 +3,7 @@ import {Storage} from "@ionic/storage";
 import {IonicApp, IonicModule, IonicErrorHandler} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
-import {KeysPipe, ReversePipe} from "../utils/pipes";
+import {KeysPipe, ReversePipe, DurationPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
 import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config";
@@ -16,7 +16,7 @@ import {PresetListPage} from "../pages/preset-list/preset-list";
         MyApp,
         ConfigPage,
         HomePage,
-        KeysPipe, ReversePipe,
+        KeysPipe, ReversePipe, DurationPipe,
         ChannelComponent,
         PresetListPage,
         ChargerStatusComponent
