@@ -1,5 +1,4 @@
 // http://ionicframework.com/docs/v2/theming/
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -13,7 +12,8 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
-
+@import "../../bourbon/bourbon";
+@import "../../node_modules/include-media/dist/include-media";
 
 // This is the CSS for the charger, as a whole.
 .charger {
@@ -22,30 +22,64 @@
   // The main amps, volts area...
   .overview {
     .status {
-      .number {
+      .cellcontainer {
         font-size: 1.4em;
+        .label {
+          font-size: 0.7em;
+        }
       }
     }
   }
 
+  //.volts {
+  //  background: lightsalmon;
+  //}
+  //.amps {
+  //  background: lightblue;
+  //}
+  //.mah {
+  //  background: lightgreen;
+  //}
+
   // Per channel
+  .channel0 {
+    background: lightblue;
+  }
+  .channel1 {
+    background: lightgreen;
+
+  }
   channel {
-    .number {
+
+    .cellcontainer {
+      border-radius: 4px;
       margin: 2px;
-      border-radius: 3px;
-      border-color: green;
+      margin-right: 4px;
+      border-color: gray;
       border-style: solid;
       border-width: 1px;
-    }
-    .status {
-      //padding-right: 10px;
-    }
-    .label {
-      font-size: 0.8em;
+
+      // The channel number sits off on the edge of the cell
+      .channelnum {
+        background: map_get($colors, 'primary');
+        color: white;
+        z-index: 1;
+        float: left;
+        padding-right: 4px;
+        padding-left: 3px;
+      }
+
+      .label {
+        font-size: 0.8em;
+      }
+      .status {
+      }
     }
     .unused {
-      opacity: 0.3;
+      opacity: 0.25;
     }
+
+    @import "../theme/balance";
   }
 }
 
@@ -66,4 +100,9 @@ ion-grid {
   padding: 0;
 }
 
-
+.mini-badge {
+  font-size: 0.7em;
+  background: green;
+  margin-right: auto;
+  margin-left: auto;
+}

@@ -1,16 +1,17 @@
 <ion-grid class="overview">
-  <ion-row class="status" padding-left padding-right padding-top>
-    <ion-col class="number" text-center width-33>
-      {{channelData.curr_inp_volts|number:'1.3-3'}}
-    </ion-col>
-    <ion-col class="number" text-center width-33>0</ion-col>
-    <ion-col class="number" text-center width-33>0</ion-col>
-  </ion-row>
-  <ion-row class="status " padding-left padding-right padding-bottom>
-    <ion-col no-padding class="label" text-center width-33>
-      volts
-    </ion-col>
-    <ion-col no-padding class="label" text-center width-33>amps</ion-col>
-    <ion-col no-padding class="label" text-center width-33>mAh</ion-col>
-  </ion-row>
+
+    <ion-row class="status">
+        <ion-col wrap class="cellcontainer volts" text-center padding>
+            {{channelData.curr_inp_volts|number:'1.3-3'}}<br/><div class="label">volts</div>
+        </ion-col>
+        <ion-col class="cellcontainer amps" text-center padding>
+            {{channelData.curr_out_amps|number:'1.2-2'}}<br/><div class="label">amps</div>
+        </ion-col>
+        <ion-col class="cellcontainer mah" text-center padding>
+            {{channelData.curr_out_capacity}}<br/><div class="label">mAh</div>
+        </ion-col>
+        <ion-col class="cellcontainer hhmm" text-center padding>
+            {{channelData.timestamp|duration}}<br/><div class="label">time</div>
+        </ion-col>
+    </ion-row>
 </ion-grid>
