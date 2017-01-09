@@ -314,7 +314,7 @@ class iChargerMaster(RtuMaster):
     def _make_query(self):
         return iChargerQuery()
 
-    def modbus_read_registers(self, addr, format, function_code=cst.READ_INPUT_REGISTERS):
+    def modbus_read_registers(self, addr, data_format, function_code=cst.READ_INPUT_REGISTERS):
         """
         Uses the modbus_tk framework to acquire data from the device.
 
@@ -328,11 +328,11 @@ class iChargerMaster(RtuMaster):
         decision by Junsi for the iCharger.
 
         :param addr: the base address (offsets are in words not bytes)
-        :param format: the structure of the data being received, assumes struct.unpack()
+        :param data_format: the structure of the data being received, assumes struct.unpack()
         :return: the tuples of unpacked and byte swapped data
         """
-        format = "=" + format
-        byte_len = struct.calcsize(format)
+        data_format = "=" + data_format
+        byte_len = struct.calcsize(data_format)
         quant = byte_len // 2
 
         assert (quant * 2) == byte_len
@@ -345,7 +345,7 @@ class iChargerMaster(RtuMaster):
         return self.execute(1,
                             function_code,
                             addr,
-                            data_format=format,
+                            data_format=data_format,
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
 

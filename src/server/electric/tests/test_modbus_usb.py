@@ -1,4 +1,4 @@
-import unittest, struct
+import unittest, struct, time
 import modbus_tk.defines as cst
 from usb.core import USBError
 
@@ -189,4 +189,21 @@ class TestGatewayCommunications(unittest.TestCase):
         presets = obj.get_preset_list()
         self.assertIsNotNone(presets)
         self.assertTrue(presets.count == len(presets.indexes))
+
+    def test_wont_cause_fire_while_charging(self):
+        # fetch status/channel info - what are the flags
+        # start a charge/discharge cycle uysing preset 0
+        # fetch status/channel info - what are the flags
+        # change the amps in the preset, watch what happens
+        charger = ChargerCommsManager()
+        preset_0 = charger.get_preset(0)
+        self.assertIsNotNone(preset_0)
+        info = charger.get_device_info()
+        channel_0 = charger.get_channel_status(0)
+        # now dear user... start a charge..
+        print("now is the time to begin charging!! you have 10 seconds")
+        time.sleep(1)
+        preset_0.charge_current = 11
+        charger.set_preset(preset_0)
+
 

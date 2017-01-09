@@ -1,6 +1,6 @@
 import struct
 
-from icharger.models import SystemStorage
+from icharger.models import SystemStorage, WriteDataSegment
 from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
 import modbus_tk.defines as cst
@@ -163,12 +163,21 @@ class ChargerCommsManager:
 
         return Preset(index, vars1, vars2, vars3, vars4, vars5)
 
-    def set_preset(self, index, preset):
-        preset_index = self._get_memory_program_preset_index(index)
+    def set_preset(self, preset):
+        preset_index = self._get_memory_program_preset_index(preset.index)
         self.select_memory_program(preset_index)
 
         # ask the preset for its data segments
         (v1, v2, v3, v4, v5) = preset.to_modbus_data()
+
+        s1 = WriteDataSegment(self.charger, "seg1", v1, base=0x8c00)
+        s2 = WriteDataSegment(self.charger, "seg2", v2, prev_format=s1)
+        s3 = WriteDataSegment(self.charger, "seg3", v3, prev_format=s2)
+        s4 = WriteDataSegment(self.charger, "seg3", v4, prev_format=s3)
+        s5 = WriteDataSegment(self.charger, "seg3", v5, prev_format=s4)
+
+        return True
+
 
 
 

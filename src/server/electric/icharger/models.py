@@ -55,8 +55,20 @@ class ReadDataSegment:
         if self.addr >= 0x8000:
             self.func_code = cst.READ_HOLDING_REGISTERS
 
-        self.data = charger.modbus_read_registers(self.addr, fmt, function_code=self.func_code)
+        self.data = charger.modbus_read_registers(self.addr, self.format, function_code=self.func_code)
 
+
+class WriteDataSegment:
+    def __init__(self, charger, name, data_tuples, base=None, prev_format=None):
+        self.func_code = cst.WRITE_MULTIPLE_REGISTERS
+
+        self.name = name
+        self.data = data_tuples
+        self.addr = base if base is not None else prev_format.addr + prev_format.size / 2
+
+        (byte,) = charger.modbus_write_registers(self.addr, self.data)
+
+        self.size = byte * 2
 
 class DeviceInfoStatus(Model):
     value = IntType(required=True, min_value=0, max_value=0x7f)

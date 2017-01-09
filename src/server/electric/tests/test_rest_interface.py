@@ -119,3 +119,4 @@ class TestRestfulAPI(unittest.TestCase):
         self.assertEqual("disconnected", d["charger_presence"])
         self.assertIn("exception", d)
         self.assertEqual(d["exception"], "Channel part of URI must be 0 or 1")
+
