@@ -1,6 +1,6 @@
 <ion-list-header>
     {{name}}
-    <button item-right clear primary ion-button>Start</button>
+    <!--<button item-right clear primary ion-button>Start</button>-->
 </ion-list-header>
 
 <ion-grid class="channel" padding>
@@ -42,8 +42,11 @@
 
     <ion-row padding-top>
         <ion-col no-padding>
-            Total IR: {{channel.cell_total_ir|number:'1.3-3'}} mΩ
-            <!--Max balance seen: {{maxBalanceSeen}}-->
+            Volt sum: {{voltsSum(channel)|number:'1.3-3'}}V
+            <!--mΩ-->
+        </ion-col>
+        <ion-col no-padding>
+            ΔV: {{maxMilliVoltDiff(channel)|number:'1.0-0'}} mV
         </ion-col>
     </ion-row>
 

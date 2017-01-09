@@ -4,9 +4,9 @@ that exposes your charger information via a RESTful web server.
 
 # what you'll need
 To use this, you will need the following:
-1. iCharger 408 or 4010 DUO
+1. iCharger 308 DUO, 408 DUO or 4010 DUO
 1. A mini-USB cable to connect the Raspberry PI3 to your iCharger 
-1. A Raspberry PI 3 
+1. A Raspberry PI 3
 
 Please note: a Raspberry PI 2 WILL NOT suffice as this project uses Bluetooth BLE and WIFI, both
 of which are present on the v3 PI and NOT on the v2 PI.
