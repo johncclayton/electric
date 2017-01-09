@@ -199,6 +199,8 @@ class ChannelStatus(Model):
 
         cells = []
         for x in range(0, 10):
+            if cell_v[x] == 1024:
+                continue
             c = CellStatus(x, cell_v[x], cell_b[x], cell_i[x])
             cells.append(c)
             self.cell_total_voltage += c.voltage
