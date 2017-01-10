@@ -57,3 +57,20 @@ Run the server ...
     $ cd src/server && ./run_server.sh
     
 
+# Neil's Setting up a fresh Pi3 from scratch
+* Install Hypriot
+  - https://github.com/hypriot/flash
+1. wget https://bootstrap.pypa.io/get-pip.py
+1. sudo python get-pip.py
+1. sudo pip install virtualenv virtualenvwrapper
+1. nano ~/.bashrc and add "source /usr/local/bin/virtualenvwrapper.sh" (without the quotes)
+1. logout / log back in (so the shell gets the new virtualenvwrapper stuff)
+1. mkvirtualenv electric
+1. nano ~/.virtualenvs/electric/bin/postactivate, and add "cd ~/electric/src/server"
+1. git clone https://github.com/johncclayton/electric.git
+
+## To run the server
+1. ssh pi3 (pi3 is my SSH alias to the pi that I've just setup)
+1. workon electric (to switch to that virtualenv, and auto cd into the electric/server folder)
+1. ./run_server.sh
+

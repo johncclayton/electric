@@ -24,8 +24,9 @@ export class ChannelComponent {
     }
 
     chunkedCells() {
+        let cells = this.channel['cells'];
         if (this.channel) {
-            return _.chunk(this.channel['cells'], this.cellChunking());
+            return _.chunk(cells, this.cellChunking());
         }
         return null;
     }
@@ -53,6 +54,44 @@ export class ChannelComponent {
         return Number(cell.v) < 0.001;
     }
 
+    voltsSum(channel) {
+        if (!channel) {
+            return 0;
+        }
+        let cells = channel['cells'];
+        if (!cells) {
+            return 0;
+        }
+
+        let total = 0;
+        cells.forEach(cell => {
+            total += cell['v'];
+        });
+        return total;
+    }
+
+    maxMilliVoltDiff(channel) {
+        if (!channel) {
+            return 0;
+        }
+        let cells = channel['cells'];
+        if (!cells) {
+            return 0;
+        }
+
+        let minimum: number = 500;
+        let maximum: number = 0;
+
+        cells.forEach(cell => {
+            let cellVolts: number = cell['v'];
+            minimum = Math.min(cellVolts, minimum);
+            maximum = Math.max(cellVolts, maximum);
+
+        });
+
+        return maximum - minimum;
+    }
+
     /*
      Return a value from 0-5 inclusive, that indicates the 'amount' of balancing on this connector.
      I think I've seen values up to 11...
@@ -65,6 +104,7 @@ export class ChannelComponent {
         // Always return all 5 "bars".
         return [1, 2, 3, 4, 5];
     }
+
     balanceLightIsLit(balanceIndex, balanceValue) {
         let scaledValue = Math.ceil(balanceValue / this.balanceScale);
         return scaledValue >= balanceIndex;

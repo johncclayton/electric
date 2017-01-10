@@ -1,6 +1,8 @@
 $balance-width: 4px;
 $balance-right-margin: 2px;
-$balance-height: 16px;
+$balance-height: 14px;
+$balance-baseline: 1px;
+
 $balance-off-color: lightgrey;
 $balance-offset: $balance-width + 1;
 
@@ -22,35 +24,36 @@ $balance-offset: $balance-width + 1;
     border-radius: 5px;
     position: absolute;
     width: $balance-width;
-    top: -$balance-height;
-    margin-top: 21px;
+    top: -($balance-height + $balance-baseline);
+    margin-top: 22px; // no idea why we need this
     margin-right: 5px;
+
     @include transform-origin(right top);
     @include transform(scale(-1) translateY(-$balance-height));
   }
   .b1 {
     right: ($balance-width / 2.0) + $balance-offset * 4;
-    height: 5px;
+    height: ($balance-height * 0.2);
     background: mix(red, yellow, 8%);
   }
   .b2 {
     right: ($balance-width / 2.0) + $balance-offset * 3;
-    height: 8px;
+    height: ($balance-height * 0.4);
     background: mix(red, yellow, 25%);
   }
   .b3 {
     right: ($balance-width / 2.0) + $balance-offset * 2;
-    height: 11px;
+    height: ($balance-height * 0.6);
     background: mix(red, yellow, 50%);
   }
   .b4 {
     right: ($balance-width / 2.0) + $balance-offset;
-    height: 14px;
+    height: ($balance-height * 0.8);
     background: mix(red, yellow, 75%);
   }
   .b5 {
     right: ($balance-width / 2.0);
-    height: 16px;
+    height: $balance-height;
     background: mix(red, yellow, 100%);
   }
   .off {

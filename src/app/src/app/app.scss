@@ -28,6 +28,14 @@
           font-size: 0.7em;
         }
       }
+      .small {
+        font-size: 1.1em;
+        .label {
+          text-align: right;
+          font-size: 1.1em;
+          vertical-align: baseline;
+        }
+      }
     }
   }
 

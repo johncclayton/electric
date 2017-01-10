@@ -2,16 +2,28 @@
 
     <ion-row class="status">
         <ion-col wrap class="cellcontainer volts" text-center padding>
-            {{channelData.curr_inp_volts|number:'1.3-3'}}<br/><div class="label">volts</div>
+            {{channelData.curr_inp_volts|number:'1.3-3'}}<br/>
+            <div class="label">DC in/volts</div>
         </ion-col>
         <ion-col class="cellcontainer amps" text-center padding>
-            {{channelData.curr_out_amps|number:'1.2-2'}}<br/><div class="label">amps</div>
+            {{channelData.curr_out_amps|number:'1.2-2'}}<br/>
+            <div class="label">amps</div>
         </ion-col>
         <ion-col class="cellcontainer mah" text-center padding>
-            {{channelData.curr_out_capacity}}<br/><div class="label">mAh</div>
+            {{channelData.curr_out_capacity}}<br/>
+            <div class="label">mAh</div>
         </ion-col>
-        <ion-col class="cellcontainer hhmm" text-center padding>
-            {{channelData.timestamp|duration}}<br/><div class="label">time</div>
+        <ion-col class="cellcontainer" text-center padding>
+            <ion-row>
+                <ion-col>
+                    <ion-icon name="time"></ion-icon>
+                </ion-col>
+                <ion-col>{{channelData.timestamp|duration}}</ion-col>
+                <ion-col>
+                    <ion-icon name="thermometer"></ion-icon>
+                </ion-col>
+                <ion-col>34.0<br/></ion-col>
+            </ion-row>
         </ion-col>
     </ion-row>
 </ion-grid>

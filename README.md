@@ -8,7 +8,7 @@ The idea is that you'll get a notification when the current charge cycle has com
 
 # how
 To use this, you will need the following:
-1. iCharger 4010 DUO
+1. iCharger 308, 408 or 4010 DUO
 1. A mini-USB cable 
 1. A Raspberry PI 3 
 
