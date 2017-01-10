@@ -1,0 +1,99 @@
+<ion-header>
+
+    <ion-navbar>
+        <ion-title>Discharge Options</ion-title>
+    </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+    <ion-list-header color="light">Discharging Options</ion-list-header>
+    <ion-list [formGroup]="formGroup">
+        <ion-item>
+            <ion-label>Discharge Current<p *ngIf="formGroup.controls.dischargeCurrent.errors" color="danger">
+                {{this.formGroup.controls.dischargeCurrent.errors.message}}</p></ion-label>
+            <ion-input type="number" no-right-padding formControlName="dischargeCurrent"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Discharge Voltage<p *ngIf="formGroup.controls.dischargeVoltage.errors" color="danger">
+                {{this.formGroup.controls.dischargeVoltage.errors.message}}</p></ion-label>
+            <ion-input type="number" no-right-padding formControlName="dischargeVoltage"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>End Current %<p *ngIf="formGroup.controls.dischargeEndCurrent.errors" color="danger">
+                {{this.formGroup.controls.dischargeEndCurrent.errors.message}}</p></ion-label>
+            <ion-input type="number" no-right-padding formControlName="dischargeEndCurrent"></ion-input>
+        </ion-item>
+    </ion-list>
+    <ion-list-header color="light">Regeneration</ion-list-header>
+    <ion-list>
+        <ion-item>
+            <ion-label>Mode</ion-label>
+            <ion-select [(ngModel)]="preset.regeneration_mode">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of regenerationModeTypeOptions()">{{opt.text}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Channel Join</ion-label>
+            <ion-select [(ngModel)]="preset.regeneration_method" disabled="{{joinDisabled()}}">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of regenerationMethodOptions()">{{opt.text}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <span [formGroup]="regenerationGroup">
+        <ion-item>
+            <ion-label>Voltage Limit<p *ngIf="regenerationGroup.controls.regenVoltLimit.errors" color="danger">
+                {{this.regenerationGroup.controls.regenVoltLimit.errors.message}}</p></ion-label>
+            <ion-input type="number" no-right-padding formControlName="regenVoltLimit"
+                       disabled="{{limitsDisabled()}}"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Current Limit<p *ngIf="regenerationGroup.controls.regenCurrentLimit.errors" color="danger">
+                {{this.regenerationGroup.controls.regenCurrentLimit.errors.message}}</p></ion-label>
+            <ion-input type="number" no-right-padding formControlName="regenCurrentLimit"
+                       disabled="{{limitsDisabled()}}"></ion-input>
+        </ion-item>
+        </span>
+    </ion-list>
+    <ion-list-header color="light">Advanced</ion-list-header>
+    <ion-list>
+        <ion-item>
+            <ion-label>Extra discharge enabled</ion-label>
+            <ion-toggle [(ngModel)]="preset.discharge_extra_discharge_enabled"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Balance enable</ion-label>
+            <ion-toggle [(ngModel)]="preset.discharge_balance_enabled"></ion-toggle>
+        </ion-item>
+    </ion-list>
+
+    <ion-list-header color="light">Safety</ion-list-header>
+    <ion-list>
+        <ion-item>
+            <ion-label>Cuttoff Temp</ion-label>
+            <ion-select [(ngModel)]="preset.safety_discharge_cutoff_temp">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of safetyTempOptions()">{{opt.text}}</ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Max Capacity</ion-label>
+            <ion-select [(ngModel)]="preset.safety_discharge_capacity">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of safetyCapacityOptions()">{{opt.text}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Safety Timer</ion-label>
+            <ion-toggle [(ngModel)]="preset.safety_discharge_timer_enabled"></ion-toggle>
+        </ion-item>
+        <ion-item *ngIf="preset.safety_discharge_timer_enabled">
+            <ion-label>Safety Timer Time (s)</ion-label>
+            <ion-input no-right-padding [(ngModel)]="preset.safety_discharge_timer_time"
+                       disabled="{{!preset.safety_discharge_timer_enabled}}"></ion-input>
+        </ion-item>
+    </ion-list>
+
+
+</ion-content>

@@ -3,17 +3,8 @@ import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {Preset, LipoBalanceType, BalanceEndCondition} from "../preset/preset-class";
 
-/*
- Generated class for the PresetCharge page.
 
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
-@Component({
-    selector: 'page-preset-charge',
-    templateUrl: 'preset-charge.html'
-})
-export class PresetChargePage {
+export class PresetBasePage {
     preset: Preset;
 
     constructor(public navCtrl: NavController,
@@ -22,7 +13,38 @@ export class PresetChargePage {
         this.preset = navParams.data;
     }
 
-    ionViewDidLoad() {
+    celciusToF(c) {
+        return c * 9 / 5 + 32;
+    }
+
+    public safetyTempOptions() {
+        let list = [];
+        for (let num = 200; num < 800; num += 5) {
+            let celcius = (num / 10);
+            let farenheight = this.celciusToF(celcius);
+            list.push({'value': celcius, 'text': celcius.toString() + "°C / " + farenheight + "°F"});
+        }
+        return list;
+    }
+
+    public safetyCapacityOptions() {
+        let list = [];
+        for (let num = 50; num < 200; num += 5) {
+            let capacity = num;
+            list.push({'value': capacity, 'text': capacity.toString() + "%"});
+        }
+        return list;
+    }
+}
+
+@Component({
+    selector: 'page-preset-charge',
+    templateUrl: 'preset-charge.html'
+})
+export class PresetChargePage extends PresetBasePage {
+    // Gotta have this, else DI doens't work? Huh?
+    constructor(navCtrl: NavController, config: Configuration, navParams: NavParams) {
+        super(navCtrl, config, navParams);
     }
 
     balanceOptions() {
@@ -72,27 +94,5 @@ export class PresetChargePage {
         return list;
     }
 
-    celciusToF(c) {
-        return c * 9 / 5 + 32;
-    }
-
-    safetyTempOptions() {
-        let list = [];
-        for (let num = 200; num < 800; num += 5) {
-            let celcius = (num / 10);
-            let farenheight = this.celciusToF(celcius);
-            list.push({'value': celcius, 'text': celcius.toString() + "°C / " + farenheight + "°F"});
-        }
-        return list;
-    }
-
-    safetyMacCapacityOptions() {
-        let list = [];
-        for (let num = 50; num < 200; num += 5) {
-            let capacity = num;
-            list.push({'value': capacity, 'text': capacity.toString() + "%"});
-        }
-        return list;
-    }
 }
 

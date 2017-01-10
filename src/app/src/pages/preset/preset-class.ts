@@ -27,17 +27,23 @@ export enum BalanceEndCondition {
     EndCurrent_and_DetectBalance,
 }
 
-let lipo_balance_presets = {};
+// Yes, it's not sequential as per the iCharger UI itself.
+export enum RegenerativeMode {
+    Off = 0,
+    ToInput = 1,
+    ToChannel = 2
+}
+
+export enum RegenerativeToChannelMethod {
+    ResistanceOrBulbs = 0,
+    ChargingBattery = 1,
+}
 
 export class Preset {
     data: {} = {};
 
     constructor(public presetDict: {}) {
         this.data = presetDict;
-        for (let key of Object.keys(presetDict)) {
-            if (!this.hasOwnProperty(key)) {
-            }
-        }
     }
 
     get name(): string {
@@ -58,22 +64,6 @@ export class Preset {
 
     set type(value: ChemistryType) {
         this.data['type'] = value;
-    }
-
-    get charge_current(): number {
-        return this.data['charge_current'];
-    }
-
-    set charge_current(value: number) {
-        this.data['charge_current'] = value;
-    }
-
-    get discharge_current(): number {
-        return this.data['discharge_current'];
-    }
-
-    set discharge_current(value: number) {
-        this.data['discharge_current'] = value;
     }
 
     get cells(): number {
@@ -157,6 +147,38 @@ export class Preset {
         this.data['lipo_charge_cell_voltage'] = value;
     }
 
+    get charge_current(): number {
+        return this.data['charge_current'];
+    }
+
+    set charge_current(value: number) {
+        this.data['charge_current'] = value;
+    }
+
+    get discharge_current(): number {
+        return this.data['discharge_current'];
+    }
+
+    set discharge_current(value: number) {
+        this.data['discharge_current'] = value;
+    }
+
+    get discharge_voltage(): number {
+        return this.data['lipo_discharge_cell_voltage'];
+    }
+
+    set discharge_voltage(value: number) {
+        this.data['lipo_discharge_cell_voltage'] = value;
+    }
+
+    get discharge_end_current(): number {
+        return this.data['end_discharge'];
+    }
+
+    set discharge_end_current(value: number) {
+        this.data['end_discharge'] = value;
+    }
+
     get showChargeVoltageWarning(): boolean {
         return this.charge_cell_voltage > 4.2;
     }
@@ -201,6 +223,7 @@ export class Preset {
         this.data['keep_charge_enable'] = value;
     }
 
+    // charge safety
     get safety_charge_cutoff_temp(): number {
         return this.data['safety_temp_c'];
     }
@@ -231,5 +254,95 @@ export class Preset {
 
     set safety_charge_timer_time(value: boolean) {
         this.data['safety_time_c'] = value;
+    }
+
+    // discharge safety
+    get safety_discharge_cutoff_temp(): number {
+        return this.data['safety_temp_d'];
+    }
+
+    set safety_discharge_cutoff_temp(value: number) {
+        this.data['safety_temp_d'] = value;
+    }
+
+    get safety_discharge_capacity(): number {
+        return this.data['safety_cap_d'];
+    }
+
+    set safety_discharge_capacity(value: number) {
+        this.data['safety_cap_d'] = value;
+    }
+
+    get safety_discharge_timer_enabled(): boolean {
+        return this.data['safety_time_d'] > 0;
+    }
+
+    set safety_discharge_timer_enabled(value: boolean) {
+        this.data['safety_time_d'] = value ? 1 : 0;
+    }
+
+    get safety_discharge_timer_time(): boolean {
+        return this.data['safety_time_d'];
+    }
+
+    set safety_discharge_timer_time(value: boolean) {
+        this.data['safety_time_d'] = value;
+    }
+
+    // extra
+    get discharge_extra_discharge_enabled(): boolean {
+        return (this.data['li_mode_d'] & 0x01) == 0x01;
+    }
+
+    set discharge_extra_discharge_enabled(value: boolean) {
+        if(value) {
+            this.data['li_mode_d'] = this.data['li_mode_d'] || 0x01;
+        } else{
+            this.data['li_mode_d'] = this.data['li_mode_d'] && ~0x01;
+        }
+    }
+
+    get discharge_balance_enabled(): boolean {
+        return (this.data['li_mode_d'] & 0x02) == 0x02;
+    }
+
+    set discharge_balance_enabled(value: boolean) {
+        if(value) {
+            this.data['li_mode_d'] = this.data['li_mode_d'] || 0x02;
+        } else {
+            this.data['li_mode_d'] = this.data['li_mode_d'] && ~0x02;
+        }
+    }
+
+    get regeneration_mode(): RegenerativeMode {
+        return this.data['regen_discharge_mode'];
+    }
+
+    set regeneration_mode(value: RegenerativeMode) {
+        this.data['regen_discharge_mode'] = value;
+    }
+
+    get regeneration_method(): RegenerativeToChannelMethod {
+        return this.data['reg_ch_mode'];
+    }
+
+    set regeneration_method(value: RegenerativeToChannelMethod) {
+        this.data['reg_ch_mode'] = value;
+    }
+
+    get regeneration_volt_limit(): number {
+        return this.data['reg_ch_volt'];
+    }
+
+    set regeneration_volt_limit(value: number) {
+        this.data['reg_ch_volt'] = value;
+    }
+
+    get regeneration_current_limit(): number {
+        return this.data['reg_ch_current'];
+    }
+
+    set regeneration_current_limit(value: number) {
+        this.data['reg_ch_current'] = value;
     }
 }

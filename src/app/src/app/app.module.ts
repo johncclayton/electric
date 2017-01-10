@@ -12,6 +12,9 @@ import {ChargerStatusComponent} from "../components/charger-status/charger-statu
 import {PresetListPage} from "../pages/preset-list/preset-list";
 import {PresetPage} from "../pages/preset/preset";
 import {PresetChargePage} from "../pages/preset-charge/preset-charge";
+import {PresetStoragePage} from "../pages/preset-storage/preset-storage";
+import {PresetDischargePage} from "../pages/preset-discharge/preset-discharge";
+import {PresetCyclePage} from "../pages/preset-cycle/preset-cycle";
 
 function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -27,6 +30,9 @@ function configServiceFactory(config: Configuration) {
         PresetListPage,
         PresetPage,
         PresetChargePage,
+        PresetStoragePage,
+        PresetDischargePage,
+        PresetCyclePage,
         ChargerStatusComponent
     ],
     imports: [
@@ -40,6 +46,9 @@ function configServiceFactory(config: Configuration) {
         PresetListPage,
         PresetPage,
         PresetChargePage,
+        PresetStoragePage,
+        PresetDischargePage,
+        PresetCyclePage,
         ChannelComponent
     ],
     providers: [

@@ -3,6 +3,9 @@ import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {PresetChargePage} from "../preset-charge/preset-charge";
 import {Preset} from "./preset-class";
+import {PresetStoragePage} from "../preset-storage/preset-storage";
+import {PresetDischargePage} from "../preset-discharge/preset-discharge";
+import {PresetCyclePage} from "../preset-cycle/preset-cycle";
 
 @Component({
     selector: 'page-preset',
@@ -19,16 +22,17 @@ export class PresetPage {
 
         this.optionsPages = [
             {title: 'Charging', component: PresetChargePage},
-            {title: 'Storage', component: PresetChargePage},
-            {title: 'Discharging', component: PresetChargePage},
-            {title: 'Cycle', component: PresetChargePage},
-            {title: 'Balancing', component: PresetChargePage},
+            {title: 'Storage', component: PresetStoragePage},
+            {title: 'Discharging', component: PresetDischargePage},
+            {title: 'Cycle', component: PresetCyclePage},
+            // {title: 'Balancing', component: PresetBalancePage},
         ];
 
     }
 
     ionViewDidLoad() {
-        this.switchTo(PresetChargePage);
+        // this.switchTo(PresetChargePage);
+        this.switchTo(PresetDischargePage);
     }
 
     cellChoices() {
