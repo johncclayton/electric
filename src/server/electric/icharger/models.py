@@ -388,7 +388,7 @@ class PresetIndex(Model):
 class Preset(Model):
     index = IntType(required=True, min_value=0, max_value=63)
 
-    use_flag = IntType(required=True, choices=[0xffff, 0x55aa, 0x0000])
+    use_flag = LongType(required=True, choices=[0xffff, 0x55aa, 0x0000])
     name = StringType(required=True, max_length=37)
     capacity = LongType(required=True)
     auto_save = BooleanType(required=True, default=False)
