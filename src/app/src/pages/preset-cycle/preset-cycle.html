@@ -1,12 +1,32 @@
 <ion-header>
 
-  <ion-navbar>
-    <ion-title>Cycle Options</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-title>Cycle Options</ion-title>
+    </ion-navbar>
 
 </ion-header>
 
 
 <ion-content>
-
+    <ion-list-header color="light">Cycle Options</ion-list-header>
+    <ion-list>
+        <ion-item>
+            <ion-label>Mode</ion-label>
+            <ion-select [(ngModel)]="preset.cycle_mode">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of cycleModeOptions()">{{opt.text}}</ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Count</ion-label>
+            <ion-select [(ngModel)]="preset.cycle_count">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of cycleCountOptions()">{{opt.text}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item [formGroup]="cycleGroup">
+            <ion-label>Delay Time<p *ngIf="cycleGroup.controls.delayTime.errors" color="danger">
+                {{this.cycleGroup.controls.delayTime.errors.message}}</p></ion-label>
+            <ion-input type="number" no-right-padding formControlName="delayTime"></ion-input>
+        </ion-item>
+    </ion-list>
 </ion-content>

@@ -18,7 +18,7 @@
         </ion-item>
         <ion-item>
             <ion-label>Compensation</ion-label>
-            <ion-select [(ngModel)]="preset.storage_compensation">
+            <ion-select [(ngModel)]="preset.storage_compensation_mv">
                 <ion-option value="{{opt.value}}" *ngFor="let opt of storageCompensationOptions()">{{opt.text}}</ion-option>
             </ion-select>
         </ion-item>

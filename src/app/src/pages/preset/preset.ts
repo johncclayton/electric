@@ -25,15 +25,18 @@ export class PresetPage {
             {title: 'Storage', component: PresetStoragePage},
             {title: 'Discharging', component: PresetDischargePage},
             {title: 'Cycle', component: PresetCyclePage},
+            // Don't see options in the charger, so dunno what to do here
             // {title: 'Balancing', component: PresetBalancePage},
         ];
 
     }
 
     ionViewDidLoad() {
+        // This was used for testing, to quickly get to a page I was working on
         // this.switchTo(PresetChargePage);
         // this.switchTo(PresetDischargePage);
-        this.switchTo(PresetStoragePage);
+        // this.switchTo(PresetStoragePage);
+        // this.switchTo(PresetCyclePage);
     }
 
     cellChoices() {

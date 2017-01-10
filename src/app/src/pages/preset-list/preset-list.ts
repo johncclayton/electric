@@ -1,8 +1,8 @@
 import {Component, ViewChild} from '@angular/core';
-import {NavController, NavParams, List} from 'ionic-angular';
+import {NavController, NavParams, List, ToastController} from 'ionic-angular';
 import {iChargerService} from "../../services/icharger.service";
 import {PresetPage} from "../preset/preset";
-import {Preset} from "../preset/preset-class";
+import {Preset, ChemistryType} from "../preset/preset-class";
 
 @Component({
     selector: 'page-preset-list',
@@ -14,6 +14,7 @@ export class PresetListPage {
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
+                public toastController: ToastController,
                 public navParams: NavParams) {
     }
 
@@ -21,14 +22,26 @@ export class PresetListPage {
         this.chargerService.getPresets().subscribe(presetsList => {
             this.presets = presetsList;
 
-            if (this.presets.length) {
-                this.navCtrl.push(PresetPage, this.presets[1]);
-            }
+            // Was used during testing, to move to a known preset and edit it.
+            // if (this.presets.length) {
+            //     this.navCtrl.push(PresetPage, this.presets[1]);
+            // }
         });
     }
 
     editPreset(preset) {
-        this.navCtrl.push(PresetPage, preset);
+        if (preset.type == ChemistryType.LiPo) {
+            this.navCtrl.push(PresetPage, preset);
+        } else {
+            let toast = this.toastController.create({
+                message: "Only support editing Lipo for now",
+                duration: 2000,
+                // dismissOnPageChange: true, // causes an exception. meh.
+                position: "top"
+            });
+
+            toast.present();
+        }
     }
 
     chemistyClass(preset) {

@@ -13,8 +13,8 @@ import {HomePage} from "../pages/home/home";
 })
 export class MyApp {
     @ViewChild(Nav) nav: Nav;
-    // rootPage = HomePage;
-    rootPage = PresetListPage;
+    rootPage = HomePage;
+    // rootPage = PresetListPage;
     pages: Array<{title: string, component: any}>;
 
     constructor(platform: Platform,

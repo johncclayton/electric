@@ -39,6 +39,16 @@ export enum RegenerativeToChannelMethod {
     ChargingBattery = 1,
 }
 
+export enum Cycle {
+    ChargeDischarge,
+    DischargeCharge,
+    ChargeDischargeCharge,
+    DischargeChargeDischarge,
+    ChargeDischargeStore,
+    DischargeChargeStore,
+
+}
+
 export class Preset {
     data: {} = {};
 
@@ -355,11 +365,11 @@ export class Preset {
         this.data['lipo_storage_cell_voltage'] = value;
     }
 
-    get storage_compensation(): number {
+    get storage_compensation_mv(): number {
         return this.data['store_compensation'];
     }
 
-    set storage_compensation(value: number) {
+    set storage_compensation_mv(value: number) {
         this.data['store_compensation'] = value;
     }
 
@@ -369,6 +379,31 @@ export class Preset {
 
     set storage_accelerated(value: boolean) {
         this.data['fast_store'] = value;
+    }
+
+    // Cycle
+    get cycle_mode(): Cycle {
+        return this.data['cycle_mode'];
+    }
+
+    set cycle_mode(value: Cycle) {
+        this.data['cycle_mode'] = value;
+    }
+
+    get cycle_count(): number {
+        return this.data['cycle_count'];
+    }
+
+    set cycle_count(value: number) {
+        this.data['cycle_count'] = value;
+    }
+
+    get cycle_delay(): number {
+        return this.data['cycle_delay'];
+    }
+
+    set cycle_delay(value: number) {
+        this.data['cycle_delay'] = value;
     }
 
 }
