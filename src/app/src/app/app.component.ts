@@ -2,10 +2,10 @@ import {Component, ViewChild} from "@angular/core";
 import {Platform, Nav} from "ionic-angular";
 import {StatusBar, Splashscreen} from "ionic-native";
 import {Configuration} from "../services/configuration.service";
-import {HomePage} from "../pages/home/home";
 import {ConfigPage} from "../pages/config/config";
 import {iChargerService} from "../services/icharger.service";
 import {PresetListPage} from "../pages/preset-list/preset-list";
+import {HomePage} from "../pages/home/home";
 
 
 @Component({
@@ -14,6 +14,7 @@ import {PresetListPage} from "../pages/preset-list/preset-list";
 export class MyApp {
     @ViewChild(Nav) nav: Nav;
     rootPage = HomePage;
+    // rootPage = PresetListPage;
     pages: Array<{title: string, component: any}>;
 
     constructor(platform: Platform,
@@ -25,12 +26,9 @@ export class MyApp {
             // Here you can do any higher level native things you might need.
             StatusBar.styleDefault();
             Splashscreen.hide();
-
-            // Load and wait for config, the potentially enter the config page.
         });
 
         this.pages = [
-            // {title: 'Dashboard', component: HomePage},
             {title: 'Presets', component: PresetListPage},
             {title: 'Config', component: ConfigPage},
         ]
@@ -41,4 +39,5 @@ export class MyApp {
         // we wouldn't want the back button to show in this scenario
         this.nav.push(page.component);
     }
+
 }

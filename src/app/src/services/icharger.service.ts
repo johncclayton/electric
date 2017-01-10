@@ -3,6 +3,7 @@ import {Http} from "@angular/http";
 import {Observable} from "rxjs";
 import {Configuration} from "./configuration.service";
 import {Events} from "ionic-angular";
+import {Preset} from "../pages/preset/preset-class";
 
 const CHARGER_CONNECTED_EVENT: string = 'charger.connected';
 const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected';
@@ -47,12 +48,16 @@ export class iChargerService {
     }
 
     getPresets(): Observable<any> {
-        let aList = [
-            {"name": "Lipo 5A"},
-            {"name": "Lipo 10A"},
-            {"name": "Lipo 20A"},
-        ];
-        return Observable.of(aList);
+        let url = this.getChargerURL("/preset");
+        return this.http.get(url).map(v => {
+            // This should be a list of presets
+            let presetList = [];
+            let arrayOfPresets = v.json();
+            for (let presetDict of arrayOfPresets) {
+                presetList.push(new Preset(presetDict));
+            }
+            return presetList;
+        });
     }
 
     getChargerStatus(): Observable<any> {

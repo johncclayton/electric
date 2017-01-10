@@ -12,11 +12,15 @@
 </ion-header>
 
 
-<ion-content padding>
+<ion-content padding class="presets">
     <ion-list>
-        <button ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
-            {{preset.name}}
-            <div class="mini-badge">test</div>
-        </button>
+        <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
+            <div class="item-left">{{preset.name}}</div>
+            <div item-right>
+                <div class="mini-badge {{chemistyClass(preset)}}" *ngFor="let tag of tagsForPreset(preset)">{{tag}}
+                </div>
+            </div>
+        </ion-item>
     </ion-list>
 </ion-content>
+

@@ -1,0 +1,80 @@
+<ion-header>
+
+    <ion-navbar>
+        <ion-title>Charge Settings</ion-title>
+    </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+    <ion-list-header color="light">Charging Options</ion-list-header>
+    <ion-item>
+        <ion-label>Balance Type</ion-label>
+        <ion-select [(ngModel)]="preset.balance_type">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of balanceOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+
+    <ion-item>
+        <ion-label>End</ion-label>
+        <ion-select [(ngModel)]="preset.balance_end_type">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of chargeEndOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+
+    <ion-item>
+        <ion-label>Cell Volts
+            <ion-icon color="warning" item-right *ngIf="preset.showChargeVoltageWarning" name="warning"></ion-icon>
+        </ion-label>
+        <ion-input [(ngModel)]="preset.charge_cell_voltage" no-right-padding [(ngModel)]="preset.charge_cell_voltage">
+        </ion-input>
+    </ion-item>
+
+    <ion-list-header color="light">Safety</ion-list-header>
+    <ion-item>
+        <ion-label>Cuttoff Temp</ion-label>
+        <ion-select [(ngModel)]="preset.safety_charge_cutoff_temp">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of safetyTempOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Max Capacity</ion-label>
+        <ion-select [(ngModel)]="preset.safety_charge_capacity">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of safetyMacCapacityOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Safety Timer</ion-label>
+        <ion-toggle [(ngModel)]="preset.safety_charge_timer_enabled"></ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="preset.safety_charge_timer_enabled">
+        <ion-label>Safety Timer Time (s)</ion-label>
+        <ion-input no-right-padding [(ngModel)]="preset.safety_charge_timer_time"
+                   disabled="{{!preset.safety_charge_timer_enabled}}"></ion-input>
+    </ion-item>
+
+    <ion-list-header color="light">Low Voltage Options</ion-list-header>
+    <ion-item>
+        <ion-label>Restore lowest voltage</ion-label>
+        <ion-select [(ngModel)]="preset.restore_voltage">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of restoreVoltageOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Restore charge time (s)</ion-label>
+        <ion-select [(ngModel)]="preset.restore_charge_time">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of restoreChargeTimeOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Restore charge current</ion-label>
+        <ion-select [(ngModel)]="preset.restore_charge_current">
+            <ion-option value="{{opt.value}}" *ngFor="let opt of restoreCurrentOptions()">{{opt.text}}</ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Keep charging after done</ion-label>
+        <ion-toggle [(ngModel)]="preset.keep_charging_after_done"></ion-toggle>
+    </ion-item>
+</ion-content>
