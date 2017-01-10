@@ -199,6 +199,8 @@ class ChannelStatus(Model):
 
         cells = []
         for x in range(0, 10):
+            if cell_v[x] == 1024:
+                continue
             c = CellStatus(x, cell_v[x], cell_b[x], cell_i[x])
             cells.append(c)
             self.cell_total_voltage += c.voltage
@@ -388,7 +390,7 @@ class PresetIndex(Model):
 class Preset(Model):
     index = IntType(required=True, min_value=0, max_value=63)
 
-    use_flag = IntType(required=True, choices=[0xffff, 0x55aa, 0x0000])
+    use_flag = LongType(required=True, choices=[0xffff, 0x55aa, 0x0000])
     name = StringType(required=True, max_length=37)
     capacity = LongType(required=True)
     auto_save = BooleanType(required=True, default=False)
