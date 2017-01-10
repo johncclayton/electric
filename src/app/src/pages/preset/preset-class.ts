@@ -295,9 +295,9 @@ export class Preset {
     }
 
     set discharge_extra_discharge_enabled(value: boolean) {
-        if(value) {
+        if (value) {
             this.data['li_mode_d'] = this.data['li_mode_d'] || 0x01;
-        } else{
+        } else {
             this.data['li_mode_d'] = this.data['li_mode_d'] && ~0x01;
         }
     }
@@ -307,7 +307,7 @@ export class Preset {
     }
 
     set discharge_balance_enabled(value: boolean) {
-        if(value) {
+        if (value) {
             this.data['li_mode_d'] = this.data['li_mode_d'] || 0x02;
         } else {
             this.data['li_mode_d'] = this.data['li_mode_d'] && ~0x02;
@@ -345,4 +345,30 @@ export class Preset {
     set regeneration_current_limit(value: number) {
         this.data['reg_ch_current'] = value;
     }
+
+    // storage
+    get storage_cell_voltage(): number {
+        return this.data['lipo_storage_cell_voltage'];
+    }
+
+    set storage_cell_voltage(value: number) {
+        this.data['lipo_storage_cell_voltage'] = value;
+    }
+
+    get storage_compensation(): number {
+        return this.data['store_compensation'];
+    }
+
+    set storage_compensation(value: number) {
+        this.data['store_compensation'] = value;
+    }
+
+    get storage_accelerated(): boolean {
+        return this.data['fast_store'];
+    }
+
+    set storage_accelerated(value: boolean) {
+        this.data['fast_store'] = value;
+    }
+
 }

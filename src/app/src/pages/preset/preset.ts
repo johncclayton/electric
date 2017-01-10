@@ -32,7 +32,8 @@ export class PresetPage {
 
     ionViewDidLoad() {
         // this.switchTo(PresetChargePage);
-        this.switchTo(PresetDischargePage);
+        // this.switchTo(PresetDischargePage);
+        this.switchTo(PresetStoragePage);
     }
 
     cellChoices() {
