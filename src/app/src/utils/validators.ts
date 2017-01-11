@@ -9,7 +9,7 @@ export class ChargerValidator {
             }
 
             let val: number = control.value;
-            console.log("value is: ", val, " of type: ", typeof val, " is NAN: ", isNaN(val));
+            // console.log("value is: ", val, " of type: ", typeof val, " is NAN: ", isNaN(val));
 
             if (isNaN(val) || /![\d.]/.test(val.toString())) {
                 return {"required": true, "message": "Required"};

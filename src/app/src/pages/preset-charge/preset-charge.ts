@@ -1,11 +1,13 @@
 import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
-import {Preset, LipoBalanceType, BalanceEndCondition} from "../preset/preset-class";
+import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../preset/preset-class";
+import {FormBuilder, FormControl} from "@angular/forms";
+import {ChargerValidator} from "../../utils/validators";
 
 
 export class PresetBasePage {
-    preset: Preset;
+    public preset: Preset;
 
     constructor(public navCtrl: NavController,
                 public config: Configuration,
@@ -42,9 +44,45 @@ export class PresetBasePage {
     templateUrl: 'preset-charge.html'
 })
 export class PresetChargePage extends PresetBasePage {
+    // nimhGroup;
+
     // Gotta have this, else DI doens't work? Huh?
-    constructor(navCtrl: NavController, config: Configuration, navParams: NavParams) {
+    constructor(navCtrl: NavController,
+                config: Configuration,
+                public formBuilder: FormBuilder,
+                navParams: NavParams) {
         super(navCtrl, config, navParams);
+    }
+
+    ngOnInit() {
+        // this.nimhGroup = this.formBuilder.group({
+        //     trickleTimeout: [
+        //         this.preset.trickle_timeout,
+        //         ChargerValidator.number({
+        //             min: 1,
+        //         })
+        //     ],
+        // });
+    }
+
+    isLipo() {
+        return this.preset.type == ChemistryType.LiPo ||
+            this.preset.type == ChemistryType.LiFe;
+    }
+
+    isNiMH() {
+        return this.preset.type == ChemistryType.NiMH;
+    }
+
+    chargeModeOptions() {
+        let modes = [];
+        switch (this.preset.type) {
+            case ChemistryType.NiMH:
+                modes = [
+                    {'value': 0, 'text': 'Normal'},
+                    {'value': 1, 'text': 'Reflex'}];
+        }
+        return modes;
     }
 
     balanceOptions() {
@@ -94,5 +132,41 @@ export class PresetChargePage extends PresetBasePage {
         return list;
     }
 
+    nimhTrickelEnabled() {
+        return this.preset.trickle_enabled;
+    }
+
+    nimhSensitivityOptions() {
+        let list = [];
+        for (let num = 1; num < 20; num++) {
+            list.push({'value': num, 'text': num.toString() + "mV"});
+        }
+        return list;
+    }
+
+    nimhDelayTimeOptions() {
+        let list = [];
+        for (let num = 0; num < 20; num++) {
+            list.push({'value': num, 'text': num.toString() + "min"});
+        }
+        return list;
+    }
+
+    nimhTrickleCurrentOptions() {
+        let list = [];
+        for (let num = 20; num < 100; num++) {
+            let actual = num / 100;
+            list.push({'value': actual, 'text': actual.toString() + "A"});
+        }
+        return list;
+    }
+
+    generalMinuteOptions(start: number, end: number) {
+        let list = [];
+        for (let num = start; num < end; num++) {
+            list.push({'value': num, 'text': num.toString() + "min"});
+        }
+        return list;
+    }
 }
 

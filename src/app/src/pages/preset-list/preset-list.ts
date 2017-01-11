@@ -19,18 +19,28 @@ export class PresetListPage {
     }
 
     ionViewDidLoad() {
+        this.refreshPresets(null);
+    }
+
+    refreshPresets(refresher) {
         this.chargerService.getPresets().subscribe(presetsList => {
             this.presets = presetsList;
 
+            if (refresher) {
+                refresher.complete();
+            }
             // Was used during testing, to move to a known preset and edit it.
             // if (this.presets.length) {
-            //     this.navCtrl.push(PresetPage, this.presets[1]);
+            //     this.navCtrl.push(PresetPage, this.presets[15]);
             // }
         });
     }
 
     editPreset(preset) {
-        if (preset.type == ChemistryType.LiPo) {
+        console.log("Editing preset type: ", preset.type);
+        if (preset.type == ChemistryType.LiPo ||
+            preset.type == ChemistryType.NiMH ||
+            preset.type == ChemistryType.LiFe) {
             this.navCtrl.push(PresetPage, preset);
         } else {
             let toast = this.toastController.create({

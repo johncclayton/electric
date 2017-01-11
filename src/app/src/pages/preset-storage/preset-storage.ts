@@ -15,7 +15,8 @@ export class PresetStoragePage extends PresetBasePage {
 
     storageCellVoltOptions() {
         let list = [];
-        for (let num = 370; num <= 390; num++) {
+        let minMax = this.preset.storageVoltageRange();
+        for (let num = minMax['min']; num <= minMax['max']; num++) {
             let capacity = num / 100.0;
             list.push({'value': capacity, 'text': capacity.toString() + "V/Cell"});
         }

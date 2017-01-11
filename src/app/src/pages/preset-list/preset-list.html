@@ -12,7 +12,10 @@
 </ion-header>
 
 
-<ion-content padding class="presets">
+<ion-content class="presets">
+    <ion-refresher (ionRefresh)="refreshPresets($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
     <ion-list>
         <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
             <div class="item-left">{{preset.name}}</div>

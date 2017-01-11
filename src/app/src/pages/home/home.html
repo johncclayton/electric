@@ -45,11 +45,8 @@
             </ion-list>
         </ion-card>
 
-        <ion-list-header>
-            Houston, we have a problem.
-        </ion-list-header>
-
         <ion-list padding>
+            <ion-list-header> Houston, we have a problem.</ion-list-header>
             <p *ngIf="!isConnectedToServer()">
                 <ion-icon name="bulb-outline"></ion-icon>
                 Check that you have the correct host URL in your Configuration.

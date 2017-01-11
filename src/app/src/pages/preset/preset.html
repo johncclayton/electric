@@ -14,63 +14,65 @@
 
 
 <ion-content>
-    <ion-list-header color="light">Settings</ion-list-header>
-    <ion-item>
-        <ion-label>Name</ion-label>
-        <ion-input [(ngModel)]="preset.name" no-right-padding></ion-input>
-    </ion-item>
-    <ion-item>
-        <ion-label>Type</ion-label>
-        <ion-select [(ngModel)]="preset.type">
-            <ion-option value="0">LiPo</ion-option>
-            <ion-option value="1">LiLo</ion-option>
-            <ion-option value="2">LiFe</ion-option>
-            <ion-option value="3">NiCd</ion-option>
-            <ion-option value="4">NiMH</ion-option>
-            <ion-option value="5">NiZn</ion-option>
-        </ion-select>
-
-    </ion-item>
-    <ion-item>
-        <ion-label>Cells</ion-label>
-        <ion-select [(ngModel)]="preset.cells">
-            <ion-option selected="{{opt.value == preset.cells}}" value="{{opt.value}}"
-                        *ngFor="let opt of cellChoices()">{{opt.text}}
-            </ion-option>
-        </ion-select>
-    </ion-item>
-    <ion-item>
-        <ion-label>Charge Current</ion-label>
-        <ion-select [(ngModel)]="preset.charge_current">
-            <ion-option *ngFor="let current of currentChoices()">{{current}}</ion-option>
-        </ion-select>
-    </ion-item>
-    <ion-item>
-        <ion-label>Capacity</ion-label>
-        <ion-input placeholder="Ignored" [(ngModel)]="preset.capacity" no-right-padding></ion-input>
-    </ion-item>
-
-    <ion-list-header color="light">Task Options</ion-list-header>
+    <ion-refresher (ionRefresh)="refreshPreset($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
     <ion-list>
+        <ion-list-header color="light">Settings</ion-list-header>
+        <ion-item>
+            <ion-label>Name</ion-label>
+            <ion-input [(ngModel)]="preset.name" no-right-padding></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Type</ion-label>
+            <ion-select [(ngModel)]="preset.type">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of typeChoices()">{{opt.text}}</ion-option>
+            </ion-select>
+
+        </ion-item>
+        <ion-item *ngIf="showCells()">
+            <ion-label>Cells</ion-label>
+            <ion-select [(ngModel)]="preset.cells">
+                <ion-option selected="{{opt.value == preset.cells}}" value="{{opt.value}}"
+                            *ngFor="let opt of cellChoices()">{{opt.text}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Charge Current</ion-label>
+            <ion-select [(ngModel)]="preset.charge_current">
+                <ion-option value="{{opt.value}}" *ngFor="let opt of currentChoices()">{{opt.text}}</ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Capacity</ion-label>
+            <ion-input placeholder="Ignored" [(ngModel)]="preset.capacity" no-right-padding></ion-input>
+        </ion-item>
+    </ion-list>
+
+    <ion-list>
+        <ion-list-header color="light">Task Options</ion-list-header>
         <ion-item detail-push *ngFor="let page of optionsPages" (click)="switchTo(page.component)">{{page.title}}
         </ion-item>
     </ion-list>
 
-    <ion-list-header>Options</ion-list-header>
-    <ion-item>
-        <ion-label>Synchronous Mode</ion-label>
-        <ion-toggle [(ngModel)]="preset.channel_mode"></ion-toggle>
-    </ion-item>
-    <ion-item>
-        <ion-label>Log to SD card</ion-label>
-        <ion-toggle [(ngModel)]="preset.save_to_sd"></ion-toggle>
-    </ion-item>
-    <ion-item>
-        <ion-label>Run counter</ion-label>
-        <ion-input [(ngModel)]="preset.run_counter" no-right-padding></ion-input>
-    </ion-item>
-    <ion-item>
-        <ion-label>Log interval (sec)</ion-label>
-        <ion-input [(ngModel)]="preset.log_interval_sec" no-right-padding></ion-input>
-    </ion-item>
+    <ion-list>
+        <ion-list-header>Options</ion-list-header>
+        <ion-item>
+            <ion-label>Synchronous Mode</ion-label>
+            <ion-toggle [(ngModel)]="preset.channel_mode"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Log to SD card</ion-label>
+            <ion-toggle [(ngModel)]="preset.save_to_sd"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Run counter</ion-label>
+            <ion-input [(ngModel)]="preset.run_counter" no-right-padding></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Log interval (sec)</ion-label>
+            <ion-input [(ngModel)]="preset.log_interval_sec" no-right-padding></ion-input>
+        </ion-item>
+    </ion-list>
 </ion-content>

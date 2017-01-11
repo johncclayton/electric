@@ -4,7 +4,7 @@ import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
-import {RegenerativeMode, RegenerativeToChannelMethod} from "../preset/preset-class";
+import {RegenerativeMode, RegenerativeToChannelMethod, Preset, ChemistryType} from "../preset/preset-class";
 
 @Component({
     selector: 'page-preset-discharge',
@@ -23,10 +23,11 @@ export class PresetDischargePage extends PresetBasePage {
     }
 
     ionViewWillLeave() {
-        // validate, and refuse
     }
 
     ngOnInit() {
+        let dischargeVoltageMinMax = this.preset.dischargeVoltageMinMax();
+
         this.formGroup = this.formBuilder.group({
             dischargeCurrent: [this.preset.discharge_current,
                 ChargerValidator.number({
@@ -34,10 +35,7 @@ export class PresetDischargePage extends PresetBasePage {
                     max: this.config.getMaxAmpsPerChannel()
                 })],
             dischargeVoltage: [this.preset.discharge_voltage,
-                ChargerValidator.number({
-                    min: 3.0,
-                    max: 4.1
-                })],
+                ChargerValidator.number(dischargeVoltageMinMax)],
             dischargeEndCurrent: [this.preset.discharge_end_current,
                 ChargerValidator.number({
                     min: 1,
@@ -71,6 +69,11 @@ export class PresetDischargePage extends PresetBasePage {
             choices.push(i / 100);
         }
         return choices;
+    }
+
+    showAdvanced() {
+        return this.preset.type == ChemistryType.LiPo ||
+            this.preset.type == ChemistryType.LiFe;
     }
 
     joinDisabled() {

@@ -1,13 +1,14 @@
-export enum ChemistryType {
+export const enum ChemistryType {
     LiPo = 0,
     LiLo,
     LiFe,
-    NiCd,
     NiMH,
+    NiCd,
+    Pb,
     NiZn,
 }
 
-export enum LipoBalanceType {
+export const enum LipoBalanceType {
     Slow = 0,
     Normal = 1,
     Fast = 2,
@@ -17,7 +18,7 @@ export enum LipoBalanceType {
 }
 
 // li_balance_end_mode
-export enum BalanceEndCondition {
+export const enum BalanceEndCondition {
     // Charge End Current is disabled in the UI
     EndCurrentOff_DetectBalanceOn,
 
@@ -28,26 +29,30 @@ export enum BalanceEndCondition {
 }
 
 // Yes, it's not sequential as per the iCharger UI itself.
-export enum RegenerativeMode {
+export const enum RegenerativeMode {
     Off = 0,
     ToInput = 1,
     ToChannel = 2
 }
 
-export enum RegenerativeToChannelMethod {
+export const enum RegenerativeToChannelMethod {
     ResistanceOrBulbs = 0,
     ChargingBattery = 1,
 }
 
-export enum Cycle {
+export const enum Cycle {
     ChargeDischarge,
     DischargeCharge,
     ChargeDischargeCharge,
     DischargeChargeDischarge,
     ChargeDischargeStore,
     DischargeChargeStore,
-
 }
+
+let _dischargeVoltageMinMax: Map<ChemistryType, Array<{min: number, max: number}> > = new Map();
+_dischargeVoltageMinMax[ChemistryType.LiPo] = {'min': 3.0, 'max': 4.1};
+_dischargeVoltageMinMax[ChemistryType.LiFe] = {'min': 2.0, 'max': 3.5};
+_dischargeVoltageMinMax[ChemistryType.NiMH] = {'min': 0.1, 'max': 33};
 
 export class Preset {
     data: {} = {};
@@ -56,12 +61,38 @@ export class Preset {
         this.data = presetDict;
     }
 
+    dischargeVoltageMinMax() {
+        let anOption = {min: 0.1, max: 33};
+        if (_dischargeVoltageMinMax[this.type]) {
+            anOption = _dischargeVoltageMinMax[this.type];
+        }
+        console.log("Using ", anOption, " as the volt/min/max");
+        return anOption;
+    }
+
+    storageVoltageRange() {
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                return {min: 370, max: 390};
+            case ChemistryType.LiFe:
+                return {min: 310, max: 340}
+        }
+        return {min: 0.0, max: 0};
+    }
+
     get name(): string {
-        return this.data['name'];
+        if (this.data['name']) {
+            return this.data['name'];
+        }
+        return `${this.type_str}_${this.charge_current}A`;
     }
 
     set name(value: string) {
         this.data['name'] = value;
+    }
+
+    get index(): number {
+        return this.data['index'];
     }
 
     get type_str(): string {
@@ -77,11 +108,29 @@ export class Preset {
     }
 
     get cells(): number {
-        return this.data['li_cell'];
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                return this.data['li_cell'];
+            case ChemistryType.NiMH:
+                return this.data['ni_cell'];
+            case ChemistryType.LiFe:
+                return this.data['li_cell'];
+        }
+        return 0;
     }
 
     set cells(value: number) {
-        this.data['li_cell'] = value;
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                this.data['li_cell'] = value;
+                break;
+            case ChemistryType.NiMH:
+                this.data['ni_cell'] = value;
+                break;
+            case ChemistryType.LiFe:
+                this.data['li_cell'] = value;
+                break;
+        }
     }
 
     get capacity(): number {
@@ -150,11 +199,24 @@ export class Preset {
     }
 
     get charge_cell_voltage(): number {
-        return this.data['lipo_charge_cell_voltage'];
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                return this.data['lipo_charge_cell_voltage'];
+            case ChemistryType.LiFe:
+                return this.data['life_charge_cell_voltage']
+        }
+        return 0;
     }
 
     set charge_cell_voltage(value: number) {
-        this.data['lipo_charge_cell_voltage'] = value;
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                this.data['lipo_charge_cell_voltage'] = value;
+                break;
+            case ChemistryType.LiFe:
+                this.data['life_charge_cell_voltage'] = value;
+                break;
+        }
     }
 
     get charge_current(): number {
@@ -163,6 +225,20 @@ export class Preset {
 
     set charge_current(value: number) {
         this.data['charge_current'] = value;
+    }
+
+    // First saw this when doing NiMH
+    get charge_mode(): number {
+        if (this.type == ChemistryType.NiMH) {
+            return this.data['ni_mode_c'];
+        }
+        return 0;
+    }
+
+    set charge_mode(value: number) {
+        if (this.type == ChemistryType.NiMH) {
+            this.data['ni_mode_c'] = value;
+        }
     }
 
     get discharge_current(): number {
@@ -174,11 +250,32 @@ export class Preset {
     }
 
     get discharge_voltage(): number {
-        return this.data['lipo_discharge_cell_voltage'];
+        switch (this.type) {
+            case ChemistryType.NiMH:
+                return this.data['ni_discharge_voltage'];
+
+            case ChemistryType.LiFe:
+                return this.data['life_discharge_cell_voltage'];
+
+            case ChemistryType.LiPo:
+                return this.data['lipo_discharge_cell_voltage'];
+        }
+        return 0;
     }
 
     set discharge_voltage(value: number) {
-        this.data['lipo_discharge_cell_voltage'] = value;
+        switch (this.type) {
+            case ChemistryType.NiMH:
+                this.data['ni_discharge_voltage'] = value;
+                break;
+
+            case ChemistryType.LiFe:
+                this.data['life_discharge_cell_voltage'] = value;
+                break;
+
+            case ChemistryType.LiPo:
+                this.data['lipo_discharge_cell_voltage'] = value;
+        }
     }
 
     get discharge_end_current(): number {
@@ -190,7 +287,13 @@ export class Preset {
     }
 
     get showChargeVoltageWarning(): boolean {
-        return this.charge_cell_voltage > 4.2;
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                return this.charge_cell_voltage > 4.2;
+            case ChemistryType.LiFe:
+                return this.charge_cell_voltage > 3.6;
+        }
+        return false;
     }
 
     get restore_voltage(): number {
@@ -358,11 +461,24 @@ export class Preset {
 
     // storage
     get storage_cell_voltage(): number {
-        return this.data['lipo_storage_cell_voltage'];
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                return this.data['lipo_storage_cell_voltage'];
+            case ChemistryType.LiFe:
+                return this.data['life_storage_cell_voltage'];
+        }
+        return 0;
     }
 
     set storage_cell_voltage(value: number) {
-        this.data['lipo_storage_cell_voltage'] = value;
+        switch (this.type) {
+            case ChemistryType.LiPo:
+                this.data['lipo_storage_cell_voltage'] = value;
+                break;
+            case ChemistryType.LiFe:
+                this.data['life_storage_cell_voltage'] = value;
+                break;
+        }
     }
 
     get storage_compensation_mv(): number {
@@ -404,6 +520,47 @@ export class Preset {
 
     set cycle_delay(value: number) {
         this.data['cycle_delay'] = value;
+    }
+
+    // NiMH
+    get ni_sensitivity(): number {
+        return this.data['ni_peak'];
+    }
+
+    set ni_sensitivity(value: number) {
+        this.data['ni_peak'] = value;
+    }
+
+    get allow_zero_volt_charging(): boolean {
+        return this.data['ni_zero_enable'];
+    }
+
+    set allow_zero_volt_charging(value: boolean) {
+        this.data['ni_zero_enable'] = value;
+    }
+
+    get trickle_enabled(): boolean {
+        return this.data['ni_trickle_enable'];
+    }
+
+    set trickle_enabled(value: boolean) {
+        this.data['ni_trickle_enable'] = value;
+    }
+
+    get trickle_current(): number {
+        return this.data['ni_trickle_current'];
+    }
+
+    set trickle_current(value: number) {
+        this.data['ni_trickle_current'] = value;
+    }
+
+    get trickle_timeout(): number {
+        return this.data['ni_trickle_time'];
+    }
+
+    set trickle_timeout(value: number) {
+        this.data['ni_trickle_time'] = value;
     }
 
 }
