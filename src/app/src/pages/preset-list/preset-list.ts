@@ -20,7 +20,11 @@ export class PresetListPage {
 
     ionViewDidLoad() {
         this.refreshPresets(null);
-    }
+        if (window.indexedDB) {
+            console.log("I'm in WKWebView!");
+        } else {
+            console.log("I'm in UIWebView");
+        }}
 
     refreshPresets(refresher) {
         this.chargerService.getPresets().subscribe(presetsList => {
@@ -37,19 +41,28 @@ export class PresetListPage {
     }
 
     editPreset(preset) {
-        console.log("Editing preset type: ", preset.type);
-        if (preset.type == ChemistryType.LiPo ||
-            preset.type == ChemistryType.NiMH ||
-            preset.type == ChemistryType.LiFe) {
-            this.navCtrl.push(PresetPage, preset);
+        if(preset) {
+            console.log("Editing preset type: ", preset.type);
+            if (preset.type == ChemistryType.LiPo ||
+                preset.type == ChemistryType.NiMH ||
+                preset.type == ChemistryType.LiFe) {
+                this.navCtrl.push(PresetPage, preset);
+            } else {
+                let toast = this.toastController.create({
+                    message: "Only support editing Lipo for now",
+                    duration: 2000,
+                    // dismissOnPageChange: true, // causes an exception. meh.
+                    position: "top"
+                });
+
+                toast.present();
+            }
         } else {
             let toast = this.toastController.create({
-                message: "Only support editing Lipo for now",
+                message: "Bug: no preset sent to edit",
                 duration: 2000,
-                // dismissOnPageChange: true, // causes an exception. meh.
                 position: "top"
             });
-
             toast.present();
         }
     }
