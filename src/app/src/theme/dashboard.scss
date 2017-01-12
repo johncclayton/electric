@@ -39,7 +39,7 @@
       font-size: 2rem;
       margin: auto;
       border-radius: 50%;
-      border-width: 3px;
+      border-width: 2px;
       border-style: solid;
       border-color: map_get($colors, 'primary');
       color: map_get($colors, 'primary');
@@ -188,6 +188,17 @@ channel:nth-child(3) .channelNumber {
     channel {
       ion-grid {
         padding-top: $item-ios-padding-top * 4 !important;
+      }
+
+      .channelNumber {
+        $size: 60px;
+        border-width: 3px;
+
+        height: $size !important;
+        width: $size !important;
+        flex: 0 0 $size;
+
+        font-size: 3.6rem;
       }
     }
   }

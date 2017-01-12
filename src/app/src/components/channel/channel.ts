@@ -92,16 +92,22 @@ export class ChannelComponent {
             return 0;
         }
 
-        let minimum: number = 500;
+        let minimum: number = 9999999;
         let maximum: number = 0;
+        let iterations: number = 0;
 
         cells.forEach(cell => {
             let cellVolts: number = cell['v'];
-            minimum = Math.min(cellVolts, minimum);
-            maximum = Math.max(cellVolts, maximum);
-
+            if (cellVolts >= 0 && cellVolts < 100) {
+                minimum = Math.min(cellVolts, minimum);
+                maximum = Math.max(cellVolts, maximum);
+            }
+            iterations++;
         });
 
+        if (iterations == 0) {
+            return 0.0;
+        }
         return maximum - minimum;
     }
 
