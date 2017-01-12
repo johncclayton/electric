@@ -1,0 +1,50 @@
+// Why I2 has padding on grids by default, I don't know ...
+ion-grid {
+  padding: 0;
+}
+
+.mini-badge {
+  font-size: 0.7em;
+  color: white;
+  border-radius: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  background: map_get($chemistry, 'default');
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.chemistry-LiPo {
+  background: map_get($chemistry, 'LiPo');
+}
+
+.chemistry-LiFe {
+  background: map_get($chemistry, 'LiFe');
+}
+
+.chemistry-LiLo {
+  background: map_get($chemistry, 'LiLo');
+}
+
+.chemistry-NiMH {
+  background: map_get($chemistry, 'NiMH');
+}
+
+.chemistry-Nicd {
+  background: map_get($chemistry, 'NiCd');
+}
+
+.chemistry-NiZn {
+  background: map_get($chemistry, 'NiZn');
+}
+
+.chemistry-Pb {
+  background: map_get($chemistry, 'Pb');
+}
+
+[no-right-padding] {
+  padding-right: 0 !important;
+  text-align: right;
+}

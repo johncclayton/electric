@@ -4,7 +4,7 @@ import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
-import {RegenerativeMode, RegenerativeToChannelMethod, Preset, ChemistryType} from "../preset/preset-class";
+import {RegenerativeMode, RegenerativeToChannelMethod, ChemistryType} from "../preset/preset-class";
 
 @Component({
     selector: 'page-preset-discharge',

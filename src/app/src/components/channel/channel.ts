@@ -24,7 +24,16 @@ export class ChannelComponent {
     }
 
     chunkedCells() {
+        if (!this.channel['cells']) {
+            return [];
+        }
         let cells = this.channel['cells'];
+
+        // Pad so there's an even divisible number of cells by cellChunking()
+        while (cells.length % this.cellChunking() != 0) {
+            cells.push({v: -1000});
+        }
+
         if (this.channel) {
             return _.chunk(cells, this.cellChunking());
         }
@@ -48,6 +57,10 @@ export class ChannelComponent {
                 this.channel = data;
             });
         }
+    }
+
+    isCellPadding(cell) {
+        return cell.v == -1000;
     }
 
     isCellUnused(cell) {

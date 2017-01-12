@@ -13,6 +13,14 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 @import "../../bourbon/bourbon";
+
+$breakpoints: (
+        'phone': 320px,
+        'widephone': 374px,
+        'tablet': 768px,
+        'desktop': 1024px
+) !default;
+
 @import "../../node_modules/include-media/dist/include-media";
 
 $chemistry: (
@@ -26,141 +34,5 @@ $chemistry: (
         'default':#bbb,
 );
 
-// This is the CSS for the charger, as a whole.
-.charger {
-
-  // This controls what you see at the top of the dashboard
-  // The main amps, volts area...
-  .overview {
-    .status {
-      .cellcontainer {
-        font-size: 1.4em;
-        .label {
-          font-size: 0.7em;
-        }
-      }
-      .small {
-        font-size: 1.1em;
-        .label {
-          text-align: right;
-          font-size: 1.1em;
-          vertical-align: baseline;
-        }
-      }
-    }
-  }
-
-  //.volts {
-  //  background: lightsalmon;
-  //}
-  //.amps {
-  //  background: lightblue;
-  //}
-  //.mah {
-  //  background: lightgreen;
-  //}
-
-  // Per channel
-  .channel0 {
-    background: lightblue;
-  }
-  .channel1 {
-    background: lightgreen;
-
-  }
-  channel {
-
-    .cellcontainer {
-      border-radius: 4px;
-      margin: 2px;
-      margin-right: 4px;
-      border-color: gray;
-      border-style: solid;
-      border-width: 1px;
-
-      // The channel number sits off on the edge of the cell
-      .channelnum {
-        background: map_get($colors, 'primary');
-        color: white;
-        z-index: 1;
-        float: left;
-        padding-right: 4px;
-        padding-left: 3px;
-      }
-
-      .label {
-        font-size: 0.8em;
-      }
-      .status {
-      }
-    }
-    .unused {
-      opacity: 0.25;
-    }
-
-    @import "../theme/balance";
-  }
-}
-
-.chargername {
-  .tag {
-    display: inline-block;
-    background: white;
-    border-radius: 2px;
-    color: map-get($colors, 'primary');
-    margin-left: 5px;
-    padding: 0 4px 0 4px;
-    transform: skewX(-5deg);
-  }
-}
-
-// Why I2 has padding on grids by default, I don't know ...
-ion-grid {
-  padding: 0;
-}
-
-.mini-badge {
-  font-size: 0.7em;
-  color: white;
-  border-radius: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  background: map_get($chemistry, 'default');
-  margin-right: 5px;
-  display: inline-block;
-}
-
-.chemistry-LiPo {
-  background: map_get($chemistry, 'LiPo');
-}
-
-.chemistry-LiFe {
-  background: map_get($chemistry, 'LiFe');
-}
-
-.chemistry-LiLo {
-  background: map_get($chemistry, 'LiLo');
-}
-
-.chemistry-NiMH {
-  background: map_get($chemistry, 'NiMH');
-}
-
-.chemistry-Nicd {
-  background: map_get($chemistry, 'NiCd');
-}
-
-.chemistry-NiZn {
-  background: map_get($chemistry, 'NiZn');
-}
-
-.chemistry-Pb {
-  background: map_get($chemistry, 'Pb');
-}
-
-[no-right-padding] {
-  padding-right: 0 !important;
-  text-align: right;
-}
+@import "../theme/dashboard";
+@import "../theme/preset";

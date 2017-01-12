@@ -2,8 +2,7 @@ import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../preset/preset-class";
-import {FormBuilder, FormControl} from "@angular/forms";
-import {ChargerValidator} from "../../utils/validators";
+import {FormBuilder} from "@angular/forms";
 
 
 export class PresetBasePage {

@@ -4,10 +4,10 @@
             <ion-icon name="menu"></ion-icon>
         </button>
         <ion-title text-center>
-            <span class="chargername">
+            <div class="chargername">
                 {{chargerService.getChargerName()}}
                 <span class="tag">{{chargerService.getChargerTag()}}</span>
-            </span>
+            </div>
         </ion-title>
     </ion-navbar>
 </ion-header>
@@ -22,7 +22,7 @@
                 Connection Status
             </ion-card-header>
 
-            <ion-list>
+            <ion-list class="errors">
                 <ion-item *ngIf="!isConnectedToServer()">
                     <ion-icon name="close-circle" color="danger"></ion-icon>
                     Can't see the Pi 'server'.
@@ -42,29 +42,33 @@
                     <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
                     Charger OK!
                 </ion-item>
+
+                <ion-list-header>Please Check</ion-list-header>
+                <h3 *ngIf="!isConnectedToServer()">
+                    <ion-icon name="bulb-outline"></ion-icon>
+                    Check that you have the correct host URL in your Configuration.
+                </h3>
+                <h3 *ngIf="!isConnectedToServer()">
+                    <ion-icon name="bulb-outline"></ion-icon>
+                    Do you have network connectivity to the Pi?
+                </h3>
+                <h3 *ngIf="!isConnectedToCharger()">
+                    <ion-icon name="bulb-outline"></ion-icon>
+                    Is the charger on?
+                </h3>
+                <h3 *ngIf="!isConnectedToCharger()">
+                    <ion-icon name="bulb-outline"></ion-icon>
+                    Is the charger USB plugged into the Pi?
+                </h3>
             </ion-list>
         </ion-card>
 
-        <ion-list padding>
-            <ion-list-header> Houston, we have a problem.</ion-list-header>
-            <p *ngIf="!isConnectedToServer()">
-                <ion-icon name="bulb-outline"></ion-icon>
-                Check that you have the correct host URL in your Configuration.
-            </p>
-            <p *ngIf="!isConnectedToServer()">
-                <ion-icon name="bulb-outline"></ion-icon>
-                Do you have network connectivity to the Pi?
-            </p>
-            <p *ngIf="!isConnectedToCharger">
-                <ion-icon name="bulb-outline"></ion-icon>
-                Is the charger on?
-            </p>
-            <p *ngIf="!isConnectedToCharger">
-                <ion-icon name="bulb-outline"></ion-icon>
-                Is the charger USB plugged into the Pi?
-            </p>
-        </ion-list>
-        <button ion-button full color="danger" *ngIf="exception">{{exception}}</button>
+        <div *ngIf="exception" class="tryme">
+            <ion-list>
+                <ion-list-header>The Server Said:</ion-list-header>
+                <h4 padding color="danger">{{exception}}</h4>
+            </ion-list>
+        </div>
     </div>
 
 
