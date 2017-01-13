@@ -3,7 +3,7 @@ version: '2'
 services:
   web:
     build:
-      context: arm
+      cops -ajx | grep dontext: docker/arm
 
     container_name: electric-web
 

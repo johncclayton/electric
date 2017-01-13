@@ -8,10 +8,10 @@ RUN apk update
 RUN apk add python libusb usbutils py-pip bash
 
 VOLUME /www
-COPY server /www
+COPY src/server /www
 EXPOSE 5000
 
-COPY server/requirements.txt /www
+COPY src/server/requirements.txt /www
 WORKDIR  /www
 
 RUN pip install -r requirements.txt
