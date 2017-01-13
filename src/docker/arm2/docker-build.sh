@@ -1,3 +1,3 @@
 #!/bin/bash
-docker build -f src/docker/arm2/Dockerfile -t scornflake/electric-pi2:latest . $1 $2 $3 $4
+docker build -f docker/arm2/Dockerfile -t scornflake/electric-pi2:latest . $1 $2 $3 $4
 
