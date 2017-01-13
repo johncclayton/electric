@@ -4,7 +4,7 @@ LABEL version="1.0"
 
 RUN apk update
 # usbutils required to make the USB stuff work.
-RUN apk add python libusb usbutils
+RUN apk add python libusb usbutils py-pip
 
 COPY server /www
 EXPOSE 5000
