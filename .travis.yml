@@ -11,7 +11,9 @@ script:
 #- docker run hypriot/rpi-mysql mysql --version
 # push image
 - >
-  if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+  if [ "$TRAVIS_BRANCH" == "feature/docker" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+    TAG=$TRAVIS_BUILD_NUMBER
+    docker tag scornflake/electric-pi2 scornflake/electric-pi2:$TAG
     docker push scornflake/electric-pi2
   fi
