@@ -5,5 +5,10 @@ COPY server /www
 EXPOSE 5000
 COPY server/requirements.txt /www
 WORKDIR  /www
+
+# usbutils required to make the USB stuff work.
+RUN apt-get update
+RUN apt-get install usbutils
+
 RUN pip install -r requirements.txt
 ENTRYPOINT ["./run_server.sh"]
