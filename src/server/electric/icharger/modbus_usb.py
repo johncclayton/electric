@@ -1,14 +1,19 @@
 import logging
 import platform
 import struct
-
+import threading
+from Queue import Queue
+from threading import Thread
 import modbus_tk.defines as cst
+import time
 import usb.core
 import usb.util
-
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
+import logging
+
+logger = logging.getLogger(__name__)
 
 MEMORY_MAX = 64
 MODBUS_HID_FRAME_TYPE = 0x30
