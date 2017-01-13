@@ -25,6 +25,7 @@ class TestRestfulAPI(unittest.TestCase):
 
         self.assertEqual("connected", d["charger_presence"])
         self.assertEqual(d["channel_count"], 2)
+        self.assertTrue(d["cell_count"] >= 6)
         self.assertTrue(len(d["device_sn"]) > 5)
         self.assertTrue(d["memory_len"] > 0)
         self.assertTrue(d["system_len"] > 0)
