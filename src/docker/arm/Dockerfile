@@ -7,11 +7,13 @@ RUN apk update
 # added bash cos I'm lazy
 RUN apk add python libusb usbutils py-pip bash
 
+VOLUME /www
 COPY server /www
 EXPOSE 5000
+
 COPY server/requirements.txt /www
 WORKDIR  /www
 
 RUN pip install -r requirements.txt
-CMD ["./run_server.sh"]
 
+CMD ["./run_server.sh"]

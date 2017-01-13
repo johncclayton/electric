@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+  web:
+    build:
+      context: arm
+
+    container_name: electric-web
+
+    ports:
+      - "80:5000"
+
+    privileged: true
+
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+
+    restart: always
+
+    networks:
+      - charger
+
+  redis:
+    image: hypriot-rpi/redis
+    container_name: electric-redis
+
+    ports:
+      - "6379:6379"
+
+    restart: always
+
+    networks:
+      - charger
+
+
+networks:
+  charger:
