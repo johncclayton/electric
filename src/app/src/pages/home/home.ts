@@ -80,7 +80,12 @@ export class HomePage {
             this.chargerStatusSubscription.unsubscribe();
             this.chargerStatusSubscription = null;
         }
-    }
+
+        if(this.chargerStatusObserver) {
+            console.log("Cleanup the channel status observer");
+            this.chargerStatusObserver = null;
+        }
+     }
 
     showToast(message: string) {
         // about not to be, so show a message

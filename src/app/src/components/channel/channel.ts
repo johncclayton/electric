@@ -19,6 +19,8 @@ export class ChannelComponent {
     @Input() channelObserver;
     @Input() name: string;
 
+    private channelSubscription;
+
     cellChunking() {
         return 3;
     }
@@ -40,11 +42,20 @@ export class ChannelComponent {
         return null;
     }
 
+    ngOnDestroy() {
+        console.log("Leaving channel: ", this.channel['channel']);
+        if (this.channelSubscription) {
+            console.log("Channel ", this.channel['channel'], " going away, unsubscribing");
+            this.channelSubscription.unsubscribe();
+            this.channelSubscription = null;
+        }
+    }
+
     ngOnChanges(changes) {
         console.log("Channel is seeing change to bound data: ", changes);
         if (this.channelObserver) {
             console.log("Channel binding to ", this.channelObserver);
-            this.channelObserver.subscribe((data) => {
+            this.channelSubscription = this.channelObserver.subscribe((data) => {
                 data['cells'].forEach(thing => {
                     this.maxBalanceSeen = Math.max(this.maxBalanceSeen, thing.balance)
                 });

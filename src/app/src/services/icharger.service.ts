@@ -115,7 +115,7 @@ export class iChargerService {
         for (let i = 0; i < this.getNumberOfChannels(); i++) {
             console.log(`Creating hot channel observable: ${i}`);
             this.channelStateObservable.push(Observable
-                .timer(500, 1000)
+                .timer(500, 1000  )
                 .flatMap((v) => {
                     return this.http.get(this.getChargerURL(`/channel/${i}`));
                 })
