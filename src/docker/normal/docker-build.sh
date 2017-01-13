@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t scornflake/electric:latest . $1 $2 $3
+docker build -f docker/normal/Dockerfile -t scornflake/electric:latest . $1 $2 $3

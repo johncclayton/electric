@@ -6,14 +6,14 @@ script:
 # prepare qemu
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 # build image
-- docker build -f src/docker/arm2/Dockerfile -t scornflake/electric-pi2 ./src
+- docker build -f src/docker/arm2/Dockerfile -t scornflake/electric-pi ./src
 # test image
 #- docker run hypriot/rpi-mysql mysql --version
 # push image
 - >
-  if [ "$TRAVIS_BRANCH" == "feature/docker" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+  if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
     TAG=$TRAVIS_BUILD_NUMBER
-    docker tag scornflake/electric-pi2 scornflake/electric-pi2:$TAG
-    docker push scornflake/electric-pi2
+    docker tag scornflake/electric-pi scornflake/electric-pi:$TAG
+    docker push scornflake/electric-pi
   fi
