@@ -104,7 +104,12 @@ class TestRestfulAPI(unittest.TestCase):
         self.assertIsNotNone(d["run_error"])
         self.assertIsNotNone(d["dlg_box_id"])
 
-        for x in range(0, 9):
+        info_resp = self.client.get("/status")
+        info = json.loads(info_resp.data)
+        num_cells = info["cell_count"]
+        self.assertTrue(num_cells >= 6)
+
+        for x in range(0, num_cells):
             self.assertEqual(d["cells"][x]["cell"], x)
             self.assertTrue(d["cells"][x]["v"] >= 0)
             self.assertTrue(d["cells"][x]["balance"] >= 0)
