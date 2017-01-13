@@ -137,6 +137,11 @@ class TestGatewayCommunications(unittest.TestCase):
         resp = obj.get_channel_status(0)
         self.assertIsNotNone(resp)
 
+    def test_number_of_channels(self):
+        obj = ChargerCommsManager()
+        resp = obj.get_device_info()
+        self.assertTrue(resp.cell_count >= 6)
+
     def test_order_description(self):
         c = Control()
         c.order = 0

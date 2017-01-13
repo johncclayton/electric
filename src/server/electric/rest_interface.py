@@ -1,6 +1,6 @@
 from flask_restful import Resource
 
-from electric.icharger.modbus_usb import connection_state_dict
+from icharger.modbus_usb import connection_state_dict
 from icharger.comms_layer import ChargerCommsManager
 
 class StatusResource(Resource):

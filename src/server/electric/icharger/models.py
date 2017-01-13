@@ -15,6 +15,14 @@ STATUS_DLG_BOX_STATUS = 0x10
 STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
+DEVICEID_4010_DUO = 64
+DEVICEID_308_DUO = 66
+
+DeviceIdCellCount = (
+    (DEVICEID_308_DUO, 8),
+    (DEVICEID_4010_DUO, 10)
+)
+
 Control_RunOperations = (
     (0, "charge"),
     (1, "storage"),
@@ -118,6 +126,7 @@ class DeviceInfo(Model):
     system_len = IntType(required=True)
     memory_len = IntType(required=True)
     channel_count = IntType(required=True, default=2)
+    cell_count = IntType(required=True, default=0)
     ch1_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
     ch2_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
 
@@ -135,6 +144,10 @@ class DeviceInfo(Model):
         self.memory_len = data[5]
         self.ch1_status = DeviceInfoStatus(data[6])
         self.ch2_status = DeviceInfoStatus(data[7])
+
+        for (device_id, cell_count) in DeviceIdCellCount:
+            if device_id == self.device_id:
+                self.cell_count = cell_count
 
 
 class CellStatus(Model):
