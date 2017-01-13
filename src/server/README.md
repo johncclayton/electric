@@ -37,6 +37,13 @@ Setup a virtualenv for the project, and load the required modules using the requ
 Use the run_server.sh script within this directory to start the server.  This assumes your current python
 environment has all the required modules installed of course.
 
+# Setting up to run as a service on the Pi
+- sudo su (probably)
+- Copy the file `scripts/electric.service` to `/etc/systemd/system` on the Pi.
+- Change permissions to 664, `chmod 664 /etc/systemd/system/electric.service`
+- Run `systemctl daemon-reload` on the Pi.
+- Run `systemctl start electric.service` on ze Pi.
+
 # publish to pypi or pypitest repository
 The server code can be published to the pypi repo as long as you have account credentials for the pypi
 repository set up in your ~/.pypirc file.  See the pypirc_template for an example of this file. 
