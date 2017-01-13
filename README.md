@@ -1,6 +1,8 @@
 # status
 [![Build Status](https://travis-ci.org/johncclayton/electric.svg?branch=master)](https://travis-ci.org/johncclayton/electric)
 
+Docker image: https://hub.docker.com/r/scornflake/electric-pi/
+
 # electric
 Battery charger integration, information and provisioning
 
