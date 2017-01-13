@@ -1,6 +1,6 @@
 # electric
 Battery charger integration, information and provisioning
-https://travis-ci.org/johncclayton/electric.svg?branch=master
+[![Build Status](https://travis-ci.org/johncclayton/electric.svg?branch=master)](https://travis-ci.org/johncclayton/electric)
 
 # what
 This project provides everything you need to get information from your iCharger 4010 DUO to an application running on your desktop or mobile device.
