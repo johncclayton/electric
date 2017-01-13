@@ -1,10 +1,8 @@
-import struct
+import modbus_tk.defines as cst
 
 from icharger.models import SystemStorage, WriteDataSegment
-from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
-
-import modbus_tk.defines as cst
 from modbus_usb import iChargerMaster
+from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
 CHANNEL_INPUT_HEADER_OFFSET = 0
 CHANNEL_INPUT_FOOTER_OFFSET = 51
