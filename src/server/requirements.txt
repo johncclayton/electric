@@ -7,6 +7,7 @@ configparser==3.5.0
 Flask==0.12
 Flask-Cors==3.0.2
 Flask-RESTful==0.3.5
+gunicorn==19.6.0
 isort==4.2.5
 itsdangerous==0.24
 Jinja2==2.8

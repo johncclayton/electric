@@ -31,7 +31,9 @@ class RqChargerCommsManager(object):
                 return job.result
 
             # Wait some more - this sucks, but hey
-            time.sleep(1.0 / 10)
+            time.sleep(1.0 / 10.0)
+
+        raise Exception("Failed to call method on the back end. Waited 10s.")
 
     def get_device_info(self):
         return self._blocking_call(get_device_info)

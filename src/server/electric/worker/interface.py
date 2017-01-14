@@ -26,8 +26,8 @@ def get_system_storage():
     return get_charger().get_system_storage()
 
 
-def get_preset_list():
-    return get_charger().get_preset_list()
+def get_preset_list(count_only):
+    return get_charger().get_preset_list(count_only)
 
 
 def get_preset(index):

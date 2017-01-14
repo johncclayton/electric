@@ -115,7 +115,7 @@ export class iChargerService {
         for (let i = 0; i < this.getNumberOfChannels(); i++) {
             console.log(`Creating hot channel observable: ${i}`);
             this.channelStateObservable.push(Observable
-                .timer(500, 1000  )
+                .timer(500, 500)
                 .flatMap((v) => {
                     return this.http.get(this.getChargerURL(`/channel/${i}`));
                 })
@@ -126,23 +126,7 @@ export class iChargerService {
                     this.events.publish(CHARGER_CHANNEL_EVENT, i);
                     let jsonResponse = response.json();
 
-                    let channels = jsonResponse["cells"];
-
-                    // TODO: Take this out when the server doesn't return 1024 cells
-                    channels = channels.filter((c) => {
-                        if (c.hasOwnProperty('v')) {
-                            if (c['v'] == 1.024) {
-                                return false;
-                            }
-                        }
-                        if (c.hasOwnProperty('ir')) {
-                            if (c['ir'] == 1024) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-                    jsonResponse["cells"] = channels;
+                    jsonResponse["cells"] = jsonResponse["cells"];
 
                     let channel = Number(jsonResponse["channel"]);
                     this.channelSnapshots[channel] = {
