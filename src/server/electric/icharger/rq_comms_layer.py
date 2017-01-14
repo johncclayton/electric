@@ -13,7 +13,7 @@ class RqChargerCommsManager(object):
     def __init__(self, redisAddress=None):
         super(RqChargerCommsManager, self).__init__()
         if not redisAddress:
-            redisAddress = "192.168.1.30"
+            redisAddress = "localhost"
         with Connection(Redis(redisAddress)):
             self.queue = Queue()
 
