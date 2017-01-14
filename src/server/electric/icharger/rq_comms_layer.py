@@ -18,7 +18,7 @@ class RqChargerCommsManager(object):
             self.queue = Queue()
 
     def _blocking_call(self, call, *args, **kwargs):
-        job = self.queue.enqueue(call, *args, **kwargs)
+        job = self.queue.enqueue_call(func=call, args=args, kwargs=kwargs, result_ttl=10)
 
         # Wait for completion
         for i in range(0, 1000):
