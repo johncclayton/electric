@@ -13,7 +13,7 @@ services:
     environment:
       - PYTHONPATH=electric
 
-    command: ["rq redis://electric-redis:6379"]
+    command: ["/usr/bin/rq", "worker", "--url", "redis://electric-redis:6379"]
 
     volumes:
       - /dev/bus/usb:/dev/bus/usb
@@ -33,6 +33,9 @@ services:
     ports:
       - "80:5000"
       - "5000:5000"
+
+    environment:
+      - REDIS_ADDRESS=electric-redis
 
     volumes:
       - ./src/server:/www
