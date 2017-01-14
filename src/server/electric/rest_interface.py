@@ -2,12 +2,16 @@ import os
 
 from flask_restful import Resource
 
+from icharger.comms_layer import ChargerCommsManager
 from icharger.modbus_usb import connection_state_dict
 from icharger.rq_comms_layer import RqChargerCommsManager
 
 
 class AbstractChargerResource(Resource):
     def get_comms(self):
+        debug_mode = os.environ.get("DEBUG_MODE", None)
+        if debug_mode:
+            return ChargerCommsManager()
         redisAddress = os.environ.get("REDIS_ADDRESS", "localhost")
         return RqChargerCommsManager(redisAddress)
 
@@ -17,6 +21,10 @@ class StatusResource(AbstractChargerResource):
         try:
             comms = self.get_comms()
             info = comms.get_device_info()
+
+            # groan
+            if globals().get('__global__device_id') is None:
+                globals()['__global__device_id'] = info.device_id
 
             obj = info.to_primitive()
             obj.update(connection_state_dict())
@@ -34,7 +42,10 @@ class ChannelResource(AbstractChargerResource):
                 raise ValueError("Channel part of URI must be 0 or 1")
 
             comms = self.get_comms()
-            status = comms.get_channel_status(int(channel))
+
+            # yeh, more groan
+            global__device_id = globals().get('__global__device_id')
+            status = comms.get_channel_status(int(channel), global__device_id)
 
             obj = status.to_primitive()
             obj.update(connection_state_dict())
