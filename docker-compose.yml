@@ -6,21 +6,27 @@ services:
 
     container_name: electric-worker
 
-    ports:
-      - "80:5000"
-      - "5000:5000"
-
     privileged: true
+
+    restart: always
+
+    environment:
+      - PYTHONPATH=electric
+
+    command: ["rq redis://electric-redis:6379"]
 
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - ./src/server:/www
 
+    networks:
+      - charger
+
   web:
     build:
       context: .
       dockerfile: docker/arm/Dockerfile
-      image: electric/web
+    image: electric/web
 
     container_name: electric-web
 
