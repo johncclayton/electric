@@ -37,7 +37,7 @@ class ChargerCommsManager:
         vars = ReadDataSegment(self.charger, "vars", "h12sHHHHHH", base=0x0000)
         return DeviceInfo(vars.data)
 
-    def get_channel_status(self, channel):
+    def get_channel_status(self, channel, device_id=None):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
         :return: ChannelStatus instance
@@ -69,7 +69,7 @@ class ChargerCommsManager:
         footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
         footer = self.charger.modbus_read_registers(footer_addr, footer_fmt)
 
-        return ChannelStatus(channel, header_data, cell_volt, cell_balance, cell_ir, footer)
+        return ChannelStatus(device_id, channel, header_data, cell_volt, cell_balance, cell_ir, footer)
 
     def get_control_register(self):
         "Returns the current run state of a particular channel"

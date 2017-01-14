@@ -78,6 +78,7 @@ class WriteDataSegment:
 
         self.size = byte * 2
 
+
 class DeviceInfoStatus(Model):
     value = IntType(required=True, min_value=0, max_value=0x7f)
 
@@ -190,12 +191,12 @@ class ChannelStatus(Model):
     dlg_box_id = IntType(required=True)
     line_intern_resistance = FloatType(required=True)
 
-    def __init__(self, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
+    def __init__(self, device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
         super(ChannelStatus, self).__init__()
         if header is not None and cell_v is not None and cell_b is not None and cell_i is not None and footer is not None:
-            self.set_from_modbus_data(channel, header, cell_v, cell_b, cell_i, footer)
+            self.set_from_modbus_data(device_id, channel, header, cell_v, cell_b, cell_i, footer)
 
-    def set_from_modbus_data(self, channel, data, cell_v, cell_b, cell_i, footer):
+    def set_from_modbus_data(self, device_id, channel, data, cell_v, cell_b, cell_i, footer):
         self.channel = channel
 
         self.timestamp = data[0] / 1000.0
@@ -230,9 +231,19 @@ class ChannelStatus(Model):
         self.run_error = footer[5]
         self.dlg_box_id = footer[6]
 
+        if device_id:
+            # With this, we can work out if the main battery lead is plugged in
+            print " we have a device, see if pack is on"
+            max_voltage = 30 if device_id is 66 else 40
+            if self.curr_out_volts > max_voltage:
+                self.curr_out_volts = 0
+
+    def max_charger_input_voltage(self):
+        return 0
+
     @serializable
     def battery_plugged_in(self):
-        return (self.curr_out_volts - self.cell_total_voltage) < 1
+        return self.curr_out_volts <= self.cell_total_voltage
 
     @serializable
     def balance_leads_plugged_in(self):

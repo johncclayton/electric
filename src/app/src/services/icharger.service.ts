@@ -125,9 +125,6 @@ export class iChargerService {
                 .map((response) => {
                     this.events.publish(CHARGER_CHANNEL_EVENT, i);
                     let jsonResponse = response.json();
-
-                    jsonResponse["cells"] = jsonResponse["cells"];
-
                     let channel = Number(jsonResponse["channel"]);
                     this.channelSnapshots[channel] = {
                         index: i,

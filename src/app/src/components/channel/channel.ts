@@ -56,16 +56,21 @@ export class ChannelComponent {
         if (this.channelObserver) {
             console.log("Channel binding to ", this.channelObserver);
             this.channelSubscription = this.channelObserver.subscribe((data) => {
-                data['cells'].forEach(thing => {
-                    this.maxBalanceSeen = Math.max(this.maxBalanceSeen, thing.balance)
-                });
-                // let i = 1;
-                // let newCells = JSON.parse(JSON.stringify(data['cells']));
-                // for (let cell in newCells) {
-                //     newCells[i - 1]['balance'] = i++;
-                // }
-                // data['cells'] = newCells;
-                this.channel = data;
+                if(data) {
+                    let someCells = data['cells'];
+                    if(someCells) {
+                        someCells.forEach(thing => {
+                            this.maxBalanceSeen = Math.max(this.maxBalanceSeen, thing.balance)
+                        });
+                        // let i = 1;
+                        // let newCells = JSON.parse(JSON.stringify(data['cells']));
+                        // for (let cell in newCells) {
+                        //     newCells[i - 1]['balance'] = i++;
+                        // }
+                        // data['cells'] = newCells;
+                        this.channel = data;
+                    }
+                }
             });
         }
     }
