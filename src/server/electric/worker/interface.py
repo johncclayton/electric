@@ -14,8 +14,8 @@ def get_device_info():
     return get_charger().get_device_info()
 
 
-def get_channel_status(channel):
-    return get_charger().get_channel_status(channel)
+def get_channel_status(channel, device_id=None):
+    return get_charger().get_channel_status(channel, device_id)
 
 
 def get_control_register():

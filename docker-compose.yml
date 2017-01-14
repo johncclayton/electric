@@ -13,7 +13,8 @@ services:
     environment:
       - PYTHONPATH=electric
 
-    command: ["/usr/bin/rq", "worker", "-w", "rq.worker.SimpleWorker", "--url", "redis://electric-redis:6379"]
+    command: ["/usr/bin/rq", "worker", "-w", "electric.worker.docker.DockerWorker", "--url", "redis://electric-redis:6379"]
+#    command: ["/usr/bin/rq", "worker", "--url", "redis://electric-redis:6379"]
 
     volumes:
       - /dev/bus/usb:/dev/bus/usb

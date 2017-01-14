@@ -18,7 +18,7 @@ class RqChargerCommsManager(object):
             self.queue = Queue()
 
     def _blocking_call(self, call, *args, **kwargs):
-        job = self.queue.enqueue_call(func=call, args=args, kwargs=kwargs, result_ttl=10)
+        job = self.queue.enqueue_call(func=call, args=args, kwargs=kwargs, result_ttl=20)
 
         # Wait for completion
         for i in range(0, 1000):
@@ -38,8 +38,8 @@ class RqChargerCommsManager(object):
     def get_device_info(self):
         return self._blocking_call(get_device_info)
 
-    def get_channel_status(self, channel):
-        return self._blocking_call(get_channel_status, channel)
+    def get_channel_status(self, channel, device_id):
+        return self._blocking_call(get_channel_status, channel, device_id)
 
     def get_control_register(self):
         return self._blocking_call(get_control_register)
