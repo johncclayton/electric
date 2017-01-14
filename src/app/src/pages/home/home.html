@@ -15,7 +15,7 @@
 <ion-nav #content [root]="rootPage"></ion-nav>
 
 <ion-content class="charger">
-    <div *ngIf="!isConnectedToServer() || !isConnectedToCharger()">
+    <div *ngIf="needToShowSomeMessages()">
         <ion-card>
             <ion-card-header>
                 Connection Status
@@ -43,6 +43,10 @@
                 </ion-item>
 
                 <ion-list-header>Please Check</ion-list-header>
+                <h3 *ngIf="!isNetworkAvailable()">
+                    <ion-icon name="bulb-outline"></ion-icon>
+                    Is Wifi on? There doesn't seem to be a network.
+                </h3>
                 <h3 *ngIf="!isConnectedToServer()">
                     <ion-icon name="bulb-outline"></ion-icon>
                     Check that you have the correct host URL in your Configuration.
@@ -71,7 +75,7 @@
     </div>
 
 
-    <div *ngIf="isConnectedToServer() && isConnectedToCharger()">
+    <div *ngIf="!needToShowSomeMessages()">
         <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
         <charger-status
                 [status]="chargerStatusObserver"

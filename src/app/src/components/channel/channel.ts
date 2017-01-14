@@ -56,9 +56,9 @@ export class ChannelComponent {
         if (this.channelObserver) {
             console.log("Channel binding to ", this.channelObserver);
             this.channelSubscription = this.channelObserver.subscribe((data) => {
-                if(data) {
+                if (data) {
                     let someCells = data['cells'];
-                    if(someCells) {
+                    if (someCells) {
                         someCells.forEach(thing => {
                             this.maxBalanceSeen = Math.max(this.maxBalanceSeen, thing.balance)
                         });
@@ -114,17 +114,18 @@ export class ChannelComponent {
 
         cells.forEach(cell => {
             let cellVolts: number = cell['v'];
-            if (cellVolts >= 0 && cellVolts < 100) {
+            if (cellVolts > 0 && cellVolts < 100) {
                 minimum = Math.min(cellVolts, minimum);
                 maximum = Math.max(cellVolts, maximum);
+                iterations++;
             }
-            iterations++;
         });
 
         if (iterations == 0) {
             return 0.0;
         }
-        return maximum - minimum;
+        // console.log("max: ", maximum, " min", minimum);
+        return (maximum - minimum) * 1000.0;
     }
 
     /*

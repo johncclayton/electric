@@ -1,8 +1,9 @@
 import {Component} from "@angular/core";
-import {NavController, ToastController, Events} from "ionic-angular";
+import {NavController, ToastController, Events, Platform} from "ionic-angular";
 import {Subscription, Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} from "../../services/icharger.service";
+import {Network} from 'ionic-native';
 
 @Component({
     selector: 'page-home',
@@ -10,6 +11,7 @@ import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} fr
 })
 export class HomePage {
     public exception: string = "";
+    public haveNetwork: boolean = true; // assume yes
     private chargerStatusObserver: Observable<any>;
     private chargerStatusSubscription: Subscription;
 
@@ -18,6 +20,7 @@ export class HomePage {
                 public events: Events,
                 public toastController: ToastController,
                 public chargerService: iChargerService,
+                public platform: Platform,
                 public http: Http) {
 
         // Put up some nice UI for disconnection
@@ -26,6 +29,25 @@ export class HomePage {
 
         // TODO: Use this to flash some activity lights
         // this.events.subscribe(CHARGER_CHANNEL_EVENT, (channelNum) => console.log("Activity on channel ", channelNum));
+
+
+        this.platform.ready().then(() => {
+            // Network.onchange().subscribe(() => {
+            //     console.log("Network changed to: ", Network.type);
+            //     this.haveNetwork = Network.type != 'none';
+            // });
+        });
+    }
+
+    needToShowSomeMessages() {
+        let haveNetwork = this.isNetworkAvailable();
+        let haveCharger = this.isConnectedToCharger();
+        let haveServer = this.isConnectedToServer();
+        return !haveNetwork || !haveCharger || !haveServer;
+    }
+
+    isNetworkAvailable(): boolean {
+        return this.haveNetwork;
     }
 
     isConnectedToServer() {
@@ -81,11 +103,11 @@ export class HomePage {
             this.chargerStatusSubscription = null;
         }
 
-        if(this.chargerStatusObserver) {
+        if (this.chargerStatusObserver) {
             console.log("Cleanup the channel status observer");
             this.chargerStatusObserver = null;
         }
-     }
+    }
 
     showToast(message: string) {
         // about not to be, so show a message
