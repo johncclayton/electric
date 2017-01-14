@@ -1,19 +1,35 @@
 version: '2'
 
 services:
-  web:
-    build:
-      cops -ajx | grep dontext: docker/arm
+  worker:
+    image: electric/web
 
-    container_name: electric-web
+    container_name: electric-worker
 
     ports:
       - "80:5000"
+      - "5000:5000"
 
     privileged: true
 
     volumes:
       - /dev/bus/usb:/dev/bus/usb
+      - ./src/server:/www
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/arm/Dockerfile
+      image: electric/web
+
+    container_name: electric-web
+
+    ports:
+      - "80:5000"
+      - "5000:5000"
+
+    volumes:
+      - ./src/server:/www
 
     restart: always
 
@@ -21,7 +37,7 @@ services:
       - charger
 
   redis:
-    image: hypriot-rpi/redis
+    image: hypriot/rpi-redis
     container_name: electric-redis
 
     ports:
@@ -31,7 +47,6 @@ services:
 
     networks:
       - charger
-
 
 networks:
   charger:

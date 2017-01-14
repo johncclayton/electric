@@ -8,6 +8,7 @@ RUN apk update
 RUN apk add python libusb usbutils py-pip bash
 
 VOLUME /www
+
 COPY src/server /www
 EXPOSE 5000
 
