@@ -1,10 +1,11 @@
 import {Component} from "@angular/core";
 import {PresetBasePage} from "../preset-charge/preset-charge";
 import {NavController, NavParams} from "ionic-angular";
-import {Configuration} from "../../services/configuration.service";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
 import {RegenerativeMode, RegenerativeToChannelMethod, ChemistryType} from "../preset/preset-class";
+import {iChargerService} from "../../services/icharger.service";
+import {Configuration} from "../../services/configuration.service";
 
 @Component({
     selector: 'page-preset-discharge',
@@ -17,6 +18,7 @@ export class PresetDischargePage extends PresetBasePage {
 
     constructor(navCtrl: NavController,
                 config: Configuration,
+                public chargerService: iChargerService,
                 private formBuilder: FormBuilder,
                 navParams: NavParams) {
         super(navCtrl, config, navParams);
@@ -32,7 +34,7 @@ export class PresetDischargePage extends PresetBasePage {
             dischargeCurrent: [this.preset.discharge_current,
                 ChargerValidator.number({
                     min: 0.05,
-                    max: this.config.getMaxAmpsPerChannel()
+                    max: this.chargerService.getMaxAmpsPerChannel()
                 })],
             dischargeVoltage: [this.preset.discharge_voltage,
                 ChargerValidator.number(dischargeVoltageMinMax)],
@@ -52,7 +54,7 @@ export class PresetDischargePage extends PresetBasePage {
             regenCurrentLimit: [this.preset.regeneration_current_limit,
                 ChargerValidator.number({
                     min: 0.05,
-                    max: this.config.getMaxAmpsPerChannel()
+                    max: this.chargerService.getMaxAmpsPerChannel()
                 })],
         });
 

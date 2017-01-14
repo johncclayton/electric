@@ -80,7 +80,7 @@ export class PresetPage {
     cellChoices() {
         let choices = [];
         choices.push({'value': 0, 'text': 'Auto'});
-        for (let i = 0; i < this.config.getNumberOfChannels(); i++) {
+        for (let i = 0; i < this.chargerService.getNumberOfChannels(); i++) {
             choices.push({'value': i + 1, 'text': (i + 1).toString()});
         }
         return choices;
@@ -88,7 +88,7 @@ export class PresetPage {
 
     currentChoices() {
         let choices = [{value: 0.25, text: "0.25A"}, {value: 0.5, text: "0.5A"}];
-        for (let i = 10; i <= this.config.getMaxAmpsPerChannel() * 10; i++) {
+        for (let i = 10; i <= this.chargerService.getMaxAmpsPerChannel() * 10; i++) {
             let real = i / 10;
             choices.push({'value': real, 'text': (real).toString() + "A"});
         }

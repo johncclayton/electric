@@ -9,6 +9,16 @@ const CHARGER_CONNECTED_EVENT: string = 'charger.connected';
 const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected';
 const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
+export enum ChargerType {
+    iCharger410Duo = 64,
+    iCharger308Duo = 66
+}
+
+export let ChargerMetadata = [
+    {'type': ChargerType.iCharger308Duo, 'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'},
+    {'type': ChargerType.iCharger410Duo, 'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'},
+];
+
 @Injectable()
 export class iChargerService {
     chargerStatus: {} = {};
@@ -95,14 +105,6 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
-    getChargerName() {
-        return 'iCharger 308';
-    }
-
-    getChargerTag() {
-        return 'DUO';
-    }
-
     private chargerDidAppear(statusDict) {
         this.numberOfChannels = statusDict['channel_count'];
         console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
@@ -144,10 +146,44 @@ export class iChargerService {
         console.log("Subscriptions are: ", this.channelStateObservable);
         this.events.publish(CHARGER_CONNECTED_EVENT);
     }
+
+    lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
+        // Not supplied? Look it up.
+        if (deviceId == null) {
+            if (this.chargerStatus) {
+                let md = ChargerMetadata[this.chargerStatus['device_id']];
+                if (md) {
+                    deviceId = md;
+                }
+            }
+        }
+        if (deviceId) {
+            let md = ChargerMetadata[deviceId];
+            if (md) {
+                if (md[propertyName]) {
+                    return md[propertyName];
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    getMaxAmpsPerChannel() {
+        return this.lookupChargerMetadata(null, 'maxAmps', 15);
+    }
+
+    getChargerName() {
+        return this.lookupChargerMetadata(null, 'name', 'iCharger');
+    }
+
+    getChargerTag() {
+        return this.lookupChargerMetadata(null, 'tag', '');
+    }
+
 }
 
 export {
     CHARGER_CONNECTED_EVENT,
     CHARGER_DISCONNECTED_EVENT,
-    CHARGER_CHANNEL_EVENT
+    CHARGER_CHANNEL_EVENT,
 }

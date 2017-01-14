@@ -102,13 +102,6 @@ export class Configuration {
             "mockCharger": false,
         };
     }
-
-    getNumberOfChannels() {
-        return 8;
-    }
-    getMaxAmpsPerChannel() {
-        return 30;
-    }
 }
 
 export {
