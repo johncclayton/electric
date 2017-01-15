@@ -154,7 +154,6 @@ export class iChargerService {
             }
         }
         if (deviceId) {
-            console.log("find ", propertyName, " for ", deviceId);
             let md = ChargerMetadata[deviceId];
             if (md) {
                 if (md[propertyName]) {
