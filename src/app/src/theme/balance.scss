@@ -68,8 +68,8 @@ $balance-offset: $balance-width + 1;
 
 @include media(">=tablet") {
   $balance-width: 6px;
-  $balance-height: 26px;
-  $balance-baseline: -9px;
+  $balance-height: 20px;
+  $balance-baseline: -1px;
   $balance-offset: $balance-width + 2;
   $balance-right-margin: 3px;
 
