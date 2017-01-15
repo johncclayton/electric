@@ -1,3 +1,4 @@
-page-home {
-
+// This prevents the "charger" view from being vertically scrolled.
+.no-scroll .scroll-content {
+  overflow: hidden;
 }

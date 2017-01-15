@@ -4,6 +4,7 @@ import {Subscription, Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} from "../../services/icharger.service";
 import {Network} from 'ionic-native';
+import {Configuration} from "../../services/configuration.service";
 
 @Component({
     selector: 'page-home',
@@ -20,6 +21,7 @@ export class HomePage {
                 public events: Events,
                 public toastController: ToastController,
                 public chargerService: iChargerService,
+                public config: Configuration,
                 public platform: Platform,
                 public http: Http) {
 

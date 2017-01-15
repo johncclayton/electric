@@ -50,6 +50,10 @@ export class Configuration {
         return this.configDict["isnew"];
     }
 
+    preventChargerVerticalScrolling(): boolean {
+        return this.configDict['preventChargerVerticalScrolling'];
+    }
+
     saveConfiguration() {
         let json = JSON.stringify(this.configDict);
 
@@ -99,6 +103,7 @@ export class Configuration {
             "ipAddress": "localhost",
             "port": "5000",
             "isnew": true,
+            "preventChargerVerticalScrolling": true,
             "mockCharger": false,
         };
     }
