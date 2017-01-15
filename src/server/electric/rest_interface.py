@@ -1,10 +1,9 @@
 import logging
 import os
 
-import evil_global
-
 from flask_restful import Resource
 
+import evil_global
 from icharger.comms_layer import ChargerCommsManager
 from icharger.modbus_usb import connection_state_dict
 
@@ -41,7 +40,6 @@ class StatusResource(AbstractChargerResource):
 
             # groan0
             evil_global.last_seen_charger_device_id = info.device_id
-            print "last seen: {0}".format(evil_global.last_seen_charger_device_id)
 
             obj = info.to_primitive()
             obj.update(connection_state_dict())
@@ -61,7 +59,6 @@ class ChannelResource(AbstractChargerResource):
             comms = self.get_comms()
 
             # yeh, more groan
-            print "last seen2: {0}".format(evil_global.last_seen_charger_device_id)
             status = comms.get_channel_status(int(channel), evil_global.last_seen_charger_device_id)
 
             obj = status.to_primitive()
