@@ -30,7 +30,7 @@ services:
     build:
       context: .
       dockerfile: docker/arm/Dockerfile
-    image: electric/web
+    image: scornflake/electric-pi
 
     depends_on:
       - worker

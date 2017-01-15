@@ -27,6 +27,7 @@ class ChargerCommsManager:
     def __init__(self, master=None):
         if master is None:
             master = iChargerMaster()
+
         self.charger = master
 
     def get_device_info(self):
@@ -100,6 +101,33 @@ class ChargerCommsManager:
         if channel not in (0, 1):
             return None
         return self.charger.modbus_write_registers(base, (channel,))
+
+    '''
+
+    for reference
+
+       ModbusRequestError icharger_usb::order(OrderAction action, Channel ch, ProgramType program, int mem_index) {
+            u16 data[5];
+
+            switch(action) {
+            case ORDER_RUN:
+                data[0] = program;
+                data[1] = mem_index;
+                data[2] = (int)ch;
+                data[3] = VALUE_ORDER_KEY;
+                data[4] = action;
+                return write_request(REG_SEL_OP, 5, (char *)data);
+
+            case ORDER_STOP:
+                data[0] = VALUE_ORDER_KEY;
+                data[1] = action;
+                return write_request(REG_ORDER_KEY, 2, (char *)data);
+            }
+
+            return MB_EILLFUNCTION;
+        }
+    '''
+
 
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
