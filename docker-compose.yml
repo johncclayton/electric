@@ -6,6 +6,9 @@ services:
 
     container_name: electric-worker
 
+    depends_on:
+      - redis
+
     privileged: true
 
     restart: always
@@ -28,6 +31,9 @@ services:
       context: .
       dockerfile: docker/arm/Dockerfile
     image: electric/web
+
+    depends_on:
+      - worker
 
     container_name: electric-web
 
