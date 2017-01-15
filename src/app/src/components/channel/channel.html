@@ -21,7 +21,7 @@
     <div class="cells">
         <ion-list>
             <ion-item-sliding #item>
-                <ion-item>
+                <ion-item no-padding>
                     <ion-row *ngFor="let r of chunkedCells(); let y=index">
                         <ion-col
                                 [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
