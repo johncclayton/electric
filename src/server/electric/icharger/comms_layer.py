@@ -1,4 +1,8 @@
+import logging
 import modbus_tk.defines as cst
+import multiprocessing
+
+import time
 
 from icharger.models import SystemStorage, WriteDataSegment
 from modbus_usb import iChargerMaster
@@ -16,7 +20,13 @@ SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY = 5
 SYSTEM_STORAGE_OFFSET_CALIBRATION = 22
 SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
 
-class ChargerCommsManager:
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
+
+# All Evil is put into its own little container.
+import evil_global
+
+
+class ChargerCommsManager(object):
     """
     The comms manager is responsible for data translation between the MODBUS types and the world outside.  It uses an
     instance of the modbus capable read/write routines to fetch and modify charger parameters.  It co-ordinates
@@ -24,11 +34,45 @@ class ChargerCommsManager:
 
     Validation is not performed here - the data going in/out is assumed to be correct already.
     """
-    def __init__(self, master=None):
+    locking = False
+
+    def __init__(self, master=None, locking=True):
         if master is None:
             master = iChargerMaster()
-
+        self.locking = locking
         self.charger = master
+
+    def __getattribute__(self, name):
+        """
+        This is pure evil.
+        Gunicorn uses multiprocess threads ... soooo, if we want to protect the charger,
+        one way is to share a lock between processes.
+
+        This works because gunicorn uses multiprocessing workers. We can share single Lock() instance
+        """
+        attr = object.__getattribute__(self, name)
+
+        # Skip some
+        if name in ['__class__', 'locking']:
+            return attr
+        if self.locking:
+            if hasattr(attr, '__call__'):
+                def locking_func(*args, **kwargs):
+                    logger.info("Calling {0} with lock {1}".format(name, id(evil_global.lock)))
+                    with evil_global.lock:
+                        result = attr(*args, **kwargs)
+                    return result
+
+                return locking_func
+            else:
+                return attr
+        else:
+            return attr
+
+    def test_lock(self):
+        for i in range(0, 3):
+            print "did work {0}".format(i)
+            time.sleep(1)
 
     def get_device_info(self):
         """
@@ -43,7 +87,6 @@ class ChargerCommsManager:
         Returns the following information from the iCharger, known as the 'channel input read only' message:
         :return: ChannelStatus instance
         """
-
         addr = 0x100 if channel == 0 else 0x200
 
         # timestamp -> ext temp
@@ -151,7 +194,7 @@ class ChargerCommsManager:
         return self.charger.modbus_write_registers(0x8000 + 1,
                                                    (preset_index, control.channel, 0x55aa))
 
-    def get_preset_list(self, count_only = False):
+    def get_preset_list(self, count_only=False):
         (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
         if count_only:
             return count
@@ -203,7 +246,3 @@ class ChargerCommsManager:
         s5 = WriteDataSegment(self.charger, "seg3", v5, prev_format=s4)
 
         return True
-
-
-
-

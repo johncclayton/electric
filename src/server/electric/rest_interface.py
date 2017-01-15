@@ -1,19 +1,36 @@
+import logging
 import os
+
+import evil_global
 
 from flask_restful import Resource
 
 from icharger.comms_layer import ChargerCommsManager
 from icharger.modbus_usb import connection_state_dict
-from icharger.rq_comms_layer import RqChargerCommsManager
+
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 
 class AbstractChargerResource(Resource):
     def get_comms(self):
         debug_mode = os.environ.get("DEBUG_MODE", None)
         if debug_mode:
-            return ChargerCommsManager()
-        redisAddress = os.environ.get("REDIS_ADDRESS", "localhost")
-        return RqChargerCommsManager(redisAddress)
+            logger.debug("Will use free ChargerCommsManager")
+            return ChargerCommsManager(master=None, locking=False)
+
+        logger.debug("Will use multiprocess Lock()ed ChargerCommsManager")
+        return ChargerCommsManager(master=None, locking=True)
+
+        # redisAddress = os.environ.get("REDIS_ADDRESS", "localhost")
+        # logger.debug("Will use RQ ChargerCommsManager, at {0}".format(redisAddress))
+        # return RqChargerCommsManager(redisAddress)
+
+
+class TestResource(AbstractChargerResource):
+    def get(self):
+        comms = self.get_comms()
+        comms.test_lock()
+        return {'done': True}
 
 
 class StatusResource(AbstractChargerResource):
@@ -22,9 +39,9 @@ class StatusResource(AbstractChargerResource):
             comms = self.get_comms()
             info = comms.get_device_info()
 
-            # groan
-            if globals().get('__global__device_id') is None:
-                globals()['__global__device_id'] = info.device_id
+            # groan0
+            evil_global.last_seen_charger_device_id = info.device_id
+            print "last seen: {0}".format(evil_global.last_seen_charger_device_id)
 
             obj = info.to_primitive()
             obj.update(connection_state_dict())
@@ -44,8 +61,8 @@ class ChannelResource(AbstractChargerResource):
             comms = self.get_comms()
 
             # yeh, more groan
-            global__device_id = globals().get('__global__device_id')
-            status = comms.get_channel_status(int(channel), global__device_id)
+            print "last seen2: {0}".format(evil_global.last_seen_charger_device_id)
+            status = comms.get_channel_status(int(channel), evil_global.last_seen_charger_device_id)
 
             obj = status.to_primitive()
             obj.update(connection_state_dict())
