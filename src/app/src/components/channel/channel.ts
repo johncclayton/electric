@@ -21,6 +21,15 @@ export class ChannelComponent {
 
     private channelSubscription;
 
+    channelSwipe(event) {
+        console.log(`Channel swipe: ${event.direction}... `, event);
+    }
+
+    measureIR(item) {
+        console.log("Measure IR: ", item);
+        item.close();
+    }
+
     cellChunking() {
         return 3;
     }
