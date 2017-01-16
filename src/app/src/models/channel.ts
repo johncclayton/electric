@@ -81,15 +81,18 @@ export class Channel {
     private numberOfActiveCells() {
         // Maybe reduce the channels, as long as they are 0 volt.
         let cells = this._json['cells'];
-        // Check voltages.
-        // If we see a voltage on a channel, we must show everything up to that channel for safety
-        let voltageSeenAtIndex = 0;
-        cells.forEach((item, index) => {
-            if (item.v > 0) {
-                voltageSeenAtIndex = index;
-            }
-        });
-        return voltageSeenAtIndex;
+        if (cells) {
+            // Check voltages.
+            // If we see a voltage on a channel, we must show everything up to that channel for safety
+            let voltageSeenAtIndex = 0;
+            cells.forEach((item, index) => {
+                if (item.v > 0) {
+                    voltageSeenAtIndex = index;
+                }
+            });
+            return voltageSeenAtIndex;
+        }
+        return 0;
     }
 
 }

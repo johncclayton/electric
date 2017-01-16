@@ -134,12 +134,14 @@ export class ChannelComponent {
             this.channelSubscription = this.channelObserver.subscribe((channelObject) => {
                 this.channel = channelObject;
                 let cells = this.channel.cells;
-                cells.forEach(cell => {
-                    this.maxBalanceSeen = Math.max(this.maxBalanceSeen, cell.balance)
-                });
+                if (cells) {
+                    cells.forEach(cell => {
+                        this.maxBalanceSeen = Math.max(this.maxBalanceSeen, cell.balance)
+                    });
 
-                if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
-                    this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+                    if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
+                        this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+                    }
                 }
             });
         }
