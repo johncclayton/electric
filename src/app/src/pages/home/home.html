@@ -14,7 +14,7 @@
 
 <ion-nav #content [root]="rootPage"></ion-nav>
 
-<ion-content class="charger">
+<ion-content class="charger" [ngClass]="{'no-scroll': config.preventChargerVerticalScrolling()}">
     <div *ngIf="needToShowSomeMessages()">
         <ion-card>
             <ion-card-header>
@@ -82,8 +82,8 @@
                 [channel]="channelSubscriptions()[0]">
         </charger-status>
 
-        <channel name="Channel 1" [channelObserver]="channelSubscriptions()[0]"></channel>
-        <channel name="Channel 2" [channelObserver]="channelSubscriptions()[1]"></channel>
+        <channel name="Channel 1" [channelObserver]="channelSubscriptions()[0]" [index]="0"></channel>
+        <channel name="Channel 2" [channelObserver]="channelSubscriptions()[1]" [index]="1"></channel>
     </div>
 
     <!--<button ion-button (click)="showtoast()">Disconnect</button>-->

@@ -41,6 +41,10 @@ export class Configuration {
         }
     }
 
+    getCellLimit() {
+        return this.configDict['cellLimit'];
+    }
+
     getHostName(): string {
         return this.configDict["ipAddress"] + ":" + this.configDict["port"];
     }
@@ -48,6 +52,10 @@ export class Configuration {
     // Has this been configured before?
     isNew(): boolean {
         return this.configDict["isnew"];
+    }
+
+    preventChargerVerticalScrolling(): boolean {
+        return this.configDict['preventChargerVerticalScrolling'];
     }
 
     saveConfiguration() {
@@ -99,6 +107,8 @@ export class Configuration {
             "ipAddress": "localhost",
             "port": "5000",
             "isnew": true,
+            "cellLimit": 0,
+            "preventChargerVerticalScrolling": true,
             "mockCharger": false,
         };
     }
