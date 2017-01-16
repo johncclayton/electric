@@ -15,8 +15,8 @@ export enum ChargerType {
 }
 
 export let ChargerMetadata = [
-    {'type': ChargerType.iCharger308Duo, 'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'},
-    {'type': ChargerType.iCharger410Duo, 'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'},
+    {'type': ChargerType.iCharger308Duo, 'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells': 8},
+    {'type': ChargerType.iCharger410Duo, 'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO', 'cells': 10},
 ];
 
 @Injectable()
@@ -55,6 +55,10 @@ export class iChargerService {
             return 0;
         }
         return this.numberOfChannels;
+    }
+
+    getNumberOfActiveCells(channelIndex) {
+        return this.channelSnapshots['cellLimit'];
     }
 
     getPresets(): Observable<any> {
@@ -105,6 +109,28 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
+    private numberOfActiveCells(channel) {
+        // Maybe reduce the channels, as long as they are 0 volt.
+        let cellLimit = this.config.getCellLimit();
+        if (cellLimit > 0) {
+            let cells = channel['cells'];
+
+            // Check voltages.
+            // If we see a voltage on a channel, we must show everything up to that channel
+            // for safety
+            let voltageSeenAtIndex = 0;
+            cells.forEach((item, index) => {
+                if (item.v > 0) {
+                    voltageSeenAtIndex = index;
+                }
+            });
+            return Math.max(cellLimit, voltageSeenAtIndex + 1);
+        }
+
+        // default to the size of the array
+        return channel.cells.lenth;
+    }
+
     private chargerDidAppear(statusDict) {
         this.numberOfChannels = statusDict['channel_count'];
         console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
@@ -118,22 +144,29 @@ export class iChargerService {
             console.log(`Creating hot channel observable: ${i}`);
             this.channelStateObservable.push(Observable
                 .timer(500, 500)
-                .flatMap((v) => {
-                    return this.http.get(this.getChargerURL(`/channel/${i}`));
-                })
                 .filter(() => {
                     return this.isConnectedToCharger();
+                })
+                .flatMap((v) => {
+                    return this.http.get(this.getChargerURL(`/channel/${i}`));
                 })
                 .map((response) => {
                     this.events.publish(CHARGER_CHANNEL_EVENT, i);
                     let jsonResponse = response.json();
+
+                    // Maybe reduce the channels, as long as they are 0 volt.
+                    let cellLimit = this.numberOfActiveCells(jsonResponse);
+                    if (cellLimit != jsonResponse['cells'].length) {
+                        jsonResponse['cells'] = jsonResponse['cells'].slice(0, cellLimit);
+                    }
                     let channel = Number(jsonResponse["channel"]);
                     this.channelSnapshots[channel] = {
                         index: i,
-                        realChannel: channel,
+                        cellLimit: cellLimit,
+                        original: channel,
                         json: jsonResponse
                     };
-                    return jsonResponse;
+                    return this.channelSnapshots[channel];
                 })
                 .retry()
                 .share()
@@ -180,6 +213,9 @@ export class iChargerService {
         return this.lookupChargerMetadata(null, 'tag', '');
     }
 
+    getMaxCells() {
+        return this.lookupChargerMetadata(null, 'cells', 0);
+    }
 }
 
 export {

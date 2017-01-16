@@ -32,6 +32,7 @@ import * as _ from "lodash";
     ]
 })
 export class ChannelComponent {
+    public data: {} = {};
     public channel: {} = {};
     public maxBalanceSeen: number = 8;
     public balanceScale: number;
@@ -64,11 +65,15 @@ export class ChannelComponent {
     }
 
     cellChunking() {
+        // Return a multiple of the visible channels
+        if(this.data['cellLimit'] % 3 == 1) {
+            return 2;
+        }
         return 3;
     }
 
     chunkedCells() {
-        if (!this.channel['cells']) {
+        if (!this.data['cellLimit']) {
             return [];
         }
         let cells = this.channel['cells'];
@@ -102,18 +107,15 @@ export class ChannelComponent {
             console.log("Channel binding to ", this.channelObserver);
             this.channelSubscription = this.channelObserver.subscribe((data) => {
                 if (data) {
-                    let someCells = data['cells'];
-                    if (someCells) {
-                        someCells.forEach(thing => {
+                    let haveAnyData = data['json'];
+                    if (haveAnyData) {
+                        this.data = data;
+                        this.channel = data['json'];
+
+                        let cells = this.channel['cells'];
+                        cells.forEach(thing => {
                             this.maxBalanceSeen = Math.max(this.maxBalanceSeen, thing.balance)
                         });
-                        // let i = 1;
-                        // let newCells = JSON.parse(JSON.stringify(data['cells']));
-                        // for (let cell in newCells) {
-                        //     newCells[i - 1]['balance'] = i++;
-                        // }
-                        // data['cells'] = newCells;
-                        this.channel = data;
                     }
                 }
             });
