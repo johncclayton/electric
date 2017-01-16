@@ -198,9 +198,7 @@ class USBSerialFacade:
     def __init__(self):
         self._dev = None
         self._claimed = False
-        self.reset()
 
-    def reset(self):
         try:
             self._dev = usb.core.find(idVendor=ICHARGER_VENDOR_ID, idProduct=ICHARGER_PRODUCT_ID)
             if not testing_control.usb_device_present:
@@ -210,8 +208,11 @@ class USBSerialFacade:
             raise
 
         if self._dev is None:
-            return False
+            return
 
+        self.reset()
+
+    def reset(self):
         if platform.system() != "Windows":
             self._detach_kernel_driver()
 
