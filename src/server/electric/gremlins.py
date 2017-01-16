@@ -4,7 +4,6 @@ import sys, traceback
 ret_code = 0
 MAX_COUNT = 500
 
-
 def main_direct():
     count = 0
     comms = None
@@ -42,6 +41,8 @@ def main_direct():
     del comms
 
 
+if __name__ == "__main__":
+    main_direct()
 
 
 sys.exit(ret_code)

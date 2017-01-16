@@ -22,18 +22,18 @@ for i in "$@" ; do
         exit
     fi
 
-#    if [[ $i == "--gremlins" ]]; then
-#        while [ 1 -eq 1 ]; do
-#            count=$((count + 1))
-#            python electric/gremlins.py
-#            gremlin_result=$?
-#            echo "that was run: $count, return code: $gremlin_result"
-#            if [ $gremlin_result -ne 0 ]; then
-#                echo "It failed with an error"
-#                exit $gremlin_result
-#            fi
-#        done
-#    fi
+    if [[ $i == "--gremlins" ]]; then
+        while [ 1 -eq 1 ]; do
+            count=$((count + 1))
+            python electric/gremlins.py
+            gremlin_result=$?
+            echo "that was run: $count, return code: $gremlin_result"
+            if [ $gremlin_result -ne 0 ]; then
+                echo "It failed with an error"
+                exit $gremlin_result
+            fi
+        done
+    fi
 done
 
 ## This is the default for now, the most reliable
