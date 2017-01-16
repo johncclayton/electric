@@ -19,8 +19,8 @@
     </ion-row>
 
     <div class="cells" [ngSwitch]="channelMode">
-        <div *ngSwitchCase="0">
-            No Data. Should put something nice here!
+        <div *ngSwitchCase="0" padding>
+            <ion-spinner></ion-spinner>
         </div>
         <div *ngSwitchCase="1" id="master">
             <ion-row *ngFor="let r of chunkedCells(); let y=index">
