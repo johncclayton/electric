@@ -13,6 +13,8 @@ from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 import logging
 
+from usb.core import USBError
+
 logger = logging.getLogger(__name__)
 
 MEMORY_MAX = 64
@@ -193,12 +195,14 @@ class USBSerialFacade:
     exception from __init__.
     """
 
-    def __init__(self, vendorId=ICHARGER_VENDOR_ID, productId=ICHARGER_PRODUCT_ID):
+    def __init__(self):
         self._dev = None
         self._claimed = False
+        self.reset()
 
+    def reset(self):
         try:
-            self._dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+            self._dev = usb.core.find(idVendor=ICHARGER_VENDOR_ID, idProduct=ICHARGER_PRODUCT_ID)
             if not testing_control.usb_device_present:
                 raise usb.core.NoBackendError("TEST_FAKE_CANNOT_FIND_DEVICE")
         except usb.core.NoBackendError:
@@ -206,14 +210,18 @@ class USBSerialFacade:
             raise
 
         if self._dev is None:
-            return
+            return False
+
+        if platform.system() != "Windows":
+            self._detach_kernel_driver()
+
+        self._claim_interface()
 
         # odd but true, if you remove this then read/writes to the USB bus while the
         # charger is actually doing its charge/discharge job WILL FAIL on the PI3
         self._dev.reset()
 
-        if platform.system() != "Windows":
-            self._detach_kernel_driver()
+        return True
 
     def _detach_kernel_driver(self):
         if self._dev is None or testing_control.usb_detach_from_kernel_should_fail:
@@ -262,10 +270,12 @@ class USBSerialFacade:
         return "! iCharger Not Connected !"
 
     def open(self):
-        return self._claim_interface()
+        # return self._claim_interface()
+        return self._dev is not None
 
     def close(self):
-        return self._release_interface()
+        # return self._release_interface()
+        pass
 
     @property
     def timeout(self):
@@ -318,6 +328,9 @@ class iChargerMaster(RtuMaster):
 
     def _make_query(self):
         return iChargerQuery()
+
+    def reset(self):
+        self._serial.reset()
 
     def modbus_read_registers(self, addr, data_format, function_code=cst.READ_INPUT_REGISTERS):
         """

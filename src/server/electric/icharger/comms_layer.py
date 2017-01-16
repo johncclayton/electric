@@ -1,8 +1,5 @@
 import logging
 import modbus_tk.defines as cst
-import multiprocessing
-
-import time
 
 from icharger.models import SystemStorage, WriteDataSegment
 from modbus_usb import iChargerMaster
@@ -22,9 +19,6 @@ SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
-# All Evil is put into its own little container.
-import evil_global
-
 
 class ChargerCommsManager(object):
     """
@@ -36,43 +30,13 @@ class ChargerCommsManager(object):
     """
     locking = False
 
-    def __init__(self, master=None, locking=True):
+    def __init__(self, master=None):
         if master is None:
             master = iChargerMaster()
-        self.locking = locking
         self.charger = master
 
-    def __getattribute__(self, name):
-        """
-        This is pure evil.
-        Gunicorn uses multiprocess threads ... soooo, if we want to protect the charger,
-        one way is to share a lock between processes.
-
-        This works because gunicorn uses multiprocessing workers. We can share single Lock() instance
-        """
-        attr = object.__getattribute__(self, name)
-
-        # Skip some
-        if name in ['__class__', 'locking']:
-            return attr
-        if self.locking:
-            if hasattr(attr, '__call__'):
-                def locking_func(*args, **kwargs):
-                    logger.info("Calling {0} with lock {1}".format(name, id(evil_global.lock)))
-                    with evil_global.lock:
-                        result = attr(*args, **kwargs)
-                    return result
-
-                return locking_func
-            else:
-                return attr
-        else:
-            return attr
-
-    def test_lock(self):
-        for i in range(0, 3):
-            print "did work {0}".format(i)
-            time.sleep(1)
+    def reset(self):
+        self.charger.reset()
 
     def get_device_info(self):
         """
@@ -170,7 +134,6 @@ class ChargerCommsManager(object):
             return MB_EILLFUNCTION;
         }
     '''
-
 
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""

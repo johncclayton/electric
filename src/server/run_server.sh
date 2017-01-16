@@ -21,19 +21,28 @@ for i in "$@" ; do
         watchmedo auto-restart -p "*.py;*.html;*.css;*.js" --recursive './start_gunicorn.sh'
         exit
     fi
+
+#    if [[ $i == "--gremlins" ]]; then
+#        while [ 1 -eq 1 ]; do
+#            count=$((count + 1))
+#            python electric/gremlins.py
+#            gremlin_result=$?
+#            echo "that was run: $count, return code: $gremlin_result"
+#            if [ $gremlin_result -ne 0 ]; then
+#                echo "It failed with an error"
+#                exit $gremlin_result
+#            fi
+#        done
+#    fi
 done
 
-# This is the default for now, the most reliable
-# Note: if DEBUG_MODE is set, rest_interface will create a ChargerCommsManager without locking
-# which is fine, since Flask does single threaded access.
-echo "Starting in DEBUG mode using flask, zero unicorns and no RQ"
-export DEBUG_MODE=1
-python electric/main.py
+## This is the default for now, the most reliable
+## Note: if DEBUG_MODE is set, rest_interface will create a ChargerCommsManager without locking
+## which is fine, since Flask does single threaded access.
+#echo "Starting in DEBUG mode using flask, zero unicorns and no RQ"
+#export DEBUG_MODE=1
+#python electric/main.py
 
-
-# If you want to run RQ, that's doable...
-# The code is commented out.
-# See: rest_interface constructor
 
 
 

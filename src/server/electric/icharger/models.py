@@ -233,7 +233,7 @@ class ChannelStatus(Model):
 
         if device_id:
             # With this, we can work out if the main battery lead is plugged in
-            max_voltage = 30 if device_id is 66 else 40
+            max_voltage = 30 if device_id is DEVICEID_308_DUO else 40
             if self.curr_out_volts > max_voltage:
                 self.curr_out_volts = 0
 
