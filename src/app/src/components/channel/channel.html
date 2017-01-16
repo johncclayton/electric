@@ -1,7 +1,7 @@
 <ion-grid padding-top>
     <ion-row>
         <ion-col class="channelNumber">
-            {{channel.channel + 1}}
+            {{index + 1}}
         </ion-col>
         <ion-col>
             <ion-row>
@@ -19,7 +19,7 @@
     </ion-row>
 
     <div class="cells" [ngSwitch]="channelMode">
-        <div *ngSwitchCase="0" id="master" [@fade]="channelMode==0">
+        <div *ngSwitchCase="0" id="master" [@fade]="channelMode==0 || channelMode == 1">
             <ion-row *ngFor="let r of chunkedCells(); let y=index">
                 <ion-col (click)="toggleChannelMode()"
                          [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
@@ -42,7 +42,7 @@
                 </ion-col>
             </ion-row>
         </div>
-        <div *ngSwitchCase="1" [style.min-height.px]="masterHeight" [@fade]="channelMode==1">
+        <div *ngSwitchCase="1" [style.min-height.px]="masterHeight" [@fade]="channelMode==2">
             <ion-col (click)="toggleChannelMode()">
                 buttons and stuff
             </ion-col>
@@ -55,7 +55,7 @@
             <!--mΩ-->
         </ion-col>
         <ion-col no-padding>
-            ΔV: {{maxMilliVoltDiff(channel)|number:'1.0-0'}} mV
+            ΔV: {{channel.maxMilliVoltDiff|number:'1.0-0'}} mV
         </ion-col>
     </ion-row>
 

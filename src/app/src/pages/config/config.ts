@@ -31,8 +31,16 @@ export class ConfigPage {
         if (cellsFromChargerConfig > 0) {
             maxCells = cellsFromChargerConfig;
         }
-        for (let i = 1; i <= maxCells; i++) {
-            choices.push(i);
+        // -1 means: All
+        // 0 means: Nothing
+        for (let i = -1; i <= maxCells; i++) {
+            if (i == -1) {
+                choices.push({'value': i, 'text': "All"});
+            } else if (i == 0) {
+                choices.push({'value': i, 'text': "None"});
+            } else {
+                choices.push({'value': i, 'text': i.toString() + ""});
+            }
         }
         return choices;
     }

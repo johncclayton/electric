@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {Configuration} from "./configuration.service";
 import {Events} from "ionic-angular";
 import {Preset} from "../pages/preset/preset-class";
+import {Channel} from "../models/channel";
 
 const CHARGER_CONNECTED_EVENT: string = 'charger.connected';
 const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected';
@@ -57,9 +58,6 @@ export class iChargerService {
         return this.numberOfChannels;
     }
 
-    getNumberOfActiveCells(channelIndex) {
-        return this.channelSnapshots['cellLimit'];
-    }
 
     getPresets(): Observable<any> {
         let url = this.getChargerURL("/preset");
@@ -88,7 +86,7 @@ export class iChargerService {
                 return this.chargerStatus;
             })
             .catch(error => {
-                console.log("Unable to get charger status, error: ", error);
+                console.error("Unable to get charger status, error: ", error);
                 if (this.isConnectedToCharger()) {
                     this.events.publish(CHARGER_DISCONNECTED_EVENT);
                 }
@@ -109,26 +107,26 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
-    private numberOfActiveCells(channel) {
+    private numberOfActiveCells(channelObject) {
         // Maybe reduce the channels, as long as they are 0 volt.
+        let cells = channelObject['cells'];
         let cellLimit = this.config.getCellLimit();
         if (cellLimit > 0) {
-            let cells = channel['cells'];
-
             // Check voltages.
             // If we see a voltage on a channel, we must show everything up to that channel
             // for safety
             let voltageSeenAtIndex = 0;
-            cells.forEach((item, index) => {
-                if (item.v > 0) {
-                    voltageSeenAtIndex = index;
-                }
-            });
-            return Math.max(cellLimit, voltageSeenAtIndex + 1);
+            if (cells) {
+                cells.forEach((item, index) => {
+                    if (item.v > 0) {
+                        voltageSeenAtIndex = index;
+                    }
+                });
+                return Math.max(cellLimit, voltageSeenAtIndex + 1);
+            }
         }
-
         // default to the size of the array
-        return channel.cells.lenth;
+        return cells.length;
     }
 
     private chargerDidAppear(statusDict) {
@@ -141,7 +139,7 @@ export class iChargerService {
 
         // Creates a series of hot observables for channel data from the charger
         for (let i = 0; i < this.getNumberOfChannels(); i++) {
-            console.log(`Creating hot channel observable: ${i}`);
+            console.debug(`Creating hot channel observable: ${i}`);
             this.channelStateObservable.push(Observable
                 .timer(500, 500)
                 .filter(() => {
@@ -155,18 +153,10 @@ export class iChargerService {
                     let jsonResponse = response.json();
 
                     // Maybe reduce the channels, as long as they are 0 volt.
-                    let cellLimit = this.numberOfActiveCells(jsonResponse);
-                    if (cellLimit != jsonResponse['cells'].length) {
-                        jsonResponse['cells'] = jsonResponse['cells'].slice(0, cellLimit);
-                    }
-                    let channel = Number(jsonResponse["channel"]);
-                    this.channelSnapshots[channel] = {
-                        index: i,
-                        cellLimit: cellLimit,
-                        original: channel,
-                        json: jsonResponse
-                    };
-                    return this.channelSnapshots[channel];
+                    let cellLimit = this.config.getCellLimit();
+                    let channel = new Channel(i, jsonResponse, cellLimit);
+                    this.channelSnapshots[i] = channel;
+                    return channel;
                 })
                 .retry()
                 .share()
@@ -176,7 +166,7 @@ export class iChargerService {
         // Now need to sort them based on their actual channel number
         // But can't do that until we get the data (which is async)
 
-        console.log("Subscriptions are: ", this.channelStateObservable);
+        console.debug("Subscriptions are: ", this.channelStateObservable);
         this.events.publish(CHARGER_CONNECTED_EVENT);
     }
 
@@ -215,6 +205,29 @@ export class iChargerService {
 
     getMaxCells() {
         return this.lookupChargerMetadata(null, 'cells', 0);
+    }
+
+    // Mock data, representing an empty channel
+    emptyData(channelNumber: number) {
+        let cellLimit = this.getMaxCells();
+        let cells = [];
+        for (let i = 0; i > cellLimit; i++) {
+            cells.push({
+                'v': 0,
+                'cell': i,
+                'balance': 0,
+                'ir': 0,
+            });
+        }
+        let channelData = {
+            curr_inp_volts: 0,
+            curr_out_amps: 0,
+            curr_out_capacity: 0,
+            timestamp: 0,
+            curr_int_temp: 0,
+            cells: cells
+        };
+        return new Channel(channelNumber, channelData, this.config.getCellLimit());
     }
 }
 

@@ -21,8 +21,7 @@
     <ion-item>
       <ion-label>Max cells to show</ion-label>
       <ion-select [(ngModel)]="config.configDict.cellLimit">
-        <ion-option value="0">All</ion-option>
-        <ion-option *ngFor="let v of cellChoices()" value="{{v}}">{{v}}</ion-option>
+        <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>
