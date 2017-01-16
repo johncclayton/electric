@@ -19,7 +19,10 @@
     </ion-row>
 
     <div class="cells" [ngSwitch]="channelMode">
-        <div *ngSwitchCase="0" id="master" [@fade]="channelMode==0 || channelMode == 1">
+        <div *ngSwitchCase="0">
+            No Data. Should put something nice here!
+        </div>
+        <div *ngSwitchCase="1" id="master">
             <ion-row *ngFor="let r of chunkedCells(); let y=index">
                 <ion-col (click)="toggleChannelMode()"
                          [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
@@ -42,7 +45,7 @@
                 </ion-col>
             </ion-row>
         </div>
-        <div *ngSwitchCase="1" [style.min-height.px]="masterHeight" [@fade]="channelMode==2">
+        <div *ngSwitchCase="2" [style.min-height.px]="masterHeight">
             <ion-col (click)="toggleChannelMode()">
                 buttons and stuff
             </ion-col>

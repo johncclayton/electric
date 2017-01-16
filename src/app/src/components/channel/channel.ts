@@ -137,6 +137,10 @@ export class ChannelComponent {
                 cells.forEach(cell => {
                     this.maxBalanceSeen = Math.max(this.maxBalanceSeen, cell.balance)
                 });
+
+                if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
+                    this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+                }
             });
         }
     }
