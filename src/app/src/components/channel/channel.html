@@ -18,37 +18,35 @@
         </ion-col>
     </ion-row>
 
-    <div class="cells">
-        <ion-list>
-            <ion-item-sliding #item>
-                <ion-item no-padding>
-                    <ion-row *ngFor="let r of chunkedCells(); let y=index">
-                        <ion-col
-                                [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
-                                class="cell"
-                                no-padding
-                                *ngFor="let cell of r; let x=index"
-                                text-center>
-                            <ion-row *ngIf="!isCellPadding(cell)">
-                                <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
-                                <ion-col text-center>{{cell.v|number:'1.3-3'}}v</ion-col>
-                                <ion-col width-20 class="balancecontainer">
-                                    <div
-                                            *ngFor="let b of balanceRange(cell.balance)"
-                                            class="balance b{{b}}"
-                                            [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
-                                    >
-                                    </div>
-                                </ion-col>
-                            </ion-row>
+    <div class="cells" [ngSwitch]="channelMode">
+        <div *ngSwitchCase="0" id="master" [@fade]="channelMode==0">
+            <ion-row *ngFor="let r of chunkedCells(); let y=index">
+                <ion-col (click)="toggleChannelMode()"
+                         [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
+                         class="cell"
+                         no-padding
+                         *ngFor="let cell of r; let x=index"
+                         text-center>
+                    <ion-row *ngIf="!isCellPadding(cell)">
+                        <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
+                        <ion-col text-center>{{cell.v|number:'1.3-3'}}v</ion-col>
+                        <ion-col width-20 class="balancecontainer">
+                            <div
+                                    *ngFor="let b of balanceRange(cell.balance)"
+                                    class="balance b{{b}}"
+                                    [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
+                            >
+                            </div>
                         </ion-col>
                     </ion-row>
-                </ion-item>
-                <ion-item-options>
-                    <button ion-button (click)="measureIR(item)">IR</button>
-                </ion-item-options>
-            </ion-item-sliding>
-        </ion-list>
+                </ion-col>
+            </ion-row>
+        </div>
+        <div *ngSwitchCase="1" [style.min-height.px]="masterHeight" [@fade]="channelMode==1">
+            <ion-col (click)="toggleChannelMode()">
+                buttons and stuff
+            </ion-col>
+        </div>
     </div>
 
     <ion-row padding-top class="cells summary">

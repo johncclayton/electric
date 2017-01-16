@@ -33,5 +33,9 @@ module.exports = {
     copyBourbon: {
         src: '{{ROOT}}/bourbon/**/*',
         dest: '{{WWW}}/assets/bourbon/'
+    },
+    copyWebAnimations: {
+        src: ['{{ROOT}}/node_modules/web-animations-js/web-animations.min.js', '{{ROOT}}/node_modules/web-animations-js/web-animations.min.js.map'],
+        dest: '{{WWW}}/assets/js/'
     }
 };

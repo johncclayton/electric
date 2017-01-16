@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, Input, trigger, state, style, transition, animate} from "@angular/core";
 import * as _ from "lodash";
 
 /*
@@ -9,25 +9,58 @@ import * as _ from "lodash";
  */
 @Component({
     selector: 'channel',
-    templateUrl: 'channel.html'
+    templateUrl: 'channel.html',
+    animations: [
+        trigger('flip', [
+            state('flipped', style({
+                transform: 'rotate(180deg)',
+                backgroundColor: 'red'
+            })),
+            transition('* => flipped', animate('400ms ease'))
+        ]),
+
+        trigger('fade', [
+            transition(':enter', [
+                style({opacity: 0}),
+                animate(500, style({opacity: 1}))
+            ]),
+            transition(':leave', [
+                style({opacity: 1}),
+                animate(500, style({opacity: 0}))
+            ])
+        ])
+    ]
 })
 export class ChannelComponent {
     public channel: {} = {};
     public maxBalanceSeen: number = 8;
     public balanceScale: number;
+    public channelMode: number;
+    public masterHeight: number;
 
     @Input() channelObserver;
     @Input() name: string;
 
     private channelSubscription;
 
-    channelSwipe(event) {
-        console.log(`Channel swipe: ${event.direction}... `, event);
+    constructor() {
+        this.channelMode = 0;
     }
 
-    measureIR(item) {
-        console.log("Measure IR: ", item);
-        item.close();
+    toggleChannelMode() {
+        this.channelMode++;
+        if (this.channelMode > 1) {
+            this.channelMode = 0;
+        }
+
+        // Store the master height (the height of the cells).
+        // We want other panels to have this same height as a minimum
+        let elementById = document.getElementById("master");
+        if (elementById) {
+            this.masterHeight = elementById.offsetHeight;
+        }
+
+        console.log("Switch mode to ", this.channelMode);
     }
 
     cellChunking() {
@@ -49,6 +82,9 @@ export class ChannelComponent {
             return _.chunk(cells, this.cellChunking());
         }
         return null;
+    }
+
+    ngAfterViewInit() {
     }
 
     ngOnDestroy() {
