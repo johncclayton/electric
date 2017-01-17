@@ -61,6 +61,30 @@ export class ChannelComponent {
         return this.channelMode;
     }
 
+    switchToCellOutput() {
+        this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+    }
+
+    startCharge() {
+
+    }
+
+    startDischarge() {
+
+    }
+
+    startBalance() {
+
+    }
+
+    startStore() {
+
+    }
+
+    meaureIR() {
+
+    }
+
     toggleChannelMode() {
         this.channelMode++;
         if (this.channelMode > ChannelDisplay.ChannelDisplayShowOptions) {
