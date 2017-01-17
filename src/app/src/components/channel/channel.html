@@ -1,6 +1,6 @@
 <ion-grid padding-top>
     <ion-row>
-        <ion-col class="channelNumber">
+        <ion-col class="channelNumber" (click)="toggleChannelMode()">
             {{index + 1}}
         </ion-col>
         <ion-col>
@@ -23,27 +23,7 @@
             <ion-spinner></ion-spinner>
         </div>
         <div *ngSwitchCase="1" id="master">
-            <ion-row *ngFor="let r of chunkedCells(); let y=index">
-                <ion-col (click)="toggleChannelMode()"
-                         [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
-                         class="cell"
-                         no-padding
-                         *ngFor="let cell of r; let x=index"
-                         text-center>
-                    <ion-row *ngIf="!isCellPadding(cell)">
-                        <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
-                        <ion-col text-center>{{cell.v|number:'1.3-3'}}v</ion-col>
-                        <ion-col width-20 class="balancecontainer">
-                            <div
-                                    *ngFor="let b of balanceRange(cell.balance)"
-                                    class="balance b{{b}}"
-                                    [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
-                            >
-                            </div>
-                        </ion-col>
-                    </ion-row>
-                </ion-col>
-            </ion-row>
+            <channel-volts [channel]="channel" (click)="toggleChannelMode()"></channel-volts>
         </div>
         <div *ngSwitchCase="2" [style.min-height.px]="masterHeight">
             <ion-row>

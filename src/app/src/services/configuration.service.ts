@@ -1,7 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Storage} from "@ionic/storage";
 import {AlertController, Events} from "ionic-angular";
-import {ChemistryType, Preset} from "../pages/preset/preset-class";
 
 const CONFIG_LOADED_EVENT = "config.loaded";
 const CONFIG_CHANGED_EVENT = "config.changed";
@@ -33,11 +32,22 @@ export class Configuration {
     bringInConfiguration(configurationObject) {
         // Overwrite defaults with what's in the store
         let savedConfiguration = JSON.parse(configurationObject);
-        for (let key in savedConfiguration) {
-            if (savedConfiguration.hasOwnProperty(key)) {
-                let value = savedConfiguration[key];
-                console.log(` - using config: ${key} = ${value}`);
-                this.configDict[key] = value;
+        this.overrideDictionary("", this.configDict, savedConfiguration);
+        // console.log("Final configuration: ", this.configDict);
+    }
+
+    private overrideDictionary(root, destinationDict, jsonObject) {
+        for (let key in jsonObject) {
+            if (jsonObject.hasOwnProperty(key)) {
+                let value = jsonObject[key];
+                if (value.constructor == Object) {
+                    // Recurse
+                    console.log(` - entering: ${key}`);
+                    this.overrideDictionary(root + key + ".", destinationDict[key], value);
+                } else {
+                    console.log(` - config: ${root}${key} = ${value}`);
+                    destinationDict[key] = value;
+                }
             }
         }
     }
@@ -112,11 +122,11 @@ export class Configuration {
             "preventChargerVerticalScrolling": true,
             "mockCharger": false,
             "charge": {
-                "capacity" : 2000,
-                "c" : 2,
-                "numPacks" : 4,
-                "chemistryFilter" : Preset.chemistryPrefix(ChemistryType.Anything),
-                "chargeMethod" : "presets",
+                "capacity": 2000,
+                "c": 2,
+                "numPacks": 4,
+                "chemistryFilter": "All",
+                "chargeMethod": "presets",
             }
         };
     }
