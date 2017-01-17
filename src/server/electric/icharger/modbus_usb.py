@@ -15,7 +15,7 @@ import logging
 
 from usb.core import USBError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 MEMORY_MAX = 64
 MODBUS_HID_FRAME_TYPE = 0x30

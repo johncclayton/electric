@@ -15,14 +15,6 @@ from rest_interface import StatusResource, \
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
 
-api = Api(application)
-api.add_resource(StatusResource, "/status")
-api.add_resource(SystemStorageResource, "/system")
-api.add_resource(ControlRegisterResource, "/control")
-api.add_resource(ChannelResource, "/channel/<channel_id>")
-api.add_resource(PresetListResource, "/preset")
-api.add_resource(PresetResource, "/preset/<preset_index>")
-
 debug_mode = os.environ.get("DEBUG_MODE", None)
 if not debug_mode:
     handler = logging.StreamHandler()
@@ -31,3 +23,12 @@ if not debug_mode:
     application.logger.addHandler(handler)
     application.logger.setLevel(logging.INFO)
     application.logger.info("The charger LIVES!")
+
+api = Api(application)
+api.add_resource(StatusResource, "/status")
+api.add_resource(SystemStorageResource, "/system")
+api.add_resource(ControlRegisterResource, "/control")
+api.add_resource(ChannelResource, "/channel/<channel_id>")
+api.add_resource(PresetListResource, "/preset")
+api.add_resource(PresetResource, "/preset/<preset_index>")
+

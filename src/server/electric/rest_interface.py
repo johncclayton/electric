@@ -19,7 +19,7 @@ def exclusive(func):
                 retry += 1
 
                 try:
-                    # print("retry :", retry, "for:", func)
+                    logger.info("retry on request: %s", func)
                     return func(self, *args, **kwargs)
 
                 except Exception, usb_err:
@@ -27,7 +27,7 @@ def exclusive(func):
                     evil_global.comms.reset()
 
                     if retry > RETRY_LIMIT:
-                        print("RETRY EXCEEDED", func)
+                        logger.info("retry exceeded:", func)
                         return connection_state_dict(usb_err)
 
     return wrapper

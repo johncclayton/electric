@@ -1,4 +1,4 @@
-import struct
+import struct, logging
 
 import modbus_tk.defines as cst
 from schematics.models import Model
@@ -6,6 +6,8 @@ from schematics.transforms import blacklist
 from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
 from schematics.types.compound import ModelType, ListType
 from schematics.types.serializable import serializable
+
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 STATUS_RUN = 0x01
 STATUS_ERROR = 0x02
