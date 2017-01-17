@@ -15,10 +15,10 @@ export enum ChargerType {
     iCharger308Duo = 66
 }
 
-export let ChargerMetadata = [
-    {'type': ChargerType.iCharger308Duo, 'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells': 8},
-    {'type': ChargerType.iCharger410Duo, 'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO', 'cells': 10},
-];
+export let ChargerMetadata = {};
+ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'};
+
 
 @Injectable()
 export class iChargerService {
@@ -107,28 +107,6 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
-    private numberOfActiveCells(channelObject) {
-        // Maybe reduce the channels, as long as they are 0 volt.
-        let cells = channelObject['cells'];
-        let cellLimit = this.config.getCellLimit();
-        if (cellLimit > 0) {
-            // Check voltages.
-            // If we see a voltage on a channel, we must show everything up to that channel
-            // for safety
-            let voltageSeenAtIndex = 0;
-            if (cells) {
-                cells.forEach((item, index) => {
-                    if (item.v > 0) {
-                        voltageSeenAtIndex = index;
-                    }
-                });
-                return Math.max(cellLimit, voltageSeenAtIndex + 1);
-            }
-        }
-        // default to the size of the array
-        return cells.length;
-    }
-
     private chargerDidAppear(statusDict) {
         this.numberOfChannels = statusDict['channel_count'];
         console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
@@ -174,10 +152,7 @@ export class iChargerService {
         // Not supplied? Look it up.
         if (deviceId == null) {
             if (this.chargerStatus) {
-                let md = ChargerMetadata[this.chargerStatus['device_id']];
-                if (md) {
-                    deviceId = md;
-                }
+                deviceId = Number(this.chargerStatus['device_id']);
             }
         }
         if (deviceId) {

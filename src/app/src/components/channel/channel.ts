@@ -2,7 +2,8 @@ import {Component, Input, trigger, state, style, transition, animate} from "@ang
 import * as _ from "lodash";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
-import {AlertController, ActionSheetController} from "ionic-angular";
+import {ActionSheetController, NavController} from "ionic-angular";
+import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -52,11 +53,14 @@ export class ChannelComponent {
     @Input() name: string;
 
     private channelSubscription;
+    private firstTime: boolean;
 
     constructor(public chargerService: iChargerService,
+                public navCtrlr: NavController,
                 public actionController: ActionSheetController) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
         this.channel = this.chargerService.emptyData(0);
+        this.firstTime = true;
     }
 
     getChannelMode() {
@@ -67,6 +71,10 @@ export class ChannelComponent {
         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
     }
 
+    showChargingOptionsPage() {
+        this.navCtrlr.push(ChargeOptionsPage, this.channel);
+    }
+
     showActionAlert() {
         let alert = this.actionController.create({
             'title': 'Channel ' + (this.index + 1),
@@ -75,7 +83,7 @@ export class ChannelComponent {
                     text: 'Charge',
                     role: 'destructive',
                     handler: () => {
-
+                        this.showChargingOptionsPage();
                     }
                 },
                 {
@@ -215,6 +223,12 @@ export class ChannelComponent {
 
                     if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
                         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+                    }
+
+                    // DEBUG:
+                    if (this.firstTime && this.index == 0) {
+                        this.firstTime = false;
+                        this.showChargingOptionsPage();
                     }
                 }
             });

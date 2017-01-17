@@ -2,3 +2,118 @@
 .no-scroll .scroll-content {
   overflow: hidden;
 }
+
+// This is the CSS for the charger, as a whole.
+.charger {
+  // This controls what you see at the top of the dashboard
+  // The main amps, volts area...
+
+  .overview {
+    ion-col:nth-child(4) {
+      text-align: center;
+
+    }
+
+    ion-col:nth-child(5) {
+      text-align: left;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+
+    .label {
+      opacity: 0.6;
+    }
+  }
+
+  .errors {
+    h3 {
+      padding: 10px 15px;
+    }
+  }
+}
+
+.chargername {
+  .tag {
+    display: inline-block;
+    background: white;
+    border-radius: 2px;
+    color: map-get($colors, 'primary');
+    margin-left: 5px;
+    padding: 0 4px 0 4px;
+    transform: skewX(-5deg);
+  }
+
+  // iPhone 5S
+  @include media("<=widephone") {
+    .tag {
+      display: none;
+    }
+  }
+}
+
+// Size overrides!
+@include media(">=widephone") {
+  .charger {
+    // Make everything bigger in general
+    font-size: 2.0rem;
+
+    .overview {
+      .label {
+        opacity: 0.8;
+      }
+    }
+
+    channel {
+      font-size: 0.8em;
+      // Force a little more spacing where we have it
+      ion-grid {
+        padding-top: $item-ios-padding-top * 2 !important;
+      }
+
+      // Pad out the rows a little, except the last one, don'd pad that
+      .cells {
+        ion-row:nth-last-child(n+2) {
+          padding-bottom: 6px;
+        }
+        // Pad the right sides of every cell but the last in the column
+        .cell:nth-last-child(n+2) {
+          margin-right: 6px;
+        }
+      }
+
+    }
+  }
+}
+
+@include media(">=tablet") {
+  .charger {
+    // Make everything bigger in general
+    font-size: 3.0rem;
+
+    .overview {
+      .label {
+        opacity: 0.8;
+      }
+    }
+
+    channel {
+      ion-grid {
+        padding-top: $item-ios-padding-top * 4 !important;
+      }
+
+      .channelNumber {
+        $size: 60px;
+        border-width: 3px;
+
+        height: $size !important;
+        width: $size !important;
+        flex: 0 0 $size;
+
+        font-size: 3.6rem;
+      }
+    }
+  }
+}
+

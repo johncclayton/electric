@@ -6,6 +6,7 @@ export const enum ChemistryType {
     NiCd,
     Pb,
     NiZn,
+    Anything,
 }
 
 export const enum LipoBalanceType {
@@ -561,6 +562,34 @@ export class Preset {
 
     set trickle_timeout(value: number) {
         this.data['ni_trickle_time'] = value;
+    }
+
+    public static chemistryPrefix(chemistry: ChemistryType) {
+        switch (chemistry) {
+            case ChemistryType.Anything:
+                return "All";
+            case ChemistryType.LiPo:
+                return "LP";
+            case ChemistryType.LiLo:
+                return "LL";
+            case ChemistryType.LiFe:
+                return "LF";
+            case ChemistryType.NiCd:
+                return "NC";
+            case ChemistryType.NiMH:
+                return "NM";
+            case ChemistryType.Pb:
+                return "Pb";
+            case ChemistryType.NiZn:
+                return "NZ";
+        }
+        return "ER";
+    }
+
+    smallButtonName() {
+        let name = Preset.chemistryPrefix(this.type);
+        let rate = this.charge_current;
+        return `${name} ${rate}A`;
     }
 
 }

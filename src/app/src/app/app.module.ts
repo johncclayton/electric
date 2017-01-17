@@ -16,6 +16,7 @@ import {PresetStoragePage} from "../pages/preset-storage/preset-storage";
 import {PresetDischargePage} from "../pages/preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../pages/preset-cycle/preset-cycle";
 import {DynamicDisable} from "../utils/directives";
+import {ChargeOptionsPage} from "../pages/charge-options/charge-options";
 
 function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -35,6 +36,7 @@ function configServiceFactory(config: Configuration) {
         PresetStoragePage,
         PresetDischargePage,
         PresetCyclePage,
+        ChargeOptionsPage,
         ChargerStatusComponent
     ],
     imports: [
@@ -51,6 +53,7 @@ function configServiceFactory(config: Configuration) {
         PresetStoragePage,
         PresetDischargePage,
         PresetCyclePage,
+        ChargeOptionsPage,
         ChannelComponent
     ],
     providers: [

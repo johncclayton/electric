@@ -3,7 +3,6 @@ import {NavController, ToastController, Events, Platform} from "ionic-angular";
 import {Subscription, Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService, CHARGER_CONNECTED_EVENT, CHARGER_DISCONNECTED_EVENT} from "../../services/icharger.service";
-import {Network} from 'ionic-native';
 import {Configuration} from "../../services/configuration.service";
 
 @Component({

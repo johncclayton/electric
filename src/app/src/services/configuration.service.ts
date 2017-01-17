@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {Storage} from "@ionic/storage";
 import {AlertController, Events} from "ionic-angular";
+import {ChemistryType, Preset} from "../pages/preset/preset-class";
 
 const CONFIG_LOADED_EVENT = "config.loaded";
 const CONFIG_CHANGED_EVENT = "config.changed";
@@ -107,9 +108,16 @@ export class Configuration {
             "ipAddress": "localhost",
             "port": "5000",
             "isnew": true,
-            "cellLimit": 0,
+            "cellLimit": -1,
             "preventChargerVerticalScrolling": true,
             "mockCharger": false,
+            "charge": {
+                "capacity" : 2000,
+                "c" : 2,
+                "numPacks" : 4,
+                "chemistryFilter" : Preset.chemistryPrefix(ChemistryType.Anything),
+                "chargeMethod" : "presets",
+            }
         };
     }
 }

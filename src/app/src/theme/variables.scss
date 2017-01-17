@@ -2,6 +2,8 @@
 // http://ionicframework.com/docs/v2/theming/
 $font-path: "../assets/fonts";
 
+
+
 @import "ionic.globals";
 
 // Shared Variables
@@ -63,4 +65,27 @@ $colors: (
 
 @import "roboto";
 @import "noto-sans";
+
+@import "../../bourbon/bourbon";
+
+$chemistry: (
+        LiPo:map_get($colors, 'primary'),
+        LiFe:map_get($colors, 'secondary'),
+        LiLo:orange,
+        NiCd:#0aa,
+        NiMH:#f60,
+        NiZH:#a00,
+        Pb:#555,
+        'default':#bbb,
+);
+
+$breakpoints: (
+        'phone': 320px,
+        'widephone': 374px,
+        'tablet': 768px,
+        'desktop': 1024px
+) !default;
+
+@import "../../node_modules/include-media/dist/include-media";
+
 
