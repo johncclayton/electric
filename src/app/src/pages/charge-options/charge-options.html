@@ -55,7 +55,7 @@
                     <ion-label range-right>7000</ion-label>
                 </ion-range>
                 <ion-list-header>Charge Rate (C)
-                    <ion-badge item-right>{{chargeRate|number:'1.1-1'}}C</ion-badge>
+                    <ion-badge item-right>{{chargeRate|number:'1.1-1'}}C <ion-icon *ngIf="showFlame()" name="flame"></ion-icon></ion-badge>
                 </ion-list-header>
                 <ion-range min="1" max="50" [(ngModel)]="chargeRateTimesTen">
                     <ion-label range-left>1</ion-label>

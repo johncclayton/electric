@@ -8,6 +8,7 @@ import {Channel} from "../models/channel";
 
 const CHARGER_CONNECTED_EVENT: string = 'charger.connected';
 const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected';
+const CHARGER_STATUS_ERROR: string = 'charger.status.error';
 const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
 export enum ChargerType {
@@ -51,6 +52,17 @@ export class iChargerService {
         return false;
     }
 
+    anyNetworkOrConnectivityProblems() {
+        let haveNetwork = this.isNetworkAvailable();
+        let haveCharger = this.isConnectedToCharger();
+        let haveServer = this.isConnectedToServer();
+        return !haveNetwork || !haveCharger || !haveServer;
+    }
+
+    isNetworkAvailable(): boolean {
+        return true;
+    }
+
     getNumberOfChannels(): number {
         if (!this.isConnectedToServer()) {
             return 0;
@@ -78,19 +90,17 @@ export class iChargerService {
                 return this.http.get(this.getChargerURL("/status"));
             })
             .map((v) => {
-                let notConnectedNow = this.isConnectedToCharger();
+                let connected = this.isConnectedToCharger();
                 this.chargerStatus = v.json();
-                if (!notConnectedNow && this.isConnectedToCharger()) {
+
+                let chargerHasAppeared = !connected && this.isConnectedToCharger();
+                if (chargerHasAppeared) {
                     this.chargerDidAppear(this.chargerStatus);
                 }
                 return this.chargerStatus;
             })
             .catch(error => {
-                console.error("Unable to get charger status, error: ", error);
-                if (this.isConnectedToCharger()) {
-                    this.events.publish(CHARGER_DISCONNECTED_EVENT);
-                }
-                this.chargerStatus = {};
+                this.chargerDidDisappear(error);
                 return Observable.throw(error);
             })
             .retry()
@@ -105,6 +115,15 @@ export class iChargerService {
     private getChargerURL(path) {
         let hostName = this.config.getHostName();
         return "http://" + hostName + path;
+    }
+
+    private chargerDidDisappear(error) {
+        console.error("Unable to get charger status, error: ", error);
+        this.events.publish(CHARGER_STATUS_ERROR);
+        if (this.isConnectedToCharger()) {
+            this.events.publish(CHARGER_DISCONNECTED_EVENT);
+        }
+        this.chargerStatus = {};
     }
 
     private chargerDidAppear(statusDict) {
@@ -209,5 +228,6 @@ export class iChargerService {
 export {
     CHARGER_CONNECTED_EVENT,
     CHARGER_DISCONNECTED_EVENT,
+    CHARGER_STATUS_ERROR,
     CHARGER_CHANNEL_EVENT,
 }

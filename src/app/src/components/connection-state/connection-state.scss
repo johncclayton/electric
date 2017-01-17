@@ -1,0 +1,8 @@
+connection-state {
+}
+
+// Make the toast show up red
+.redToast .toast-wrapper {
+  background-color: map-get($colors, 'danger') !important;
+}
+

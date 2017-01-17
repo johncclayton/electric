@@ -88,6 +88,10 @@ export class ChargeOptionsPage implements Chemistry {
         return Math.min(this.computedAmps, this.chargerService.getMaxAmpsPerChannel());
     }
 
+    showFlame() {
+        return this.chargeRate >= 5.0;
+    }
+
     chargePlan() {
         return "Charge at " + sprintf("%2.01fA", this.amps);
     }

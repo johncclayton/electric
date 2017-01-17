@@ -17,6 +17,7 @@ import {PresetDischargePage} from "../pages/preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../pages/preset-cycle/preset-cycle";
 import {DynamicDisable} from "../utils/directives";
 import {ChargeOptionsPage} from "../pages/charge-options/charge-options";
+import {ConnectionStateComponent} from "../components/connection-state/connection-state";
 
 function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -30,6 +31,7 @@ function configServiceFactory(config: Configuration) {
         KeysPipe, ReversePipe, DurationPipe,
         DynamicDisable,
         ChannelComponent,
+        ConnectionStateComponent,
         PresetListPage,
         PresetPage,
         PresetChargePage,
@@ -54,7 +56,8 @@ function configServiceFactory(config: Configuration) {
         PresetDischargePage,
         PresetCyclePage,
         ChargeOptionsPage,
-        ChannelComponent
+        ChannelComponent,
+        ConnectionStateComponent
     ],
     providers: [
         Configuration,
