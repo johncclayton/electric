@@ -2,6 +2,7 @@ import {Component, Input, trigger, state, style, transition, animate} from "@ang
 import * as _ from "lodash";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
+import {AlertController, ActionSheetController} from "ionic-angular";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -52,7 +53,8 @@ export class ChannelComponent {
 
     private channelSubscription;
 
-    constructor(public chargerService: iChargerService) {
+    constructor(public chargerService: iChargerService,
+                public actionController: ActionSheetController) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
         this.channel = this.chargerService.emptyData(0);
     }
@@ -63,6 +65,53 @@ export class ChannelComponent {
 
     switchToCellOutput() {
         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+    }
+
+    showActionAlert() {
+        let alert = this.actionController.create({
+            'title': 'Channel ' + (this.index + 1),
+            buttons: [
+                {
+                    text: 'Charge',
+                    role: 'destructive',
+                    handler: () => {
+
+                    }
+                },
+                {
+                    text: 'Store',
+                    handler: () => {
+
+                    }
+                },
+                {
+                    text: 'Discharge',
+                    handler: () => {
+
+                    }
+                },
+                {
+                    text: 'Balance Only',
+                    handler: () => {
+
+                    }
+                },
+                {
+                    text: 'Measure IR',
+                    handler: () => {
+
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    role: 'cancel',
+                    handler: () => {
+                    }
+                }
+            ]
+        });
+
+        alert.present()
     }
 
     startCharge() {
@@ -86,19 +135,20 @@ export class ChannelComponent {
     }
 
     toggleChannelMode() {
-        this.channelMode++;
-        if (this.channelMode > ChannelDisplay.ChannelDisplayShowOptions) {
-            this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
-        }
-
-        // Store the master height (the height of the cells).
-        // We want other panels to have this same height as a minimum
-        let elementById = document.getElementById("master");
-        if (elementById) {
-            this.masterHeight = elementById.offsetHeight;
-        }
-
-        console.log("Switch mode to ", this.channelMode);
+        this.showActionAlert();
+        // this.channelMode++;
+        // if (this.channelMode > ChannelDisplay.ChannelDisplayShowOptions) {
+        //     this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+        // }
+        //
+        // // Store the master height (the height of the cells).
+        // // We want other panels to have this same height as a minimum
+        // let elementById = document.getElementById("master");
+        // if (elementById) {
+        //     this.masterHeight = elementById.offsetHeight;
+        // }
+        //
+        // console.log("Switch mode to ", this.channelMode);
     }
 
     cellChunking() {

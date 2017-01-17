@@ -46,12 +46,26 @@
             </ion-row>
         </div>
         <div *ngSwitchCase="2" [style.min-height.px]="masterHeight">
-            <button ion-button (click)="startCharge()">Charge</button>
-            <button ion-button (click)="startStore()">Store</button>
-            <button ion-button (click)="startDischarge()">Discharge</button>
-            <button ion-button (click)="startBalance()">Balance</button>
-            <button ion-button (click)="meaureIR()">Measure IR</button>
-            <button ion-button (click)="switchToCellOutput()">Back</button>
+            <ion-row>
+                <ion-col>
+                    <button ion-button (click)="startCharge()">Charge</button>
+                </ion-col>
+                <ion-col>
+                    <button ion-button (click)="startDischarge()">Discharge</button>
+                </ion-col>
+                <ion-col>
+                    <button ion-button (click)="startStore()">Store</button>
+                </ion-col>
+                <ion-col>
+                    <button ion-button (click)="startBalance()">Balance</button>
+                </ion-col>
+                <ion-col>
+                    <button ion-button (click)="meaureIR()">Measure IR</button>
+                </ion-col>
+                <ion-col>
+                    <button ion-button (click)="switchToCellOutput()">Back</button>
+                </ion-col>
+            </ion-row>
         </div>
     </div>
 
