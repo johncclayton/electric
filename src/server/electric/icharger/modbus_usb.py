@@ -1,20 +1,11 @@
-import logging
 import platform
-import struct
-import threading
-from Queue import Queue
-from threading import Thread
+import struct, hid, array
 import modbus_tk.defines as cst
-import time
-import usb.core
-import usb.util
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
+
 import logging
-
-from usb.core import USBError
-
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 MEMORY_MAX = 64
@@ -80,8 +71,12 @@ def connection_state_dict(exc=None):
     the connection state of the charger
     """
 
+    state = "connected"
+    if exc is not None and type(exc) == Exception:
+        state = "disconnected"
+
     value = {
-        "charger_presence": "disconnected" if exc is not None else "connected"
+        "charger_presence": state
     }
 
     if exc is not None:
@@ -195,74 +190,76 @@ class USBSerialFacade:
     exception from __init__.
     """
 
-    def __init__(self):
+    def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID):
         self._dev = None
-        self._claimed = False
+        self._claimed = True
+        self.vendor = vendor
+        self.product = prod
 
         try:
-            self._dev = usb.core.find(idVendor=ICHARGER_VENDOR_ID, idProduct=ICHARGER_PRODUCT_ID)
+            self._dev = hid.device()
+            self._dev.open(vendor, prod)
             if not testing_control.usb_device_present:
-                raise usb.core.NoBackendError("TEST_FAKE_CANNOT_FIND_DEVICE")
-        except usb.core.NoBackendError:
-            logging.error("There is no USB backend - the service cannot start")
+                raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
+        except IOError:
+            logging.error("The USB device could not be opened")
             raise
 
-        if self._dev is None:
-            return
-
-        self.reset()
-
     def reset(self):
-        if platform.system() != "Windows":
-            self._detach_kernel_driver()
+        # if platform.system() != "Windows":
+        #     self._detach_kernel_driver()
+        #
+        # self._claim_interface()
+        #
+        # # odd but true, if you remove this then read/writes to the USB bus while the
+        # # charger is actually doing its charge/discharge job WILL FAIL on the PI3
+        # self._dev.reset()
 
-        self._claim_interface()
-
-        # odd but true, if you remove this then read/writes to the USB bus while the
-        # charger is actually doing its charge/discharge job WILL FAIL on the PI3
-        self._dev.reset()
+        if self._dev is not None:
+            self._dev.close()
+            self._dev.open(self.vendor, self.product)
 
         return True
 
-    def _detach_kernel_driver(self):
-        if self._dev is None or testing_control.usb_detach_from_kernel_should_fail:
-            raise usb.core.USBError("Failed to detach from the kernel")
+    # def _detach_kernel_driver(self):
+    #     if self._dev is None or testing_control.usb_detach_from_kernel_should_fail:
+    #         raise usb.core.USBError("Failed to detach from the kernel")
+    #
+    #     if self._dev.is_kernel_driver_active(0):
+    #         self._dev.detach_kernel_driver(0)
 
-        if self._dev.is_kernel_driver_active(0):
-            self._dev.detach_kernel_driver(0)
+    # def _claim_interface(self):
+    #     if not self._dev or testing_control.usb_claim_interface_should_fail:
+    #         raise usb.core.USBError(
+    #             "Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
+    #
+    #     try:
+    #         usb.util.claim_interface(self._dev, 0)
+    #         self._claimed = True
+    #         return True
+    #     except Exception, e:
+    #         logging.info("Failed to _claim interface with {0}".format(e))
+    #     return False
 
-    def _claim_interface(self):
-        if not self._dev or testing_control.usb_claim_interface_should_fail:
-            raise usb.core.USBError(
-                "Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
-
-        try:
-            usb.util.claim_interface(self._dev, 0)
-            self._claimed = True
-            return True
-        except Exception, e:
-            logging.info("Failed to _claim interface with {0}".format(e))
-        return False
-
-    def _release_interface(self):
-        if not self._dev:
-            return False
-
-        try:
-            usb.util.release_interface(self._dev, 0)
-            self._claimed = False
-            return True
-        except:
-            pass
-        return False
+    # def _release_interface(self):
+    #     if not self._dev:
+    #         return False
+    #
+    #     try:
+    #         usb.util.release_interface(self._dev, 0)
+    #         self._claimed = False
+    #         return True
+    #     except:
+    #         pass
+    #     return False
 
     @property
     def serial_number(self):
-        return usb.util.get_string(self._dev, self._dev.iSerialNumber) if self.valid else None
+        return self._dev.get_serial_number_string()
 
     @property
     def is_open(self):
-        return self._dev is not None and self._claimed
+        return self._dev is not None
 
     @property
     def name(self):
@@ -303,16 +300,28 @@ class USBSerialFacade:
         """There are no internal buffers so this method is a no-op"""
         pass
 
-    def write(self, content):
+    def write(self, payload):
+        if not testing_control.usb_device_present:
+            raise IOError("FAKE TEST ON WRITE, CHARGER NOT PRESENT")
+
         if self._dev is not None and self._claimed:
-            pad_len = MAX_READWRITE_LEN - len(content)
-            return self._dev.write(END_POINT_ADDRESS_WRITE, content + ("\0" * pad_len), 5000)
-        raise usb.core.USBError("Device write failure - either not present or not claimed")
+            pad_len = MAX_READWRITE_LEN - len(payload)
+            data = struct.pack("B", 0)
+            content = list(data + payload + ("\0" * pad_len))
+            try:
+                return self._dev.write([ord(i) for i in content])
+            except Exception, e:
+                logging.info("bad bad bad, %s", e)
+        raise IOError("Device write failure - either not present or not claimed")
 
     def read(self, expected_length):
+        if not testing_control.usb_device_present:
+            raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
+
         if self._dev is not None and self._claimed:
-            return self._dev.read(END_POINT_ADDRESS_READ, expected_length, 5000).tostring()
-        raise usb.core.USBError("Device read failure - either not present or not claimed")
+            data = self._dev.read(MAX_READWRITE_LEN + 1, 5000)
+            return array.array('B', data[:expected_length]).tostring()
+        raise IOError("Device read failure - either not present or not claimed")
 
 
 class iChargerMaster(RtuMaster):

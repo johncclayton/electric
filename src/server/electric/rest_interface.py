@@ -1,10 +1,9 @@
 import logging
+from flask_restful import Resource
+from icharger.modbus_usb import connection_state_dict
 
 # All Evil is put into its own little container.
 import evil_global
-
-from flask_restful import Resource
-from icharger.modbus_usb import connection_state_dict
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -28,7 +27,7 @@ def exclusive(func):
 
                     if retry > RETRY_LIMIT:
                         logger.info("retry exceeded:", func)
-                        return connection_state_dict(usb_err)
+                        return connection_state_dict(usb_err), 504
 
     return wrapper
 
@@ -51,7 +50,7 @@ class ChannelResource(Resource):
     def get(self, channel_id):
         channel = int(channel_id)
         if not (channel == 0 or channel == 1):
-            raise ValueError("Channel part of URI must be 0 or 1")
+            return connection_state_dict("Channel number must be 0 or 1"), 403
 
         # yeh, more groan
         status = evil_global.comms.get_channel_status(int(channel), evil_global.last_seen_charger_device_id)

@@ -6,7 +6,7 @@ MAX_COUNT = 500
 
 def main_direct():
     count = 0
-    comms = None
+    comms = ChargerCommsManager(master=None)
 
     while count < MAX_COUNT:
         try:
@@ -33,7 +33,7 @@ def main_direct():
 
             comms.reset()
 
-            time.sleep(2)
+            time.sleep(0.3)
 
             # ret_code = 5
 

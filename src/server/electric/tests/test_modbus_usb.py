@@ -11,6 +11,7 @@ from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidRespons
 from icharger.models import Control
 from icharger.modbus_usb import TestingControlException
 
+import evil_global
 
 class TestChargerQuery(unittest.TestCase):
     def setUp(self):
@@ -126,19 +127,19 @@ class TestGatewayCommunications(unittest.TestCase):
         testing_control.reset()
 
     def test_status_contains_num_channels(self):
-        obj = ChargerCommsManager()
+        obj = evil_global.comms
         status = obj.get_device_info()
         self.assertIsNotNone(status)
         self.assertEqual(status.channel_count, 2)
         self.assertIn("channel_count", status.to_primitive().keys())
 
     def test_fetch_status(self):
-        obj = ChargerCommsManager()
+        obj = evil_global.comms
         resp = obj.get_channel_status(0)
         self.assertIsNotNone(resp)
 
     def test_number_of_channels(self):
-        obj = ChargerCommsManager()
+        obj = evil_global.comms
         resp = obj.get_device_info()
         self.assertTrue(resp.cell_count >= 6)
 
@@ -162,11 +163,11 @@ class TestGatewayCommunications(unittest.TestCase):
         testing_control.modbus_read_should_fail = True
 
         with self.assertRaises(TestingControlException):
-            charger = ChargerCommsManager()
+            charger = evil_global.comms
             charger.get_device_info()
 
     def test_can_change_key_tone_and_volume(self):
-        charger = ChargerCommsManager()
+        charger = evil_global.comms
         new_volume = 2
         charger.set_beep_properties(beep_index=0, enabled=True, volume=new_volume)
         resp = charger.get_system_storage()
@@ -174,7 +175,7 @@ class TestGatewayCommunications(unittest.TestCase):
         self.assertEqual(resp.beep_volume_key, new_volume)
 
     def test_setting_active_channel(self):
-        charger = ChargerCommsManager()
+        charger = evil_global.comms
         self.assertIsNone(charger.set_active_channel(-1))
         self.assertIsNone(charger.set_active_channel(2))
         resp = charger.set_active_channel(0)
@@ -183,14 +184,14 @@ class TestGatewayCommunications(unittest.TestCase):
         self.assertIsNotNone(resp)
 
     def test_get_all_presets(self):
-        charger = ChargerCommsManager()
+        charger = evil_global.comms
         preset_count = charger.get_preset_list(count_only=True)
         for index in range(0, preset_count):
             one_preset = charger.get_preset(index)
             print(one_preset.name)
 
     def test_get_preset_index_list(self):
-        obj = ChargerCommsManager()
+        obj = evil_global.comms
         presets = obj.get_preset_list()
         self.assertIsNotNone(presets)
         self.assertTrue(presets.count == len(presets.indexes))
@@ -200,7 +201,7 @@ class TestGatewayCommunications(unittest.TestCase):
         # start a charge/discharge cycle uysing preset 0
         # fetch status/channel info - what are the flags
         # change the amps in the preset, watch what happens
-        charger = ChargerCommsManager()
+        charger = evil_global.comms
         preset_0 = charger.get_preset(0)
         self.assertIsNotNone(preset_0)
         info = charger.get_device_info()
