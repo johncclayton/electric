@@ -6,11 +6,19 @@ ion-spinner {
 channel {
   // Container for all cells
   position: relative;
+  display: block;
+
+  padding-left: $item-ios-padding-left;
+  padding-right: $item-ios-padding-right;
+
+  // Puts some space between the V/A/mah row, and the cell readout
+  #heading {
+    padding-bottom: 10px;
+  }
 
   .channelNumber {
     $size: 40px;
     position: relative;
-    left: $item-ios-padding-left;
     top: 3px;
 
     width: $size !important;
@@ -27,18 +35,28 @@ channel {
     text-align: center;
   }
 
+  // The channel number sits off on the edge of the cell
+  .channelnum {
+    background: map_get($colors, 'primary');
+    color: white;
+    z-index: 1;
+    float: left;
+    padding-right: 4px;
+    padding-left: 3px;
+  }
+
+  .ir .channelnum {
+    background: map_get($colors, 'warning');
+  }
+
+  channel-ir {
+    background: red;
+  }
+
   .cells {
     // *slightly* smaller vaules INSIDE each cell
-    font-size: 0.9em;
+    font-size: .9em;
 
-    padding-left: $item-ios-padding-left;
-    padding-right: $item-ios-padding-right;
-    padding-top: $item-ios-padding-top;
-
-    // Pad out the rows a little, except the last one, don'd pad that
-    ion-row:nth-last-child(n+2) {
-      padding-bottom: 2px;
-    }
     // Pad the right sides of every cell but the last in the column
     .cell:nth-last-child(n+2) {
       margin-right: 3px;
@@ -50,23 +68,16 @@ channel {
       border-style: solid;
       border-width: 1px;
     }
+  }
 
+  // Pad out the balance/ir rows a little, except the last one, don'd pad that
+  ion-row.cells:nth-last-child(n+2) {
+    padding-bottom: 5px;
   }
 
   .label {
     font-size: 0.9em;
   }
-
-  // The channel number sits off on the edge of the cell
-  .channelnum {
-    background: map_get($colors, 'primary');
-    color: white;
-    z-index: 1;
-    float: left;
-    padding-right: 4px;
-    padding-left: 3px;
-  }
-
   .summary {
     :last-child {
       text-align: right;
@@ -88,8 +99,8 @@ channel {
   $balance-off-color: lightgrey;
   $balance-offset: $balance-width + 1;
 
-  @mixin balance() {
-    .balancecontainer {
+  @mixin cellsMixin() {
+    .cells-container {
       z-index: 1;
       margin-right: $balance-right-margin;
       position: relative;
@@ -137,7 +148,7 @@ channel {
     }
   }
 
-  @include balance();
+  @include cellsMixin();
 
   @include media(">=widephone") {
     $balance-width: 3px;
@@ -145,7 +156,24 @@ channel {
     $balance-baseline: 1px;
     $balance-offset: $balance-width + 1;
 
-    @include balance();
+    @include cellsMixin();
+
+    font-size: 0.8em;
+    // Force a little more spacing where we have it
+    ion-grid {
+      padding-top: $item-ios-padding-top * 2 !important;
+    }
+
+    .cells {
+      // Pad the right sides of every cell but the last in the column
+      .cell:nth-last-child(n+2) {
+        margin-right: 6px;
+      }
+    }
+    // Pad out the rows a little more
+    ion-row.cells:nth-last-child(n+2) {
+      padding-bottom: 6px;
+    }
   }
 
   @include media(">=tablet") {
@@ -155,7 +183,24 @@ channel {
     $balance-offset: $balance-width + 2;
     $balance-right-margin: 3px;
 
-    @include balance();
+    @include cellsMixin();
+
+    channel {
+      ion-grid {
+        padding-top: $item-ios-padding-top * 4 !important;
+      }
+
+      .channelNumber {
+        $size: 60px;
+        border-width: 3px;
+
+        height: $size !important;
+        width: $size !important;
+        flex: 0 0 $size;
+
+        font-size: 3.6rem;
+      }
+    }
   }
 }
 

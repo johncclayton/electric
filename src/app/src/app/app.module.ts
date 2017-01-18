@@ -19,6 +19,7 @@ import {DynamicDisable} from "../utils/directives";
 import {ChargeOptionsPage} from "../pages/charge-options/charge-options";
 import {ConnectionStateComponent} from "../components/connection-state/connection-state";
 import {ChannelVoltsComponent} from "../components/channel-volts/channel-volts";
+import {ChannelIRComponent} from "../components/channel-volts/channel-ir";
 
 function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -33,6 +34,7 @@ function configServiceFactory(config: Configuration) {
         DynamicDisable,
         ChannelComponent,
         ChannelVoltsComponent,
+        ChannelIRComponent,
         ConnectionStateComponent,
         PresetListPage,
         PresetPage,
@@ -60,6 +62,7 @@ function configServiceFactory(config: Configuration) {
         ChargeOptionsPage,
         ChannelComponent,
         ChannelVoltsComponent,
+        ChannelIRComponent,
         ConnectionStateComponent
     ],
     providers: [

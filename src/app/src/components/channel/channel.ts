@@ -1,13 +1,13 @@
-import {Component, Input, trigger, state, style, transition, animate} from "@angular/core";
+import {Component, Input, trigger, state, style, transition, animate, ViewChild} from "@angular/core";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
-import {ActionSheetController, NavController} from "ionic-angular";
+import {ActionSheetController, NavController, Slides} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
     ChannelDisplayShowCellVolts,
-    ChannelDisplayShowOptions,
+    ChannelDisplayShowIR,
 }
 
 /*
@@ -42,10 +42,7 @@ enum ChannelDisplay {
 })
 export class ChannelComponent {
     public channel: Channel = null;
-    public maxBalanceSeen: number = 8;
-    public balanceScale: number;
     public channelMode: number = ChannelDisplay.ChannelDisplayNothingPluggedIn;
-    public masterHeight: number;
 
     @Input() channelObserver;
     @Input() index: number;
@@ -66,12 +63,16 @@ export class ChannelComponent {
         return this.channelMode;
     }
 
-    switchToCellOutput() {
+    showCellVoltage() {
         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
     }
 
     showChargingOptionsPage() {
         this.navCtrlr.push(ChargeOptionsPage, this.channel);
+    }
+
+    showMeasureIR() {
+        this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
     }
 
     showActionAlert() {
@@ -106,7 +107,7 @@ export class ChannelComponent {
                 {
                     text: 'Measure IR',
                     handler: () => {
-
+                        this.showMeasureIR();
                     }
                 },
                 {
@@ -137,11 +138,11 @@ export class ChannelComponent {
 
     }
 
-    meaureIR() {
+    measureIR() {
 
     }
 
-    toggleChannelMode() {
+    showChargerActions() {
         this.showActionAlert();
         // this.channelMode++;
         // if (this.channelMode > ChannelDisplay.ChannelDisplayShowOptions) {
@@ -178,21 +179,15 @@ export class ChannelComponent {
             console.log("Channel binding to ", this.channelObserver);
             this.channelSubscription = this.channelObserver.subscribe((channelObject) => {
                 this.channel = channelObject;
-                let cells = this.channel.cells;
-                if (cells) {
-                    cells.forEach(cell => {
-                        this.maxBalanceSeen = Math.max(this.maxBalanceSeen, cell.balance)
-                    });
-
+                if (this.channel) {
                     if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
                         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
                     }
-
                     // DEBUG:
-                    // if (this.firstTime && this.index == 0) {
-                    //     this.firstTime = false;
-                    //     this.showChargingOptionsPage();
-                    // }
+                    if (this.firstTime && this.index == 0) {
+                        this.firstTime = false;
+                        // this.showMeasureIR();
+                    }
                 }
             });
         }

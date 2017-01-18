@@ -52,13 +52,22 @@ export class ChannelVoltsComponent {
         return _.chunk(cells, this.cellChunking());
     }
 
-
     isCellPadding(cell) {
         return cell.v == -1000;
     }
 
     isCellUnused(cell) {
         return Number(cell.v) < 0.001;
+    }
+
+    // Recompute balance max every time we get some more data
+    ngOnChanges(changes) {
+        let cells = this.channel.cells;
+        if (cells) {
+            cells.forEach(cell => {
+                this.maxBalanceSeen = Math.max(this.maxBalanceSeen, cell.balance)
+            });
+        }
     }
 
     /*

@@ -1,6 +1,6 @@
-<ion-grid padding-top>
-    <ion-row>
-        <ion-col class="channelNumber" (click)="toggleChannelMode()">
+<ion-grid>
+    <ion-row id="heading">
+        <ion-col class="channelNumber" (click)="showChargerActions()">
             {{index + 1}}
         </ion-col>
         <ion-col>
@@ -18,41 +18,21 @@
         </ion-col>
     </ion-row>
 
-    <div class="cells" [ngSwitch]="channelMode">
+    <div [ngSwitch]="channelMode">
         <div *ngSwitchCase="0" padding>
             <ion-spinner></ion-spinner>
         </div>
         <div *ngSwitchCase="1" id="master">
-            <channel-volts [channel]="channel" (click)="toggleChannelMode()"></channel-volts>
+            <channel-volts [channel]="channel" (click)="showChargerActions()"></channel-volts>
         </div>
-        <div *ngSwitchCase="2" [style.min-height.px]="masterHeight">
-            <ion-row>
-                <ion-col>
-                    <button ion-button (click)="startCharge()">Charge</button>
-                </ion-col>
-                <ion-col>
-                    <button ion-button (click)="startDischarge()">Discharge</button>
-                </ion-col>
-                <ion-col>
-                    <button ion-button (click)="startStore()">Store</button>
-                </ion-col>
-                <ion-col>
-                    <button ion-button (click)="startBalance()">Balance</button>
-                </ion-col>
-                <ion-col>
-                    <button ion-button (click)="meaureIR()">Measure IR</button>
-                </ion-col>
-                <ion-col>
-                    <button ion-button (click)="switchToCellOutput()">Back</button>
-                </ion-col>
-            </ion-row>
+        <div *ngSwitchCase="2">
+            <channel-ir [channel]="channel" (click)="showCellVoltage()"></channel-ir>
         </div>
     </div>
 
     <ion-row padding-top class="cells summary">
         <ion-col no-padding>
             All cell volts: {{channel.cell_total_voltage|number:'1.3-3'}}V
-            <!--mΩ-->
         </ion-col>
         <ion-col no-padding>
             ΔV: {{channel.maxMilliVoltDiff|number:'1.0-0'}} mV

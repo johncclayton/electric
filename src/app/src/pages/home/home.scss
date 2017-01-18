@@ -64,26 +64,6 @@
         opacity: 0.8;
       }
     }
-
-    channel {
-      font-size: 0.8em;
-      // Force a little more spacing where we have it
-      ion-grid {
-        padding-top: $item-ios-padding-top * 2 !important;
-      }
-
-      // Pad out the rows a little, except the last one, don'd pad that
-      .cells {
-        ion-row:nth-last-child(n+2) {
-          padding-bottom: 6px;
-        }
-        // Pad the right sides of every cell but the last in the column
-        .cell:nth-last-child(n+2) {
-          margin-right: 6px;
-        }
-      }
-
-    }
   }
 }
 
@@ -95,23 +75,6 @@
     .overview {
       .label {
         opacity: 0.8;
-      }
-    }
-
-    channel {
-      ion-grid {
-        padding-top: $item-ios-padding-top * 4 !important;
-      }
-
-      .channelNumber {
-        $size: 60px;
-        border-width: 3px;
-
-        height: $size !important;
-        width: $size !important;
-        flex: 0 0 $size;
-
-        font-size: 3.6rem;
       }
     }
   }
