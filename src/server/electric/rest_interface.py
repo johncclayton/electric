@@ -20,12 +20,12 @@ def exclusive(func):
                 except Exception, usb_err:
                     retry += 1
 
-                    logging.error("%s, reset bus and retrying (count is at %d/%d)", usb_err, retry, RETRY_LIMIT)
+                    logging.info("%s, will try again (count is at %d/%d)", usb_err, retry, RETRY_LIMIT)
 
                     evil_global.comms.reset()
 
                     if retry >= RETRY_LIMIT:
-                        logger.error("retry limit exceeded, aborting the call completely")
+                        logger.warning("retry limit exceeded, aborting the call completely")
                         return connection_state_dict(usb_err), 504
 
     return wrapper
