@@ -1,0 +1,21 @@
+<ion-row *ngFor="let r of chunkedCells(); let y=index" class="cells">
+    <ion-col
+            [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
+            no-padding
+            class="cell"
+            *ngFor="let cell of r; let x=index"
+            text-center>
+        <ion-row *ngIf="!isCellPadding(cell)">
+            <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
+            <ion-col text-center>{{cell.v|number:'1.3-3'}}v</ion-col>
+            <ion-col width-20 class="cells-container">
+                <div
+                        *ngFor="let b of balanceRange(cell.balance)"
+                        class="balance b{{b}}"
+                        [ngClass]="{'off':!balanceLightIsLit(b, cell.balance)}"
+                >
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-col>
+</ion-row>

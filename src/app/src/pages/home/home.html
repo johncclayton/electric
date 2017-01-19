@@ -15,7 +15,7 @@
 <ion-nav #content [root]="rootPage"></ion-nav>
 
 <ion-content class="charger" [ngClass]="{'no-scroll': config.preventChargerVerticalScrolling()}">
-    <div *ngIf="needToShowSomeMessages()">
+    <div *ngIf="anyNetworkOrConnectivityProblems()">
         <ion-card>
             <ion-card-header>
                 Connection Status
@@ -75,7 +75,7 @@
     </div>
 
 
-    <div *ngIf="!needToShowSomeMessages()">
+    <div *ngIf="!anyNetworkOrConnectivityProblems()">
         <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
         <charger-status
                 [status]="chargerStatusObserver"
@@ -86,7 +86,6 @@
         <channel name="Channel 2" [channelObserver]="channelSubscriptions()[1]" [index]="1"></channel>
     </div>
 
-    <!--<button ion-button (click)="showtoast()">Disconnect</button>-->
-
+    <connection-state></connection-state>
 </ion-content>
 

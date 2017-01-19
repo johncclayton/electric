@@ -1,0 +1,35 @@
+<!--<ion-row>-->
+<!--<ion-col>-->
+<!--<button ion-button icon-only (click)="goBack()">-->
+<!--<ion-icon name="arrow-back"></ion-icon>-->
+<!--</button>-->
+<!--</ion-col>-->
+<!--<ion-col >-->
+<!--<ion-row *ngFor="let r of chunkedCells(); let y=index" class="cells ir">-->
+<!--<ion-col-->
+<!--[ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"-->
+<!--class="cell"-->
+<!--no-padding-->
+<!--*ngFor="let cell of r; let x=index"-->
+<!--text-center>-->
+<!--<ion-row *ngIf="!isCellPadding(cell)">-->
+<!--<ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>-->
+<!--<ion-col text-center>{{cell.ir|number:'1.1-1'}}mΩ</ion-col>-->
+<!--</ion-row>-->
+<!--</ion-col>-->
+<!--</ion-row>-->
+<!--</ion-col>-->
+<!--</ion-row>-->
+<ion-row *ngFor="let r of chunkedCells(); let y=index" class="cells ir">
+    <ion-col
+            [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
+            class="cell"
+            no-padding
+            *ngFor="let cell of r; let x=index"
+            text-center>
+        <ion-row *ngIf="!isCellPadding(cell)">
+            <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
+            <ion-col text-center>{{cell.ir|number:'1.1-1'}}mΩ</ion-col>
+        </ion-row>
+    </ion-col>
+</ion-row>

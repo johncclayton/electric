@@ -20,7 +20,7 @@
         <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
             <div class="item-left">{{preset.name}}</div>
             <div item-right>
-                <div class="mini-badge {{chemistyClass(preset)}}" *ngFor="let tag of tagsForPreset(preset)">{{tag}}
+                <div class="mini-badge {{chemistryClass(preset)}}" *ngFor="let tag of tagsForPreset(preset)">{{tag}}
                 </div>
             </div>
         </ion-item>

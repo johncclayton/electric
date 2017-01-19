@@ -2,3 +2,81 @@
 .no-scroll .scroll-content {
   overflow: hidden;
 }
+
+// This is the CSS for the charger, as a whole.
+.charger {
+  // This controls what you see at the top of the dashboard
+  // The main amps, volts area...
+
+  .overview {
+    ion-col:nth-child(4) {
+      text-align: center;
+
+    }
+
+    ion-col:nth-child(5) {
+      text-align: left;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+
+    .label {
+      opacity: 0.6;
+    }
+  }
+
+  .errors {
+    h3 {
+      padding: 10px 15px;
+    }
+  }
+}
+
+.chargername {
+  .tag {
+    display: inline-block;
+    background: white;
+    border-radius: 2px;
+    color: map-get($colors, 'primary');
+    margin-left: 5px;
+    padding: 0 4px 0 4px;
+    transform: skewX(-5deg);
+  }
+
+  // iPhone 5S
+  @include media("<=widephone") {
+    .tag {
+      display: none;
+    }
+  }
+}
+
+// Size overrides!
+@include media(">=widephone") {
+  .charger {
+    // Make everything bigger in general
+    font-size: 2.0rem;
+
+    .overview {
+      .label {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+@include media(">=tablet") {
+  .charger {
+    // Make everything bigger in general
+    font-size: 3.0rem;
+
+    .overview {
+      .label {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+

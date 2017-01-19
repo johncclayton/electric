@@ -3,12 +3,14 @@ import {NavController, NavParams, List, ToastController} from 'ionic-angular';
 import {iChargerService} from "../../services/icharger.service";
 import {PresetPage} from "../preset/preset";
 import {Preset, ChemistryType} from "../preset/preset-class";
+import {Chemistry} from "../../utils/mixins";
+import {applyMixins} from "rxjs/util/applyMixins";
 
 @Component({
     selector: 'page-preset-list',
     templateUrl: 'preset-list.html'
 })
-export class PresetListPage {
+export class PresetListPage implements Chemistry {
     public presets: Array<Preset>;
     @ViewChild(List) list: List;
 
@@ -24,7 +26,8 @@ export class PresetListPage {
             console.log("I'm in WKWebView!");
         } else {
             console.log("I'm in UIWebView");
-        }}
+        }
+    }
 
     refreshPresets(refresher) {
         this.chargerService.getPresets().subscribe(presetsList => {
@@ -41,7 +44,7 @@ export class PresetListPage {
     }
 
     editPreset(preset) {
-        if(preset) {
+        if (preset) {
             console.log("Editing preset type: ", preset.type);
             if (preset.type == ChemistryType.LiPo ||
                 preset.type == ChemistryType.NiMH ||
@@ -67,10 +70,6 @@ export class PresetListPage {
         }
     }
 
-    chemistyClass(preset) {
-        return "chemistry-" + preset['type_str'];
-    }
-
     tagsForPreset(preset) {
         let tags = [];
         if (preset.type_str) {
@@ -86,4 +85,8 @@ export class PresetListPage {
         }
         return tags;
     }
+
+    chemistryClass: () => string;
 }
+
+applyMixins(PresetListPage, [Chemistry]);

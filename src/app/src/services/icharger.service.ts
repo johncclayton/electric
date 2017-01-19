@@ -8,6 +8,7 @@ import {Channel} from "../models/channel";
 
 const CHARGER_CONNECTED_EVENT: string = 'charger.connected';
 const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected';
+const CHARGER_STATUS_ERROR: string = 'charger.status.error';
 const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
 export enum ChargerType {
@@ -15,10 +16,10 @@ export enum ChargerType {
     iCharger308Duo = 66
 }
 
-export let ChargerMetadata = [
-    {'type': ChargerType.iCharger308Duo, 'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells': 8},
-    {'type': ChargerType.iCharger410Duo, 'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO', 'cells': 10},
-];
+export let ChargerMetadata = {};
+ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'};
+
 
 @Injectable()
 export class iChargerService {
@@ -51,6 +52,17 @@ export class iChargerService {
         return false;
     }
 
+    anyNetworkOrConnectivityProblems() {
+        let haveNetwork = this.isNetworkAvailable();
+        let haveCharger = this.isConnectedToCharger();
+        let haveServer = this.isConnectedToServer();
+        return !haveNetwork || !haveCharger || !haveServer;
+    }
+
+    isNetworkAvailable(): boolean {
+        return true;
+    }
+
     getNumberOfChannels(): number {
         if (!this.isConnectedToServer()) {
             return 0;
@@ -78,19 +90,17 @@ export class iChargerService {
                 return this.http.get(this.getChargerURL("/status"));
             })
             .map((v) => {
-                let notConnectedNow = this.isConnectedToCharger();
+                let connected = this.isConnectedToCharger();
                 this.chargerStatus = v.json();
-                if (!notConnectedNow && this.isConnectedToCharger()) {
+
+                let chargerHasAppeared = !connected && this.isConnectedToCharger();
+                if (chargerHasAppeared) {
                     this.chargerDidAppear(this.chargerStatus);
                 }
                 return this.chargerStatus;
             })
             .catch(error => {
-                console.error("Unable to get charger status, error: ", error);
-                if (this.isConnectedToCharger()) {
-                    this.events.publish(CHARGER_DISCONNECTED_EVENT);
-                }
-                this.chargerStatus = {};
+                this.chargerDidDisappear(error);
                 return Observable.throw(error);
             })
             .retry()
@@ -107,26 +117,13 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
-    private numberOfActiveCells(channelObject) {
-        // Maybe reduce the channels, as long as they are 0 volt.
-        let cells = channelObject['cells'];
-        let cellLimit = this.config.getCellLimit();
-        if (cellLimit > 0) {
-            // Check voltages.
-            // If we see a voltage on a channel, we must show everything up to that channel
-            // for safety
-            let voltageSeenAtIndex = 0;
-            if (cells) {
-                cells.forEach((item, index) => {
-                    if (item.v > 0) {
-                        voltageSeenAtIndex = index;
-                    }
-                });
-                return Math.max(cellLimit, voltageSeenAtIndex + 1);
-            }
+    private chargerDidDisappear(error) {
+        console.error("Unable to get charger status, error: ", error);
+        this.events.publish(CHARGER_STATUS_ERROR);
+        if (this.isConnectedToCharger()) {
+            this.events.publish(CHARGER_DISCONNECTED_EVENT);
         }
-        // default to the size of the array
-        return cells.length;
+        this.chargerStatus = {};
     }
 
     private chargerDidAppear(statusDict) {
@@ -174,10 +171,7 @@ export class iChargerService {
         // Not supplied? Look it up.
         if (deviceId == null) {
             if (this.chargerStatus) {
-                let md = ChargerMetadata[this.chargerStatus['device_id']];
-                if (md) {
-                    deviceId = md;
-                }
+                deviceId = Number(this.chargerStatus['device_id']);
             }
         }
         if (deviceId) {
@@ -234,5 +228,6 @@ export class iChargerService {
 export {
     CHARGER_CONNECTED_EVENT,
     CHARGER_DISCONNECTED_EVENT,
+    CHARGER_STATUS_ERROR,
     CHARGER_CHANNEL_EVENT,
 }

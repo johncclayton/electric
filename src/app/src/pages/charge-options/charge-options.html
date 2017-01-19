@@ -1,0 +1,80 @@
+<ion-header>
+
+    <ion-navbar>
+        <ion-title>Charging</ion-title>
+    </ion-navbar>
+
+    <ion-toolbar>
+        <!--<h3 text-center>Select Method</h3>-->
+        <ion-segment [(ngModel)]="chargeMethod">
+            <ion-segment-button value="presets">Presets</ion-segment-button>
+            <ion-segment-button value="capacity">Capacity & C</ion-segment-button>
+        </ion-segment>
+
+    </ion-toolbar>
+</ion-header>
+
+
+<ion-content padding>
+    <div [ngSwitch]="chargeMethod">
+        <div *ngSwitchCase="'presets'">
+            <!--<h4 text-center>By Preset</h4>-->
+            <ion-segment [(ngModel)]="chemistryFilter">
+                <ion-segment-button value="All">All</ion-segment-button>
+                <ion-segment-button value="LP">Lipo</ion-segment-button>
+                <ion-segment-button value="LL">Lilo</ion-segment-button>
+                <ion-segment-button value="LF">LiFe</ion-segment-button>
+                <ion-segment-button value="NM">NiMh</ion-segment-button>
+            </ion-segment>
+
+            <ion-grid>
+                <ion-row *ngFor="let some of filteredPresets()" no-padding>
+                    <ion-col *ngFor="let preset of some">
+                        <button [ngClass]="chemistryClass(preset)" small block ion-button>
+                            {{preset.smallButtonName()}}
+                        </button>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+        <div *ngSwitchCase="'capacity'">
+            <!--<h4 text-center>By Capacity & C</h4>-->
+            <ion-list>
+                <ion-list-header>Number of packs
+                    <ion-badge item-right>{{numPacks}} packs</ion-badge>
+                </ion-list-header>
+                <ion-range min="1" max="6" [(ngModel)]="numPacks">
+                    <ion-label range-left>1</ion-label>
+                    <ion-label range-right>6</ion-label>
+                </ion-range>
+                <ion-list-header>Smallest Pack
+                    <ion-badge item-right>{{capacity}} mAh</ion-badge>
+                </ion-list-header>
+                <ion-range min="100" max="7000" step="100" [(ngModel)]="capacity">
+                    <ion-label range-left>100</ion-label>
+                    <ion-label range-right>7000</ion-label>
+                </ion-range>
+                <ion-list-header>Charge Rate (C)
+                    <ion-badge item-right>{{chargeRate|number:'1.1-1'}}C <ion-icon *ngIf="showFlame()" name="flame"></ion-icon></ion-badge>
+                </ion-list-header>
+                <ion-range min="1" max="50" [(ngModel)]="chargeRateTimesTen">
+                    <ion-label range-left>1</ion-label>
+                    <ion-label range-right>5</ion-label>
+                </ion-range>
+
+
+                <div text-center>
+                    <ion-badge color="warning" *ngIf="channelLimitReached">
+                        {{computedAmps|number:'1.1-1'}}A exceeds limit of {{ampsLimit()|number:'1.1-1'}}A<br/>
+                        channel amperage limit applied
+                    </ion-badge>
+                </div>
+                <button ion-button block color="secondary" icon-right>
+                    {{chargePlan()}}
+                    <ion-icon name="play"></ion-icon>
+                </button>
+            </ion-list>
+        </div>
+    </div>
+
+</ion-content>
