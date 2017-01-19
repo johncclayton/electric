@@ -33,10 +33,6 @@ class TestingControl:
     def reset(self):
         # Holds the global testing flags that modify the interface behaviour in simple ways to enable testing
         self.usb_device_present = True
-        # If the kernel detach should fail
-        self.usb_detach_from_kernel_should_fail = False
-        # claiming the interface should fail
-        self.usb_claim_interface_should_fail = False
         # If a read operation should fail and throw an exception
         self.modbus_read_should_fail = False
         # If a write operation should fail and throw an exception
@@ -72,7 +68,7 @@ def connection_state_dict(exc=None):
     """
 
     state = "connected"
-    if exc is not None and type(exc) == Exception:
+    if exc is not None and isinstance(exc, Exception):
         state = "disconnected"
 
     value = {
@@ -192,13 +188,14 @@ class USBSerialFacade:
 
     def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID):
         self._dev = None
-        self._claimed = True
+        self._opened = False
+
         self.vendor = vendor
         self.product = prod
 
         try:
             self._dev = hid.device()
-            self._dev.open(vendor, prod)
+            self.open()
             if not testing_control.usb_device_present:
                 raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
         except IOError:
@@ -206,52 +203,10 @@ class USBSerialFacade:
             raise
 
     def reset(self):
-        # if platform.system() != "Windows":
-        #     self._detach_kernel_driver()
-        #
-        # self._claim_interface()
-        #
-        # # odd but true, if you remove this then read/writes to the USB bus while the
-        # # charger is actually doing its charge/discharge job WILL FAIL on the PI3
-        # self._dev.reset()
-
         if self._dev is not None:
-            self._dev.close()
+            self.close()
             self._dev.open(self.vendor, self.product)
-
         return True
-
-    # def _detach_kernel_driver(self):
-    #     if self._dev is None or testing_control.usb_detach_from_kernel_should_fail:
-    #         raise usb.core.USBError("Failed to detach from the kernel")
-    #
-    #     if self._dev.is_kernel_driver_active(0):
-    #         self._dev.detach_kernel_driver(0)
-
-    # def _claim_interface(self):
-    #     if not self._dev or testing_control.usb_claim_interface_should_fail:
-    #         raise usb.core.USBError(
-    #             "Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
-    #
-    #     try:
-    #         usb.util.claim_interface(self._dev, 0)
-    #         self._claimed = True
-    #         return True
-    #     except Exception, e:
-    #         logging.info("Failed to _claim interface with {0}".format(e))
-    #     return False
-
-    # def _release_interface(self):
-    #     if not self._dev:
-    #         return False
-    #
-    #     try:
-    #         usb.util.release_interface(self._dev, 0)
-    #         self._claimed = False
-    #         return True
-    #     except:
-    #         pass
-    #     return False
 
     @property
     def serial_number(self):
@@ -259,7 +214,7 @@ class USBSerialFacade:
 
     @property
     def is_open(self):
-        return self._dev is not None
+        return self._opened
 
     @property
     def name(self):
@@ -268,12 +223,14 @@ class USBSerialFacade:
         return "! iCharger Not Connected !"
 
     def open(self):
-        # return self._claim_interface()
-        return self._dev is not None
+        self._dev.open(self.vendor, self.product)
+        self._opened = True
+        return self._dev is not None and self._opened
 
     def close(self):
-        # return self._release_interface()
-        pass
+        self._dev.close()
+        self._opened = False
+        return True
 
     @property
     def timeout(self):
@@ -304,7 +261,7 @@ class USBSerialFacade:
         if not testing_control.usb_device_present:
             raise IOError("FAKE TEST ON WRITE, CHARGER NOT PRESENT")
 
-        if self._dev is not None and self._claimed:
+        if self._dev is not None:
             pad_len = MAX_READWRITE_LEN - len(payload)
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
@@ -312,15 +269,17 @@ class USBSerialFacade:
                 return self._dev.write([ord(i) for i in content])
             except Exception, e:
                 logging.info("bad bad bad, %s", e)
+
         raise IOError("Device write failure - either not present or not claimed")
 
     def read(self, expected_length):
         if not testing_control.usb_device_present:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
-        if self._dev is not None and self._claimed:
+        if self._dev is not None:
             data = self._dev.read(MAX_READWRITE_LEN + 1, 5000)
             return array.array('B', data[:expected_length]).tostring()
+
         raise IOError("Device read failure - either not present or not claimed")
 
 

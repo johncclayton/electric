@@ -9,7 +9,6 @@ logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 RETRY_LIMIT = 30
 
-
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
         with evil_global.lock:
@@ -23,9 +22,10 @@ def exclusive(func):
 
                 except Exception, usb_err:
                     logging.error(usb_err)
+
                     evil_global.comms.reset()
 
-                    if retry > RETRY_LIMIT:
+                    if retry >= RETRY_LIMIT:
                         logger.info("retry exceeded:", func)
                         return connection_state_dict(usb_err), 504
 

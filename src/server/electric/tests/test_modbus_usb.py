@@ -1,6 +1,5 @@
 import unittest, struct, time
 import modbus_tk.defines as cst
-from usb.core import USBError
 
 from icharger.comms_layer import ChargerCommsManager
 from icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, \
@@ -91,40 +90,25 @@ class TestSerialFacade(unittest.TestCase):
     def setUp(self):
         testing_control.reset()
 
-    def test_kernel_detach_fails(self):
-        testing_control.usb_detach_from_kernel_should_fail = True
-
-        with self.assertRaises(USBError) as context:
-            USBSerialFacade()
-
-        self.assertIn("Failed to detach from the kernel", str(context.exception))
-
     def test_bad_vendor_product_combo(self):
-        charger = USBSerialFacade(0x9999, 0x9999)
-        self.assertIsNotNone(charger)
-        self.assertIsNone(charger._dev)
+        with self.assertRaises(IOError):
+            USBSerialFacade(0x9999, 0x9999)
 
     def test_opening_claims_usb_interface(self):
-        serial = USBSerialFacade()
-        charger = iChargerMaster(serial=serial)
+        charger = evil_global.comms
+        serial = charger.charger._serial
+        serial.close()
         self.assertEqual(serial.is_open, False)
-        charger.open()
+        serial.open()
         self.assertEqual(serial.is_open, True)
-        self.assertEqual(serial._claimed, True)
-        charger.close()
+        serial.close()
         self.assertEqual(serial.is_open, False)
-        self.assertEqual(serial._claimed, False)
-
-    def test_usb_claim_interface_fails(self):
-        testing_control.usb_claim_interface_should_fail = True
-        with self.assertRaises(USBError) as c:
-            serial = USBSerialFacade()
-            serial.open()
 
 
 class TestGatewayCommunications(unittest.TestCase):
     def setUp(self):
         testing_control.reset()
+        evil_global.comms.charger.open()
 
     def test_status_contains_num_channels(self):
         obj = evil_global.comms
