@@ -1,4 +1,3 @@
-import platform
 import struct, hid, array
 import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
@@ -82,6 +81,8 @@ def connection_state_dict(exc=None):
 
 
 #
+# NOTE: This isnt' relevant for Docker based installs - things run as root there anyway.
+#
 # Want user-land access to the device?  Looking for an easier way, tired of sudo <command>
 # and having op-sec experts scorn you at the water cooler?
 #
@@ -91,7 +92,7 @@ def connection_state_dict(exc=None):
 # Once you have added this single line of text to the file, ask udevd to re-read configuration:
 # $ udevadm control --reload-rules
 #
-# But you NEED to unplug/plug-in the device for this to work - otherwise REBOOT the device.
+# But you NEED to unplug/plug-in the device for this to work - or REBOOT the pi.
 #
 
 class iChargerQuery(Query):
