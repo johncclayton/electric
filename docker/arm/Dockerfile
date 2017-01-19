@@ -2,10 +2,9 @@ FROM hypriot/rpi-alpine
 MAINTAINER Neil Clayton
 LABEL version="1.0"
 
-RUN apk update
-# usbutils required to make the USB stuff work.
-# added bash cos I'm lazy
-RUN apk add python libusb usbutils py-pip bash
+RUN apk update && apk add bash python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev
+RUN pip install --upgrade setuptools && pip install --upgrade pip
+RUN pip install hidapi
 
 VOLUME /www
 
@@ -17,4 +16,4 @@ WORKDIR  /www
 
 RUN pip install -r requirements.txt
 
-CMD ["./run_server.sh"]
+CMD ["./start_gunicorn.sh" ]
