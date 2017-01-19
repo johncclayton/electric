@@ -1,7 +1,7 @@
 import logging
 import modbus_tk.defines as cst
 
-from icharger.models import SystemStorage, WriteDataSegment
+from electric.icharger.models import SystemStorage, WriteDataSegment
 from modbus_usb import iChargerMaster
 from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 

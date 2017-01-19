@@ -5,13 +5,8 @@ LABEL version="1.0"
 RUN apk update && apk add bash python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev
 RUN pip install --upgrade setuptools && pip install --upgrade pip
 RUN pip install hidapi
+RUN pip install electric
 
-VOLUME /www
-
-COPY src/server /www
 EXPOSE 5000
 
-WORKDIR  /www
-RUN pip install -r requirements.txt
-
-CMD ["./start_gunicorn.sh" ]
+CMD [ "gunicorn", "--preload", "--bind 0.0.0.0:5000", "--workers=1", "--max-requests=50", "--backlog=300", "electric.wsgi:application" ]

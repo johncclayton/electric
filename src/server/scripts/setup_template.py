@@ -17,7 +17,7 @@ def write_setup_py(content, root_path = None):
     setup_file.close()
 
 
-def render_setup(root_path = None, ver="0.6.7"):
+def render_setup(root_path = None, ver="0.7.1"):
     if root_path is None:
         root_path = default_root_path()
 

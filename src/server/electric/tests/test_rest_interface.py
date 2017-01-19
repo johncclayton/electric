@@ -1,5 +1,5 @@
-from app import application
-from icharger.modbus_usb import testing_control
+from electric.app import application
+from electric.icharger.modbus_usb import testing_control
 import unittest, json
 
 

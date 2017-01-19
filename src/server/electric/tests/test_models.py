@@ -1,7 +1,7 @@
 import unittest
 
 from schematics.exceptions import ModelValidationError
-from icharger.models import DeviceInfo, DeviceInfoStatus
+from electric.icharger.models import DeviceInfo, DeviceInfoStatus
 
 
 class TestDeviceStatusInfoSerialization(unittest.TestCase):
