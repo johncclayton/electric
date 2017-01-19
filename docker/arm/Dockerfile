@@ -8,7 +8,7 @@ RUN apk update \
     && pip install --upgrade pip \
     && pip install hidapi \
     && pip install electric \
-    && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev cython-dev --purge
+    && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev py-pip cython cython-dev --purge
 
 EXPOSE 5000
 
