@@ -1,3 +1,5 @@
+import sys
+
 from icharger.comms_layer import ChargerCommsManager
 
 __global_charger = None
@@ -32,3 +34,7 @@ def get_preset_list(count_only):
 
 def get_preset(index):
     return get_charger().get_preset(index)
+
+
+def restart():
+    sys.exit(2)

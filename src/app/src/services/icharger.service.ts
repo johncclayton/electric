@@ -14,10 +14,9 @@ export enum ChargerType {
     iCharger308Duo = 66
 }
 
-export let ChargerMetadata = [
-    {'type': ChargerType.iCharger308Duo, 'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'},
-    {'type': ChargerType.iCharger410Duo, 'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'},
-];
+export let ChargerMetadata = {};
+ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'};
 
 @Injectable()
 export class iChargerService {
@@ -117,7 +116,7 @@ export class iChargerService {
         for (let i = 0; i < this.getNumberOfChannels(); i++) {
             console.log(`Creating hot channel observable: ${i}`);
             this.channelStateObservable.push(Observable
-                .timer(500, 500)
+                .timer(500, 1000)
                 .flatMap((v) => {
                     return this.http.get(this.getChargerURL(`/channel/${i}`));
                 })
@@ -151,10 +150,7 @@ export class iChargerService {
         // Not supplied? Look it up.
         if (deviceId == null) {
             if (this.chargerStatus) {
-                let md = ChargerMetadata[this.chargerStatus['device_id']];
-                if (md) {
-                    deviceId = md;
-                }
+                deviceId = Number(this.chargerStatus['device_id']);
             }
         }
         if (deviceId) {

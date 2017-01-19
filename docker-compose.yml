@@ -1,39 +1,11 @@
 version: '2'
 
 services:
-  worker:
-    image: electric/web
-
-    container_name: electric-worker
-
-    depends_on:
-      - redis
-
-    privileged: true
-
-    restart: always
-
-    environment:
-      - PYTHONPATH=electric
-
-    command: ["/usr/bin/rq", "worker", "-w", "electric.worker.docker.DockerWorker", "--url", "redis://electric-redis:6379"]
-#    command: ["/usr/bin/rq", "worker", "--url", "redis://electric-redis:6379"]
-
-    volumes:
-      - /dev/bus/usb:/dev/bus/usb
-      - ./src/server:/www
-
-    networks:
-      - charger
-
   web:
     build:
       context: .
       dockerfile: docker/arm/Dockerfile
     image: scornflake/electric-pi
-
-    depends_on:
-      - worker
 
     container_name: electric-web
 
@@ -41,23 +13,8 @@ services:
       - "80:5000"
       - "5000:5000"
 
-    environment:
-      - REDIS_ADDRESS=electric-redis
-
     volumes:
       - ./src/server:/www
-
-    restart: always
-
-    networks:
-      - charger
-
-  redis:
-    image: hypriot/rpi-redis
-    container_name: electric-redis
-
-    ports:
-      - "6379:6379"
 
     restart: always
 

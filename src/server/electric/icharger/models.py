@@ -1,4 +1,4 @@
-import struct
+import struct, logging
 
 import modbus_tk.defines as cst
 from schematics.models import Model
@@ -6,6 +6,8 @@ from schematics.transforms import blacklist
 from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
 from schematics.types.compound import ModelType, ListType
 from schematics.types.serializable import serializable
+
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 STATUS_RUN = 0x01
 STATUS_ERROR = 0x02
@@ -233,7 +235,7 @@ class ChannelStatus(Model):
 
         if device_id:
             # With this, we can work out if the main battery lead is plugged in
-            max_voltage = 30 if device_id is 66 else 40
+            max_voltage = 30 if device_id is DEVICEID_308_DUO else 40
             if self.curr_out_volts > max_voltage:
                 self.curr_out_volts = 0
 
