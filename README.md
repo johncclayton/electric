@@ -3,21 +3,18 @@
 
 Docker image: https://hub.docker.com/r/scornflake/electric-pi/
 
-# electric
-Battery charger integration, information and mobile app to view/control it all.
-
 # what
 This project provides everything you need to get information from your iCharger 308/4010 DUO to an application 
-running on your desktop or mobile device.
+running on your mobile device.
 
 # how
-To use this, you will need the following:
+You will need the following:
 
  1. iCharger 308, 408 or 4010 DUO
  1. The mini-USB cable provided with the charger (don't use anything else)
  1. A Raspberry PI 3 with Docker installed (Hypriot ARM To The Rescue!)
 
-Warning: seriously, don't use anything other than the USB cable provided with the iCharger - there are known cases
+Warning: **seriously**, don't use anything other than the USB cable provided with the iCharger - there are known cases
  of the iCharger frying motherboards (in this case your Pi).  You have been warned.
 
 To run this, you'll need to have the Pi running, connected to WiFi on your local network, and have terminal/SSH access 
