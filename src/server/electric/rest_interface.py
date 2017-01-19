@@ -1,9 +1,9 @@
 import logging
 from flask_restful import Resource
-from icharger.modbus_usb import connection_state_dict
+from electric.icharger.modbus_usb import connection_state_dict
 
 # All Evil is put into its own little container.
-import evil_global
+import electric.evil_global as evil_global
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 

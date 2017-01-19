@@ -1,4 +1,4 @@
-from icharger.comms_layer import ChargerCommsManager
+from electric.icharger.comms_layer import ChargerCommsManager
 import sys, traceback, time
 
 ret_code = 0

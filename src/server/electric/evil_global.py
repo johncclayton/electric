@@ -1,6 +1,6 @@
 import multiprocessing, logging
 
-from icharger.comms_layer import ChargerCommsManager
+from electric.icharger.comms_layer import ChargerCommsManager
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
