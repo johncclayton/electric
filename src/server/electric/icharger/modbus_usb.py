@@ -195,7 +195,6 @@ class USBSerialFacade:
 
         try:
             self._dev = hid.device()
-            self.open()
             if not testing_control.usb_device_present:
                 raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
         except IOError:
@@ -205,12 +204,14 @@ class USBSerialFacade:
     def reset(self):
         if self._dev is not None:
             self.close()
-            self._dev.open(self.vendor, self.product)
+            self.open()
         return True
 
     @property
     def serial_number(self):
-        return self._dev.get_serial_number_string()
+        if self._opened:
+            return self._dev.get_serial_number_string()
+        return "<not yet opened - no serial number>"
 
     @property
     def is_open(self):
@@ -223,12 +224,15 @@ class USBSerialFacade:
         return "! iCharger Not Connected !"
 
     def open(self):
-        self._dev.open(self.vendor, self.product)
-        self._opened = True
-        return self._dev is not None and self._opened
+        assert not self._opened
+        if self._dev is not None:
+            self._dev.open(self.vendor, self.product)
+            self._opened = True
+        return True
 
     def close(self):
-        self._dev.close()
+        if self._opened:
+            self._dev.close()
         self._opened = False
         return True
 
