@@ -16,7 +16,7 @@ export enum ChargerType {
 
 export let ChargerMetadata = {};
 ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
-ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO'};
 
 @Injectable()
 export class iChargerService {

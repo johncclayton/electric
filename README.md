@@ -20,10 +20,8 @@ To use this, you will need the following:
 Warning: seriously, don't use anything other than the USB cable provided with the iCharger - there are known cases
  of the iCharger frying motherboards (in this case your Pi).  You have been warned.
 
-To run this, you'll need to have the Pi running, connected to WiFi on your local network.  Further instructions 
-to do this can be found at the Hypriot ARM website, at the of writing: 
-
-  https://github.com/hypriot/device-init#the-bootdevice-inityaml  
+To run this, you'll need to have the Pi running, connected to WiFi on your local network, and have terminal/SSH access 
+to it.  Further instructions on how to go about this can be found at the [Hypriot ARM website](https://github.com/hypriot/device-init#the-bootdevice-inityaml)  
 
 Assuming you have the IP Address of your Docker capable Raspberry Pi: 
 
