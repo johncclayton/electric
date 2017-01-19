@@ -11,9 +11,7 @@ VOLUME /www
 COPY src/server /www
 EXPOSE 5000
 
-COPY src/server/requirements.txt /www
 WORKDIR  /www
-
 RUN pip install -r requirements.txt
 
 CMD ["./start_gunicorn.sh" ]
