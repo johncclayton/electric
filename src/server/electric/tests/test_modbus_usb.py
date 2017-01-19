@@ -92,7 +92,8 @@ class TestSerialFacade(unittest.TestCase):
 
     def test_bad_vendor_product_combo(self):
         with self.assertRaises(IOError):
-            USBSerialFacade(0x9999, 0x9999)
+            s = USBSerialFacade(0x9999, 0x9999)
+            s.open()
 
     def test_opening_claims_usb_interface(self):
         charger = evil_global.comms

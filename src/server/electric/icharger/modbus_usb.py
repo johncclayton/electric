@@ -219,12 +219,11 @@ class USBSerialFacade:
 
     @property
     def name(self):
-        if self.serial_number is not None:
+        if self._opened:
             return "iCharger 4010 Duo SN:" + self.serial_number
         return "! iCharger Not Connected !"
 
     def open(self):
-        assert not self._opened
         if self._dev is not None:
             self._dev.open(self.vendor, self.product)
             self._opened = True
