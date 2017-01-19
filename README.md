@@ -21,13 +21,15 @@ Warning: seriously, don't use anything other than the USB cable provided with th
  of the iCharger frying motherboards (in this case your Pi).  You have been warned.
 
 To run this, you'll need to have the Pi running, connected to WiFi on your local network, and have terminal/SSH access 
-to it.  Further instructions on how to go about this can be found at the [Hypriot ARM website](https://github.com/hypriot/device-init#the-bootdevice-inityaml)  
+to it.  Further instructions on how to do this can be found at the [Hypriot ARM website](https://github.com/hypriot/device-init#the-bootdevice-inityaml).  
 
-Assuming you have the IP Address of your Docker capable Raspberry Pi: 
+Assuming you have the IP Address of your Docker capable Raspberry Pi 3, all you need to do is fire up the container that can talk with your iCharger: 
 
     $ docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb  --name electric-pi -p 5000:5000 scornflake/electric-pi 
 
-That's it!  Now go get the Ionic 2 App and type in the IP address to your server, you will see the status of your
+That's it!  
+
+Now go get the Ionic 2 App and type in the IP address to your server, you will see the status of your
 charger and youre ready to go!
 
 # why
