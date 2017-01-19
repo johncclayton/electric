@@ -7,24 +7,30 @@ Docker image: https://hub.docker.com/r/scornflake/electric-pi/
 Battery charger integration, information and mobile app to view/control it all.
 
 # what
-This project provides everything you need to get information from your iCharger 308/4010 DUO to an application running on your desktop or mobile device.
-
-## what - server
-The back end is written entirely in Python, and exposes a RESTful API to the iCharger.
-
-## what - frontend
-The front end UI app is based on Ionic 2.
+This project provides everything you need to get information from your iCharger 308/4010 DUO to an application 
+running on your desktop or mobile device.
 
 # how
 To use this, you will need the following:
 
  1. iCharger 308, 408 or 4010 DUO
  1. The mini-USB cable provided with the charger (don't use anything else)
- 1. A Raspberry PI 3 
+ 1. A Raspberry PI 3 with Docker installed (Hypriot ARM To The Rescue!)
 
-Warning: 
+Warning: seriously, don't use anything other than the USB cable provided with the iCharger - there are known cases
+ of the iCharger frying motherboards (in this case your Pi).  You have been warned.
 
+To run this, you'll need to have the Pi running, connected to WiFi on your local network.  Further instructions 
+to do this can be found at the Hypriot ARM website, at the of writing: 
 
+  https://github.com/hypriot/device-init#the-bootdevice-inityaml  
+
+Assuming you have the IP Address of your Docker capable Raspberry Pi: 
+
+    $ docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb  --name electric-pi -p 5000:5000 scornflake/electric-pi 
+
+That's it!  Now go get the Ionic 2 App and type in the IP address to your server, you will see the status of your
+charger and youre ready to go!
 
 # why
 One day I was staring at my iCharger thinking: it'd be cool if I could get a notification when the charge cycle 
