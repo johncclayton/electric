@@ -7,9 +7,12 @@ RUN apk update \
     && pip install --upgrade setuptools \
     && pip install --upgrade pip \
     && pip install hidapi \
-    && pip install electric \
     && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
+
+WORKDIR /www
+COPY ./src/server/ /www
+RUN rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
 
 EXPOSE 5000
 
-CMD [ "gunicorn", "--preload", "--bind=0.0.0.0:5000", "--workers=1", "--max-requests=5000", "--backlog=300", "electric.wsgi:application" ]
+CMD [ "./start_gunicorn.sh" ]
