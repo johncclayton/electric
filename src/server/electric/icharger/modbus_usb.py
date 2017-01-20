@@ -1,19 +1,11 @@
-import logging
-import platform
-import struct
-import threading
-from Queue import Queue
-from threading import Thread
+import struct, hid, array
 import modbus_tk.defines as cst
-import time
-import usb.core
-import usb.util
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
-import logging
 
-logger = logging.getLogger(__name__)
+import logging
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 MEMORY_MAX = 64
 MODBUS_HID_FRAME_TYPE = 0x30
@@ -40,10 +32,6 @@ class TestingControl:
     def reset(self):
         # Holds the global testing flags that modify the interface behaviour in simple ways to enable testing
         self.usb_device_present = True
-        # If the kernel detach should fail
-        self.usb_detach_from_kernel_should_fail = False
-        # claiming the interface should fail
-        self.usb_claim_interface_should_fail = False
         # If a read operation should fail and throw an exception
         self.modbus_read_should_fail = False
         # If a write operation should fail and throw an exception
@@ -78,8 +66,12 @@ def connection_state_dict(exc=None):
     the connection state of the charger
     """
 
+    state = "connected"
+    if exc is not None and isinstance(exc, Exception):
+        state = "disconnected"
+
     value = {
-        "charger_presence": "disconnected" if exc is not None else "connected"
+        "charger_presence": state
     }
 
     if exc is not None:
@@ -88,6 +80,8 @@ def connection_state_dict(exc=None):
     return value
 
 
+#
+# NOTE: This isnt' relevant for Docker based installs - things run as root there anyway.
 #
 # Want user-land access to the device?  Looking for an easier way, tired of sudo <command>
 # and having op-sec experts scorn you at the water cooler?
@@ -98,7 +92,7 @@ def connection_state_dict(exc=None):
 # Once you have added this single line of text to the file, ask udevd to re-read configuration:
 # $ udevadm control --reload-rules
 #
-# But you NEED to unplug/plug-in the device for this to work - otherwise REBOOT the device.
+# But you NEED to unplug/plug-in the device for this to work - or REBOOT the pi.
 #
 
 class iChargerQuery(Query):
@@ -193,79 +187,54 @@ class USBSerialFacade:
     exception from __init__.
     """
 
-    def __init__(self, vendorId=ICHARGER_VENDOR_ID, productId=ICHARGER_PRODUCT_ID):
+    def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID):
         self._dev = None
-        self._claimed = False
+        self._opened = False
+
+        self.vendor = vendor
+        self.product = prod
 
         try:
-            self._dev = usb.core.find(idVendor=vendorId, idProduct=productId)
+            self._dev = hid.device()
             if not testing_control.usb_device_present:
-                raise usb.core.NoBackendError("TEST_FAKE_CANNOT_FIND_DEVICE")
-        except usb.core.NoBackendError:
-            logging.error("There is no USB backend - the service cannot start")
+                raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
+        except IOError:
+            logging.error("The USB device could not be opened")
             raise
 
-        if self._dev is None:
-            return
-
-        # odd but true, if you remove this then read/writes to the USB bus while the
-        # charger is actually doing its charge/discharge job WILL FAIL on the PI3
-        self._dev.reset()
-
-        if platform.system() != "Windows":
-            self._detach_kernel_driver()
-
-    def _detach_kernel_driver(self):
-        if self._dev is None or testing_control.usb_detach_from_kernel_should_fail:
-            raise usb.core.USBError("Failed to detach from the kernel")
-
-        if self._dev.is_kernel_driver_active(0):
-            self._dev.detach_kernel_driver(0)
-
-    def _claim_interface(self):
-        if not self._dev or testing_control.usb_claim_interface_should_fail:
-            raise usb.core.USBError(
-                "Must be able to claim the interface or read/write won't work - perhaps the device is not plugged in or not turned on?")
-
-        try:
-            usb.util.claim_interface(self._dev, 0)
-            self._claimed = True
-            return True
-        except Exception, e:
-            logging.info("Failed to _claim interface with {0}".format(e))
-        return False
-
-    def _release_interface(self):
-        if not self._dev:
-            return False
-
-        try:
-            usb.util.release_interface(self._dev, 0)
-            self._claimed = False
-            return True
-        except:
-            pass
-        return False
+    def reset(self):
+        if self._dev is not None:
+            self.close()
+            self.open()
+        return True
 
     @property
     def serial_number(self):
-        return usb.util.get_string(self._dev, self._dev.iSerialNumber) if self.valid else None
+        if self._opened:
+            return self._dev.get_serial_number_string()
+        return "<not yet opened - no serial number>"
 
     @property
     def is_open(self):
-        return self._dev is not None and self._claimed
+        return self._opened
 
     @property
     def name(self):
-        if self.serial_number is not None:
+        if self._opened:
             return "iCharger 4010 Duo SN:" + self.serial_number
         return "! iCharger Not Connected !"
 
     def open(self):
-        return self._claim_interface()
+        if self._dev is not None:
+            self._dev.open(self.vendor, self.product)
+            self._opened = True
+        return True
 
     def close(self):
-        return self._release_interface()
+        if self._opened:
+            self._dev.close()
+        self._opened = False
+        return True
 
     @property
     def timeout(self):
@@ -292,16 +261,30 @@ class USBSerialFacade:
         """There are no internal buffers so this method is a no-op"""
         pass
 
-    def write(self, content):
-        if self._dev is not None and self._claimed:
-            pad_len = MAX_READWRITE_LEN - len(content)
-            return self._dev.write(END_POINT_ADDRESS_WRITE, content + ("\0" * pad_len), 5000)
-        raise usb.core.USBError("Device write failure - either not present or not claimed")
+    def write(self, payload):
+        if not testing_control.usb_device_present:
+            raise IOError("FAKE TEST ON WRITE, CHARGER NOT PRESENT")
+
+        if self._dev is not None:
+            pad_len = MAX_READWRITE_LEN - len(payload)
+            data = struct.pack("B", 0)
+            content = list(data + payload + ("\0" * pad_len))
+            try:
+                return self._dev.write([ord(i) for i in content])
+            except Exception, e:
+                logging.info("bad bad bad, %s", e)
+
+        raise IOError("Device write failure - either not present or not claimed")
 
     def read(self, expected_length):
-        if self._dev is not None and self._claimed:
-            return self._dev.read(END_POINT_ADDRESS_READ, expected_length, 5000).tostring()
-        raise usb.core.USBError("Device read failure - either not present or not claimed")
+        if not testing_control.usb_device_present:
+            raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
+
+        if self._dev is not None:
+            data = self._dev.read(MAX_READWRITE_LEN + 1, 5000)
+            return array.array('B', data[:expected_length]).tostring()
+
+        raise IOError("Device read failure - either not present or not claimed")
 
 
 class iChargerMaster(RtuMaster):
@@ -318,6 +301,9 @@ class iChargerMaster(RtuMaster):
 
     def _make_query(self):
         return iChargerQuery()
+
+    def reset(self):
+        self._serial.reset()
 
     def modbus_read_registers(self, addr, data_format, function_code=cst.READ_INPUT_REGISTERS):
         """

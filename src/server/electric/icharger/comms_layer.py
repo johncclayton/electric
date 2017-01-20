@@ -1,6 +1,7 @@
+import logging
 import modbus_tk.defines as cst
 
-from icharger.models import SystemStorage, WriteDataSegment
+from electric.icharger.models import SystemStorage, WriteDataSegment
 from modbus_usb import iChargerMaster
 from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
@@ -16,7 +17,10 @@ SYSTEM_STORAGE_OFFSET_FANS_OFF_DELAY = 5
 SYSTEM_STORAGE_OFFSET_CALIBRATION = 22
 SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
 
-class ChargerCommsManager:
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
+
+
+class ChargerCommsManager(object):
     """
     The comms manager is responsible for data translation between the MODBUS types and the world outside.  It uses an
     instance of the modbus capable read/write routines to fetch and modify charger parameters.  It co-ordinates
@@ -24,11 +28,15 @@ class ChargerCommsManager:
 
     Validation is not performed here - the data going in/out is assumed to be correct already.
     """
+    locking = False
+
     def __init__(self, master=None):
         if master is None:
             master = iChargerMaster()
-
         self.charger = master
+
+    def reset(self):
+        self.charger.reset()
 
     def get_device_info(self):
         """
@@ -43,7 +51,6 @@ class ChargerCommsManager:
         Returns the following information from the iCharger, known as the 'channel input read only' message:
         :return: ChannelStatus instance
         """
-
         addr = 0x100 if channel == 0 else 0x200
 
         # timestamp -> ext temp
@@ -128,7 +135,6 @@ class ChargerCommsManager:
         }
     '''
 
-
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
         # temp-unit -> beep-vol
@@ -151,7 +157,7 @@ class ChargerCommsManager:
         return self.charger.modbus_write_registers(0x8000 + 1,
                                                    (preset_index, control.channel, 0x55aa))
 
-    def get_preset_list(self, count_only = False):
+    def get_preset_list(self, count_only=False):
         (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
         if count_only:
             return count
@@ -203,7 +209,3 @@ class ChargerCommsManager:
         s5 = WriteDataSegment(self.charger, "seg3", v5, prev_format=s4)
 
         return True
-
-
-
-

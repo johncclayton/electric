@@ -1,108 +1,107 @@
-import os
-
+import logging
 from flask_restful import Resource
+from electric.icharger.modbus_usb import connection_state_dict
 
-from icharger.comms_layer import ChargerCommsManager
-from icharger.modbus_usb import connection_state_dict
-from icharger.rq_comms_layer import RqChargerCommsManager
+# All Evil is put into its own little container.
+import electric.evil_global as evil_global
+
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
+
+RETRY_LIMIT = 30
+
+def exclusive(func):
+    def wrapper(self, *args, **kwargs):
+        with evil_global.lock:
+            retry = 0
+            while retry < RETRY_LIMIT:
+                try:
+                    return func(self, *args, **kwargs)
+
+                except Exception, usb_err:
+                    retry += 1
+
+                    logging.info("%s, will try again (count is at %d/%d)", usb_err, retry, RETRY_LIMIT)
+
+                    evil_global.comms.reset()
+
+                    if retry >= RETRY_LIMIT:
+                        logger.warning("retry limit exceeded, aborting the call completely")
+                        return connection_state_dict(usb_err), 504
+
+    return wrapper
 
 
-class AbstractChargerResource(Resource):
-    def get_comms(self):
-        debug_mode = os.environ.get("DEBUG_MODE", None)
-        if debug_mode:
-            return ChargerCommsManager()
-        redisAddress = os.environ.get("REDIS_ADDRESS", "localhost")
-        return RqChargerCommsManager(redisAddress)
-
-
-class StatusResource(AbstractChargerResource):
+class StatusResource(Resource):
+    @exclusive
     def get(self):
-        try:
-            comms = self.get_comms()
-            info = comms.get_device_info()
+        info = evil_global.comms.get_device_info()
 
-            # groan
-            if globals().get('__global__device_id') is None:
-                globals()['__global__device_id'] = info.device_id
+        evil_global.last_seen_charger_device_id = info.device_id
 
-            obj = info.to_primitive()
-            obj.update(connection_state_dict())
+        obj = info.to_primitive()
+        obj.update(connection_state_dict())
 
-            return obj
-        except Exception, e:
-            return connection_state_dict(e)
+        return obj
 
 
-class ChannelResource(AbstractChargerResource):
+class ChannelResource(Resource):
+    @exclusive
     def get(self, channel_id):
-        try:
-            channel = int(channel_id)
-            if not (channel == 0 or channel == 1):
-                raise ValueError("Channel part of URI must be 0 or 1")
+        channel = int(channel_id)
+        if not (channel == 0 or channel == 1):
+            return connection_state_dict("Channel number must be 0 or 1"), 403
 
-            comms = self.get_comms()
+        # yeh, more groan
+        status = evil_global.comms.get_channel_status(int(channel), evil_global.last_seen_charger_device_id)
 
-            # yeh, more groan
-            global__device_id = globals().get('__global__device_id')
-            status = comms.get_channel_status(int(channel), global__device_id)
+        obj = status.to_primitive()
+        obj.update(connection_state_dict())
 
-            obj = status.to_primitive()
-            obj.update(connection_state_dict())
-
-            return obj
-        except Exception, e:
-            return connection_state_dict(e)
+        return obj
 
 
-class ControlRegisterResource(AbstractChargerResource):
+class ControlRegisterResource(Resource):
+    @exclusive
     def get(self):
-        try:
-            comms = self.get_comms()
-            control = comms.get_control_register()
+        control = evil_global.comms.get_control_register()
 
-            # note: intentionally no connection state
-            return control.to_primitive()
-        except Exception, e:
-            return connection_state_dict(e)
+        # note: intentionally no connection state
+        return control.to_primitive()
 
 
-class SystemStorageResource(AbstractChargerResource):
+class SystemStorageResource(Resource):
+    @exclusive
     def get(self):
-        try:
-            comms = self.get_comms()
-            syst = comms.get_system_storage()
+        syst = evil_global.comms.get_system_storage()
 
-            obj = syst.to_primitive()
-            obj.update(connection_state_dict())
+        obj = syst.to_primitive()
+        obj.update(connection_state_dict())
 
-            return obj
-        except Exception, e:
-            return connection_state_dict(e)
+        return obj
 
 
-class PresetResource(AbstractChargerResource):
+class PresetResource(Resource):
+    @exclusive
     def get(self, preset_id):
         pass
 
+    @exclusive
     def put(self, preset_id):
         pass
 
 
-class PresetListResource(AbstractChargerResource):
+class PresetListResource(Resource):
+    @exclusive
     def get(self):
-        try:
-            comms = self.get_comms()
-            count = comms.get_preset_list(count_only=True)
+        count = evil_global.comms.get_preset_list(count_only=True)
 
-            all_presets = []
-            for index in range(0, count):
-                all_presets.append(comms.get_preset(index).to_native())
+        all_presets = []
+        for index in range(0, count):
+            all_presets.append(evil_global.comms.get_preset(index).to_native())
 
-            return all_presets
+        return all_presets
 
-        except Exception, e:
-            return connection_state_dict(e)
 
+    @exclusive
     def post(self):
         pass

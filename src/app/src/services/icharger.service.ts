@@ -20,7 +20,6 @@ export let ChargerMetadata = {};
 ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
 ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'};
 
-
 @Injectable()
 export class iChargerService {
     chargerStatus: {} = {};
@@ -138,7 +137,7 @@ export class iChargerService {
         for (let i = 0; i < this.getNumberOfChannels(); i++) {
             console.debug(`Creating hot channel observable: ${i}`);
             this.channelStateObservable.push(Observable
-                .timer(500, 500)
+                .timer(500, 1000)
                 .filter(() => {
                     return this.isConnectedToCharger();
                 })

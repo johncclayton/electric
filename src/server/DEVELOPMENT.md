@@ -3,9 +3,9 @@ The development environment can be anything you like, however unit tests can onl
 a charger connected to it.
 
 # coding, debugging - tools
-Use PyCharm Pro.
+Use PyCharm Pro.  
 
-There are a number of things to set up in order to obtain development nirvana.
+There are a number of things to set up in PyCharm in order to get remote debugging and SSH support.
 
 1. a virtualenv for the development - see the README.md for more info on this
 2. check out the source code (duh)

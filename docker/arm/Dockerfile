@@ -1,20 +1,15 @@
-FROM hypriot/rpi-alpine
+FROM hypriot/rpi-alpine:3.4
 MAINTAINER Neil Clayton
 LABEL version="1.0"
 
-RUN apk update
-# usbutils required to make the USB stuff work.
-# added bash cos I'm lazy
-RUN apk add python libusb usbutils py-pip bash
+RUN apk update \
+    && apk add bash python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev \
+    && pip install --upgrade setuptools \
+    && pip install --upgrade pip \
+    && pip install hidapi \
+    && pip install electric \
+    && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
-VOLUME /www
-
-COPY src/server /www
 EXPOSE 5000
 
-COPY src/server/requirements.txt /www
-WORKDIR  /www
-
-RUN pip install -r requirements.txt
-
-CMD ["./run_server.sh"]
+CMD [ "gunicorn", "--preload", "--bind=0.0.0.0:5000", "--workers=1", "--max-requests=5000", "--backlog=300", "electric.wsgi:application" ]

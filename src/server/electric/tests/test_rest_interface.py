@@ -1,5 +1,5 @@
-from app import application
-from icharger.modbus_usb import testing_control
+from electric.app import application
+from electric.icharger.modbus_usb import testing_control
 import unittest, json
 
 
@@ -122,7 +122,7 @@ class TestRestfulAPI(unittest.TestCase):
 
         resp = self.client.get("/channel/2")
         d = json.loads(resp.data)
-        self.assertEqual("disconnected", d["charger_presence"])
+        self.assertEqual("connected", d["charger_presence"])
         self.assertIn("exception", d)
-        self.assertEqual(d["exception"], "Channel part of URI must be 0 or 1")
+        self.assertEqual(d["exception"], "Channel number must be 0 or 1")
 
