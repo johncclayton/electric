@@ -1,2 +1,2 @@
 #@IgnoreInspection BashAddShebang
-docker run --restart=always -d --name electric-pi --privileged -v /dev/bus/usb:/dev/bus/usb -p 5000:5000 scornflake/electric-pi
+docker run -it --rm --privileged -v /dev/bus/usb:/dev/bus/usb -v $PWD/src/server:/www -p 5000:5000 scornflake/electric-pi ./run_server.sh --unicorns

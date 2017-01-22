@@ -11,7 +11,8 @@ RUN apk update \
 
 WORKDIR /www
 COPY ./src/server/ /www
-RUN rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
+RUN pip install -r requirements.txt && rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
+VOLUME /www
 
 EXPOSE 5000
 
