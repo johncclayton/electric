@@ -9,10 +9,10 @@ RUN apk update \
     && pip install hidapi \
     && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
-WORKDIR /www
 COPY ./src/server/ /www
 RUN pip install -r requirements.txt && rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
 VOLUME /www
+WORKDIR /www
 
 EXPOSE 5000
 
