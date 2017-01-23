@@ -11,7 +11,6 @@ export class ChannelVoltsComponent {
     public balanceScale: number;
 
     @Input() channel: Channel;
-    @Input() index: number;
 
     constructor() {
     }
@@ -64,6 +63,7 @@ export class ChannelVoltsComponent {
     ngOnChanges(changes) {
         let cells = this.channel.cells;
         if (cells) {
+            this.channel.addToStoredHistory();
             cells.forEach(cell => {
                 this.maxBalanceSeen = Math.max(this.maxBalanceSeen, cell.balance)
             });
@@ -92,4 +92,6 @@ export class ChannelVoltsComponent {
         let scaledValue = Math.ceil(balanceValue / this.balanceScale);
         return scaledValue >= balanceIndex;
     }
+
+
 }

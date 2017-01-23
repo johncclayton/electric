@@ -1,0 +1,11 @@
+<ion-row>
+    <ion-col *ngIf="voltageData.length">
+        <canvas baseChart
+                [datasets]="voltageData"
+                [labels]="cellVoltageLabels"
+                [options]="cellVoltageOptions"
+                chartType="line"
+        >
+        </canvas>
+    </ion-col>
+</ion-row>

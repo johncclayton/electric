@@ -1,13 +1,14 @@
-import {Component, Input, trigger, state, style, transition, animate, ViewChild} from "@angular/core";
+import {Component, Input, trigger, state, style, transition, animate, ChangeDetectorRef} from "@angular/core";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
-import {ActionSheetController, NavController, Slides} from "ionic-angular";
+import {ActionSheetController, NavController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
     ChannelDisplayShowCellVolts,
     ChannelDisplayShowIR,
+    ChannelDisplayShowChart,
 }
 
 /*
@@ -53,7 +54,7 @@ export class ChannelComponent {
 
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
-                public actionController: ActionSheetController) {
+                public actionController: ActionSheetController,) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
         this.channel = this.chargerService.emptyData(0);
         this.firstTime = true;
@@ -67,8 +68,14 @@ export class ChannelComponent {
         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
     }
 
+    showCellChart() {
+        this.channelMode = ChannelDisplay.ChannelDisplayShowChart;
+    }
+
     showChargingOptionsPage() {
-        this.navCtrlr.push(ChargeOptionsPage, this.channel);
+        this.navCtrlr.push(ChargeOptionsPage, this.channel).then((v) => {
+            console.log("Finished charger push");
+        });
     }
 
     showMeasureIR() {
@@ -177,19 +184,28 @@ export class ChannelComponent {
         console.log("Channel is seeing change to bound data: ", changes);
         if (this.channelObserver) {
             console.log("Channel binding to ", this.channelObserver);
-            this.channelSubscription = this.channelObserver.subscribe((channelObject) => {
-                this.channel = channelObject;
-                if (this.channel) {
-                    if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
-                        this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+            this.channelSubscription = this.channelObserver.subscribe((channelObject: Channel) => {
+                    // Migrate the existing history to this new object
+                    // Doing it this way so that the ng2 change detectors see a new instance,
+                    // while migrating the long lived state from the old objects.
+                    // I tried using a changeDetectorRef, but that didn't seem to work.
+                    if (this.channel) {
+                        channelObject.takeHistoryFrom(this.channel);
                     }
-                    // DEBUG:
-                    if (this.firstTime && this.index == 0) {
-                        this.firstTime = false;
-                        // this.showMeasureIR();
+                    this.channel = channelObject;
+
+                    if (this.channel) {
+                        if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
+                            this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+                        }
+                        // DEBUG:
+                        if (this.firstTime && this.index == 0) {
+                            this.firstTime = false;
+                            // this.showMeasureIR();
+                        }
                     }
                 }
-            });
+            );
         }
     }
 }

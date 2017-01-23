@@ -20,6 +20,10 @@ import {ChargeOptionsPage} from "../pages/charge-options/charge-options";
 import {ConnectionStateComponent} from "../components/connection-state/connection-state";
 import {ChannelVoltsComponent} from "../components/channel-volts/channel-volts";
 import {ChannelIRComponent} from "../components/channel-volts/channel-ir";
+import {ChartsModule} from "ng2-charts";
+import {ChannelChartComponent} from "../components/channel-chart/channel-chart";
+
+import '../../node_modules/chart.js/dist/Chart.bundle.min.js';
 
 function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -35,6 +39,7 @@ function configServiceFactory(config: Configuration) {
         ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
+        ChannelChartComponent,
         ConnectionStateComponent,
         PresetListPage,
         PresetPage,
@@ -46,6 +51,7 @@ function configServiceFactory(config: Configuration) {
         ChargerStatusComponent
     ],
     imports: [
+        ChartsModule,
         IonicModule.forRoot(MyApp)
     ],
     bootstrap: [IonicApp],
@@ -63,6 +69,7 @@ function configServiceFactory(config: Configuration) {
         ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
+        ChannelChartComponent,
         ConnectionStateComponent
     ],
     providers: [

@@ -8,7 +8,6 @@ import {Channel} from "../../models/channel";
 })
 export class ChannelIRComponent extends ChannelVoltsComponent {
     @Input() channel: Channel;
-    @Input() index: number;
 
     @Output() back = new EventEmitter();
 

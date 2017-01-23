@@ -23,10 +23,13 @@
             <ion-spinner></ion-spinner>
         </div>
         <div *ngSwitchCase="1" id="master">
-            <channel-volts [channel]="channel" (click)="showChargerActions()"></channel-volts>
+            <channel-volts [channel]="channel" (click)="showCellChart()"></channel-volts>
         </div>
         <div *ngSwitchCase="2">
             <channel-ir [channel]="channel" (click)="showCellVoltage()"></channel-ir>
+        </div>
+        <div *ngSwitchCase="3">
+            <channel-chart [channel]="channel" (click)="showCellVoltage()"></channel-chart>
         </div>
     </div>
 

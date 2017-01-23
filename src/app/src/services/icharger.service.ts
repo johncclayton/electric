@@ -150,9 +150,9 @@ export class iChargerService {
 
                     // Maybe reduce the channels, as long as they are 0 volt.
                     let cellLimit = this.config.getCellLimit();
-                    let channel = new Channel(i, jsonResponse, cellLimit);
-                    this.channelSnapshots[i] = channel;
-                    return channel;
+                    let newchannel = new Channel(i, jsonResponse, cellLimit);
+                    this.channelSnapshots[i] = newchannel;
+                    return newchannel;
                 })
                 .retry()
                 .share()

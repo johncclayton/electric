@@ -1,10 +1,12 @@
 export class Channel {
     _json = {};
     _index: number = 0;
+    _cellHistory: {} = {};
 
     public constructor(index: number, jsonObject, configuredCellLimit: number = 0) {
         this._index = index;
         this._json = jsonObject;
+        this._cellHistory = {};
         this.limitCellsBasedOnLimit(configuredCellLimit);
 
         for (let key of Object.keys(jsonObject)) {
@@ -25,6 +27,24 @@ export class Channel {
 
     public get numberOfCells(): number {
         return this.cells.length;
+    }
+
+    // Thus number of cells we can see voltage > 0 on.
+    get numberOfActiveCells(): number {
+        // Maybe reduce the channels, as long as they are 0 volt.
+        let cells = this._json['cells'];
+        if (cells) {
+            // Check voltages.
+            // If we see a voltage on a channel, we must show everything up to that channel for safety
+            let voltageSeenAtIndex = 0;
+            cells.forEach((item, index) => {
+                if (item.v > 0) {
+                    voltageSeenAtIndex = index;
+                }
+            });
+            return voltageSeenAtIndex;
+        }
+        return 0;
     }
 
     get cells() {
@@ -63,7 +83,7 @@ export class Channel {
     private limitCellsBasedOnLimit(configuredCellLimit: number) {
         // Limit the number of cells
         if (configuredCellLimit >= 0) {
-            let activeCells = this.numberOfActiveCells();
+            let activeCells = this.numberOfActiveCells;
             if (activeCells != this._json['cells'].length) {
                 // console.debug(`Limited cells on channel ${this._index} to ${activeCells}`);
                 let toShow = Math.max(activeCells, configuredCellLimit);
@@ -78,23 +98,49 @@ export class Channel {
         }
     }
 
-    private numberOfActiveCells() {
-        // Maybe reduce the channels, as long as they are 0 volt.
-        let cells = this._json['cells'];
+    /*
+     Stores the cell history for this channel.
+     If the number of cells changes, it is cleared automatically.
+     */
+    addToStoredHistory() {
+        let cells = this.cells;
         if (cells) {
-            // Check voltages.
-            // If we see a voltage on a channel, we must show everything up to that channel for safety
-            let voltageSeenAtIndex = 0;
-            cells.forEach((item, index) => {
-                if (item.v > 0) {
-                    voltageSeenAtIndex = index;
+            let isEmpty = Object.keys(this._cellHistory).length == 0;
+            let isChanged = false;
+            if (!isEmpty) {
+                isChanged = cells.length != this._cellHistory['cellCount'];
+            }
+            if (isEmpty || isChanged) {
+                console.log(`Empty: ${isEmpty}, Changed: ${isChanged}. Clearing history for channel ${this.index}, cell count changed from ${this._cellHistory['cellCount']}  to ${cells.length}`);
+                this._cellHistory = {
+                    cellCount: cells.length,
+                    history: []
+                };
+            }
+
+            cells.forEach((cell, index) => {
+                let series = this._cellHistory['history'][index];
+                if (!series) {
+                    this._cellHistory['history'][index] = [];
+                } else {
+                    series.push(cell);
                 }
             });
-            return voltageSeenAtIndex;
         }
-        return 0;
     }
 
+    clearHistory() {
+        console.log("Clearing cell history");
+        this._cellHistory = {};
+    }
+
+    history() {
+        return this._cellHistory['history'];
+    }
+
+    takeHistoryFrom(channelObject: Channel) {
+        this._cellHistory = channelObject._cellHistory;
+    }
 }
 
 

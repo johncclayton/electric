@@ -33,6 +33,10 @@ export class ChargeOptionsPage implements Chemistry {
         this.recomputeLimitReached();
     }
 
+    beginChargeWithPreset(preset) {
+        this.navCtrl.pop();
+    }
+
     get chargeMethod(): string {
         return this.getChargeProperty('chargeMethod');
     }
