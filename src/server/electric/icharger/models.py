@@ -138,6 +138,9 @@ class DeviceInfo(Model):
         if modbus_data is not None:
             self.set_from_modbus_data(modbus_data)
 
+    def get_status(self, channel):
+        return self.ch1_status if channel == 0 else self.ch2_status
+
     def set_from_modbus_data(self, data):
         self.device_id = data[0]
         self.device_sn = data[1].split('\0')[0]
@@ -151,6 +154,30 @@ class DeviceInfo(Model):
         for (device_id, cell_count) in DeviceIdCellCount:
             if device_id == self.device_id:
                 self.cell_count = cell_count
+
+
+class OperationResponse(Model):
+    first_number = IntType(required=True)
+    second_number = IntType(required=False)
+
+    def __init__(self, modbus_data=None):
+        super(OperationResponse, self).__init__()
+        if modbus_data is not None:
+            self.set_from_modbus_data(modbus_data)
+
+    # Beats me
+    @serializable()
+    def success(self):
+        return self.first_number == 128
+
+    @serializable()
+    def error(self):
+        return not self.success
+
+    def set_from_modbus_data(self, data):
+        self.first_number = data[0]
+        if len(data) > 1:
+            self.second_number = data[1]
 
 
 class CellStatus(Model):
