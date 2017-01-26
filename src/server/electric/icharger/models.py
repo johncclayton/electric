@@ -585,11 +585,11 @@ class Preset(Model):
             return "Pb"
 
     def to_modbus_data(self):
-        preset_name = self.name
-        if type(preset_name) is unicode:
-            preset_name = preset_name.encode('utf8')
+        new_name = self.name
+        if type(new_name) is unicode:
+            new_name = new_name.encode('utf8')
         v1 = (self.use_flag,
-              preset_name,
+              new_name,
               self.capacity,
               self.auto_save,
               self.li_balance_end_mode,

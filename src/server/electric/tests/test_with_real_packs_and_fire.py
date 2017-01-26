@@ -15,7 +15,7 @@ class TestWithLiveStuffs(unittest.TestCase):
     def setUp(self):
         self.client = application.test_client()
 
-    def can_convert_charger_data_to_u16s(self):
+    def test_can_convert_charger_data_to_u16s(self):
         # Data is in format, "H38sLBB7cHB"
         # It should be 56 chars long
         data_from_charger = (
