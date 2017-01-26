@@ -191,7 +191,7 @@ class ChargerCommsManager(object):
         # cycle-mode -> ni-zn-cell
         vars5 = ReadDataSegment(self.charger, "vars5", "B6HB2HB3HB", prev_format=vars4)
 
-        return Preset(index, vars1, vars2, vars3, vars4, vars5)
+        return Preset.modbus(index, vars1, vars2, vars3, vars4, vars5)
 
     def set_preset(self, preset):
         preset_index = self._get_memory_program_preset_index(preset.index)
@@ -200,11 +200,11 @@ class ChargerCommsManager(object):
         # ask the preset for its data segments
         (v1, v2, v3, v4, v5) = preset.to_modbus_data()
 
-        s1 = WriteDataSegment(self.charger, "seg1", v1, base=0x8c00)
-        s2 = WriteDataSegment(self.charger, "seg2", v2, prev_format=s1)
-        s3 = WriteDataSegment(self.charger, "seg3", v3, prev_format=s2)
-        s4 = WriteDataSegment(self.charger, "seg3", v4, prev_format=s3)
-        s5 = WriteDataSegment(self.charger, "seg3", v5, prev_format=s4)
+        s1 = WriteDataSegment(self.charger, "seg1", v1, "H38sLBB7cHB", base=0x8c00)
+        s2 = WriteDataSegment(self.charger, "seg2", v2, "BHH12BHBBB", prev_format=s1)
+        s3 = WriteDataSegment(self.charger, "seg3", v3, "BB14H", prev_format=s2)
+        s4 = WriteDataSegment(self.charger, "seg3", v4, "16H", prev_format=s3)
+        s5 = WriteDataSegment(self.charger, "seg3", v5, "B6HB2HB3HB", prev_format=s4)
 
         return True
 

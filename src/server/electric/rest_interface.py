@@ -1,11 +1,14 @@
 import logging
 
+from flask import request
 from flask_restful import Resource
+from modbus_tk.exceptions import ModbusInvalidResponseError
 from werkzeug.exceptions import BadRequest
 
 import electric.evil_global as evil_global
 from electric.icharger.modbus_usb import connection_state_dict
 from icharger.comms_layer import Operation
+from icharger.models import Preset
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -23,6 +26,10 @@ def exclusive(func):
                 except BadRequest, badRequest:
                     # Just return it, it's a validation failure
                     raise badRequest
+                except ValueError, ve:
+                    raise ve
+                # except ModbusInvalidResponseError, e:
+                #     raise e
 
                 except Exception, ex:
                     retry += 1
@@ -125,14 +132,17 @@ class PresetResource(Resource):
     @exclusive
     def get(self, preset_index):
         preset_index = int(preset_index)
-        logger.info("Get preset {0}".format(preset_index))
-        list = evil_global.comms.get_preset_list().to_primitive()
         return evil_global.comms.get_preset(preset_index).to_primitive()
 
     @exclusive
     def put(self, preset_index):
         preset_index = int(preset_index)
-        pass
+        json_dict = request.json
+        logger.info("Asked to get save index: {0} with {1}".format(preset_index, json_dict))
+
+        # Turn it into a Preset object
+        preset = Preset(json_dict)
+        return evil_global.comms.set_preset(preset)
 
 
 class PresetListResource(Resource):

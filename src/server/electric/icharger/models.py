@@ -3,7 +3,7 @@ import struct, logging
 import modbus_tk.defines as cst
 from schematics.models import Model
 from schematics.transforms import blacklist
-from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
+from schematics.types import StringType, IntType, LongType, FloatType, BooleanType, six
 from schematics.types.compound import ModelType, ListType
 from schematics.types.serializable import serializable
 
@@ -69,16 +69,42 @@ class ReadDataSegment:
 
 
 class WriteDataSegment:
-    def __init__(self, charger, name, data_tuples, base=None, prev_format=None):
+    def __init__(self, charger, name, data_tuples, data_format, base=None, prev_format=None):
         self.func_code = cst.WRITE_MULTIPLE_REGISTERS
-
         self.name = name
-        self.data = data_tuples
+
+        self.data = self.convert_tuples_to_u16s(data_tuples, data_format)
         self.addr = base if base is not None else prev_format.addr + prev_format.size / 2
 
         (byte,) = charger.modbus_write_registers(self.addr, self.data)
 
-        self.size = byte * 2
+        # Actually, we know that the data being written is all "H" or "h" (2 bytes)
+        # So bytes is simply: len(self.data) * 2
+        self.size = len(self.data) * 2
+
+    @staticmethod
+    def convert_tuples_to_u16s(data_tuples, data_format):
+        # modbus_write_registers expects a bunch of U16s
+        # Thus we expect the data_tuples to have a format supplied.
+        # We convert this to a set of U16s. As such, each format MUST be of length divisible by 2.
+        native_format = "=" + data_format
+        format_length = struct.calcsize(native_format)
+        if format_length % 2 == 1:
+            msg = "Data format {1} has size {0}. Must be divisible by 2 for U16s conversion to succeed".format(format_length, data_format)
+            raise Exception(msg)
+
+        packed_data_as_bytes = struct.pack(native_format, *data_tuples)
+
+        # Some paranoia
+        size_of_packed_data = len(packed_data_as_bytes)
+        if size_of_packed_data % 2 == 1:
+            raise Exception(
+                "Packed data has size {0} (which is unexpected, since the previous packing size test passed). Must be divisible by 2 for U16s conversion to succeed".format(
+                    size_of_packed_data))
+
+        u16s_repeat = size_of_packed_data / 2
+        u16s_format = "{0}H".format(u16s_repeat)
+        return struct.unpack(u16s_format, packed_data_as_bytes)
 
 
 class DeviceInfoStatus(Model):
@@ -535,11 +561,13 @@ class Preset(Model):
     ni_zn_discharge_cell_volt = FloatType(required=True)
     ni_zn_cell = IntType(required=True, default=0)
 
-    def __init__(self, index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
-        super(Preset, self).__init__()
-        self.index = index
+    @staticmethod
+    def modbus(index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
+        p = Preset()
+        p.index = index
         if ds1 is not None and ds2 is not None and ds3 is not None and ds4 is not None and ds5 is not None:
-            self.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
+            p.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
+        return p
 
     @serializable
     def type_str(self):
@@ -557,12 +585,15 @@ class Preset(Model):
             return "Pb"
 
     def to_modbus_data(self):
+        preset_name = self.name
+        if type(preset_name) is unicode:
+            preset_name = preset_name.encode('utf8')
         v1 = (self.use_flag,
-              self.name,
+              preset_name,
               self.capacity,
               self.auto_save,
               self.li_balance_end_mode,
-              0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  # 7 reserved bytes
+              chr(0xff), chr(0xff), chr(0xff), chr(0xff), chr(0xff), chr(0xff), chr(0xff),  # 7 reserved bytes
               self.op_enable_mask,
               self.channel_mode)
 
