@@ -1,9 +1,10 @@
-import struct, logging
+import logging
+import struct
 
 import modbus_tk.defines as cst
 from schematics.models import Model
 from schematics.transforms import blacklist
-from schematics.types import StringType, IntType, LongType, FloatType, BooleanType, six
+from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
 from schematics.types.compound import ModelType, ListType
 from schematics.types.serializable import serializable
 

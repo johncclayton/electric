@@ -6,8 +6,8 @@ from werkzeug.exceptions import BadRequest
 
 import electric.evil_global as evil_global
 from electric.icharger.modbus_usb import connection_state_dict
-from icharger.comms_layer import Operation
-from icharger.models import Preset, SystemStorage, ObjectNotFoundException
+from electric.icharger.comms_layer import Operation
+from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -22,13 +22,15 @@ def exclusive(func):
                 try:
                     return func(self, *args, **kwargs)
 
-                except BadRequest, badRequest:
+                except ObjectNotFoundException as e:
+                    abort(404, message=e.message)
+
+                except BadRequest as badRequest:
                     # Just return it, it's a validation failure
                     raise badRequest
-                except ValueError, ve:
+
+                except ValueError as ve:
                     raise ve
-                except ObjectNotFoundException, e:
-                    abort(404, message=e.message)
 
                 except Exception, ex:
                     retry += 1

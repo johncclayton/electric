@@ -2,8 +2,8 @@ import json
 import logging
 
 from electric.app import application
-from icharger.models import SystemStorage
-from tests.live.live_testcase import LiveIChargerTestCase
+from electric.icharger.models import SystemStorage
+from electric.tests.live.live_testcase import LiveIChargerTestCase
 
 logger = logging.getLogger(__name__)
 

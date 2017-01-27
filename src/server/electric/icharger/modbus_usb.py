@@ -1,10 +1,13 @@
-import struct, hid, array
+import array
+import hid
+import logging
+import struct
+
 import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 
-import logging
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 MEMORY_MAX = 64

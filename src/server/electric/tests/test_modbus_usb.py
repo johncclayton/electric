@@ -1,15 +1,16 @@
-import unittest, struct, time
-import modbus_tk.defines as cst
+import struct
+import time
+import unittest
 
-from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, \
-    MODBUS_HID_FRAME_TYPE
-from electric.icharger.modbus_usb import testing_control
+import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
-from electric.icharger.models import Control
-from electric.icharger.modbus_usb import TestingControlException
-
 import electric.evil_global as evil_global
+from electric.icharger.modbus_usb import TestingControlException
+from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, MODBUS_HID_FRAME_TYPE
+from electric.icharger.modbus_usb import testing_control
+from electric.icharger.models import Control
+
 
 class TestChargerQuery(unittest.TestCase):
     def setUp(self):

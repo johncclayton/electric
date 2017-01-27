@@ -1,50 +1,10 @@
 import json
 import logging
 
-import collections
-
-from electric.app import application
-from icharger.models import Preset, PresetIndex
-from tests.live.live_testcase import LiveIChargerTestCase
+from electric.icharger.models import Preset
+from electric.tests.live.test_preset_base import BasePresetTestCase
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
-
-
-class BasePresetTestCase(LiveIChargerTestCase):
-    def setUp(self):
-        self.client = application.test_client()
-
-    def _turn_response_into_preset_object(self, response):
-        return self._turn_response_into_object(response, Preset, False)
-
-    def _turn_response_into_preset_index_object(self, response):
-        return self._turn_response_into_object(response, PresetIndex, False)
-
-    def _turn_response_into_preset_list(self, response):
-        json_dict = json.loads(response.data)
-        if type(json_dict) is not list:
-            message = "{0} isn't a list!".format(json_dict)
-            raise Exception(message)
-
-        list_of_presets = []
-        for item in json_dict:
-            list_of_presets.append(Preset(item))
-        return list_of_presets
-
-    def _find_last_test_preset(self):
-        response = self.client.get("/preset")
-        all_presets = self._turn_response_into_preset_list(response)
-        self.assertIsNotNone(all_presets)
-
-        preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
-        self.assertIsNotNone(preset_index)
-
-        test_preset = None
-        for index in preset_index.range_of_presets():
-            preset = all_presets[index]
-            if preset.name == "Test Preset":
-                test_preset = preset
-        return preset_index, all_presets, test_preset
 
 
 class TestPresetFunctions(BasePresetTestCase):
