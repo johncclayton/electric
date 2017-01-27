@@ -37,6 +37,14 @@ class TestDataConversion(unittest.TestCase):
         data_as_U16s_from_charger = struct.unpack(u16_unpacking_format, packed_data)
         self.assertEqual(len(data_as_U16s_from_charger), length_in_u16s)
 
+    def test_setting_set2_of_preset(self):
+        data = (True, 10, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 3, 2, 3000, 5, 10, 5)
+        u16s = WriteDataSegment.convert_tuples_to_u16s(data, "BHH12BHBBB")
+
+        data_bytes = struct.pack("=BHH12BHBBB", *data)
+        u16_bytes = struct.pack("{0}H".format(len(u16s)), *u16s)
+        self.assertEqual(data_bytes, u16_bytes)
+
     def test_can_convert_into_U16s(self):
         fake_data = (1,
                      "Crappy Code",
@@ -72,4 +80,3 @@ class TestDataConversion(unittest.TestCase):
         # Do the same using the WriteDataSegment packing method. It should match.
         converted_tuples = WriteDataSegment.convert_tuples_to_u16s(fake_data, original_format)
         self.assertEqual(data_as_U16s_from_charger, converted_tuples)
-
