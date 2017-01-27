@@ -1,7 +1,8 @@
 import unittest
 
 from schematics.exceptions import ModelValidationError
-from electric.icharger.models import DeviceInfo, DeviceInfoStatus
+
+from electric.icharger.models import DeviceInfo, DeviceInfoStatus, PresetIndex
 
 
 class TestDeviceStatusInfoSerialization(unittest.TestCase):
@@ -39,10 +40,19 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
         status.value = 0x7f
         status.validate()
 
+    def test_preset_index_with_all_presets_filled(self):
+        p = PresetIndex()
+        p.count = 64
+        p.indexes = [num for num in range(0, 64)]
+
+        # Should have 64 presets
+        self.assertEqual(64, p.number_of_presets)
+        # And no free slots
+        self.assertIsNone(p.first_empty_slot)
+
 
 class TestDeviceInfoSerialization(unittest.TestCase):
     def test_deviceinfo_json_keys(self):
         info = DeviceInfo()
         json = info.to_primitive()
         print(json)
-

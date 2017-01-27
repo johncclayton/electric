@@ -20,6 +20,11 @@ STATUS_BALANCE = 0x40
 DEVICEID_4010_DUO = 64
 DEVICEID_308_DUO = 66
 
+
+class ObjectNotFoundException(Exception):
+    pass
+
+
 DeviceIdCellCount = (
     (DEVICEID_308_DUO, 8),
     (DEVICEID_4010_DUO, 10)
@@ -494,7 +499,7 @@ class SystemStorage(Model):
 
 class PresetIndex(Model):
     count = IntType(required=True, min_value=0, max_value=63, default=0)
-    indexes = ListType(IntType, required=True, min_size=0, max_size=63, default=[])
+    indexes = ListType(IntType(min_value=0, max_value=255), required=True, min_size=0, max_size=63, default=[])
 
     @staticmethod
     def modbus(count=None, indexes=None):
@@ -506,6 +511,28 @@ class PresetIndex(Model):
 
     def preset_exists_at_index(self, index):
         return self.indexes[index] != 255
+
+    def range_of_presets(self):
+        return range(0, self.first_empty_slot)
+
+    def set_last_item_unused(self):
+        self.indexes[self.number_of_presets] = 255
+
+    @property
+    def number_of_presets(self):
+        first_empty_slot = self.first_empty_slot
+        if not first_empty_slot:
+            return len(self.indexes)
+        return first_empty_slot - 1
+
+    @property
+    def first_empty_slot(self):
+        first_empty = None
+        for i, index in enumerate(self.indexes):
+            if index == 255:
+                first_empty = i
+                break
+        return first_empty
 
     def set_from_modbus_data(self, count, indexes):
         self.count = count

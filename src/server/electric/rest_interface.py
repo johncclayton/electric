@@ -1,13 +1,13 @@
 import logging
 
 from flask import request
-from flask_restful import Resource
+from flask_restful import Resource, abort
 from werkzeug.exceptions import BadRequest
 
 import electric.evil_global as evil_global
 from electric.icharger.modbus_usb import connection_state_dict
 from icharger.comms_layer import Operation
-from icharger.models import Preset, SystemStorage
+from icharger.models import Preset, SystemStorage, ObjectNotFoundException
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -27,8 +27,8 @@ def exclusive(func):
                     raise badRequest
                 except ValueError, ve:
                     raise ve
-                # except ModbusInvalidResponseError, e:
-                #     raise e
+                except ObjectNotFoundException, e:
+                    abort(404, message=e.message)
 
                 except Exception, ex:
                     retry += 1
@@ -141,6 +141,13 @@ class PresetResource(Resource):
         return evil_global.comms.get_preset(preset_index).to_primitive()
 
     @exclusive
+    def delete(self, preset_index):
+        # This will only, I think ... work for "at the end"
+        preset_index = int(preset_index)
+        logger.info("Try to delete index {0}".format(preset_index))
+        return evil_global.comms.delete_preset_at_index(preset_index)
+
+    @exclusive
     def put(self, preset_index):
         preset_index = int(preset_index)
         json_dict = request.json
@@ -148,18 +155,23 @@ class PresetResource(Resource):
 
         # Turn it into a Preset object
         preset = Preset(json_dict)
-        # return evil_global.comms.save_preset(preset)
-        return evil_global.comms.save_preset_to_memory_slot(preset, 63)
+        return evil_global.comms.save_preset_to_memory_slot(preset, preset_index)
 
 
 class PresetListResource(Resource):
     @exclusive
     def get(self):
-        count = evil_global.comms.get_preset_list(count_only=True)
+        preset_list = evil_global.comms.get_full_preset_list()
+        # TODO: Error handling
 
         all_presets = []
-        for index in range(0, count):
-            all_presets.append(evil_global.comms.get_preset(index).to_native())
+        for index in preset_list.range_of_presets():
+            preset = evil_global.comms.get_preset(index)
+
+            # TODO: Error handling
+
+            if preset:
+                all_presets.append(preset.to_native())
 
         return all_presets
 

@@ -2,7 +2,7 @@ import logging
 
 import modbus_tk.defines as cst
 
-from electric.icharger.models import SystemStorage, WriteDataSegment, OperationResponse
+from electric.icharger.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException
 from modbus_usb import iChargerMaster
 from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
@@ -162,11 +162,11 @@ class ChargerCommsManager(object):
 
         return True
 
-
     def _get_memory_program_preset_index(self, index):
-        preset_list = self.get_preset_list()
-        if index > preset_list.count - 1:
-            raise ValueError("Preset index too large")
+        preset_list = self.get_full_preset_list()
+        if index > preset_list.number_of_presets:
+            message = "Preset index {0} too large. Exceeds max index {1}".format(index, preset_list.number_of_presets)
+            raise ObjectNotFoundException(message)
         return preset_list.indexes[index]
 
     def select_memory_program(self, preset_index):
@@ -236,7 +236,27 @@ class ChargerCommsManager(object):
 
         return Preset.modbus(index, vars1, vars2, vars3, vars4, vars5)
 
+    def delete_preset_at_index(self, index_to_remove):
+        # Which memory slot is this?
+        preset_index = self.get_full_preset_list()
+
+        # TODO: What if someone asks to delete 63? something out of bounds? not used?
+
+        memory_slot = preset_index.indexes[index_to_remove]
+        logger.info("Remove item at memory slot {0}, index {1}".format(memory_slot, index_to_remove))
+
+        # If it is the last object, we can adjust the index map only, and ignore (I hope!) the preset itself.
+        if memory_slot == preset_index.number_of_presets:
+            logger.info("Removing last item, easy!")
+
+            # Change the preset index so that the last item is "unused"
+            preset_index.set_last_item_unused()
+            return self.save_full_preset_list(preset_index)
+
+        return True
+
     def save_preset_to_memory_slot(self, preset, memory_slot):
+        # First, select this memory slot.
         self.select_memory_program(memory_slot)
 
         # ask the preset for its data segments
@@ -256,8 +276,7 @@ class ChargerCommsManager(object):
 
         # Get current index
         preset_indexes = self.get_full_preset_list()
-        preset_indexes.indexes[63] = 255
-        preset_indexes.indexes[12] = 63
+        preset_indexes.indexes[memory_slot] = memory_slot
         self.save_full_preset_list(preset_indexes)
 
         return True
