@@ -1,17 +1,14 @@
-import json
+import logging
+import struct
 import unittest
 
-import logging
-
-import struct
-
 from electric.app import application
-from icharger.models import Preset, WriteDataSegment
+from icharger.models import WriteDataSegment
 
 logger = logging.getLogger(__name__)
 
 
-class TestWithLiveStuffs(unittest.TestCase):
+class TestDataConversion(unittest.TestCase):
     def setUp(self):
         self.client = application.test_client()
 
@@ -27,7 +24,7 @@ class TestWithLiveStuffs(unittest.TestCase):
         original_format = "=H38sLBB7cHB"
         expected_length_given_format = struct.calcsize(original_format)
 
-        packed_data = struct.pack(original_format, data_from_charger)
+        packed_data = struct.pack(original_format, *data_from_charger)
         length_of_packed_data = len(packed_data)
         self.assertEqual(length_of_packed_data, expected_length_given_format)
 
@@ -76,34 +73,3 @@ class TestWithLiveStuffs(unittest.TestCase):
         converted_tuples = WriteDataSegment.convert_tuples_to_u16s(fake_data, original_format)
         self.assertEqual(data_as_U16s_from_charger, converted_tuples)
 
-    def test_can_reconstruct_preset_from_json(self):
-        response = self.client.get("/preset/0")
-        preset = json.loads(response.data)
-        p = Preset.from_flat(preset)
-        self.assertEqual(p['lipo_storage_cell_voltage'], p.lipo_storage_cell_voltage)
-        self.assertEqual(p['end_charge'], p.end_charge)
-        self.assertEqual(p['ni_discharge_voltage'], p.ni_discharge_voltage)
-        self.assertEqual(p['pb_cell'], p.pb_cell)
-        self.assertEqual(p['safety_cap_c'], p.safety_cap_c)
-        self.assertEqual(p['safety_cap_d'], p.safety_cap_d)
-        self.assertEqual(p['lilo_storage_cell_voltage'], p.lilo_storage_cell_voltage)
-        self.assertEqual(p['fast_store'], p.fast_store)
-
-    def test_can_write_new_preset_to_last_slot(self):
-        response = self.client.get("/preset/0")
-        response_data = response.data
-        flattened = json.loads(response_data)
-        original_preset_object = Preset(flattened)
-        original_preset_name = original_preset_object.name
-
-        original_preset_object.name = "Neil Test"
-        new_preset_dict = original_preset_object.to_primitive()
-        response = self.client.put("/preset/0", data=json.dumps(new_preset_dict), content_type='application/json');
-        print "Response: {0}".format(response)
-
-    def test_can_call_stop(self):
-        # operation/channel_num/preset_index
-        url = "/stop/0"
-        response = self.client.put(url)
-        d = json.loads(response.data)
-        self.assertEqual(d['error'], False)

@@ -194,6 +194,6 @@ class TestGatewayCommunications(unittest.TestCase):
         print("now is the time to begin charging!! you have 10 seconds")
         time.sleep(1)
         preset_0.charge_current = 11
-        charger.set_preset(preset_0)
+        charger.save_preset(preset_0)
 
 

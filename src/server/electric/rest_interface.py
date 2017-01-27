@@ -2,13 +2,12 @@ import logging
 
 from flask import request
 from flask_restful import Resource
-from modbus_tk.exceptions import ModbusInvalidResponseError
 from werkzeug.exceptions import BadRequest
 
 import electric.evil_global as evil_global
 from electric.icharger.modbus_usb import connection_state_dict
 from icharger.comms_layer import Operation
-from icharger.models import Preset
+from icharger.models import Preset, SystemStorage
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -127,6 +126,13 @@ class SystemStorageResource(Resource):
 
         return obj
 
+    @exclusive
+    def put(self):
+        json_dict = request.json
+        del json_dict['charger_presence']
+        system_storage_object = SystemStorage(json_dict)
+        return evil_global.comms.save_system_storage(system_storage_object)
+
 
 class PresetResource(Resource):
     @exclusive
@@ -138,11 +144,12 @@ class PresetResource(Resource):
     def put(self, preset_index):
         preset_index = int(preset_index)
         json_dict = request.json
-        logger.info("Asked to get save index: {0} with {1}".format(preset_index, json_dict))
+        logger.info("Asked to save preset to index: {0} with {1}".format(preset_index, json_dict))
 
         # Turn it into a Preset object
         preset = Preset(json_dict)
-        return evil_global.comms.set_preset(preset)
+        # return evil_global.comms.save_preset(preset)
+        return evil_global.comms.save_preset_to_memory_slot(preset, 63)
 
 
 class PresetListResource(Resource):
@@ -155,6 +162,17 @@ class PresetListResource(Resource):
             all_presets.append(evil_global.comms.get_preset(index).to_native())
 
         return all_presets
+
+    @exclusive
+    def post(self):
+        pass
+
+
+class PresetOrderResource(Resource):
+    @exclusive
+    def get(self):
+        preset_list = evil_global.comms.get_full_preset_list()
+        return preset_list.to_native()
 
     @exclusive
     def post(self):

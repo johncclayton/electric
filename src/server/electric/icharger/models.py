@@ -68,19 +68,20 @@ class ReadDataSegment:
         self.data = charger.modbus_read_registers(self.addr, self.format, function_code=self.func_code)
 
 
-class WriteDataSegment:
+class WriteDataSegment(object):
     def __init__(self, charger, name, data_tuples, data_format, base=None, prev_format=None):
         self.func_code = cst.WRITE_MULTIPLE_REGISTERS
         self.name = name
 
         self.data = self.convert_tuples_to_u16s(data_tuples, data_format)
-        self.addr = base if base is not None else prev_format.addr + prev_format.size / 2
 
-        (byte,) = charger.modbus_write_registers(self.addr, self.data)
+        # / 2 because offsets are expressed in words
+        self.addr = base if base is not None else prev_format.addr + (prev_format.size_in_bytes / 2)
+        (number_of_words_returned,) = charger.modbus_write_registers(self.addr, self.data)
 
         # Actually, we know that the data being written is all "H" or "h" (2 bytes)
         # So bytes is simply: len(self.data) * 2
-        self.size = len(self.data) * 2
+        self.size_in_bytes = len(self.data) * 2
 
     @staticmethod
     def convert_tuples_to_u16s(data_tuples, data_format):
@@ -350,7 +351,7 @@ class SystemStorage(Model):
 
     fans_off_delay = IntType(required=True)
     lcd_contrast = IntType(required=True)
-    light_value = IntType(required=True)
+    lcd_brightness = IntType(required=True)
 
     beep_type_key = IntType(required=True)
     beep_type_hint = IntType(required=True)
@@ -370,22 +371,22 @@ class SystemStorage(Model):
     calibration = IntType(required=True)
     selected_input_source = IntType(required=True)
 
-    dc_input_low_voltage = FloatType(required=True)
+    dc_input_low_voltage = FloatType(required=True, min_value=9, max_value=48)
     dc_input_over_voltage = FloatType(required=True)
-    dc_input_current_limit = FloatType(required=True)
+    dc_input_current_limit = FloatType(required=True, min_value=1, max_value=65)
 
-    batt_input_low_voltage = FloatType(required=True)
+    batt_input_low_voltage = FloatType(required=True, min_value=9, max_value=48)
     batt_input_over_voltage = FloatType(required=True)
-    batt_input_current_limit = FloatType(required=True)
+    batt_input_current_limit = FloatType(required=True, min_value=1, max_value=65)
 
     regenerative_enable = IntType(required=True)
-    regenerative_volt_limit = FloatType(required=True)
-    regenerative_current_limit = FloatType(required=True)
+    regenerative_volt_limit = FloatType(required=True, min_value=9, max_value=48)
+    regenerative_current_limit = FloatType(required=True, min_value=1, max_value=65)
 
     power_priority = IntType(required=True)
 
-    charge_power = ListType(IntType)
-    discharge_power = ListType(IntType)
+    charge_power = ListType(IntType(min_value=5, max_value=800))
+    discharge_power = ListType(IntType(min_value=5, max_value=80))
     monitor_log_interval = ListType(IntType)
     monitor_save_to_sd = ListType(BooleanType)
 
@@ -399,15 +400,18 @@ class SystemStorage(Model):
     modbus_serial_baud_rate = LongType(required=True)
     modbus_serial_parity = LongType(required=True)
 
-    def __init__(self, ds1=None, ds2=None, ds3=None):
-        super(SystemStorage, self).__init__()
+    @staticmethod
+    def modbus(ds1=None, ds2=None, ds3=None):
         if ds1 is not None and ds2 is not None and ds3 is not None:
-            self.set_from_modbus_data(ds1, ds2, ds3)
+            storage = SystemStorage()
+            storage.set_from_modbus_data(ds1, ds2, ds3)
+            return storage
+        return None
 
     def set_from_modbus_data(self, ds1, ds2, ds3):
         dummy1 = None
         (self.temp_unit, self.temp_stop, self.temp_fans_on, self.temp_reduce, dummy1, self.fans_off_delay,
-         self.lcd_contrast, self.light_value, dummy1,
+         self.lcd_contrast, self.lcd_brightness, dummy1,
          self.beep_type_key, self.beep_type_hint, self.beep_type_alarm, self.beep_type_done,
          self.beep_enabled_key, self.beep_enabled_hint, self.beep_enabled_alarm, self.beep_enabled_done,
          self.beep_volume_key, self.beep_volume_hint, self.beep_volume_alarm, self.beep_volume_done) = ds1.data
@@ -431,11 +435,48 @@ class SystemStorage(Model):
          self.modbus_mode, self.modbus_serial_addr, self.modbus_serial_baud_rate,
          self.modbus_serial_parity) = ds3.data
 
-        self.temp_unit = "C" if self.temp_unit == 0 else "F"
+        self.temp_unit = "C" if self.temp_unit is 0 else "F"
 
         self.temp_stop /= 10.0
         self.temp_fans_on /= 10.0
-        self.temp_reduce /= 10.0
+
+        self.dc_input_low_voltage /= 10.0
+        self.dc_input_current_limit /= 10.0
+        self.dc_input_over_voltage /= 10.0
+
+        self.batt_input_low_voltage /= 10.0
+        self.batt_input_over_voltage /= 10.0
+        self.batt_input_current_limit /= 10.0
+
+        self.regenerative_volt_limit /= 10.0
+        self.regenerative_current_limit /= 10.0
+
+    def to_modbus_data(self):
+        s1 = (0 if self.temp_unit == "C" else 1, self.temp_stop * 10, self.temp_fans_on * 10, self.temp_reduce,)
+
+        # Note, the trailing 0 is required, else the lcd_brightness isn't set correctly.
+        s2 = (self.fans_off_delay, self.lcd_contrast, self.lcd_brightness, 0,)
+        s3 = (self.beep_type_key, self.beep_type_hint, self.beep_type_alarm, self.beep_type_done,
+              self.beep_enabled_key, self.beep_enabled_hint, self.beep_enabled_alarm, self.beep_enabled_done,
+              self.beep_volume_key, self.beep_volume_hint, self.beep_volume_alarm, self.beep_volume_done,)
+        s4 = (self.calibration,)
+
+        # Note, the trailing 0 is required, else the regenerative_current_limit isn't set correctly.
+        s5 = (self.selected_input_source,
+              self.dc_input_low_voltage * 10, self.dc_input_over_voltage * 10, self.dc_input_current_limit * 10,
+              self.batt_input_low_voltage * 10, self.batt_input_over_voltage * 10, self.batt_input_current_limit * 10,
+              self.regenerative_enable, self.regenerative_volt_limit * 10, self.regenerative_current_limit * 10, 0,)
+
+        # Note, the trailing 0 is required, else the modbus_serial_parity isn't set correctly.
+        s6 = (self.charge_power[0], self.charge_power[1],
+              self.discharge_power[0], self.discharge_power[1],
+              self.power_priority,
+              self.monitor_log_interval[0], self.monitor_log_interval[1],
+              self.monitor_save_to_sd[0], self.monitor_save_to_sd[1],
+              self.servo_type, self.servo_user_center, self.server_user_rate, self.server_user_op_angle,
+              self.modbus_mode, self.modbus_serial_addr, self.modbus_serial_baud_rate,
+              self.modbus_serial_parity, 0)
+        return s1, s2, s3, s4, s5, s6
 
     @serializable
     def selected_input_source_type(self):
@@ -455,14 +496,26 @@ class PresetIndex(Model):
     count = IntType(required=True, min_value=0, max_value=63, default=0)
     indexes = ListType(IntType, required=True, min_size=0, max_size=63, default=[])
 
-    def __init__(self, count=None, indexes=None):
-        super(PresetIndex, self).__init__()
+    @staticmethod
+    def modbus(count=None, indexes=None):
         if count is not None and indexes is not None:
-            self.set_from_modbus_data(count, indexes)
+            pi = PresetIndex()
+            pi.set_from_modbus_data(count, indexes)
+            return pi
+        return None
+
+    def preset_exists_at_index(self, index):
+        return self.indexes[index] != 255
 
     def set_from_modbus_data(self, count, indexes):
         self.count = count
         self.indexes = indexes
+
+    def to_modbus_data(self):
+        v1 = [len(self.indexes), ]
+        v1.extend(self.indexes[:32])
+        v2 = self.indexes[32:]
+        return v1, v2
 
 
 class Preset(Model):
@@ -563,11 +616,12 @@ class Preset(Model):
 
     @staticmethod
     def modbus(index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
-        p = Preset()
-        p.index = index
         if ds1 is not None and ds2 is not None and ds3 is not None and ds4 is not None and ds5 is not None:
+            p = Preset()
+            p.index = index
             p.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
-        return p
+            return p
+        return None
 
     @serializable
     def type_str(self):

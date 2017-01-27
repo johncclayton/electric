@@ -10,7 +10,7 @@ from rest_interface import StatusResource, \
     ChannelResource, \
     ControlRegisterResource, \
     PresetListResource, \
-    PresetResource, ChargeResource, DischargeResource, BalanceResource, MeasureIRResource, StopResource
+    PresetResource, ChargeResource, DischargeResource, BalanceResource, MeasureIRResource, StopResource, PresetOrderResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
@@ -35,4 +35,5 @@ api.add_resource(MeasureIRResource, "/measureir/<channel_id>")
 api.add_resource(StopResource, "/stop/<channel_id>")
 api.add_resource(ChannelResource, "/channel/<channel_id>")
 api.add_resource(PresetListResource, "/preset")
+api.add_resource(PresetOrderResource, "/presetorder")
 api.add_resource(PresetResource, "/preset/<preset_index>")

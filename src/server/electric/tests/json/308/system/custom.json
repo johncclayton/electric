@@ -1,0 +1,60 @@
+{
+ "batt_input_current_limit": 60,
+ "batt_input_low_voltage": 10,
+ "batt_input_over_voltage": 30.5,
+ "beep_enabled_alarm": 1,
+ "beep_enabled_done": 1,
+ "beep_enabled_hint": 1,
+ "beep_enabled_key": 1,
+ "beep_type_alarm": 0,
+ "beep_type_done": 3,
+ "beep_type_hint": 0,
+ "beep_type_key": 0,
+ "beep_volume_alarm": 5,
+ "beep_volume_done": 5,
+ "beep_volume_hint": 5,
+ "beep_volume_key": 5,
+ "calibration": 0,
+ "charge_power": [
+  570,
+  570
+ ],
+ "charger_presence": "connected",
+ "dc_input_current_limit": 46,
+ "dc_input_low_voltage": 10,
+ "dc_input_over_voltage": 30.5,
+ "discharge_power": [
+  80,
+  80
+ ],
+ "fans_off_delay": 2,
+ "lcd_contrast": 16,
+ "lcd_brightness": 25,
+ "modbus_mode": 0,
+ "modbus_serial_addr": 1,
+ "modbus_serial_baud_rate": 0,
+ "modbus_serial_parity": 0,
+ "monitor_log_interval": [
+  10,
+  10
+ ],
+ "monitor_save_to_sd": [
+  1,
+  1
+ ],
+ "power_priority": 1,
+ "power_priority_description": "ch1 priority",
+ "regenerative_current_limit": 10,
+ "regenerative_enable": 1,
+ "regenerative_volt_limit": 14.5,
+ "selected_input_source": 0,
+ "selected_input_source_type": "dc",
+ "server_user_op_angle": 5000,
+ "server_user_rate": 50,
+ "servo_type": 1,
+ "servo_user_center": 15000,
+ "temp_fans_on": 40.0,
+ "temp_reduce": 10.0,
+ "temp_stop": 75.0,
+ "temp_unit": "C"
+}

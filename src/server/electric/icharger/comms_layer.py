@@ -142,7 +142,26 @@ class ChargerCommsManager(object):
         # charge/discharge power -> modbus_serial_parity
         ds3 = ReadDataSegment(self.charger, "vars3", "17H", prev_format=ds2)
 
-        return SystemStorage(ds1, ds2, ds3)
+        return SystemStorage.modbus(ds1, ds2, ds3)
+
+    def save_system_storage(self, system_storage_object):
+        (s1, s2, s3, s4, s5, s6) = system_storage_object.to_modbus_data()
+
+        # Write the system data to RAM
+        ws1 = self.charger.modbus_write_registers(0x8400, s1)
+        ws2 = self.charger.modbus_write_registers(0x8400 + 5, s2)
+        ws3 = self.charger.modbus_write_registers(0x8400 + 9, s3)
+        ws4 = self.charger.modbus_write_registers(0x8400 + 22, s4)
+        ws5 = self.charger.modbus_write_registers(0x8400 + 24, s5)
+        ws6 = self.charger.modbus_write_registers(0x8400 + 34, s6)
+
+        # Now write the RAM to flash
+        write_sys_to_flash = (VALUE_ORDER_LOCK, Order.WriteSys, 0, 0,)
+        store = self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
+        self.unlock_after_write()
+
+        return True
+
 
     def _get_memory_program_preset_index(self, index):
         preset_list = self.get_preset_list()
@@ -154,6 +173,30 @@ class ChargerCommsManager(object):
         control = self.get_control_register()
         return self.charger.modbus_write_registers(0x8000 + 1,
                                                    (preset_index, control.channel, VALUE_ORDER_LOCK))
+
+    def save_full_preset_list(self, preset_list):
+        (v1, v2) = preset_list.to_modbus_data()
+
+        # Write the thing to RAM. Moo.
+        part1 = WriteDataSegment(self.charger, "part1", v1, "H32B", base=0x8800)
+        part2 = WriteDataSegment(self.charger, "part2", v2, "32B", prev_format=part1)
+
+        # Write to flash.
+        write_head_to_flash = (VALUE_ORDER_LOCK, Order.WriteMemHead, 0, 0,)
+        store = self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
+        self.unlock_after_write()
+        return True
+
+    def get_full_preset_list(self):
+        (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
+
+        # There are apparently 64 indexes. Apparently.
+        read_a_bit_format = "32B"
+        data_1 = self.charger.modbus_read_registers(0x8800 + 1, read_a_bit_format, function_code=cst.READ_HOLDING_REGISTERS)
+        data_2 = self.charger.modbus_read_registers(0x8800 + 16, read_a_bit_format, function_code=cst.READ_HOLDING_REGISTERS)
+        list_of_all_indexes = list(data_1)
+        list_of_all_indexes.extend(list(data_2))
+        return PresetIndex.modbus(count, list_of_all_indexes)
 
     def get_preset_list(self, count_only=False):
         (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
@@ -174,7 +217,7 @@ class ChargerCommsManager(object):
             indexes += data
             offset += len(data) / 2
 
-        return PresetIndex(number, indexes[:number])
+        return PresetIndex.modbus(number, indexes[:number])
 
     def get_preset(self, index):
         preset_index = self._get_memory_program_preset_index(index)
@@ -193,19 +236,51 @@ class ChargerCommsManager(object):
 
         return Preset.modbus(index, vars1, vars2, vars3, vars4, vars5)
 
-    def set_preset(self, preset):
-        preset_index = self._get_memory_program_preset_index(preset.index)
-        self.select_memory_program(preset_index)
+    def save_preset_to_memory_slot(self, preset, memory_slot):
+        self.select_memory_program(memory_slot)
 
         # ask the preset for its data segments
         (v1, v2, v3, v4, v5) = preset.to_modbus_data()
 
+        # Write the preset into the RAM area
         s1 = WriteDataSegment(self.charger, "seg1", v1, "H38sLBB7cHB", base=0x8c00)
         s2 = WriteDataSegment(self.charger, "seg2", v2, "BHH12BHBBB", prev_format=s1)
         s3 = WriteDataSegment(self.charger, "seg3", v3, "BB14H", prev_format=s2)
-        s4 = WriteDataSegment(self.charger, "seg3", v4, "16H", prev_format=s3)
-        s5 = WriteDataSegment(self.charger, "seg3", v5, "B6HB2HB3HB", prev_format=s4)
+        s4 = WriteDataSegment(self.charger, "seg4", v4, "16H", prev_format=s3)
+        s5 = WriteDataSegment(self.charger, "seg5", v5, "B6HB2HB3HB", prev_format=s4)
 
+        # Now write back to flash
+        write_to_flash = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
+        store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
+        self.unlock_after_write()
+
+        # Get current index
+        preset_indexes = self.get_full_preset_list()
+        preset_indexes.indexes[63] = 255
+        preset_indexes.indexes[12] = 63
+        self.save_full_preset_list(preset_indexes)
+
+        return True
+
+    def save_preset(self, preset):
+        # Find out the memory index storage area for this preset
+        memory_slot = self._get_memory_program_preset_index(preset.index)
+        self.select_memory_program(memory_slot)
+
+        # ask the preset for its data segments
+        (v1, v2, v3, v4, v5) = preset.to_modbus_data()
+
+        # Write the preset into the RAM area
+        s1 = WriteDataSegment(self.charger, "seg1", v1, "H38sLBB7cHB", base=0x8c00)
+        s2 = WriteDataSegment(self.charger, "seg2", v2, "BHH12BHBBB", prev_format=s1)
+        s3 = WriteDataSegment(self.charger, "seg3", v3, "BB14H", prev_format=s2)
+        s4 = WriteDataSegment(self.charger, "seg4", v4, "16H", prev_format=s3)
+        s5 = WriteDataSegment(self.charger, "seg5", v5, "B6HB2HB3HB", prev_format=s4)
+
+        # Now write back to flash
+        store_command = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
+        store = self.charger.modbus_write_registers(0x8000 + 3, store_command)
+        self.unlock_after_write()
         return True
 
     def unlock_after_write(self):
