@@ -12,7 +12,7 @@ class TestPresetModification(BasePresetTestCase):
         self.reset_to_defaults()
 
     # def tearDown(self):
-    #     self.remove_test_/preset()
+    #     self.remove_test_preset()
 
     def dump_preset(self, index):
         response = self.client.get("/preset/{0}".format(index))
@@ -283,5 +283,137 @@ class TestPresetModification(BasePresetTestCase):
         self.assertEqual(test_preset.lipo_discharge_cell_voltage, 3.4)
         self.assertEqual(test_preset.lilo_discharge_cell_voltage, 3.3)
         self.assertEqual(test_preset.life_discharge_cell_voltage, 2.1)
+
+    def test_currents(self):
+        preset_index, all_presets, test_preset = self.reset_to_defaults()
+
+        self.assertEqual(test_preset.charge_current, 2)
+        test_preset.charge_current = 5
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.charge_current, 5)
+
+        self.assertEqual(test_preset.discharge_current, 2)
+        test_preset.discharge_current = 4
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.discharge_current, 4)
+
+        self.assertEqual(test_preset.end_charge, 10)  # %
+        test_preset.end_charge = 20
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.end_charge, 20)  # %
+
+        self.assertEqual(test_preset.end_discharge, 50)  # %
+        test_preset.end_discharge = 100
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.end_discharge, 100)  # %
+
+        # TODO: Doesn't look like regen_discharge_mode can be set
+        # self.assertEqual(test_preset.regen_discharge_mode, 0)
+        # test_preset.regen_discharge_mode = 1
+        # test_preset = self.save_and_reload_preset(test_preset)
+        # self.assertEqual(test_preset.regen_discharge_mode, 1)
+
+        test_preset.type = 3  # ni
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.ni_peak, 3)
+        test_preset.ni_peak = 13
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.ni_peak, 13)
+
+        self.assertEqual(test_preset.ni_peak_delay, 3)
+        self.assertFalse(test_preset.ni_trickle_enable)
+        self.assertEqual(test_preset.ni_trickle_current, 0.05)
+        self.assertEqual(test_preset.ni_trickle_time, 5)
+        test_preset.ni_peak_delay = 1
+        test_preset.ni_trickle_enable = True
+        test_preset.ni_trickle_current = 1
+        test_preset.ni_trickle_time = 10
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.ni_peak_delay, 1)
+        self.assertEqual(test_preset.ni_trickle_current, 1)
+        self.assertEqual(test_preset.ni_trickle_time, 10)
+        self.assertTrue(test_preset.ni_trickle_enable)
+
+        self.assertFalse(test_preset.ni_zero_enable)
+        test_preset.ni_zero_enable = True
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertTrue(test_preset.ni_zero_enable)
+
+    def test_discharge_voltages(self):
+        preset_index, all_presets, test_preset = self.reset_to_defaults()
+        self.assertEqual(test_preset.ni_discharge_voltage, 0.8)
+        self.assertEqual(test_preset.pb_charge_voltage, 2.4)
+        self.assertEqual(test_preset.pb_discharge_voltage, 1.8)
+
+        # These are "reservation" in the spec
+        # self.assertEqual(test_preset.pb_cell_float_voltage, 2.3)
+        # self.assertFalse(test_preset.pb_cell_float_enable)
+
+        test_preset.type = 5  # pb
+        test_preset = self.save_and_reload_preset(test_preset)
+        test_preset.ni_discharge_voltage = 10
+        test_preset.pb_charge_voltage = 2.2
+        test_preset.pb_discharge_voltage = 2
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.ni_discharge_voltage, 10)
+        self.assertEqual(test_preset.pb_charge_voltage, 2.2)
+        self.assertEqual(test_preset.pb_discharge_voltage, 2)
+
+        # Restore
+        self.assertEqual(test_preset.restore_voltage, 1)
+        self.assertEqual(test_preset.restore_time, 3)
+        self.assertEqual(test_preset.restore_current, 0.1)
+
+        test_preset.restore_voltage = 2
+        test_preset.restore_time = 1
+        test_preset.restore_current = 0.5
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.restore_voltage, 2)
+        self.assertEqual(test_preset.restore_time, 1)
+        self.assertEqual(test_preset.restore_current, 0.5)
+
+        # Cycle counts
+        self.assertEqual(test_preset.cycle_count, 3)
+        self.assertEqual(test_preset.cycle_delay, 0)
+        self.assertEqual(test_preset.cycle_mode, 0)
+
+        # TODO: Looks like we cannot set cycle_delay
+
+        test_preset.cycle_count = 5
+        # test_preset.cycle_delay = 15
+        test_preset.cycle_mode = 3
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.cycle_count, 5)
+        # self.assertEqual(test_preset.cycle_delay, 15)
+        self.assertEqual(test_preset.cycle_mode, 3)
+
+    def test_safety_and_other(self):
+        preset_index, all_presets, test_preset = self.reset_to_defaults()
+
+        self.assertEqual(test_preset.safety_time_c, 0)
+        self.assertEqual(test_preset.safety_cap_c, 120)
+        self.assertEqual(test_preset.safety_temp_c, 45)
+
+        test_preset.safety_time_c = 1
+        test_preset.safety_cap_c = 20
+        test_preset.safety_temp_c = 30
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.safety_time_c, 1)
+        self.assertEqual(test_preset.safety_cap_c, 20)
+        self.assertEqual(test_preset.safety_temp_c, 30)
+
+        # Discharge
+        self.assertEqual(test_preset.safety_time_d, 0)
+        self.assertEqual(test_preset.safety_cap_d, 90)
+        self.assertEqual(test_preset.safety_temp_d, 45)
+
+        test_preset.safety_time_d = 2
+        test_preset.safety_cap_d = 80
+        test_preset.safety_temp_d = 33
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.safety_time_d, 2)
+        self.assertEqual(test_preset.safety_cap_d, 80)
+        self.assertEqual(test_preset.safety_temp_d, 33)
+
 
 
