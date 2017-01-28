@@ -37,6 +37,17 @@ class BasePresetTestCase(LiveIChargerTestCase):
         test_preset.name = "Test Preset"
         return test_preset
 
+    def _find_preset_with_name(self, name):
+        preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
+        for index in preset_index.range_of_presets():
+            preset_endpoint = "/preset/{0}".format(index)
+            response = self.client.get(preset_endpoint)
+            preset = self._turn_response_into_preset_object(response)
+            if preset:
+                if preset.name == name:
+                    return preset
+        return None
+
     def _find_or_create_last_test_preset(self):
         preset_index, all_presets, test_preset = self._find_last_test_preset()
         if test_preset:
