@@ -2,7 +2,7 @@ import unittest
 
 from schematics.exceptions import ModelValidationError
 
-from electric.icharger.models import DeviceInfo, DeviceInfoStatus, PresetIndex
+from electric.icharger.models import DeviceInfo, DeviceInfoStatus, PresetIndex, Preset
 
 
 class TestDeviceStatusInfoSerialization(unittest.TestCase):
@@ -49,6 +49,30 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
         self.assertEqual(64, p.number_of_presets)
         # And no free slots
         self.assertIsNone(p.first_empty_slot)
+
+    def test_preset_op_enable_mask(self):
+        p = Preset()
+        p.op_enable_mask = 255
+        self.assertTrue(p.charge_enabled)
+        self.assertTrue(p.storage_enabled)
+        self.assertTrue(p.discharge_enabled)
+        self.assertTrue(p.cycle_enabled)
+        self.assertTrue(p.balance_enabled)
+
+        p.charge_enabled = False
+        self.assertEquals(p.op_enable_mask, 254)
+
+        p.discharge_enabled = False
+        self.assertEquals(p.op_enable_mask, 246)
+
+        p.storage_enabled = False
+        self.assertEquals(p.op_enable_mask, 242)
+
+        p.cycle_enabled = False
+        self.assertEquals(p.op_enable_mask, 226)
+
+        p.balance_enabled = False
+        self.assertEquals(p.op_enable_mask, 194)
 
 
 class TestDeviceInfoSerialization(unittest.TestCase):

@@ -558,16 +558,16 @@ class Preset(Model):
 
     channel_mode = IntType(required=True, choices=[0, 1])
     save_to_sd = BooleanType(required=True, default=True)
-    log_interval_sec = FloatType(required=True)
+    log_interval_sec = FloatType(required=True, min_value=0.5, max_value=60)
     run_counter = IntType(required=True)
 
     type = IntType(required=True, choices=[0, 1, 2, 3, 4, 5])
     li_cell = IntType(required=True)
     ni_cell = IntType(required=True)
-    pb_cell = IntType(required=True)
+    pb_cell = IntType(required=True, min_value=1, max_value=15)
 
     li_mode_c = IntType(required=True, choices=[0, 1])
-    li_mode_d = IntType(required=True, choices=[0, 1])
+    li_mode_d = IntType(required=True, min_value=1, max_value=3)  # this is a bitmask
     ni_mode_c = IntType(required=True, choices=[0, 1])
     ni_mode_d = IntType(required=True, choices=[0, 1])
     pb_mode_c = IntType(required=True, choices=[0, 1])
@@ -583,17 +583,17 @@ class Preset(Model):
 
     keep_charge_enable = BooleanType(required=True)
 
-    lipo_charge_cell_voltage = FloatType(required=True)
-    lilo_charge_cell_voltage = FloatType(required=True)
-    life_charge_cell_voltage = FloatType(required=True)
+    lipo_charge_cell_voltage = FloatType(required=True, min_value=3.85, max_value=4.35)
+    lilo_charge_cell_voltage = FloatType(required=True, min_value=3.75, max_value=4.35)
+    life_charge_cell_voltage = FloatType(required=True, min_value=3.3, max_value=3.8)
 
-    lipo_storage_cell_voltage = FloatType(required=True)
-    lilo_storage_cell_voltage = FloatType(required=True)
-    life_storage_cell_voltage = FloatType(required=True)
+    lipo_storage_cell_voltage = FloatType(required=True, min_value=3.7, max_value=3.9)
+    lilo_storage_cell_voltage = FloatType(required=True, min_value=3.6, max_value=3.8)
+    life_storage_cell_voltage = FloatType(required=True, min_value=3.1, max_value=3.4)
 
-    lipo_discharge_cell_voltage = FloatType(required=True)
-    lilo_discharge_cell_voltage = FloatType(required=True)
-    life_discharge_cell_voltage = FloatType(required=True)
+    lipo_discharge_cell_voltage = FloatType(required=True, min_value=3, max_value=4.1)
+    lilo_discharge_cell_voltage = FloatType(required=True, min_value=2.5, max_value=4)
+    life_discharge_cell_voltage = FloatType(required=True, min_value=2, max_value=3.5)
 
     charge_current = FloatType(required=True)
     discharge_current = FloatType(required=True)
@@ -650,6 +650,79 @@ class Preset(Model):
             p.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
             return p
         return None
+
+    def _test_bit_set(self, offset):
+        mask = (1 << offset)
+        return (self.op_enable_mask & mask) > 0
+
+    def _set_or_clear_bit(self, offset, bool_value):
+        mask = (1 << offset)
+        if not bool_value:
+            self.op_enable_mask &= ~mask
+        else:
+            self.op_enable_mask |= mask
+
+    @property
+    def charge_enabled(self):
+        return self._test_bit_set(0)
+
+    @charge_enabled.setter
+    def charge_enabled(self, new_value):
+        self._set_or_clear_bit(0, new_value)
+
+    @property
+    def storage_enabled(self):
+        return self._test_bit_set(2)
+
+    @storage_enabled.setter
+    def storage_enabled(self, new_value):
+        self._set_or_clear_bit(2, new_value)
+
+    @property
+    def discharge_enabled(self):
+        return self._test_bit_set(3)
+
+    @discharge_enabled.setter
+    def discharge_enabled(self, new_value):
+        self._set_or_clear_bit(3, new_value)
+
+    @property
+    def cycle_enabled(self):
+        return self._test_bit_set(4)
+
+    @cycle_enabled.setter
+    def cycle_enabled(self, new_value):
+        self._set_or_clear_bit(4, new_value)
+
+    @property
+    def balance_enabled(self):
+        return self._test_bit_set(5)
+
+    @balance_enabled.setter
+    def balance_enabled(self, new_value):
+        self._set_or_clear_bit(5, new_value)
+
+    @property
+    def extra_discharge_enable(self):
+        return self.li_mode_d & 0x01 == 0x01
+
+    @extra_discharge_enable.setter
+    def extra_discharge_enable(self, value):
+        if value:
+            self.li_mode_d |= 0x01
+        else:
+            self.li_mode_d &= ~0x01
+
+    @property
+    def discharge_balance_enable(self):
+        return self.li_mode_d & 0x02 == 0x02
+
+    @discharge_balance_enable.setter
+    def discharge_balance_enable(self, value):
+        if value:
+            self.li_mode_d |= 0x02
+        else:
+            self.li_mode_d &= ~0x02
 
     @serializable
     def type_str(self):
