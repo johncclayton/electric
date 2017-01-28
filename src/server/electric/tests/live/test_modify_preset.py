@@ -11,8 +11,8 @@ class TestPresetModification(BasePresetTestCase):
         super(TestPresetModification, self).setUp()
         self.reset_to_defaults()
 
-    # def tearDown(self):
-    #     self.remove_test_preset()
+    def tearDown(self):
+        self.remove_test_preset()
 
     def dump_preset(self, index):
         response = self.client.get("/preset/{0}".format(index))
@@ -20,8 +20,8 @@ class TestPresetModification(BasePresetTestCase):
         json_string = json.dumps(json_dict, indent=True, sort_keys=True)
         print "Preset {0}: {1}".format(index, json_string)
 
-    def test_show_test_preset(self):
-        self.dump_preset(7)
+    # def test_show_test_preset(self):
+    #     self.dump_preset(7)
 
     def save_and_reload_preset(self, preset):
         native = preset.to_native()
@@ -64,7 +64,7 @@ class TestPresetModification(BasePresetTestCase):
         # But I'm not sure you can write these values. When I tried, it failed.
         # Maybe more useful on the client, to know what editors to show?
         self.assertEqual(test_preset.op_enable_mask, 255)
-        self.assertEqual(test_preset.charge_enabled, False)
+        self.assertTrue(test_preset.charge_enabled)
 
     def test_channel_mode_to_pb_cell(self):
         preset_index, all_presets, test_preset = self._find_or_create_last_test_preset()
@@ -415,5 +415,43 @@ class TestPresetModification(BasePresetTestCase):
         self.assertEqual(test_preset.safety_cap_d, 80)
         self.assertEqual(test_preset.safety_temp_d, 33)
 
+        # Regenerative
+        self.assertEqual(test_preset.reg_ch_mode, 0)
+        self.assertEqual(test_preset.reg_ch_volt, 12)
+        self.assertEqual(test_preset.reg_ch_current, 1)
+
+        test_preset.reg_ch_mode = 1
+        test_preset.reg_ch_volt = 10
+        test_preset.reg_ch_current = 2
+        test_preset = self.save_and_reload_preset(test_preset)
+
+        self.assertEqual(test_preset.reg_ch_mode, 1)
+        self.assertEqual(test_preset.reg_ch_volt, 10)
+        self.assertEqual(test_preset.reg_ch_current, 2)
+
+        # Other Crap
+        self.assertTrue(test_preset.fast_store)
+        self.assertEqual(test_preset.store_compensation, 0.1)
+
+        test_preset.fast_store = False
+        test_preset.store_compensation = 0.15
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertFalse(test_preset.fast_store)
+        self.assertEqual(test_preset.store_compensation, 0.15)
+
+        # Switch to NiZn
+        test_preset.type = 6
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.ni_zn_charge_cell_volt, 1.9)
+        self.assertEqual(test_preset.ni_zn_discharge_cell_volt, 0.844)
+        self.assertEqual(test_preset.ni_zn_cell, 0)
+
+        test_preset.ni_zn_charge_cell_volt = 2
+        test_preset.ni_zn_discharge_cell_volt = 1
+        test_preset.ni_zn_cell = 6
+        test_preset = self.save_and_reload_preset(test_preset)
+        self.assertEqual(test_preset.ni_zn_charge_cell_volt, 2)
+        self.assertEqual(test_preset.ni_zn_discharge_cell_volt, 1)
+        self.assertEqual(test_preset.ni_zn_cell, 6)
 
 

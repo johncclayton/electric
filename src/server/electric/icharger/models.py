@@ -631,16 +631,16 @@ class Preset(Model):
     safety_cap_d = IntType(required=True, min_value=50, max_value=200)
     safety_temp_d = FloatType(required=True, min_value=20, max_value=80)
 
-    reg_ch_mode = IntType(required=True)
-    reg_ch_volt = FloatType(required=True)
-    reg_ch_current = FloatType(required=True)
+    reg_ch_mode = IntType(required=True, choices=[0, 1, 2])
+    reg_ch_volt = FloatType(required=True, min_value=0.1, max_value=33)
+    reg_ch_current = FloatType(required=True, min_value=0.05, max_value=40)
 
     fast_store = BooleanType(required=True, default=True)
-    store_compensation = IntType(required=True)
+    store_compensation = FloatType(required=True, min_value=0, max_value=0.2)
 
-    ni_zn_charge_cell_volt = FloatType(required=True)
-    ni_zn_discharge_cell_volt = FloatType(required=True)
-    ni_zn_cell = IntType(required=True, default=0)
+    ni_zn_charge_cell_volt = FloatType(required=True, min_value=1.2, max_value=2)
+    ni_zn_discharge_cell_volt = FloatType(required=True, min_value=0.844, max_value=1.6)
+    ni_zn_cell = IntType(required=True, default=0, min_value=0, max_value=10)
 
     @staticmethod
     def modbus(index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
@@ -821,7 +821,7 @@ class Preset(Model):
               int(self.reg_ch_volt * 1000),
               int(self.reg_ch_current * 100),
               self.fast_store,
-              self.store_compensation,
+              self.store_compensation * 100,
               int(self.ni_zn_charge_cell_volt * 1000),
               int(self.ni_zn_discharge_cell_volt * 1000),
               self.ni_zn_cell)
@@ -942,5 +942,7 @@ class Preset(Model):
         self.log_interval_sec /= 10.0
         self.safety_temp_d /= 10.0
         self.safety_temp_c /= 10.0
+
+        self.store_compensation /= 100.0
 
         self.name = self.name.split('\0')[0]

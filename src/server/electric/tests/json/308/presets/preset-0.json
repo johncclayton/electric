@@ -70,7 +70,7 @@
  "safety_time_c": 0,
  "safety_time_d": 0,
  "save_to_sd": 1,
- "store_compensation": 10,
+ "store_compensation": 0.1,
  "type": 0,
  "type_str": "LiPo",
  "use_flag": 0
