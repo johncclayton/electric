@@ -9,6 +9,9 @@ class TestPresetCreation(BasePresetTestCase):
     def tearDown(self):
         self.remove_test_preset()
 
+        preset_index = self._get_preset_index()
+        print "Preset index, after delete: {0}".format(preset_index)
+
     def test_create_and_remove_test_preset(self):
         preset_index, all_presets, test_preset = self._find_or_create_last_test_preset()
 

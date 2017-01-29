@@ -198,29 +198,8 @@ class ChargerCommsManager(object):
         list_of_all_indexes.extend(list(data_2))
         return PresetIndex.modbus(count, list_of_all_indexes)
 
-    def get_preset_list(self, count_only=False):
-        (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
-        if count_only:
-            return count
-
-        number = count
-        offset = 0
-        indexes = ()
-
-        while count > 0:
-            to_read = min(count, 32)
-            if (to_read % 2) != 0:
-                to_read += 1
-            data = self.charger.modbus_read_registers(0x8801 + offset, "{0}B".format(to_read),
-                                                      function_code=cst.READ_HOLDING_REGISTERS)
-            count -= len(data)
-            indexes += data
-            offset += len(data) / 2
-
-        return PresetIndex.modbus(number, indexes[:number])
-
     def get_preset(self, memory_slot_number):
-        self.select_memory_program(memory_slot_number)
+        result = self.select_memory_program(memory_slot_number)
 
         # use-flag -> channel mode
         vars1 = ReadDataSegment(self.charger, "vars1", "H38sLBB7cHB", base=0x8c00)
@@ -233,13 +212,14 @@ class ChargerCommsManager(object):
         # cycle-mode -> ni-zn-cell
         vars5 = ReadDataSegment(self.charger, "vars5", "B6HB2HB3HB", prev_format=vars4)
 
-        return Preset.modbus(memory_slot_number, vars1, vars2, vars3, vars4, vars5)
+        preset = Preset.modbus(memory_slot_number, vars1, vars2, vars3, vars4, vars5)
+        if preset.is_unused:
+            raise ObjectNotFoundException()
+        return preset
 
     def delete_preset_at_index(self, preset_memory_slot_number):
         # Find this thing, within the index
         preset_index = self.get_full_preset_list()
-
-        # TODO: What if someone asks to delete 63? something out of bounds? not used?
 
         index_number = preset_index.index_of_preset_with_memory_slot_number(preset_memory_slot_number)
         if index_number is None:
@@ -251,7 +231,19 @@ class ChargerCommsManager(object):
         preset_index.delete_item_at_index(index_number)
 
         # Change the preset index so that the last item is "unused"
-        return self.save_full_preset_list(preset_index)
+        index_save_result = self.save_full_preset_list(preset_index)
+
+        # Set this slots used flag to "EMPTY (useflag = 0xffff")
+        logger.info("Setting slot {0} unused flag".format(preset_memory_slot_number))
+        self.select_memory_program(preset_memory_slot_number)
+        store = self.charger.modbus_write_registers(0x8c00, (0xffff, ))
+
+        # Now write back to flash
+        write_to_flash = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
+        store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
+        self.unlock_after_write()
+
+        return True
 
     def save_preset_to_memory_slot(self, preset, memory_slot):
         # First, select this memory slot.
@@ -281,8 +273,7 @@ class ChargerCommsManager(object):
 
     def save_preset(self, preset):
         # Store the preset back into its own memory slot
-        memory_slot = preset.index
-        self.select_memory_program(memory_slot)
+        self.select_memory_program(preset.memory_slot)
 
         # ask the preset for its data segments
         (v1, v2, v3, v4, v5) = preset.to_modbus_data()

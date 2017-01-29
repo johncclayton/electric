@@ -10,7 +10,7 @@ logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 # It creates presets from 2->26A, in 2Amp increments
 # It checks to see if they exist first.
 #
-RUN_THIS_TEST = False
+RUN_THIS_TEST = True
 
 
 class TestPresetCreation(BasePresetTestCase):

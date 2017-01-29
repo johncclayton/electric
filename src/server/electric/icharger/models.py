@@ -605,7 +605,7 @@ class PresetIndex(Model):
 
 class Preset(Model):
     # The memory slot that this Preset occupies
-    index = IntType(required=True, min_value=0, max_value=63, serialized_name="index")
+    memory_slot = IntType(required=True, min_value=0, max_value=63, serialized_name="index")
 
     use_flag = LongType(required=True, choices=[0xffff, 0x55aa, 0x0000])
     name = StringType(required=True, max_length=37)
@@ -704,7 +704,7 @@ class Preset(Model):
     def modbus(index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
         if ds1 is not None and ds2 is not None and ds3 is not None and ds4 is not None and ds5 is not None:
             p = Preset()
-            p.index = index
+            p.memory_slot = index
             p.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
             return p
         return None
@@ -719,6 +719,18 @@ class Preset(Model):
             self.op_enable_mask &= ~mask
         else:
             self.op_enable_mask |= mask
+
+    @property
+    def is_unused(self):
+        return not (self.is_fixed | self.is_used)
+
+    @property
+    def is_fixed(self):
+        return self.use_flag == 0
+
+    @property
+    def is_used(self):
+        return self.use_flag == 0
 
     @property
     def charge_enabled(self):

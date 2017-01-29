@@ -20,8 +20,8 @@ class TestPresetModification(BasePresetTestCase):
         json_string = json.dumps(json_dict, indent=True, sort_keys=True)
         print "Preset {0}: {1}".format(index, json_string)
 
-    # def test_show_test_preset(self):
-    #     self.dump_preset(7)
+    def test_show_test_preset(self):
+        self.dump_preset(0)
 
     # Doesn't test moving the preset within the index, just modifying in place
     def test_capacity_to_op_enable(self):
@@ -31,7 +31,7 @@ class TestPresetModification(BasePresetTestCase):
         self.assertIsNotNone(all_presets)
         self.assertIsNotNone(test_preset)
 
-        # self.dump_preset(test_preset.index)
+        # self.dump_preset(test_preset.memory_slot)
 
         # Name is tested as part of preset creation / lookup
         self.assertEqual(test_preset.capacity, 0)

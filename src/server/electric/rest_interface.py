@@ -138,26 +138,27 @@ class SystemStorageResource(Resource):
 
 class PresetResource(Resource):
     @exclusive
-    def get(self, preset_index):
-        preset_index = int(preset_index)
-        return evil_global.comms.get_preset(preset_index).to_primitive()
+    def get(self, preset_memory_slot):
+        preset_memory_slot = int(preset_memory_slot)
+        preset = evil_global.comms.get_preset(preset_memory_slot)
+        return preset.to_primitive()
 
     @exclusive
-    def delete(self, preset_index):
+    def delete(self, preset_memory_slot):
         # This will only, I think ... work for "at the end"
-        preset_index = int(preset_index)
-        logger.info("Try to delete index {0}".format(preset_index))
-        return evil_global.comms.delete_preset_at_index(preset_index)
+        preset_memory_slot = int(preset_memory_slot)
+        logger.info("Try to delete preset at memory slot {0}".format(preset_memory_slot))
+        return evil_global.comms.delete_preset_at_index(preset_memory_slot)
 
     @exclusive
-    def put(self, preset_index):
-        preset_index = int(preset_index)
+    def put(self, preset_memory_slot):
+        preset_memory_slot = int(preset_memory_slot)
         json_dict = request.json
-        logger.info("Asked to save preset to index: {0} with {1}".format(preset_index, json_dict))
+        logger.info("Asked to save preset to mem slot: {0} with {1}".format(preset_memory_slot, json_dict))
 
         # Turn it into a Preset object
         preset = Preset(json_dict)
-        return evil_global.comms.save_preset_to_memory_slot(preset, preset_index)
+        return evil_global.comms.save_preset_to_memory_slot(preset, preset_memory_slot)
 
 
 class PresetListResource(Resource):

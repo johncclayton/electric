@@ -81,9 +81,9 @@ class BasePresetTestCase(LiveIChargerTestCase):
 
         if test_preset:
             print "Index: {0}".format(preset_index.to_native())
-            print "Test preset is in memory slot {0}".format(test_preset.index)
+            print "Test preset is in memory slot {0}".format(test_preset.memory_slot)
 
-            response = self.client.delete("/preset/{0}".format(test_preset.index))
+            response = self.client.delete("/preset/{0}".format(test_preset.memory_slot))
             self.assertEqual(response.status_code, 200)
 
             # Check it is gone
@@ -94,7 +94,10 @@ class BasePresetTestCase(LiveIChargerTestCase):
             self.assertEqual(new_preset_index.first_empty_index_position, preset_index.first_empty_index_position - 1)
 
             # And we should not be able to get the old preset, by memory_slot, anymore
-            response = self.client.get("/preset/{0}".format(test_preset.index))
+            response = self.client.get("/preset/{0}".format(test_preset.memory_slot))
+            if response.status_code != 404:
+                json_dict = json.loads(response.data)
+                print "Unexpected: got back a preset: {0}".format(json.dumps(json_dict, sort_keys=True, indent=True))
             self.assertEqual(response.status_code, 404)
 
     def _get_preset_index(self):
@@ -116,6 +119,8 @@ class BasePresetTestCase(LiveIChargerTestCase):
         test_preset = None
         for index in preset_index.range_of_presets():
             preset = all_presets[index]
+            if preset.is_unused:
+                continue
             if preset.name == "Test Preset":
                 test_preset = preset
         return preset_index, all_presets, test_preset
@@ -128,13 +133,13 @@ class BasePresetTestCase(LiveIChargerTestCase):
         if test_preset:
             logger.info("Resaving preset back to defaults, as it already exists")
             replacement_test_preset = self._create_new_test_preset()
-            replacement_test_preset.index = test_preset.index
+            replacement_test_preset.memory_slot = test_preset.memory_slot
             test_preset = self.save_and_reload_preset(replacement_test_preset)
         return preset_index, all_presets, test_preset
 
     def save_and_reload_preset(self, preset):
         native = preset.to_native()
-        preset_endpoint = "/preset/{0}".format(preset.index)
+        preset_endpoint = "/preset/{0}".format(preset.memory_slot)
         response = self.client.put(preset_endpoint, data=json.dumps(native), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
