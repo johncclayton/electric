@@ -58,8 +58,7 @@ class BasePresetTestCase(LiveIChargerTestCase):
         test_preset = self._create_new_test_preset()
 
         native = test_preset.to_native()
-        preset_endpoint = "/preset/{0}".format(preset_index.first_empty_index_position)
-        response = self.client.put(preset_endpoint, data=json.dumps(native), content_type='application/json')
+        response = self.client.put("/addpreset", data=json.dumps(native), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         # Read the preset list back in, and check that we have one more item

@@ -2,7 +2,7 @@ import logging
 
 import modbus_tk.defines as cst
 
-from electric.icharger.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException
+from electric.icharger.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException, BadRequestException
 from modbus_usb import iChargerMaster
 from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
@@ -199,6 +199,9 @@ class ChargerCommsManager(object):
         return PresetIndex.modbus(count, list_of_all_indexes)
 
     def get_preset(self, memory_slot_number):
+        # TODO: Maybe lookup the preset indicies, and see if a mapping for the requested slot
+        # exists. If it does not, throw an error.
+
         result = self.select_memory_program(memory_slot_number)
 
         # use-flag -> channel mode
@@ -245,6 +248,29 @@ class ChargerCommsManager(object):
 
         return True
 
+    '''
+    This ALWAYS saves a NEW preset. The presets memory_slot is ignored, and it's
+    inserted at the end of the preset index list.
+    '''
+    def add_new_preset(self, preset):
+        # Find the next free memory slot, assign that to the preset, and save both indexes + preset
+        preset_index = self.get_full_preset_list()
+
+        # This assigns the preset the next available memory slot, and also writes that into
+        # the index.
+        if not preset_index.add_to_index(preset):
+            raise BadRequestException("Presets full")
+
+        # Right. Now we can save it.
+        self.save_preset_to_memory_slot(preset, preset.memory_slot)
+
+        # And save the new preset list
+        return self.save_full_preset_list(preset_index)
+
+    '''
+    This saves an existing preset to memory.
+    It does NOT allocate new presets, or insert them into a preset index list
+    '''
     def save_preset_to_memory_slot(self, preset, memory_slot):
         # First, select this memory slot.
         self.select_memory_program(memory_slot)
@@ -264,31 +290,6 @@ class ChargerCommsManager(object):
         store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
         self.unlock_after_write()
 
-        # Get current index
-        preset_indexes = self.get_full_preset_list()
-        preset_indexes.indexes[memory_slot] = memory_slot
-        self.save_full_preset_list(preset_indexes)
-
-        return True
-
-    def save_preset(self, preset):
-        # Store the preset back into its own memory slot
-        self.select_memory_program(preset.memory_slot)
-
-        # ask the preset for its data segments
-        (v1, v2, v3, v4, v5) = preset.to_modbus_data()
-
-        # Write the preset into the RAM area
-        s1 = WriteDataSegment(self.charger, "seg1", v1, "H38sLBB7cHB", base=0x8c00)
-        s2 = WriteDataSegment(self.charger, "seg2", v2, "BHH12BHBBB", prev_format=s1)
-        s3 = WriteDataSegment(self.charger, "seg3", v3, "BB14H", prev_format=s2)
-        s4 = WriteDataSegment(self.charger, "seg4", v4, "16H", prev_format=s3)
-        s5 = WriteDataSegment(self.charger, "seg5", v5, "B6HB2HB3HB", prev_format=s4)
-
-        # Now write back to flash
-        store_command = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
-        store = self.charger.modbus_write_registers(0x8000 + 3, store_command)
-        self.unlock_after_write()
         return True
 
     def unlock_after_write(self):
@@ -321,6 +322,12 @@ class ChargerCommsManager(object):
     def run_operation(self, operation, channel_number, preset_memory_slot_index):
         channel_number = min(1, max(0, channel_number))
 
+        # Load the preset from this slot, and check it is valid
+        # Loading will itself perform a check for 'used', and will throw an exception it it
+        # is not available.
+        # It'll also be loaded into RAM.
+        self.get_preset(preset_memory_slot_index)
+
         # Translate from a sensible 0..64 index, to where it is in memory
         values_list = (
             operation,
@@ -332,9 +339,10 @@ class ChargerCommsManager(object):
 
         logger.info("Sending write: {0}".format(values_list))
         modbus_response = self.charger.modbus_write_registers(0x8000, values_list)
+
         logger.info("Got back {0} from write".format(modbus_response))
         logger.info("Device status: {0}".format(self.get_device_info().get_status(channel_number).to_native()))
 
         self.unlock_after_write()
 
-        return OperationResponse(modbus_response)
+        return self.get_device_info().get_status(channel_number)

@@ -86,21 +86,22 @@ class ControlRegisterResource(Resource):
 
 class ChargeResource(ControlRegisterResource):
     @exclusive
-    def put(self, channel_id, preset_index):
-        operation_response = evil_global.comms.run_operation(Operation.Charge, int(channel_id), int(preset_index)).to_primitive()
-        operation_response.update(connection_state_dict())
-        return operation_response
+    def put(self, channel_id, preset_memory_slot):
+        device_status = evil_global.comms.run_operation(Operation.Charge, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class DischargeResource(ControlRegisterResource):
     @exclusive
-    def put(self, channel_id, preset_index):
+    def put(self, channel_id, preset_memory_slot):
         pass
 
 
 class BalanceResource(ControlRegisterResource):
     @exclusive
-    def put(self, channel_id, preset_index):
+    def put(self, channel_id, preset_memory_slot):
         pass
 
 
@@ -154,11 +155,24 @@ class PresetResource(Resource):
     def put(self, preset_memory_slot):
         preset_memory_slot = int(preset_memory_slot)
         json_dict = request.json
-        logger.info("Asked to save preset to mem slot: {0} with {1}".format(preset_memory_slot, json_dict))
 
         # Turn it into a Preset object
         preset = Preset(json_dict)
+
+        logger.info("Asked to save preset to mem slot: {0} with {1}".format(preset_memory_slot, json_dict))
         return evil_global.comms.save_preset_to_memory_slot(preset, preset_memory_slot)
+
+
+class AddNewPresetResource(Resource):
+    @exclusive
+    def put(self):
+        json_dict = request.json
+
+        # Turn it into a Preset object
+        preset = Preset(json_dict)
+
+        logger.info("Asked to add a new preset: {0}".format(json_dict))
+        return evil_global.comms.add_new_preset(preset)
 
 
 class PresetListResource(Resource):

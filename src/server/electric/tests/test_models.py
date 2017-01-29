@@ -7,6 +7,7 @@ from electric.icharger.models import DeviceInfo, DeviceInfoStatus, PresetIndex, 
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
+
 class TestDeviceStatusInfoSerialization(unittest.TestCase):
     def test_deviceinfostatus_keeps_modbus_value_hidden(self):
         status = DeviceInfoStatus()
@@ -107,13 +108,43 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
     def test_throws_exception_if_index_out_of_range(self):
         p = PresetIndex()
         p.count = 4
-        p.indexes = [0, 1, 2, 3, 255]
+        p.set_indexes([0, 1, 2, 3, 255])
         self.assertEqual(p.number_of_presets, 4)
         self.assertFalse(p.is_valid_index(4))
         self.assertFalse(p.is_valid_index(-1))
         self.assertTrue(p.is_valid_index(0))
         self.assertTrue(p.is_valid_index(1))
         self.assertTrue(p.is_valid_index(3))
+
+    def test_adding_preset_modifies_both_index_and_preset(self):
+        p = Preset()
+        p.index = 123
+
+        pi = PresetIndex()
+        pi.set_indexes([0, 1, 2, 3, 255])
+
+        pi.add_to_index(p)
+        self.assertEqual(p.memory_slot, 4)
+        self.assertEqual(pi.index_of_preset_with_memory_slot_number(4), 4)
+        print "PI: {0}".format(pi.indexes)
+
+    def test_preset_index_can_provide_next_available_slot(self):
+        p = PresetIndex()
+        p.set_indexes([0, 1, 2, 3, 255])
+        self.assertEqual(4, p.next_available_memory_slot)
+
+        p.set_indexes([0, 2, 8, 10, 255])
+        self.assertEqual(1, p.next_available_memory_slot)
+
+        p.set_indexes([1, 2, 8, 10, 255])
+        self.assertEqual(0, p.next_available_memory_slot)
+
+        p.set_indexes([1, 0, 2, 8, 10, 255])
+        self.assertEqual(3, p.next_available_memory_slot)
+
+        # Fill it up entirely
+        p.set_indexes(list(range(0, 64)))
+        self.assertIsNone(p.next_available_memory_slot)
 
 
 class TestDeviceInfoSerialization(unittest.TestCase):

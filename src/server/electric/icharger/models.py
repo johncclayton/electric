@@ -27,6 +27,10 @@ class ObjectNotFoundException(Exception):
     pass
 
 
+class BadRequestException(Exception):
+    pass
+
+
 DeviceIdCellCount = (
     (DEVICEID_308_DUO, 8),
     (DEVICEID_4010_DUO, 10)
@@ -519,8 +523,33 @@ class PresetIndex(Model):
                 return index
         return None
 
+    @property
+    def next_available_memory_slot(self):
+        for slot_number in range(0, 64):
+            # does any index take this?
+            memory_slot_number = self.index_of_preset_with_memory_slot_number(slot_number)
+            if memory_slot_number is None:
+                return slot_number
+        return None
+
+    def add_to_index(self, new_preset):
+        next_memory_slot = self.next_available_memory_slot
+        if next_memory_slot is None:
+            return None
+
+        next_index = self.first_empty_index_position
+        if next_index is None:
+            return None
+
+        new_preset.memory_slot = next_memory_slot
+        self.indexes[next_index] = next_memory_slot
+
+        return new_preset
+
     def range_of_presets(self):
-        return range(0, self.first_empty_index_position)
+        if self.first_empty_index_position is not None:
+            return range(0, self.first_empty_index_position)
+        return range(0, 64)
 
     def is_valid_index(self, index):
         return index in self.range_of_presets()
@@ -564,11 +593,12 @@ class PresetIndex(Model):
     def _validate_and_fix_index_list(self):
         # Add 255's on the end until we have 64 of them
         # this also clears out any other 0's and other stuff.
-        for index in range(self.first_empty_index_position, 64):
-            if index < len(self.indexes):
-                self.indexes[index] = 255
-            else:
-                self.indexes.append(255)
+        if self.first_empty_index_position is not None:
+            for index in range(self.first_empty_index_position, 64):
+                if index < len(self.indexes):
+                    self.indexes[index] = 255
+                else:
+                    self.indexes.append(255)
 
         # Indexes must be unique
         set_of_seen = {}
