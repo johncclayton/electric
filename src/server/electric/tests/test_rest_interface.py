@@ -58,7 +58,7 @@ class TestRestfulAPI(unittest.TestCase):
         d = json.loads(resp.data)
         self.assertIsNotNone(d)
         self.assertIsNotNone(d.keys())
-        self.assertIn("light_value", d.keys())
+        self.assertIn("lcd_brightness", d.keys())
         self.assertIn("temp_unit", d.keys())
         self.assertEqual("connected", d["charger_presence"])
 
