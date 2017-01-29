@@ -114,7 +114,9 @@ class MeasureIRResource(ControlRegisterResource):
 class StopResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id):
-        operation_response = evil_global.comms.stop_operation(int(channel_id)).to_primitive()
+        channel_number = int(channel_id)
+        logger.info("Stop, channel {0}".format(channel_number))
+        operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response.update(connection_state_dict())
         return operation_response
 
@@ -172,7 +174,7 @@ class AddNewPresetResource(Resource):
         preset = Preset(json_dict)
 
         logger.info("Asked to add a new preset: {0}".format(json_dict))
-        return evil_global.comms.add_new_preset(preset)
+        return evil_global.comms.add_new_preset(preset).to_native()
 
 
 class PresetListResource(Resource):

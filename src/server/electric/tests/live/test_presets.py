@@ -30,18 +30,6 @@ class TestPresetFunctions(BasePresetTestCase):
         self.assertEqual(first_empty, preset_index.first_empty_index_position)
         self.assertEqual(first_empty - 1, preset_index.number_of_presets)
 
-    # def test_can_write_new_preset_to_last_slot(self):
-    #     response = self.client.get("/preset/5")
-    #     response_data = response.data
-    #     flattened = json.loads(response_data)
-    #     original_preset_object = Preset(flattened)
-    #     original_preset_name = original_preset_object.name
-    #
-    #     original_preset_object.name = "Neil Test Foo2"
-    #     new_preset_dict = original_preset_object.to_primitive()
-    #     response = self.client.put("/preset/5", data=json.dumps(new_preset_dict), content_type='application/json')
-    #     print "Response: {0}".format(response)
-
     def test_can_reconstruct_preset_from_json(self):
         preset_data = self.load_json_file("presets/preset-0.json")
         p = Preset(preset_data)
@@ -53,10 +41,3 @@ class TestPresetFunctions(BasePresetTestCase):
         self.assertEqual(p['safety_cap_d'], p.safety_cap_d)
         self.assertEqual(p['lilo_storage_cell_voltage'], p.lilo_storage_cell_voltage)
         self.assertEqual(p['fast_store'], p.fast_store)
-
-    def test_can_call_stop(self):
-        # operation/channel_num/preset_index
-        url = "/stop/0"
-        response = self.client.put(url)
-        d = json.loads(response.data)
-        self.assertEqual(d['error'], False)

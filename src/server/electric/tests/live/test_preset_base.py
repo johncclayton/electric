@@ -30,14 +30,15 @@ class BasePresetTestCase(LiveIChargerTestCase):
             list_of_presets.append(Preset(item))
         return list_of_presets
 
-    def _create_new_test_preset(self):
+    def _create_new_test_preset(self, name="Test Preset"):
         test_preset_dict = self.load_json_file("presets/preset-0.json")
         self.assertIsNotNone(test_preset_dict)
         test_preset = Preset(test_preset_dict)
-        test_preset.name = "Test Preset"
+        test_preset.name = name
         return test_preset
 
     def _find_preset_with_name(self, name):
+        logger.info("Looking for preset with name: {0}".format(name))
         all_presets = self._get_all_presets()
         for preset in all_presets:
             if preset.name == name:
@@ -52,7 +53,6 @@ class BasePresetTestCase(LiveIChargerTestCase):
         logger.info("No test preset exists. Will create at {0}".format(preset_index.first_empty_index_position))
 
         test_preset = self._create_new_test_preset()
-
         native = test_preset.to_native()
         response = self.client.put("/addpreset", data=json.dumps(native), content_type='application/json')
         self.assertEqual(response.status_code, 200, "Failed with {0}".format(response))

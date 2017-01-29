@@ -156,23 +156,18 @@ class ChargerCommsManager(object):
         ws6 = self.charger.modbus_write_registers(0x8400 + 34, s6)
 
         # Now write the RAM to flash
+        self.take_out_order_lock("save system configuration")
         write_sys_to_flash = (VALUE_ORDER_LOCK, Order.WriteSys, 0, 0,)
         store = self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
-        self.unlock_after_write()
+        self.release_order_lock()
 
         return True
 
-    # def _get_memory_program_preset_index(self, index):
-    #     preset_list = self.get_full_preset_list()
-    #     if index > preset_list.number_of_presets - 1:
-    #         message = "Preset index {0} too large. Exceeds max index {1}".format(index, preset_list.number_of_presets - 1)
-    #         raise ObjectNotFoundException(message)
-    #     return preset_list.indexes[index]
-
-    def select_memory_program(self, preset_index):
+    def select_memory_program(self, memory_slot):
         control = self.get_control_register()
+        logger.info("Selecting memory slot {0}".format(memory_slot))
         return self.charger.modbus_write_registers(0x8000 + 1,
-                                                   (preset_index, control.channel, VALUE_ORDER_LOCK))
+                                                   (memory_slot, control.channel, VALUE_ORDER_LOCK))
 
     def save_full_preset_list(self, preset_list):
         (v1, v2) = preset_list.to_modbus_data()
@@ -182,9 +177,10 @@ class ChargerCommsManager(object):
         part2 = WriteDataSegment(self.charger, "part2", v2, "32B", prev_format=part1)
 
         # Write to flash.
+        self.take_out_order_lock("save preset index, writing index")
         write_head_to_flash = (VALUE_ORDER_LOCK, Order.WriteMemHead, 0, 0,)
         store = self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
-        self.unlock_after_write()
+        self.release_order_lock()
         return True
 
     def get_full_preset_list(self):
@@ -247,15 +243,16 @@ class ChargerCommsManager(object):
         # Change the preset index so that the last item is "unused"
         index_save_result = self.save_full_preset_list(preset_index)
 
-        # Set this slots used flag to "EMPTY (useflag = 0xffff")
+        # Set this preset (slot) used flag to "EMPTY (useflag = 0xffff") in RAM
         logger.info("Setting slot {0} unused flag".format(preset_memory_slot_number))
         self.select_memory_program(preset_memory_slot_number)
         store = self.charger.modbus_write_registers(0x8c00, (0xffff,))
 
         # Now write back to flash
+        self.take_out_order_lock("delete preset, writing preset to flash")
         write_to_flash = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
         store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
-        self.unlock_after_write()
+        self.release_order_lock()
 
         return True
 
@@ -274,17 +271,22 @@ class ChargerCommsManager(object):
             raise BadRequestException("Presets full")
 
         # Right. Now we can save it.
+        logger.info("Preset Index before add: {0}".format(preset_index.to_native()))
+        logger.info("Adding new preset at slot {0}".format(preset.memory_slot))
         self.save_preset_to_memory_slot(preset, preset.memory_slot, verify_write=False)
 
         # And save the new preset list
-        return self.save_full_preset_list(preset_index)
+        self.save_full_preset_list(preset_index)
+        logger.info("Preset Index after add: {0}".format(self.get_full_preset_list().to_native()))
+
+        return self.get_preset(preset.memory_slot)
 
     '''
     This saves an existing preset to memory.
     It does NOT allocate new presets, or insert them into a preset index list
     '''
-    def save_preset_to_memory_slot(self, preset, memory_slot, verify_write=True):
 
+    def save_preset_to_memory_slot(self, preset, memory_slot, verify_write=True):
         # We don't want to verify if we're adding. In that case we KNOW we want to add it here.
         # and we want to ignore any older data that may be in that slot.
         if verify_write:
@@ -306,30 +308,37 @@ class ChargerCommsManager(object):
         s5 = WriteDataSegment(self.charger, "seg5", v5, "B6HB2HB3HB", prev_format=s4)
 
         # Now write back to flash
+        self.take_out_order_lock("save preset, writing preset to flash")
         write_to_flash = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
         store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
-        self.unlock_after_write()
+        self.release_order_lock()
 
         return True
 
-    def unlock_after_write(self):
+    def take_out_order_lock(self, message="<unknown reason>"):
+        logger.info("Taking out order lock: {0}".format(message))
+        self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_LOCK,))
+
+    def release_order_lock(self):
         # clear the ORDER LOCK value (no idea why - the C++ code does this)
         self.charger.modbus_write_registers(0x8000 + 3, (0,))
 
     def close_messagebox(self):
         # If showing a dialog, or have error, try to clear the dialog
+        self.take_out_order_lock("close messagebox")
         self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_LOCK, Order.MsgBoxNo, 0, 0,))
-        self.unlock_after_write()
+        self.release_order_lock()
 
     def stop_operation(self, channel_number):
         channel_number = min(1, max(0, channel_number))
         values_list = (channel_number, VALUE_ORDER_LOCK, Order.Stop, 0, 0,)
 
+        self.take_out_order_lock("stop")
         modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
         logger.info("Got back {0} from write".format(modbus_response))
         status = self.get_device_info().get_status(channel_number)
         logger.info("Device status: {0}".format(status.to_native()))
-        self.unlock_after_write()
+        self.release_order_lock()
 
         # If showing a dialog, or have error, try to clear the dialog
         # This also works to close the presets listing, if that is open
@@ -346,7 +355,10 @@ class ChargerCommsManager(object):
         # Loading will itself perform a check for 'used', and will throw an exception it it
         # is not available.
         # It'll also be loaded into RAM.
+        logger.info("Begin operation {0} on channel {1} using slot {2}".format(operation, channel_number, preset_memory_slot_index))
         self.get_preset(preset_memory_slot_index)
+
+        self.take_out_order_lock("charging")
 
         # Translate from a sensible 0..64 index, to where it is in memory
         values_list = (
@@ -363,6 +375,6 @@ class ChargerCommsManager(object):
         logger.info("Got back {0} from write".format(modbus_response))
         logger.info("Device status: {0}".format(self.get_device_info().get_status(channel_number).to_native()))
 
-        self.unlock_after_write()
+        self.release_order_lock()
 
         return self.get_device_info().get_status(channel_number)
