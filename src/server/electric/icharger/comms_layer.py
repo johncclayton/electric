@@ -199,8 +199,11 @@ class ChargerCommsManager(object):
         return PresetIndex.modbus(count, list_of_all_indexes)
 
     def get_preset(self, memory_slot_number):
-        # TODO: Maybe lookup the preset indicies, and see if a mapping for the requested slot
-        # exists. If it does not, throw an error.
+        # First, load the indicies and see if in fact this is mapped. If not, don't bother even trying
+        preset_index = self.get_full_preset_list()
+        if preset_index.index_of_preset_with_memory_slot_number(memory_slot_number) is None:
+            message = "No preset is mapped with slot number {0}".format(memory_slot_number)
+            raise ObjectNotFoundException(message)
 
         result = self.select_memory_program(memory_slot_number)
 
@@ -216,8 +219,11 @@ class ChargerCommsManager(object):
         vars5 = ReadDataSegment(self.charger, "vars5", "B6HB2HB3HB", prev_format=vars4)
 
         preset = Preset.modbus(memory_slot_number, vars1, vars2, vars3, vars4, vars5)
-        if preset.is_unused:
-            raise ObjectNotFoundException()
+
+        # if preset.is_unused:
+        #     message = "Preset in slot {0} appears to exist, is marked as unused.".format(memory_slot_number)
+        #     raise ObjectNotFoundException(message)
+
         return preset
 
     def delete_preset_at_index(self, preset_memory_slot_number):
@@ -230,6 +236,11 @@ class ChargerCommsManager(object):
             raise ObjectNotFoundException(message)
         logger.info("Remove item at memory slot {0}, index {1}".format(preset_memory_slot_number, index_number))
 
+        # If the preset is marked as "fixed", then the iCharger UI doesn't allow it to be
+        # moved or deleted. Reject the request.
+        preset = self.get_preset(preset_memory_slot_number)
+        preset.verify_can_be_written_or_deleted()
+
         # If it is the last object, we can adjust the index map only, and ignore (I hope!) the preset itself.
         preset_index.delete_item_at_index(index_number)
 
@@ -239,7 +250,7 @@ class ChargerCommsManager(object):
         # Set this slots used flag to "EMPTY (useflag = 0xffff")
         logger.info("Setting slot {0} unused flag".format(preset_memory_slot_number))
         self.select_memory_program(preset_memory_slot_number)
-        store = self.charger.modbus_write_registers(0x8c00, (0xffff, ))
+        store = self.charger.modbus_write_registers(0x8c00, (0xffff,))
 
         # Now write back to flash
         write_to_flash = (VALUE_ORDER_LOCK, Order.WriteMem, 0, 0,)
@@ -252,6 +263,7 @@ class ChargerCommsManager(object):
     This ALWAYS saves a NEW preset. The presets memory_slot is ignored, and it's
     inserted at the end of the preset index list.
     '''
+
     def add_new_preset(self, preset):
         # Find the next free memory slot, assign that to the preset, and save both indexes + preset
         preset_index = self.get_full_preset_list()
@@ -262,7 +274,7 @@ class ChargerCommsManager(object):
             raise BadRequestException("Presets full")
 
         # Right. Now we can save it.
-        self.save_preset_to_memory_slot(preset, preset.memory_slot)
+        self.save_preset_to_memory_slot(preset, preset.memory_slot, verify_write=False)
 
         # And save the new preset list
         return self.save_full_preset_list(preset_index)
@@ -271,9 +283,17 @@ class ChargerCommsManager(object):
     This saves an existing preset to memory.
     It does NOT allocate new presets, or insert them into a preset index list
     '''
-    def save_preset_to_memory_slot(self, preset, memory_slot):
-        # First, select this memory slot.
-        self.select_memory_program(memory_slot)
+    def save_preset_to_memory_slot(self, preset, memory_slot, verify_write=True):
+
+        # We don't want to verify if we're adding. In that case we KNOW we want to add it here.
+        # and we want to ignore any older data that may be in that slot.
+        if verify_write:
+            # Get the preset and verify we can write
+            # This has a side effect of self.select_memory_program(memory_slot)
+            existing_preset = self.get_preset(memory_slot)
+            existing_preset.verify_can_be_written_or_deleted()
+        else:
+            self.select_memory_program(memory_slot)
 
         # ask the preset for its data segments
         (v1, v2, v3, v4, v5) = preset.to_modbus_data()

@@ -24,18 +24,6 @@ class TestSystemFunctions(LiveIChargerTestCase):
         json_string = json.dumps(json_dict, indent=True, sort_keys=True)
         print "System: {0}".format(json_string)
 
-    def test_can_reset_system_to_neils_defaults(self):
-        neils_defaults = self.load_json_file("system/custom.json")
-        response = self.client.put("/system", data=json.dumps(neils_defaults), content_type='application/json')
-        json_dict = json.loads(response.data)
-        self.assertIsNotNone(json_dict)
-
-        response = self.client.get("/system")
-        system_object = self._turn_response_into_storage_object(response)
-
-        self.assertEqual(system_object.charge_power[0], 570)
-        self.assertEqual(system_object.charge_power[1], 570)  # 570w per channel for me
-
     def test_can_change_system_params(self):
         icharger_defaults = self.load_json_file('system/defaults.json')
         response = self.client.put("/system", data=json.dumps(icharger_defaults), content_type='application/json')

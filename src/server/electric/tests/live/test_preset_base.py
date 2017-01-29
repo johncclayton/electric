@@ -38,14 +38,10 @@ class BasePresetTestCase(LiveIChargerTestCase):
         return test_preset
 
     def _find_preset_with_name(self, name):
-        preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
-        for index in preset_index.range_of_presets():
-            preset_endpoint = "/preset/{0}".format(index)
-            response = self.client.get(preset_endpoint)
-            preset = self._turn_response_into_preset_object(response)
-            if preset:
-                if preset.name == name:
-                    return preset
+        all_presets = self._get_all_presets()
+        for preset in all_presets:
+            if preset.name == name:
+                return preset
         return None
 
     def _find_or_create_last_test_preset(self):
@@ -59,7 +55,7 @@ class BasePresetTestCase(LiveIChargerTestCase):
 
         native = test_preset.to_native()
         response = self.client.put("/addpreset", data=json.dumps(native), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, "Failed with {0}".format(response))
 
         # Read the preset list back in, and check that we have one more item
         new_preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
@@ -106,6 +102,7 @@ class BasePresetTestCase(LiveIChargerTestCase):
 
     def _get_all_presets(self):
         response = self.client.get("/preset")
+        self.assertEqual(response.status_code, 200, "Didn't get all presets: {0}, {1}".format(response, response.data))
         return self._turn_response_into_preset_list(response)
 
     def _find_last_test_preset(self):

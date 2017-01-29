@@ -542,6 +542,7 @@ class PresetIndex(Model):
             return None
 
         new_preset.memory_slot = next_memory_slot
+        new_preset.use_flag = 0x55aa  # Used
         self.indexes[next_index] = next_memory_slot
 
         return new_preset
@@ -739,6 +740,10 @@ class Preset(Model):
             return p
         return None
 
+    def verify_can_be_written_or_deleted(self):
+        if self.is_fixed:
+            raise ObjectNotFoundException("This preset exists, but is marked as 'fixed' (read only)")
+
     def _test_bit_set(self, offset):
         mask = (1 << offset)
         return (self.op_enable_mask & mask) > 0
@@ -752,7 +757,7 @@ class Preset(Model):
 
     @property
     def is_unused(self):
-        return not (self.is_fixed | self.is_used)
+        return not self.is_used
 
     @property
     def is_fixed(self):
@@ -760,7 +765,7 @@ class Preset(Model):
 
     @property
     def is_used(self):
-        return self.use_flag == 0
+        return self.use_flag == 0x55aa
 
     @property
     def charge_enabled(self):
