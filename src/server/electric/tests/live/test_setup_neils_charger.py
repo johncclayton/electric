@@ -47,7 +47,6 @@ class TestPresetCreation(BasePresetTestCase):
         new_preset.charge_current = charge_current
 
         # Where to put it?
-        preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
         native = new_preset.to_native()
         response = self.client.put("/addpreset", data=json.dumps(native), content_type='application/json')
         self.assertEqual(response.status_code, 200)

@@ -17,6 +17,7 @@ except Exception, e:
 @unittest.skipUnless(HAVE_CONFIGURATION, "This test requires live.config.json to be setup. See live.config.json.example, and the 'tests/json folder'")
 class LiveIChargerTestCase(unittest.TestCase):
     def _turn_response_into_object(self, response, cls, expect_charger_presence=True):
+        self.assertEqual(response.status_code, 200, "Response not expected. Got: {0}".format(response))
         json_dict = json.loads(response.data)
         if expect_charger_presence:
             self.assertEqual(json_dict['charger_presence'], "connected")
