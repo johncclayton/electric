@@ -1,9 +1,11 @@
+import logging
 import unittest
 
 from schematics.exceptions import ModelValidationError
 
 from electric.icharger.models import DeviceInfo, DeviceInfoStatus, PresetIndex, Preset
 
+logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
 class TestDeviceStatusInfoSerialization(unittest.TestCase):
     def test_deviceinfostatus_keeps_modbus_value_hidden(self):
@@ -47,8 +49,9 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
 
         # Should have 64 presets
         self.assertEqual(64, p.number_of_presets)
+
         # And no free slots
-        self.assertIsNone(p.first_empty_slot)
+        self.assertIsNone(p.first_empty_index_position)
 
     def test_preset_op_enable_mask(self):
         p = Preset()
@@ -73,6 +76,44 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
 
         p.balance_enabled = False
         self.assertEquals(p.op_enable_mask, 194)
+
+    def test_preset_indexes_are_swapped_ok(self):
+        p = PresetIndex()
+        p.count = 4
+        p.indexes = [0, 1, 2, 3, 255]
+        p.swap(0, 3)
+        self.assertEqual([3, 1, 2, 0, 255], p.indexes)
+
+    def test_preset_index_filling_gives_us_64_items(self):
+        p = PresetIndex()
+        p.set_indexes([0, 255])
+        self.assertEqual(1, p.number_of_presets)
+        self.assertEqual(64, len(p.indexes))
+
+    def test_deleting_shuffles_indexes_left(self):
+        p = PresetIndex()
+        p.set_indexes([0, 1, 2, 3, 255])
+        self.assertEqual(4, p.number_of_presets)
+
+        expected_index_list = list(p.indexes)
+        del expected_index_list[0]
+        expected_index_list.append(255)
+
+        # logger.info("Is now: {0}".format(p.indexes))
+        p.delete_item_at_index(0)
+        self.assertEqual(expected_index_list, p.indexes)
+        self.assertEqual(3, p.number_of_presets)
+
+    def test_throws_exception_if_index_out_of_range(self):
+        p = PresetIndex()
+        p.count = 4
+        p.indexes = [0, 1, 2, 3, 255]
+        self.assertEqual(p.number_of_presets, 4)
+        self.assertFalse(p.is_valid_index(4))
+        self.assertFalse(p.is_valid_index(-1))
+        self.assertTrue(p.is_valid_index(0))
+        self.assertTrue(p.is_valid_index(1))
+        self.assertTrue(p.is_valid_index(3))
 
 
 class TestDeviceInfoSerialization(unittest.TestCase):

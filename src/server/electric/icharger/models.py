@@ -1,3 +1,4 @@
+import copy
 import logging
 import struct
 
@@ -499,7 +500,6 @@ class SystemStorage(Model):
 
 
 class PresetIndex(Model):
-    count = IntType(required=True, min_value=0, max_value=63, default=0)
     indexes = ListType(IntType(min_value=0, max_value=255), required=True, min_size=0, max_size=63, default=[])
 
     @staticmethod
@@ -513,41 +513,99 @@ class PresetIndex(Model):
     def preset_exists_at_index(self, index):
         return self.indexes[index] != 255
 
-    def range_of_presets(self):
-        return range(0, self.first_empty_slot)
+    def index_of_preset_with_memory_slot_number(self, memory_slot_number):
+        for index in self.range_of_presets():
+            if self.indexes[index] == memory_slot_number:
+                return index
+        return None
 
-    def set_last_item_unused(self):
-        self.indexes[self.number_of_presets] = 255
+    def range_of_presets(self):
+        return range(0, self.first_empty_index_position)
+
+    def is_valid_index(self, index):
+        return index in self.range_of_presets()
+
+    def swap(self, index_one, index_two):
+        if not self.is_valid_index(index_one):
+            message = "Index one {0} is invalid".format(index_one)
+            raise ObjectNotFoundException(message)
+        if not self.is_valid_index(index_two):
+            message = "Index two {0} is invalid".format(index_two)
+            raise ObjectNotFoundException(message)
+
+        value1 = self.indexes[index_one]
+        value2 = self.indexes[index_two]
+        self.indexes[index_one] = value2
+        self.indexes[index_two] = value1
 
     @property
     def number_of_presets(self):
-        first_empty_slot = self.first_empty_slot
+        first_empty_slot = self.first_empty_index_position
         if not first_empty_slot:
             return len(self.indexes)
-        return first_empty_slot - 1
+        return first_empty_slot
 
     @property
-    def first_empty_slot(self):
+    def first_empty_index_position(self):
         first_empty = None
         for i, index in enumerate(self.indexes):
             if index == 255:
                 first_empty = i
                 break
+
         return first_empty
 
+    def delete_item_at_index(self, index, validate=True):
+        if self.is_valid_index(index):
+            del self.indexes[index]
+            if validate:
+                self._validate_and_fix_index_list()
+
+    def _validate_and_fix_index_list(self):
+        # Add 255's on the end until we have 64 of them
+        # this also clears out any other 0's and other stuff.
+        for index in range(self.first_empty_index_position, 64):
+            if index < len(self.indexes):
+                self.indexes[index] = 255
+            else:
+                self.indexes.append(255)
+
+        # Indexes must be unique
+        set_of_seen = {}
+        current_position = 0
+        while current_position < self.number_of_presets - 1:
+            index_at_this_position = self.indexes[current_position]
+            if set_of_seen.get(index_at_this_position, None):
+                # if we've already seen it, we should delete this one
+                self.delete_item_at_index(current_position, validate=False)
+
+                # Don't inc counter, as we've deleted one
+            else:
+                set_of_seen[index_at_this_position] = 1
+                current_position += 1
+
+    def set_indexes(self, new_value):
+        self.indexes = copy.deepcopy(new_value)
+        self._validate_and_fix_index_list()
+
     def set_from_modbus_data(self, count, indexes):
-        self.count = count
-        self.indexes = indexes
+        self.set_indexes(indexes)
+
+    @serializable
+    def count(self):
+        # The number of non-255 index positions
+        return self.number_of_presets
 
     def to_modbus_data(self):
-        v1 = [len(self.indexes), ]
+        v1 = [self.number_of_presets, ]
         v1.extend(self.indexes[:32])
         v2 = self.indexes[32:]
         return v1, v2
 
 
 class Preset(Model):
-    index = IntType(required=True, min_value=0, max_value=63)
+    # The memory slot that this Preset occupies
+    index = IntType(required=True, min_value=0, max_value=63, serialized_name="index")
 
     use_flag = LongType(required=True, choices=[0xffff, 0x55aa, 0x0000])
     name = StringType(required=True, max_length=37)

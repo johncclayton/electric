@@ -23,17 +23,6 @@ class TestPresetModification(BasePresetTestCase):
     # def test_show_test_preset(self):
     #     self.dump_preset(7)
 
-    def save_and_reload_preset(self, preset):
-        native = preset.to_native()
-        preset_endpoint = "/preset/{0}".format(preset.index)
-        response = self.client.put(preset_endpoint, data=json.dumps(native), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-
-        # Get it back
-        response = self.client.get(preset_endpoint)
-        self.assertEqual(response.status_code, 200)
-        return self._turn_response_into_preset_object(response)
-
     # Doesn't test moving the preset within the index, just modifying in place
     def test_capacity_to_op_enable(self):
         preset_index, all_presets, test_preset = self._find_or_create_last_test_preset()
@@ -125,18 +114,6 @@ class TestPresetModification(BasePresetTestCase):
         test_preset.pb_cell = 2
         test_preset = self.save_and_reload_preset(test_preset)
         self.assertEqual(test_preset.pb_cell, 2)
-
-    def reset_to_defaults(self):
-        preset_index, all_presets, test_preset = self._find_or_create_last_test_preset()
-
-        # If the test preset exists already, reset it to defaults
-        # Doing this means we can comment out / remove the tearDown, and the tests are still sensible
-        if test_preset:
-            logger.info("Resaving preset back to defaults, as it already exists")
-            replacement_test_preset = self._create_new_test_preset()
-            replacement_test_preset.index = test_preset.index
-            test_preset = self.save_and_reload_preset(replacement_test_preset)
-        return preset_index, all_presets, test_preset
 
     # Doesn't test moving the preset within the index, just modifying in place
     def test_balance_variables(self):

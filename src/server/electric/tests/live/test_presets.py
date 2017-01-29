@@ -27,7 +27,7 @@ class TestPresetFunctions(BasePresetTestCase):
                 first_empty = i
                 break
         self.assertIsNotNone(first_empty)
-        self.assertEqual(first_empty, preset_index.first_empty_slot)
+        self.assertEqual(first_empty, preset_index.first_empty_index_position)
         self.assertEqual(first_empty - 1, preset_index.number_of_presets)
 
     # def test_can_write_new_preset_to_last_slot(self):

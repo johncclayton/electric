@@ -7,7 +7,7 @@ from werkzeug.exceptions import BadRequest
 import electric.evil_global as evil_global
 from electric.icharger.modbus_usb import connection_state_dict
 from electric.icharger.comms_layer import Operation
-from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException
+from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException, PresetIndex
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -168,7 +168,9 @@ class PresetListResource(Resource):
 
         all_presets = []
         for index in preset_list.range_of_presets():
-            preset = evil_global.comms.get_preset(index)
+            # Preset.index is the memory slot it's in, not the position within the index
+            memory_slot_number = preset_list.indexes[index]
+            preset = evil_global.comms.get_preset(memory_slot_number)
 
             # TODO: Error handling
 
@@ -190,4 +192,6 @@ class PresetOrderResource(Resource):
 
     @exclusive
     def post(self):
-        pass
+        json_dict = request.json
+        preset_list = PresetIndex(json_dict)
+        return evil_global.comms.save_full_preset_list(preset_list)

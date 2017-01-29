@@ -30,7 +30,7 @@ class TestPresetCreation(BasePresetTestCase):
 
         # Where to put it?
         preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
-        next_available_slot = preset_index.first_empty_slot
+        next_available_slot = preset_index.first_empty_index_position
         if next_available_slot:
             preset_endpoint = "preset/{0}".format(next_available_slot)
             native = new_preset.to_native()

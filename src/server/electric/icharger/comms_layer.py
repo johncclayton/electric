@@ -162,12 +162,12 @@ class ChargerCommsManager(object):
 
         return True
 
-    def _get_memory_program_preset_index(self, index):
-        preset_list = self.get_full_preset_list()
-        if index > preset_list.number_of_presets:
-            message = "Preset index {0} too large. Exceeds max index {1}".format(index, preset_list.number_of_presets)
-            raise ObjectNotFoundException(message)
-        return preset_list.indexes[index]
+    # def _get_memory_program_preset_index(self, index):
+    #     preset_list = self.get_full_preset_list()
+    #     if index > preset_list.number_of_presets - 1:
+    #         message = "Preset index {0} too large. Exceeds max index {1}".format(index, preset_list.number_of_presets - 1)
+    #         raise ObjectNotFoundException(message)
+    #     return preset_list.indexes[index]
 
     def select_memory_program(self, preset_index):
         control = self.get_control_register()
@@ -219,9 +219,8 @@ class ChargerCommsManager(object):
 
         return PresetIndex.modbus(number, indexes[:number])
 
-    def get_preset(self, index):
-        preset_index = self._get_memory_program_preset_index(index)
-        self.select_memory_program(preset_index)
+    def get_preset(self, memory_slot_number):
+        self.select_memory_program(memory_slot_number)
 
         # use-flag -> channel mode
         vars1 = ReadDataSegment(self.charger, "vars1", "H38sLBB7cHB", base=0x8c00)
@@ -234,26 +233,25 @@ class ChargerCommsManager(object):
         # cycle-mode -> ni-zn-cell
         vars5 = ReadDataSegment(self.charger, "vars5", "B6HB2HB3HB", prev_format=vars4)
 
-        return Preset.modbus(index, vars1, vars2, vars3, vars4, vars5)
+        return Preset.modbus(memory_slot_number, vars1, vars2, vars3, vars4, vars5)
 
-    def delete_preset_at_index(self, index_to_remove):
-        # Which memory slot is this?
+    def delete_preset_at_index(self, preset_memory_slot_number):
+        # Find this thing, within the index
         preset_index = self.get_full_preset_list()
 
         # TODO: What if someone asks to delete 63? something out of bounds? not used?
 
-        memory_slot = preset_index.indexes[index_to_remove]
-        logger.info("Remove item at memory slot {0}, index {1}".format(memory_slot, index_to_remove))
+        index_number = preset_index.index_of_preset_with_memory_slot_number(preset_memory_slot_number)
+        if index_number is None:
+            message = "Cannot find preset with memory slot {0}".format(preset_memory_slot_number)
+            raise ObjectNotFoundException(message)
+        logger.info("Remove item at memory slot {0}, index {1}".format(preset_memory_slot_number, index_number))
 
         # If it is the last object, we can adjust the index map only, and ignore (I hope!) the preset itself.
-        if memory_slot == preset_index.number_of_presets:
-            logger.info("Removing last item, easy!")
+        preset_index.delete_item_at_index(index_number)
 
-            # Change the preset index so that the last item is "unused"
-            preset_index.set_last_item_unused()
-            return self.save_full_preset_list(preset_index)
-
-        return True
+        # Change the preset index so that the last item is "unused"
+        return self.save_full_preset_list(preset_index)
 
     def save_preset_to_memory_slot(self, preset, memory_slot):
         # First, select this memory slot.
@@ -282,8 +280,8 @@ class ChargerCommsManager(object):
         return True
 
     def save_preset(self, preset):
-        # Find out the memory index storage area for this preset
-        memory_slot = self._get_memory_program_preset_index(preset.index)
+        # Store the preset back into its own memory slot
+        memory_slot = preset.index
         self.select_memory_program(memory_slot)
 
         # ask the preset for its data segments
@@ -329,16 +327,13 @@ class ChargerCommsManager(object):
 
         return OperationResponse(modbus_response)
 
-    def run_operation(self, operation, channel_number, preset_index):
+    def run_operation(self, operation, channel_number, preset_memory_slot_index):
         channel_number = min(1, max(0, channel_number))
 
         # Translate from a sensible 0..64 index, to where it is in memory
-        memory_index = self._get_memory_program_preset_index(preset_index)
-        logger.info("Preset index {0} is at memory slot {1}".format(preset_index, memory_index))
-
         values_list = (
             operation,
-            memory_index,
+            preset_memory_slot_index,
             channel_number,
             VALUE_ORDER_LOCK,
             Order.Run,

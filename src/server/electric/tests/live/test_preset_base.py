@@ -53,19 +53,19 @@ class BasePresetTestCase(LiveIChargerTestCase):
         if test_preset:
             return preset_index, all_presets, test_preset
 
-        logger.info("No test preset exists. Will create at {0}".format(preset_index.first_empty_slot))
+        logger.info("No test preset exists. Will create at {0}".format(preset_index.first_empty_index_position))
 
         test_preset = self._create_new_test_preset()
 
         native = test_preset.to_native()
-        preset_endpoint = "/preset/{0}".format(preset_index.first_empty_slot)
+        preset_endpoint = "/preset/{0}".format(preset_index.first_empty_index_position)
         response = self.client.put(preset_endpoint, data=json.dumps(native), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         # Read the preset list back in, and check that we have one more item
         new_preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
         self.assertEqual(new_preset_index.number_of_presets, preset_index.number_of_presets + 1)
-        self.assertEqual(new_preset_index.first_empty_slot, preset_index.first_empty_slot + 1)
+        self.assertEqual(new_preset_index.first_empty_index_position, preset_index.first_empty_index_position + 1)
 
         # The other presets should be identical to before.
         new_presets = self._turn_response_into_preset_list(self.client.get("/preset"))
@@ -81,7 +81,7 @@ class BasePresetTestCase(LiveIChargerTestCase):
 
         if test_preset:
             print "Index: {0}".format(preset_index.to_native())
-            print "Test preset has display index {1}: {0}".format(test_preset.to_native(), test_preset.index)
+            print "Test preset is in memory slot {0}".format(test_preset.index)
 
             response = self.client.delete("/preset/{0}".format(test_preset.index))
             self.assertEqual(response.status_code, 200)
@@ -90,19 +90,27 @@ class BasePresetTestCase(LiveIChargerTestCase):
             new_preset_index, new_presets, new_test_preset = self._find_last_test_preset()
             self.assertEqual(new_preset_index.number_of_presets, preset_index.number_of_presets - 1)
 
-            # Because we are deleting the last one, the first empty slot should also decrease
-            self.assertEqual(new_preset_index.first_empty_slot, preset_index.first_empty_slot - 1)
+            # Because we are deleting, the first empty index position should also decrease
+            self.assertEqual(new_preset_index.first_empty_index_position, preset_index.first_empty_index_position - 1)
 
-            # And we should not be able to get the old preset, by index, anymore
+            # And we should not be able to get the old preset, by memory_slot, anymore
             response = self.client.get("/preset/{0}".format(test_preset.index))
             self.assertEqual(response.status_code, 404)
 
-    def _find_last_test_preset(self):
+    def _get_preset_index(self):
+        response = self.client.get("/presetorder")
+        preset_index_object = self._turn_response_into_preset_index_object(response)
+        return preset_index_object
+
+    def _get_all_presets(self):
         response = self.client.get("/preset")
-        all_presets = self._turn_response_into_preset_list(response)
+        return self._turn_response_into_preset_list(response)
+
+    def _find_last_test_preset(self):
+        all_presets = self._get_all_presets()
         self.assertIsNotNone(all_presets)
 
-        preset_index = self._turn_response_into_preset_index_object(self.client.get("/presetorder"))
+        preset_index = self._get_preset_index()
         self.assertIsNotNone(preset_index)
 
         test_preset = None
@@ -111,3 +119,27 @@ class BasePresetTestCase(LiveIChargerTestCase):
             if preset.name == "Test Preset":
                 test_preset = preset
         return preset_index, all_presets, test_preset
+
+    def reset_to_defaults(self):
+        preset_index, all_presets, test_preset = self._find_or_create_last_test_preset()
+
+        # If the test preset exists already, reset it to defaults
+        # Doing this means we can comment out / remove the tearDown, and the tests are still sensible
+        if test_preset:
+            logger.info("Resaving preset back to defaults, as it already exists")
+            replacement_test_preset = self._create_new_test_preset()
+            replacement_test_preset.index = test_preset.index
+            test_preset = self.save_and_reload_preset(replacement_test_preset)
+        return preset_index, all_presets, test_preset
+
+    def save_and_reload_preset(self, preset):
+        native = preset.to_native()
+        preset_endpoint = "/preset/{0}".format(preset.index)
+        response = self.client.put(preset_endpoint, data=json.dumps(native), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # Get it back
+        response = self.client.get(preset_endpoint)
+        self.assertEqual(response.status_code, 200)
+        return self._turn_response_into_preset_object(response)
+
