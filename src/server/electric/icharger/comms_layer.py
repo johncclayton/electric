@@ -163,11 +163,11 @@ class ChargerCommsManager(object):
 
         return True
 
-    def select_memory_program(self, memory_slot):
-        control = self.get_control_register()
-        logger.info("Selecting memory slot {0}".format(memory_slot))
-        return self.charger.modbus_write_registers(0x8000 + 1,
-                                                   (memory_slot, control.channel, VALUE_ORDER_LOCK))
+    def select_memory_program(self, memory_slot, channel_number=0):
+        self.take_out_order_lock("Selecting memory slot {0}".format(memory_slot))
+        (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number,))
+        self.release_order_lock()
+        return word_count
 
     def save_full_preset_list(self, preset_list):
         (v1, v2) = preset_list.to_modbus_data()
