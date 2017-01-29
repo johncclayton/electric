@@ -2,7 +2,7 @@ import json
 import logging
 
 from electric.app import application
-from electric.icharger.models import Preset, PresetIndex
+from electric.icharger.models import Preset, PresetIndex, ChannelStatus
 from electric.tests.live.live_testcase import LiveIChargerTestCase
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
@@ -18,6 +18,9 @@ class BasePresetTestCase(LiveIChargerTestCase):
 
     def _turn_response_into_preset_index_object(self, response):
         return self._turn_response_into_object(response, PresetIndex, False)
+
+    def _turn_response_into_channel_status(self, response):
+        return self._turn_response_into_object(response, ChannelStatus, True)
 
     def _turn_response_into_preset_list(self, response):
         json_dict = json.loads(response.data)
@@ -102,8 +105,11 @@ class BasePresetTestCase(LiveIChargerTestCase):
 
     def _get_all_presets(self):
         response = self.client.get("/preset")
-        self.assertEqual(response.status_code, 200, "Didn't get all presets: {0}, {1}".format(response, response.data))
         return self._turn_response_into_preset_list(response)
+
+    def _get_channel(self, channel):
+        response = self.client.get("/channel/{0}".format(channel))
+        return self._turn_response_into_channel_status(response)
 
     def _find_last_test_preset(self):
         all_presets = self._get_all_presets()

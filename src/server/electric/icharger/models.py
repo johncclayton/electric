@@ -258,10 +258,12 @@ class ChannelStatus(Model):
     dlg_box_id = IntType(required=True)
     line_intern_resistance = FloatType(required=True)
 
-    def __init__(self, device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
-        super(ChannelStatus, self).__init__()
+    @staticmethod
+    def modbus(device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
+        status = ChannelStatus()
         if header is not None and cell_v is not None and cell_b is not None and cell_i is not None and footer is not None:
-            self.set_from_modbus_data(device_id, channel, header, cell_v, cell_b, cell_i, footer)
+            status.set_from_modbus_data(device_id, channel, header, cell_v, cell_b, cell_i, footer)
+        return status
 
     def set_from_modbus_data(self, device_id, channel, data, cell_v, cell_b, cell_i, footer):
         self.channel = channel

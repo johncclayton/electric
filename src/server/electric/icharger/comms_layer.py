@@ -101,7 +101,7 @@ class ChargerCommsManager(object):
         footer_addr = addr + CHANNEL_INPUT_FOOTER_OFFSET
         footer = self.charger.modbus_read_registers(footer_addr, footer_fmt)
 
-        return ChannelStatus(device_id, channel, header_data, cell_volt, cell_balance, cell_ir, footer)
+        return ChannelStatus.modbus(device_id, channel, header_data, cell_volt, cell_balance, cell_ir, footer)
 
     def get_control_register(self):
         "Returns the current run state of a particular channel"

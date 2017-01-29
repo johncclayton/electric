@@ -10,6 +10,7 @@ logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 class TestCharging(BasePresetTestCase):
     def setUp(self):
         super(TestCharging, self).setUp()
+        self.clear_existing_charge_preset()
 
     # This was here to let me clean up the CHAARGE preset when things were going "badly"
     def clear_existing_charge_preset(self):
@@ -27,7 +28,6 @@ class TestCharging(BasePresetTestCase):
                 preset = self._create_new_test_preset("CHAARGE")
                 # First, we set it to 1A.
                 preset.charge_current = 1.0
-                preset.auto_save = False
                 native = preset.to_native()
                 response = self.client.put("/addpreset", data=json.dumps(native), content_type='application/json')
                 preset = self._turn_response_into_preset_object(response)
@@ -35,14 +35,32 @@ class TestCharging(BasePresetTestCase):
             logger.info("Preset: {0}".format(preset.to_primitive()))
             logger.info("Index: {0}".format(self._get_preset_index().to_primitive()))
 
-            endpoint = "/charge/1/{0}".format(preset.memory_slot)
+            endpoint = "/charge/0/{0}".format(preset.memory_slot)
             logger.info("Test preset at memory slot {0}. Calling: {1}".format(preset.memory_slot, endpoint))
 
             # Now kick off a charge
             response = self.client.put(endpoint)
             self.assertEqual(response.status_code, 200)
 
+            # Wait for the charge to begin, and get close to 1.0a
+            wait_time = 0
+            time.sleep(5)
+            channel_status = self._get_channel(0)
+            while channel_status.curr_out_amps < 0.8 and wait_time < 30:
+                logger.info("Channel 0 charging at {0}A...".format(channel_status.curr_out_amps))
+                time.sleep(2)
+                channel_status = self._get_channel(0)
+                wait_time += 2
+
+            self.assertTrue(wait_time < 30, "timeout waiting for charge / amps!")
+
+            logger.info("Channel 0 charging at {0}A... Changing to 1.5A".format(channel_status.curr_out_amps))
+
+            # Write <different>A to the preset. And see if the charger changes.
+            preset.charge_current = 1.5
+            preset = self.save_and_reload_preset(preset)
+            self.assertEqual(preset.charge_current, 1.5)
+
             # Wait 2s. Then stop
-            time.sleep(15)
-            response = self.client.put("/stop/1")
+            response = self.client.put("/stop/0")
             self.assertEqual(response.status_code, 200)
