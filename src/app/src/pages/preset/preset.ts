@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, NavParams} from "ionic-angular";
+import {NavController, NavParams, AlertController} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {PresetChargePage} from "../preset-charge/preset-charge";
 import {Preset, ChemistryType} from "./preset-class";
@@ -7,6 +7,7 @@ import {PresetStoragePage} from "../preset-storage/preset-storage";
 import {PresetDischargePage} from "../preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../preset-cycle/preset-cycle";
 import {iChargerService} from "../../services/icharger.service";
+import * as _ from "lodash";
 
 @Component({
     selector: 'page-preset',
@@ -14,30 +15,60 @@ import {iChargerService} from "../../services/icharger.service";
 })
 export class PresetPage {
     preset: Preset = null;
+    unmodifiedpreset: Preset = null;
+    confirmedExit: boolean = false;
+    saving: boolean = false;
     optionsPages;
+
+    private callback: (preset: Preset) => void;
 
     constructor(public navCtrl: NavController,
                 public config: Configuration,
+                public alertController: AlertController,
                 public chargerService: iChargerService,
                 public navParams: NavParams) {
-        this.preset = navParams.data;
 
-        this.optionsPages = [
-            {title: 'Charging', component: PresetChargePage},
-            {title: 'Discharging', component: PresetDischargePage},
-            {title: 'Cycle', component: PresetCyclePage},
+        this.callback = navParams.data['callback'];
+        this.preset = _.cloneDeep(navParams.data['preset']);
+        this.unmodifiedpreset = _.cloneDeep(this.preset);
+    }
 
-            // Don't see options in the charger, so dunno what to do here
-            // {title: 'Balancing', component: PresetBalancePage},
-        ];
+    optionPagesForCurrentType() {
+        if (this.optionsPages == null) {
+            this.optionsPages = [
+                {title: 'Charging', component: PresetChargePage},
+                {title: 'Discharging', component: PresetDischargePage},
+                {title: 'Cycle', component: PresetCyclePage},
 
-        if (this.preset.type == ChemistryType.LiPo ||
-            this.preset.type == ChemistryType.LiFe) {
-            this.optionsPages.push(
-                {title: 'Storage', component: PresetStoragePage}
-            );
+                // Don't see options in the charger, so dunno what to do here
+                // {title: 'Balancing', component: PresetBalancePage},
+            ];
+
+            if (this.preset.type == ChemistryType.LiPo ||
+                this.preset.type == ChemistryType.LiFe) {
+                this.optionsPages.push(
+                    {title: 'Storage', component: PresetStoragePage}
+                );
+            }
         }
+        return this.optionsPages;
+    }
 
+    get presetType() {
+        return this.preset.type;
+    }
+
+    set presetType(newType) {
+        this.optionsPages = null;
+        this.preset.type = newType;
+    }
+
+    isDisabled() {
+        return this.saving;
+    }
+
+    isReadOnly() {
+        return this.preset.readonly;
     }
 
     ionViewDidLoad() {
@@ -46,6 +77,70 @@ export class PresetPage {
         // this.switchTo(PresetDischargePage);
         // this.switchTo(PresetStoragePage);
         // this.switchTo(PresetCyclePage);
+        this.confirmedExit = false;
+    }
+
+    ionViewCanLeave() {
+        return new Promise((resolve, reject) => {
+            // If there are changes, we should prompt the user to save.
+            let presetBeingEdited = this.preset;
+            let modifiedProperties = _.reduce(this.unmodifiedpreset.data, function (result, value, key) {
+                return _.isEqual(value, presetBeingEdited.data[key]) ?
+                    result : result.concat(key);
+            }, []);
+
+            // let are_equal = _.isEqual(this.unmodifiedpreset.data, this.preset.data);
+            let are_equal = modifiedProperties.length == 0;
+            if (!are_equal) {
+                console.log("Preset modified:");
+                for (let property of modifiedProperties) {
+                    console.log(property, ": ", this.unmodifiedpreset.data[property], " (", typeof(this.unmodifiedpreset.data[property]),
+                        ") now = ", presetBeingEdited.data[property], "(", typeof(presetBeingEdited.data[property]), ")");
+                }
+                this.confirmedExit = false;
+                let alert = this.alertController.create({
+                    title: 'Preset modified',
+                    message: 'Do you want to save your changes?',
+                    buttons: [
+                        {
+                            text: 'Save',
+                            handler: () => {
+                                this.saving = true;
+                                this.chargerService.savePreset(this.preset).subscribe((preset) => {
+                                    // Pass the result back to the caller.
+                                    // When you save,  you are always given your preset back.
+                                    // This may be a new preset object, with a new memory slot, or it may just the modified preset.
+                                    // Either way, the caller needs it, to update their state.
+                                    this.callback(preset);
+                                    this.saving = false;
+                                    resolve();
+                                });
+
+                                // If there's an error, the charger service will fire an event.
+                                // It'll be picked up by the charger-status component, and an error shown as a toast
+                            }
+                        },
+                        {
+                            text: 'Discard',
+                            handler: () => {
+                                this.saving = false;
+                                resolve();
+                            }
+                        },
+                        {
+                            text: 'Cancel',
+                            handler: () => {
+                                this.saving = false;
+                                reject();
+                            }
+                        }
+                    ]
+                });
+                alert.present();
+            } else {
+                resolve();
+            }
+        });
     }
 
     refreshPreset(refresher) {

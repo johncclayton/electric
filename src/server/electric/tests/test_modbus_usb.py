@@ -1,15 +1,16 @@
-import unittest, struct, time
-import modbus_tk.defines as cst
+import struct
+import time
+import unittest
 
-from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, iChargerMaster, \
-    MODBUS_HID_FRAME_TYPE
-from electric.icharger.modbus_usb import testing_control
+import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
-from electric.icharger.models import Control
-from electric.icharger.modbus_usb import TestingControlException
-
 import electric.evil_global as evil_global
+from electric.icharger.modbus_usb import TestingControlException
+from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, MODBUS_HID_FRAME_TYPE
+from electric.icharger.modbus_usb import testing_control
+from electric.icharger.models import Control
+
 
 class TestChargerQuery(unittest.TestCase):
     def setUp(self):
@@ -169,31 +170,32 @@ class TestGatewayCommunications(unittest.TestCase):
 
     def test_get_all_presets(self):
         charger = evil_global.comms
-        preset_count = charger.get_preset_list(count_only=True)
-        for index in range(0, preset_count):
-            one_preset = charger.get_preset(index)
+        preset_index = charger.get_full_preset_list()
+        for index in preset_index.range_of_presets():
+            slot = preset_index.indexes[index]
+            one_preset = charger.get_preset(slot)
             print(one_preset.name)
 
     def test_get_preset_index_list(self):
         obj = evil_global.comms
-        presets = obj.get_preset_list()
-        self.assertIsNotNone(presets)
-        self.assertTrue(presets.count == len(presets.indexes))
+        preset_index = obj.get_full_preset_list()
+        self.assertIsNotNone(preset_index)
+        self.assertTrue(preset_index.count == len(preset_index.number_of_presets))
 
-    def test_wont_cause_fire_while_charging(self):
-        # fetch status/channel info - what are the flags
-        # start a charge/discharge cycle uysing preset 0
-        # fetch status/channel info - what are the flags
-        # change the amps in the preset, watch what happens
-        charger = evil_global.comms
-        preset_0 = charger.get_preset(0)
-        self.assertIsNotNone(preset_0)
-        info = charger.get_device_info()
-        channel_0 = charger.get_channel_status(0)
-        # now dear user... start a charge..
-        print("now is the time to begin charging!! you have 10 seconds")
-        time.sleep(1)
-        preset_0.charge_current = 11
-        charger.set_preset(preset_0)
-
+    # def test_wont_cause_fire_while_charging(self):
+    #     # fetch status/channel info - what are the flags
+    #     # start a charge/discharge cycle uysing preset 0
+    #     # fetch status/channel info - what are the flags
+    #     # change the amps in the preset, watch what happens
+    #     charger = evil_global.comms
+    #     preset_0 = charger.get_preset(0)
+    #     self.assertIsNotNone(preset_0)
+    #     info = charger.get_device_info()
+    #     channel_0 = charger.get_channel_status(0)
+    #     # now dear user... start a charge..
+    #     print("now is the time to begin charging!! you have 10 seconds")
+    #     time.sleep(1)
+    #     preset_0.charge_current = 11
+    #     charger.save_preset(preset_0)
+    #
 

@@ -1,6 +1,8 @@
+import json
+import unittest
+
 from electric.app import application
 from electric.icharger.modbus_usb import testing_control
-import unittest, json
 
 
 class TestRestfulAPI(unittest.TestCase):
@@ -56,7 +58,7 @@ class TestRestfulAPI(unittest.TestCase):
         d = json.loads(resp.data)
         self.assertIsNotNone(d)
         self.assertIsNotNone(d.keys())
-        self.assertIn("light_value", d.keys())
+        self.assertIn("lcd_brightness", d.keys())
         self.assertIn("temp_unit", d.keys())
         self.assertEqual("connected", d["charger_presence"])
 

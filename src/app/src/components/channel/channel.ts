@@ -1,4 +1,4 @@
-import {Component, Input, trigger, state, style, transition, animate, ChangeDetectorRef} from "@angular/core";
+import {Component, Input, trigger, state, style, transition, animate} from "@angular/core";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
 import {ActionSheetController, NavController} from "ionic-angular";

@@ -1,4 +1,6 @@
-import struct, logging
+import copy
+import logging
+import struct
 
 import modbus_tk.defines as cst
 from schematics.models import Model
@@ -19,6 +21,15 @@ STATUS_BALANCE = 0x40
 
 DEVICEID_4010_DUO = 64
 DEVICEID_308_DUO = 66
+
+
+class ObjectNotFoundException(Exception):
+    pass
+
+
+class BadRequestException(Exception):
+    pass
+
 
 DeviceIdCellCount = (
     (DEVICEID_308_DUO, 8),
@@ -68,17 +79,44 @@ class ReadDataSegment:
         self.data = charger.modbus_read_registers(self.addr, self.format, function_code=self.func_code)
 
 
-class WriteDataSegment:
-    def __init__(self, charger, name, data_tuples, base=None, prev_format=None):
+class WriteDataSegment(object):
+    def __init__(self, charger, name, data_tuples, data_format, base=None, prev_format=None):
         self.func_code = cst.WRITE_MULTIPLE_REGISTERS
-
         self.name = name
-        self.data = data_tuples
-        self.addr = base if base is not None else prev_format.addr + prev_format.size / 2
 
-        (byte,) = charger.modbus_write_registers(self.addr, self.data)
+        self.data = self.convert_tuples_to_u16s(data_tuples, data_format)
 
-        self.size = byte * 2
+        # / 2 because offsets are expressed in words
+        self.addr = base if base is not None else prev_format.addr + (prev_format.size_in_bytes / 2)
+        (number_of_words_returned,) = charger.modbus_write_registers(self.addr, self.data)
+
+        # Actually, we know that the data being written is all "H" or "h" (2 bytes)
+        # So bytes is simply: len(self.data) * 2
+        self.size_in_bytes = len(self.data) * 2
+
+    @staticmethod
+    def convert_tuples_to_u16s(data_tuples, data_format):
+        # modbus_write_registers expects a bunch of U16s
+        # Thus we expect the data_tuples to have a format supplied.
+        # We convert this to a set of U16s. As such, each format MUST be of length divisible by 2.
+        native_format = "=" + data_format
+        format_length = struct.calcsize(native_format)
+        if format_length % 2 == 1:
+            msg = "Data format {1} has size {0}. Must be divisible by 2 for U16s conversion to succeed".format(format_length, data_format)
+            raise Exception(msg)
+
+        packed_data_as_bytes = struct.pack(native_format, *data_tuples)
+
+        # Some paranoia
+        size_of_packed_data = len(packed_data_as_bytes)
+        if size_of_packed_data % 2 == 1:
+            raise Exception(
+                "Packed data has size {0} (which is unexpected, since the previous packing size test passed). Must be divisible by 2 for U16s conversion to succeed".format(
+                    size_of_packed_data))
+
+        u16s_repeat = size_of_packed_data / 2
+        u16s_format = "{0}H".format(u16s_repeat)
+        return struct.unpack(u16s_format, packed_data_as_bytes)
 
 
 class DeviceInfoStatus(Model):
@@ -138,6 +176,9 @@ class DeviceInfo(Model):
         if modbus_data is not None:
             self.set_from_modbus_data(modbus_data)
 
+    def get_status(self, channel):
+        return self.ch1_status if channel == 0 else self.ch2_status
+
     def set_from_modbus_data(self, data):
         self.device_id = data[0]
         self.device_sn = data[1].split('\0')[0]
@@ -151,6 +192,30 @@ class DeviceInfo(Model):
         for (device_id, cell_count) in DeviceIdCellCount:
             if device_id == self.device_id:
                 self.cell_count = cell_count
+
+
+class OperationResponse(Model):
+    first_number = IntType(required=True)
+    second_number = IntType(required=False)
+
+    def __init__(self, modbus_data=None):
+        super(OperationResponse, self).__init__()
+        if modbus_data is not None:
+            self.set_from_modbus_data(modbus_data)
+
+    # Beats me
+    @serializable()
+    def success(self):
+        return self.first_number == 128
+
+    @serializable()
+    def error(self):
+        return not self.success
+
+    def set_from_modbus_data(self, data):
+        self.first_number = data[0]
+        if len(data) > 1:
+            self.second_number = data[1]
 
 
 class CellStatus(Model):
@@ -193,10 +258,12 @@ class ChannelStatus(Model):
     dlg_box_id = IntType(required=True)
     line_intern_resistance = FloatType(required=True)
 
-    def __init__(self, device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
-        super(ChannelStatus, self).__init__()
+    @staticmethod
+    def modbus(device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
+        status = ChannelStatus()
         if header is not None and cell_v is not None and cell_b is not None and cell_i is not None and footer is not None:
-            self.set_from_modbus_data(device_id, channel, header, cell_v, cell_b, cell_i, footer)
+            status.set_from_modbus_data(device_id, channel, header, cell_v, cell_b, cell_i, footer)
+        return status
 
     def set_from_modbus_data(self, device_id, channel, data, cell_v, cell_b, cell_i, footer):
         self.channel = channel
@@ -297,7 +364,7 @@ class SystemStorage(Model):
 
     fans_off_delay = IntType(required=True)
     lcd_contrast = IntType(required=True)
-    light_value = IntType(required=True)
+    lcd_brightness = IntType(required=True)
 
     beep_type_key = IntType(required=True)
     beep_type_hint = IntType(required=True)
@@ -317,22 +384,22 @@ class SystemStorage(Model):
     calibration = IntType(required=True)
     selected_input_source = IntType(required=True)
 
-    dc_input_low_voltage = FloatType(required=True)
+    dc_input_low_voltage = FloatType(required=True, min_value=9, max_value=48)
     dc_input_over_voltage = FloatType(required=True)
-    dc_input_current_limit = FloatType(required=True)
+    dc_input_current_limit = FloatType(required=True, min_value=1, max_value=65)
 
-    batt_input_low_voltage = FloatType(required=True)
+    batt_input_low_voltage = FloatType(required=True, min_value=9, max_value=48)
     batt_input_over_voltage = FloatType(required=True)
-    batt_input_current_limit = FloatType(required=True)
+    batt_input_current_limit = FloatType(required=True, min_value=1, max_value=65)
 
     regenerative_enable = IntType(required=True)
-    regenerative_volt_limit = FloatType(required=True)
-    regenerative_current_limit = FloatType(required=True)
+    regenerative_volt_limit = FloatType(required=True, min_value=9, max_value=48)
+    regenerative_current_limit = FloatType(required=True, min_value=1, max_value=65)
 
     power_priority = IntType(required=True)
 
-    charge_power = ListType(IntType)
-    discharge_power = ListType(IntType)
+    charge_power = ListType(IntType(min_value=5, max_value=800))
+    discharge_power = ListType(IntType(min_value=5, max_value=80))
     monitor_log_interval = ListType(IntType)
     monitor_save_to_sd = ListType(BooleanType)
 
@@ -346,15 +413,18 @@ class SystemStorage(Model):
     modbus_serial_baud_rate = LongType(required=True)
     modbus_serial_parity = LongType(required=True)
 
-    def __init__(self, ds1=None, ds2=None, ds3=None):
-        super(SystemStorage, self).__init__()
+    @staticmethod
+    def modbus(ds1=None, ds2=None, ds3=None):
         if ds1 is not None and ds2 is not None and ds3 is not None:
-            self.set_from_modbus_data(ds1, ds2, ds3)
+            storage = SystemStorage()
+            storage.set_from_modbus_data(ds1, ds2, ds3)
+            return storage
+        return None
 
     def set_from_modbus_data(self, ds1, ds2, ds3):
         dummy1 = None
         (self.temp_unit, self.temp_stop, self.temp_fans_on, self.temp_reduce, dummy1, self.fans_off_delay,
-         self.lcd_contrast, self.light_value, dummy1,
+         self.lcd_contrast, self.lcd_brightness, dummy1,
          self.beep_type_key, self.beep_type_hint, self.beep_type_alarm, self.beep_type_done,
          self.beep_enabled_key, self.beep_enabled_hint, self.beep_enabled_alarm, self.beep_enabled_done,
          self.beep_volume_key, self.beep_volume_hint, self.beep_volume_alarm, self.beep_volume_done) = ds1.data
@@ -378,11 +448,48 @@ class SystemStorage(Model):
          self.modbus_mode, self.modbus_serial_addr, self.modbus_serial_baud_rate,
          self.modbus_serial_parity) = ds3.data
 
-        self.temp_unit = "C" if self.temp_unit == 0 else "F"
+        self.temp_unit = "C" if self.temp_unit is 0 else "F"
 
         self.temp_stop /= 10.0
         self.temp_fans_on /= 10.0
-        self.temp_reduce /= 10.0
+
+        self.dc_input_low_voltage /= 10.0
+        self.dc_input_current_limit /= 10.0
+        self.dc_input_over_voltage /= 10.0
+
+        self.batt_input_low_voltage /= 10.0
+        self.batt_input_over_voltage /= 10.0
+        self.batt_input_current_limit /= 10.0
+
+        self.regenerative_volt_limit /= 10.0
+        self.regenerative_current_limit /= 10.0
+
+    def to_modbus_data(self):
+        s1 = (0 if self.temp_unit == "C" else 1, self.temp_stop * 10, self.temp_fans_on * 10, self.temp_reduce,)
+
+        # Note, the trailing 0 is required, else the lcd_brightness isn't set correctly.
+        s2 = (self.fans_off_delay, self.lcd_contrast, self.lcd_brightness, 0,)
+        s3 = (self.beep_type_key, self.beep_type_hint, self.beep_type_alarm, self.beep_type_done,
+              self.beep_enabled_key, self.beep_enabled_hint, self.beep_enabled_alarm, self.beep_enabled_done,
+              self.beep_volume_key, self.beep_volume_hint, self.beep_volume_alarm, self.beep_volume_done,)
+        s4 = (self.calibration,)
+
+        # Note, the trailing 0 is required, else the regenerative_current_limit isn't set correctly.
+        s5 = (self.selected_input_source,
+              self.dc_input_low_voltage * 10, self.dc_input_over_voltage * 10, self.dc_input_current_limit * 10,
+              self.batt_input_low_voltage * 10, self.batt_input_over_voltage * 10, self.batt_input_current_limit * 10,
+              self.regenerative_enable, self.regenerative_volt_limit * 10, self.regenerative_current_limit * 10, 0,)
+
+        # Note, the trailing 0 is required, else the modbus_serial_parity isn't set correctly.
+        s6 = (self.charge_power[0], self.charge_power[1],
+              self.discharge_power[0], self.discharge_power[1],
+              self.power_priority,
+              self.monitor_log_interval[0], self.monitor_log_interval[1],
+              self.monitor_save_to_sd[0], self.monitor_save_to_sd[1],
+              self.servo_type, self.servo_user_center, self.server_user_rate, self.server_user_op_angle,
+              self.modbus_mode, self.modbus_serial_addr, self.modbus_serial_baud_rate,
+              self.modbus_serial_parity, 0)
+        return s1, s2, s3, s4, s5, s6
 
     @serializable
     def selected_input_source_type(self):
@@ -399,21 +506,139 @@ class SystemStorage(Model):
 
 
 class PresetIndex(Model):
-    count = IntType(required=True, min_value=0, max_value=63, default=0)
-    indexes = ListType(IntType, required=True, min_size=0, max_size=63, default=[])
+    indexes = ListType(IntType(min_value=0, max_value=255), required=True, min_size=0, max_size=63, default=[])
 
-    def __init__(self, count=None, indexes=None):
-        super(PresetIndex, self).__init__()
+    @staticmethod
+    def modbus(count=None, indexes=None):
         if count is not None and indexes is not None:
-            self.set_from_modbus_data(count, indexes)
+            pi = PresetIndex()
+            pi.set_from_modbus_data(count, indexes)
+            return pi
+        return None
+
+    def preset_exists_at_index(self, index):
+        return self.indexes[index] != 255
+
+    def index_of_preset_with_memory_slot_number(self, memory_slot_number):
+        for index in self.range_of_presets():
+            if self.indexes[index] == memory_slot_number:
+                return index
+        return None
+
+    @property
+    def next_available_memory_slot(self):
+        for slot_number in range(0, 64):
+            # does any index take this?
+            memory_slot_number = self.index_of_preset_with_memory_slot_number(slot_number)
+            if memory_slot_number is None:
+                return slot_number
+        return None
+
+    def add_to_index(self, new_preset):
+        next_memory_slot = self.next_available_memory_slot
+        if next_memory_slot is None:
+            return None
+
+        next_index = self.first_empty_index_position
+        if next_index is None:
+            return None
+
+        new_preset.memory_slot = next_memory_slot
+        new_preset.use_flag = 0x55aa  # Used
+        self.indexes[next_index] = next_memory_slot
+
+        return new_preset
+
+    def range_of_presets(self):
+        if self.first_empty_index_position is not None:
+            return range(0, self.first_empty_index_position)
+        return range(0, 64)
+
+    def is_valid_index(self, index):
+        return index in self.range_of_presets()
+
+    def swap(self, index_one, index_two):
+        if not self.is_valid_index(index_one):
+            message = "Index one {0} is invalid".format(index_one)
+            raise ObjectNotFoundException(message)
+        if not self.is_valid_index(index_two):
+            message = "Index two {0} is invalid".format(index_two)
+            raise ObjectNotFoundException(message)
+
+        value1 = self.indexes[index_one]
+        value2 = self.indexes[index_two]
+        self.indexes[index_one] = value2
+        self.indexes[index_two] = value1
+
+    @property
+    def number_of_presets(self):
+        first_empty_slot = self.first_empty_index_position
+        if not first_empty_slot:
+            return len(self.indexes)
+        return first_empty_slot
+
+    @property
+    def first_empty_index_position(self):
+        first_empty = None
+        for i, index in enumerate(self.indexes):
+            if index == 255:
+                first_empty = i
+                break
+
+        return first_empty
+
+    def delete_item_at_index(self, index, validate=True):
+        if self.is_valid_index(index):
+            del self.indexes[index]
+            if validate:
+                self._validate_and_fix_index_list()
+
+    def _validate_and_fix_index_list(self):
+        # Add 255's on the end until we have 64 of them
+        # this also clears out any other 0's and other stuff.
+        if self.first_empty_index_position is not None:
+            for index in range(self.first_empty_index_position, 64):
+                if index < len(self.indexes):
+                    self.indexes[index] = 255
+                else:
+                    self.indexes.append(255)
+
+        # Indexes must be unique
+        set_of_seen = {}
+        current_position = 0
+        while current_position < self.number_of_presets - 1:
+            index_at_this_position = self.indexes[current_position]
+            if set_of_seen.get(index_at_this_position, None):
+                # if we've already seen it, we should delete this one
+                self.delete_item_at_index(current_position, validate=False)
+
+                # Don't inc counter, as we've deleted one
+            else:
+                set_of_seen[index_at_this_position] = 1
+                current_position += 1
+
+    def set_indexes(self, new_value):
+        self.indexes = copy.deepcopy(new_value)
+        self._validate_and_fix_index_list()
 
     def set_from_modbus_data(self, count, indexes):
-        self.count = count
-        self.indexes = indexes
+        self.set_indexes(indexes)
+
+    @serializable
+    def count(self):
+        # The number of non-255 index positions
+        return self.number_of_presets
+
+    def to_modbus_data(self):
+        v1 = [self.number_of_presets, ]
+        v1.extend(self.indexes[:32])
+        v2 = self.indexes[32:]
+        return v1, v2
 
 
 class Preset(Model):
-    index = IntType(required=True, min_value=0, max_value=63)
+    # The memory slot that this Preset occupies
+    memory_slot = IntType(required=True, min_value=0, max_value=63, serialized_name="index")
 
     use_flag = LongType(required=True, choices=[0xffff, 0x55aa, 0x0000])
     name = StringType(required=True, max_length=37)
@@ -424,16 +649,16 @@ class Preset(Model):
 
     channel_mode = IntType(required=True, choices=[0, 1])
     save_to_sd = BooleanType(required=True, default=True)
-    log_interval_sec = FloatType(required=True)
+    log_interval_sec = FloatType(required=True, min_value=0.5, max_value=60)
     run_counter = IntType(required=True)
 
     type = IntType(required=True, choices=[0, 1, 2, 3, 4, 5])
     li_cell = IntType(required=True)
     ni_cell = IntType(required=True)
-    pb_cell = IntType(required=True)
+    pb_cell = IntType(required=True, min_value=1, max_value=15)
 
     li_mode_c = IntType(required=True, choices=[0, 1])
-    li_mode_d = IntType(required=True, choices=[0, 1])
+    li_mode_d = IntType(required=True, min_value=1, max_value=3)  # this is a bitmask
     ni_mode_c = IntType(required=True, choices=[0, 1])
     ni_mode_d = IntType(required=True, choices=[0, 1])
     pb_mode_c = IntType(required=True, choices=[0, 1])
@@ -449,70 +674,162 @@ class Preset(Model):
 
     keep_charge_enable = BooleanType(required=True)
 
-    lipo_charge_cell_voltage = FloatType(required=True)
-    lilo_charge_cell_voltage = FloatType(required=True)
-    life_charge_cell_voltage = FloatType(required=True)
+    lipo_charge_cell_voltage = FloatType(required=True, min_value=3.85, max_value=4.35)
+    lilo_charge_cell_voltage = FloatType(required=True, min_value=3.75, max_value=4.35)
+    life_charge_cell_voltage = FloatType(required=True, min_value=3.3, max_value=3.8)
 
-    lipo_storage_cell_voltage = FloatType(required=True)
-    lilo_storage_cell_voltage = FloatType(required=True)
-    life_storage_cell_voltage = FloatType(required=True)
+    lipo_storage_cell_voltage = FloatType(required=True, min_value=3.7, max_value=3.9)
+    lilo_storage_cell_voltage = FloatType(required=True, min_value=3.6, max_value=3.8)
+    life_storage_cell_voltage = FloatType(required=True, min_value=3.1, max_value=3.4)
 
-    lipo_discharge_cell_voltage = FloatType(required=True)
-    lilo_discharge_cell_voltage = FloatType(required=True)
-    life_discharge_cell_voltage = FloatType(required=True)
+    lipo_discharge_cell_voltage = FloatType(required=True, min_value=3, max_value=4.1)
+    lilo_discharge_cell_voltage = FloatType(required=True, min_value=2.5, max_value=4)
+    life_discharge_cell_voltage = FloatType(required=True, min_value=2, max_value=3.5)
 
-    charge_current = FloatType(required=True)
-    discharge_current = FloatType(required=True)
-    end_charge = FloatType(required=True)
-    end_discharge = FloatType(required=True)
-    regen_discharge_mode = IntType(required=True, choices=[0, 1, 2, 3])
+    charge_current = FloatType(required=True, min_value=0.05, max_value=40)
+    discharge_current = FloatType(required=True, min_value=0.05, max_value=40)
+    end_charge = FloatType(required=True, min_value=1, max_value=50)
+    end_discharge = FloatType(required=True, min_value=1, max_value=100)
+    regen_discharge_mode = IntType(required=True, choices=[0, 1, 2])
 
-    ni_peak = FloatType(required=True)
-    ni_peak_delay = IntType(required=True)
+    ni_peak = FloatType(required=True, min_value=1, max_value=20)
+    ni_peak_delay = IntType(required=True, min_value=0, max_value=20)
     ni_trickle_enable = BooleanType(required=True)
-    ni_trickle_current = FloatType(required=True)
-    ni_trickle_time = IntType(required=True)
+    ni_trickle_current = FloatType(required=True, min_value=0.02, max_value=1)
+    ni_trickle_time = IntType(required=True, min_value=1, max_value=999)
 
     ni_zero_enable = BooleanType(required=True)
 
-    ni_discharge_voltage = FloatType(required=True)
-    pb_charge_voltage = FloatType(required=True)
-    pb_discharge_voltage = FloatType(required=True)
+    ni_discharge_voltage = FloatType(required=True, min_value=0.1, max_value=33)
+    pb_charge_voltage = FloatType(required=True, min_value=2, max_value=2.6)
+    pb_discharge_voltage = FloatType(required=True, min_value=1.5, max_value=2.4)
     pb_cell_float_enable = BooleanType(required=True)
     pb_cell_float_voltage = FloatType(required=True)
 
-    restore_voltage = FloatType(required=True)
-    restore_time = IntType(required=True)
-    restore_current = FloatType(required=True)
+    restore_voltage = FloatType(required=True, min_value=0.5, max_value=2.5)
+    restore_time = IntType(required=True, min_value=1, max_value=5)
+    restore_current = FloatType(required=True, min_value=0.02, max_value=0.5)
 
-    cycle_count = IntType(required=True)
-    cycle_delay = IntType(required=True)
-    cycle_mode = IntType(required=True)
+    cycle_count = IntType(required=True, min_value=1, max_value=99)
+    cycle_delay = IntType(required=True, min_value=0, max_value=3000)  # charger goes more. I set an arbitrary limit.
+    cycle_mode = IntType(required=True, choices=[0, 1, 2, 3, 4, 5])
 
-    safety_time_c = IntType(required=True)
-    safety_cap_c = IntType(required=True)
-    safety_temp_c = FloatType(required=True)
+    safety_time_c = IntType(required=True, min_value=0)
+    safety_cap_c = IntType(required=True, min_value=50, max_value=200)
+    safety_temp_c = FloatType(required=True, min_value=20, max_value=80)
 
-    safety_time_d = IntType(required=True)
-    safety_cap_d = IntType(required=True)
-    safety_temp_d = FloatType(required=True)
+    safety_time_d = IntType(required=True, min_value=0)
+    safety_cap_d = IntType(required=True, min_value=50, max_value=200)
+    safety_temp_d = FloatType(required=True, min_value=20, max_value=80)
 
-    reg_ch_mode = IntType(required=True)
-    reg_ch_volt = FloatType(required=True)
-    reg_ch_current = FloatType(required=True)
+    reg_ch_mode = IntType(required=True, choices=[0, 1, 2])
+    reg_ch_volt = FloatType(required=True, min_value=0.1, max_value=33)
+    reg_ch_current = FloatType(required=True, min_value=0.05, max_value=40)
 
     fast_store = BooleanType(required=True, default=True)
-    store_compensation = IntType(required=True)
+    store_compensation = FloatType(required=True, min_value=0, max_value=0.2)
 
-    ni_zn_charge_cell_volt = FloatType(required=True)
-    ni_zn_discharge_cell_volt = FloatType(required=True)
-    ni_zn_cell = IntType(required=True, default=0)
+    ni_zn_charge_cell_volt = FloatType(required=True, min_value=1.2, max_value=2)
+    ni_zn_discharge_cell_volt = FloatType(required=True, min_value=0.844, max_value=1.6)
+    ni_zn_cell = IntType(required=True, default=0, min_value=0, max_value=10)
 
-    def __init__(self, index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
-        super(Preset, self).__init__()
-        self.index = index
+    @staticmethod
+    def modbus(index, ds1=None, ds2=None, ds3=None, ds4=None, ds5=None):
         if ds1 is not None and ds2 is not None and ds3 is not None and ds4 is not None and ds5 is not None:
-            self.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
+            p = Preset()
+            p.memory_slot = index
+            p.set_from_modbus_data(ds1, ds2, ds3, ds4, ds5)
+            return p
+        return None
+
+    def verify_can_be_written_or_deleted(self):
+        if self.is_fixed:
+            raise ObjectNotFoundException("This preset exists, but is marked as 'fixed' (read only)")
+
+    def _test_bit_set(self, offset):
+        mask = (1 << offset)
+        return (self.op_enable_mask & mask) > 0
+
+    def _set_or_clear_bit(self, offset, bool_value):
+        mask = (1 << offset)
+        if not bool_value:
+            self.op_enable_mask &= ~mask
+        else:
+            self.op_enable_mask |= mask
+
+    @property
+    def is_unused(self):
+        return not self.is_used
+
+    @property
+    def is_fixed(self):
+        return self.use_flag == 0
+
+    @property
+    def is_used(self):
+        return self.use_flag == 0x55aa
+
+    @property
+    def charge_enabled(self):
+        return self._test_bit_set(0)
+
+    @charge_enabled.setter
+    def charge_enabled(self, new_value):
+        self._set_or_clear_bit(0, new_value)
+
+    @property
+    def storage_enabled(self):
+        return self._test_bit_set(2)
+
+    @storage_enabled.setter
+    def storage_enabled(self, new_value):
+        self._set_or_clear_bit(2, new_value)
+
+    @property
+    def discharge_enabled(self):
+        return self._test_bit_set(3)
+
+    @discharge_enabled.setter
+    def discharge_enabled(self, new_value):
+        self._set_or_clear_bit(3, new_value)
+
+    @property
+    def cycle_enabled(self):
+        return self._test_bit_set(4)
+
+    @cycle_enabled.setter
+    def cycle_enabled(self, new_value):
+        self._set_or_clear_bit(4, new_value)
+
+    @property
+    def balance_enabled(self):
+        return self._test_bit_set(5)
+
+    @balance_enabled.setter
+    def balance_enabled(self, new_value):
+        self._set_or_clear_bit(5, new_value)
+
+    @property
+    def extra_discharge_enable(self):
+        return self.li_mode_d & 0x01 == 0x01
+
+    @extra_discharge_enable.setter
+    def extra_discharge_enable(self, value):
+        if value:
+            self.li_mode_d |= 0x01
+        else:
+            self.li_mode_d &= ~0x01
+
+    @property
+    def discharge_balance_enable(self):
+        return self.li_mode_d & 0x02 == 0x02
+
+    @discharge_balance_enable.setter
+    def discharge_balance_enable(self, value):
+        if value:
+            self.li_mode_d |= 0x02
+        else:
+            self.li_mode_d &= ~0x02
 
     @serializable
     def type_str(self):
@@ -530,12 +847,15 @@ class Preset(Model):
             return "Pb"
 
     def to_modbus_data(self):
+        new_name = self.name
+        if type(new_name) is unicode:
+            new_name = new_name.encode('utf8')
         v1 = (self.use_flag,
-              self.name,
+              new_name,
               self.capacity,
               self.auto_save,
               self.li_balance_end_mode,
-              0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  # 7 reserved bytes
+              chr(0xff), chr(0xff), chr(0xff), chr(0xff), chr(0xff), chr(0xff), chr(0xff),  # 7 reserved bytes
               self.op_enable_mask,
               self.channel_mode)
 
@@ -608,7 +928,7 @@ class Preset(Model):
               int(self.reg_ch_volt * 1000),
               int(self.reg_ch_current * 100),
               self.fast_store,
-              self.store_compensation,
+              self.store_compensation * 100,
               int(self.ni_zn_charge_cell_volt * 1000),
               int(self.ni_zn_discharge_cell_volt * 1000),
               self.ni_zn_cell)
@@ -729,5 +1049,7 @@ class Preset(Model):
         self.log_interval_sec /= 10.0
         self.safety_temp_d /= 10.0
         self.safety_temp_c /= 10.0
+
+        self.store_compensation /= 100.0
 
         self.name = self.name.split('\0')[0]

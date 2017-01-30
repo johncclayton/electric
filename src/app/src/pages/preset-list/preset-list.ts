@@ -11,6 +11,7 @@ import {applyMixins} from "rxjs/util/applyMixins";
     templateUrl: 'preset-list.html'
 })
 export class PresetListPage implements Chemistry {
+    firstLoad: boolean = true;
     public presets: Array<Preset>;
     @ViewChild(List) list: List;
 
@@ -22,17 +23,12 @@ export class PresetListPage implements Chemistry {
 
     ionViewDidLoad() {
         this.refreshPresets(null);
-        if (window.indexedDB) {
-            console.log("I'm in WKWebView!");
-        } else {
-            console.log("I'm in UIWebView");
-        }
     }
 
     refreshPresets(refresher) {
         this.chargerService.getPresets().subscribe(presetsList => {
             this.presets = presetsList;
-
+            this.firstLoad = false;
             if (refresher) {
                 refresher.complete();
             }
@@ -45,11 +41,19 @@ export class PresetListPage implements Chemistry {
 
     editPreset(preset) {
         if (preset) {
-            console.log("Editing preset type: ", preset.type);
+            console.log("Editing preset type: ", preset.type, "usage: ", preset.data.use_flag);
             if (preset.type == ChemistryType.LiPo ||
                 preset.type == ChemistryType.NiMH ||
                 preset.type == ChemistryType.LiFe) {
-                this.navCtrl.push(PresetPage, preset);
+                this.navCtrl.push(PresetPage, {
+                    preset: preset,
+                    callback: (new_preset) => {
+                        if (new_preset) {
+                            console.log("Got result ", new_preset, " from the save call");
+                            preset.updateFrom(new_preset);
+                        }
+                    }
+                });
             } else {
                 let toast = this.toastController.create({
                     message: "Only support editing Lipo for now",
