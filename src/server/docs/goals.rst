@@ -1,5 +1,5 @@
-What is the goal of this project?
-=================================
+Overview / Goals
+================
 The electric project aims to provide you with a way to control
 almost all the features of the iCharger from your mobile device.  While the iCharger
 user interface is perfectly adequate, we think its far cooler to sit
