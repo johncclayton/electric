@@ -11,3 +11,14 @@ Using the provided app & server (see below for setup), you can:
  * make use of all your existing presets
  * easily modifying existing presets or create new ones
  * charger, discharge, store or balance your LiPo packs
+
+Why?
+----
+One day I was staring at my iCharger thinking: it'd be cool if I could get a notification when the charge cycle
+for my LiPo packs has completed.
+
+That was the start of this project.
+
+My brother and I fly RC model helis.  The hobby is complex, interesting, fun and has a fantastic community.
+We're involved in I.T. - and we figured we can use our skills to build something useful and give it back to everyone
+in the community and beyond.

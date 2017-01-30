@@ -1,5 +1,5 @@
-Eletric: an iCharger Mobile Interface
-=====================================
+Electric: an iCharger Mobile Interface
+======================================
 
 .. toctree::
    :maxdepth: 2
@@ -7,6 +7,7 @@ Eletric: an iCharger Mobile Interface
 
    goals
    disclaimer
+   quick-start
 
 how to get started, what to buy, how to hook it up - diff between 308 with USB and 4010 which requires external power, what chargers it works with (pre-req).
 how to install (flashing instruction for Mac, Windows), based off hypriot on rpi3
@@ -18,6 +19,4 @@ future ideas
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
