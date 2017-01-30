@@ -1,14 +1,15 @@
 import {Injectable} from "@angular/core";
-import {Http} from "@angular/http";
+import {Http, Headers, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
 import {Configuration} from "./configuration.service";
 import {Events} from "ionic-angular";
 import {Preset} from "../pages/preset/preset-class";
 import {Channel} from "../models/channel";
 
-const CHARGER_CONNECTED_EVENT: string = 'charger.connected';
-const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected';
-const CHARGER_STATUS_ERROR: string = 'charger.status.error';
+const CHARGER_CONNECTED_EVENT: string = 'charger.connected'; // connected!
+const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected'; // connection error
+const CHARGER_STATUS_ERROR: string = 'charger.status.error'; // when we can't get the charger status
+const CHARGER_COMMAND_FAILURE: string = 'charger.command.error'; // when a save command goes bad
 const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
 export enum ChargerType {
@@ -99,6 +100,7 @@ export class iChargerService {
                 return this.chargerStatus;
             })
             .catch(error => {
+                this.chargerStatusError();
                 this.chargerDidDisappear(error);
                 return Observable.throw(error);
             })
@@ -116,10 +118,14 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
-    private chargerDidDisappear(error) {
-        console.error("Unable to get charger status, error: ", error);
+    private chargerStatusError() {
+        console.error("Unable to get charger status");
         this.events.publish(CHARGER_STATUS_ERROR);
+    }
+
+    private chargerDidDisappear(error) {
         if (this.isConnectedToCharger()) {
+            console.error("Disconnected from the charger, ", error);
             this.events.publish(CHARGER_DISCONNECTED_EVENT);
         }
         this.chargerStatus = {};
@@ -222,11 +228,50 @@ export class iChargerService {
         };
         return new Channel(channelNumber, channelData, this.config.getCellLimit());
     }
+
+    savePreset(preset: Preset): Observable<any> {
+        // An existing preset? in a memory slot?
+        return Observable.create((observable) => {
+            let addingNewPreset = preset.index < 0;
+            let putURL = addingNewPreset ? this.getChargerURL("/addpreset") : this.getChargerURL("/preset/" + preset.index);
+            let body = preset.json();
+            console.log("Saving Preset: ", body);
+
+            let headers = new Headers({ 'Content-Type': 'application/json' });
+            let options = new RequestOptions({ headers: headers });
+
+            this.http.put(putURL, body, options).subscribe((resp) => {
+                // Expect a copy of the modified preset?
+                // If we were adding, the preset is returned. If we're saving, it isn't.
+                // At the moment, it just returns "ok"
+                if (resp.ok) {
+                    // Yay
+                    if (addingNewPreset) {
+                        // Return the newly saved preset, with its new memory slot (index)
+                        let new_preset = new Preset(resp.json());
+                        observable.next(new_preset);
+                    } else {
+                        // Just return the modified preset, that the user just saved
+                        observable.next(preset);
+                    }
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            }, (error) => {
+                console.log("Error saving preset: ", error);
+                this.events.publish(CHARGER_COMMAND_FAILURE, error);
+                observable.error(error);
+            });
+
+        });
+    }
 }
 
 export {
     CHARGER_CONNECTED_EVENT,
     CHARGER_DISCONNECTED_EVENT,
     CHARGER_STATUS_ERROR,
+    CHARGER_COMMAND_FAILURE,
     CHARGER_CHANNEL_EVENT,
 }

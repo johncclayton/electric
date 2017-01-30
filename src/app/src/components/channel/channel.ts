@@ -1,7 +1,7 @@
-import {Component, Input, trigger, state, style, transition, animate, ViewChild} from "@angular/core";
+import {Component, Input, trigger, state, style, transition, animate} from "@angular/core";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
-import {ActionSheetController, NavController, Slides} from "ionic-angular";
+import {ActionSheetController, NavController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 
 enum ChannelDisplay {

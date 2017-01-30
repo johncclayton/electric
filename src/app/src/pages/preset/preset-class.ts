@@ -1,4 +1,4 @@
-export const enum ChemistryType {
+export enum ChemistryType {
     LiPo = 0,
     LiLo,
     LiFe,
@@ -9,7 +9,7 @@ export const enum ChemistryType {
     Anything,
 }
 
-export const enum LipoBalanceType {
+export enum LipoBalanceType {
     Slow = 0,
     Normal = 1,
     Fast = 2,
@@ -19,7 +19,7 @@ export const enum LipoBalanceType {
 }
 
 // li_balance_end_mode
-export const enum BalanceEndCondition {
+export enum BalanceEndCondition {
     // Charge End Current is disabled in the UI
     EndCurrentOff_DetectBalanceOn,
 
@@ -30,18 +30,18 @@ export const enum BalanceEndCondition {
 }
 
 // Yes, it's not sequential as per the iCharger UI itself.
-export const enum RegenerativeMode {
+export enum RegenerativeMode {
     Off = 0,
     ToInput = 1,
     ToChannel = 2
 }
 
-export const enum RegenerativeToChannelMethod {
+export enum RegenerativeToChannelMethod {
     ResistanceOrBulbs = 0,
     ChargingBattery = 1,
 }
 
-export const enum Cycle {
+export enum Cycle {
     ChargeDischarge,
     DischargeCharge,
     ChargeDischargeCharge,
@@ -60,6 +60,10 @@ export class Preset {
 
     constructor(public presetDict: {}) {
         this.data = presetDict;
+    }
+
+    json() {
+        return JSON.stringify(this.data);
     }
 
     dischargeVoltageMinMax() {
@@ -590,6 +594,10 @@ export class Preset {
         let name = Preset.chemistryPrefix(this.type);
         let rate = this.charge_current;
         return `${name} ${rate}A`;
+    }
+
+    updateFrom(other_preset) {
+        this.data = other_preset.data;
     }
 
 }

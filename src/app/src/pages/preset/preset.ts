@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, NavParams} from "ionic-angular";
+import {NavController, NavParams, AlertController} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {PresetChargePage} from "../preset-charge/preset-charge";
 import {Preset, ChemistryType} from "./preset-class";
@@ -7,6 +7,7 @@ import {PresetStoragePage} from "../preset-storage/preset-storage";
 import {PresetDischargePage} from "../preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../preset-cycle/preset-cycle";
 import {iChargerService} from "../../services/icharger.service";
+import * as _ from "lodash";
 
 @Component({
     selector: 'page-preset',
@@ -14,13 +15,21 @@ import {iChargerService} from "../../services/icharger.service";
 })
 export class PresetPage {
     preset: Preset = null;
+    unmodifiedpreset: Preset = null;
+    confirmedExit: boolean = false;
     optionsPages;
+
+    private callback: (preset: Preset) => void;
 
     constructor(public navCtrl: NavController,
                 public config: Configuration,
+                public alertController: AlertController,
                 public chargerService: iChargerService,
                 public navParams: NavParams) {
-        this.preset = navParams.data;
+
+        this.callback = navParams.data['callback'];
+        this.preset = _.cloneDeep(navParams.data['preset']);
+        this.unmodifiedpreset = _.cloneDeep(this.preset);
 
         this.optionsPages = [
             {title: 'Charging', component: PresetChargePage},
@@ -46,6 +55,52 @@ export class PresetPage {
         // this.switchTo(PresetDischargePage);
         // this.switchTo(PresetStoragePage);
         // this.switchTo(PresetCyclePage);
+    }
+
+    ionViewCanLeave() {
+        return new Promise((resolve, reject) => {
+            // If there are changes, we should prompt the user to save.
+            if (!_.isEqual(this.unmodifiedpreset, this.preset)) {
+                this.confirmedExit = false;
+                let alert = this.alertController.create({
+                    title: 'Save modifications?',
+                    message: 'Preset has been modified. Save it?',
+                    buttons: [
+                        {
+                            text: 'Save',
+                            handler: () => {
+                                this.chargerService.savePreset(this.preset).subscribe((preset) => {
+                                    // Pass the result back to the caller.
+                                    // When you save,  you are always given your preset back.
+                                    // This may be a new preset object, with a new memory slot, or it may just the modified preset.
+                                    // Either way, the caller needs it, to update their state.
+                                    this.callback(preset);
+                                    resolve();
+                                });
+
+                                // If there's an error, the charger service will fire an event.
+                                // It'll be picked up by the charger-status component, and an error shown as a toast
+                            }
+                        },
+                        {
+                            text: 'Discard',
+                            handler: () => {
+                                resolve();
+                            }
+                        },
+                        {
+                            text: 'Cancel',
+                            handler: () => {
+                                reject();
+                            }
+                        }
+                    ]
+                });
+                alert.present();
+            } else {
+                resolve();
+            }
+        });
     }
 
     refreshPreset(refresher) {

@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {Platform, ToastController, Events, NavController} from "ionic-angular";
-import {iChargerService, CHARGER_STATUS_ERROR} from "../../services/icharger.service";
+import {iChargerService, CHARGER_STATUS_ERROR, CHARGER_COMMAND_FAILURE} from "../../services/icharger.service";
 import {CHARGER_CONNECTED_EVENT} from "../../services/icharger.mock.service";
 
 @Component({
@@ -29,7 +29,8 @@ export class ConnectionStateComponent {
         this.connectionFailure = 0;
 
         this.events.subscribe(CHARGER_CONNECTED_EVENT, () => this.chargerConnected());
-        this.events.subscribe(CHARGER_STATUS_ERROR, () => this.chargerDisconnected());
+        this.events.subscribe(CHARGER_STATUS_ERROR, () => this.chargerError(null));
+        this.events.subscribe(CHARGER_COMMAND_FAILURE, (error) => this.chargerError(error));
     }
 
     chargerConnected() {
@@ -41,11 +42,14 @@ export class ConnectionStateComponent {
         this.connectionFailure = 0;
     }
 
-    chargerDisconnected() {
+    chargerError(message) {
+        if (message == null) {
+            message = 'Connection Problem'
+        }
         this.connectionFailure++;
         if (!this.disconnectionAlert) {
             this.disconnectionAlert = this.toastController.create({
-                'message': 'Connection Problem',
+                'message': message,
                 'cssClass': 'redToast',
                 'position': 'bottom',
                 'showCloseButton': true,
