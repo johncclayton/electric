@@ -83,11 +83,24 @@ export class PresetPage {
     ionViewCanLeave() {
         return new Promise((resolve, reject) => {
             // If there are changes, we should prompt the user to save.
-            if (!_.isEqual(this.unmodifiedpreset.data, this.preset.data)) {
+            let presetBeingEdited = this.preset;
+            let modifiedProperties = _.reduce(this.unmodifiedpreset.data, function (result, value, key) {
+                return _.isEqual(value, presetBeingEdited.data[key]) ?
+                    result : result.concat(key);
+            }, []);
+
+            // let are_equal = _.isEqual(this.unmodifiedpreset.data, this.preset.data);
+            let are_equal = modifiedProperties.length == 0;
+            if (!are_equal) {
+                console.log("Preset modified:");
+                for (let property of modifiedProperties) {
+                    console.log(property, ": ", this.unmodifiedpreset.data[property], " (", typeof(this.unmodifiedpreset.data[property]),
+                        ") now = ", presetBeingEdited.data[property], "(", typeof(presetBeingEdited.data[property]), ")");
+                }
                 this.confirmedExit = false;
                 let alert = this.alertController.create({
-                    title: 'Save modifications?',
-                    message: 'Preset has been modified. Save it?',
+                    title: 'Preset modified',
+                    message: 'Do you want to save your changes?',
                     buttons: [
                         {
                             text: 'Save',
