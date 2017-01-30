@@ -17,6 +17,7 @@ export class PresetPage {
     preset: Preset = null;
     unmodifiedpreset: Preset = null;
     confirmedExit: boolean = false;
+    saving: boolean = false;
     optionsPages;
 
     private callback: (preset: Preset) => void;
@@ -30,23 +31,44 @@ export class PresetPage {
         this.callback = navParams.data['callback'];
         this.preset = _.cloneDeep(navParams.data['preset']);
         this.unmodifiedpreset = _.cloneDeep(this.preset);
+    }
 
-        this.optionsPages = [
-            {title: 'Charging', component: PresetChargePage},
-            {title: 'Discharging', component: PresetDischargePage},
-            {title: 'Cycle', component: PresetCyclePage},
+    optionPagesForCurrentType() {
+        if (this.optionsPages == null) {
+            this.optionsPages = [
+                {title: 'Charging', component: PresetChargePage},
+                {title: 'Discharging', component: PresetDischargePage},
+                {title: 'Cycle', component: PresetCyclePage},
 
-            // Don't see options in the charger, so dunno what to do here
-            // {title: 'Balancing', component: PresetBalancePage},
-        ];
+                // Don't see options in the charger, so dunno what to do here
+                // {title: 'Balancing', component: PresetBalancePage},
+            ];
 
-        if (this.preset.type == ChemistryType.LiPo ||
-            this.preset.type == ChemistryType.LiFe) {
-            this.optionsPages.push(
-                {title: 'Storage', component: PresetStoragePage}
-            );
+            if (this.preset.type == ChemistryType.LiPo ||
+                this.preset.type == ChemistryType.LiFe) {
+                this.optionsPages.push(
+                    {title: 'Storage', component: PresetStoragePage}
+                );
+            }
         }
+        return this.optionsPages;
+    }
 
+    get presetType() {
+        return this.preset.type;
+    }
+
+    set presetType(newType) {
+        this.optionsPages = null;
+        this.preset.type = newType;
+    }
+
+    isDisabled() {
+        return this.saving;
+    }
+
+    isReadOnly() {
+        return this.preset.readonly;
     }
 
     ionViewDidLoad() {
@@ -55,12 +77,13 @@ export class PresetPage {
         // this.switchTo(PresetDischargePage);
         // this.switchTo(PresetStoragePage);
         // this.switchTo(PresetCyclePage);
+        this.confirmedExit = false;
     }
 
     ionViewCanLeave() {
         return new Promise((resolve, reject) => {
             // If there are changes, we should prompt the user to save.
-            if (!_.isEqual(this.unmodifiedpreset, this.preset)) {
+            if (!_.isEqual(this.unmodifiedpreset.data, this.preset.data)) {
                 this.confirmedExit = false;
                 let alert = this.alertController.create({
                     title: 'Save modifications?',
@@ -69,12 +92,14 @@ export class PresetPage {
                         {
                             text: 'Save',
                             handler: () => {
+                                this.saving = true;
                                 this.chargerService.savePreset(this.preset).subscribe((preset) => {
                                     // Pass the result back to the caller.
                                     // When you save,  you are always given your preset back.
                                     // This may be a new preset object, with a new memory slot, or it may just the modified preset.
                                     // Either way, the caller needs it, to update their state.
                                     this.callback(preset);
+                                    this.saving = false;
                                     resolve();
                                 });
 
@@ -85,12 +110,14 @@ export class PresetPage {
                         {
                             text: 'Discard',
                             handler: () => {
+                                this.saving = false;
                                 resolve();
                             }
                         },
                         {
                             text: 'Cancel',
                             handler: () => {
+                                this.saving = false;
                                 reject();
                             }
                         }

@@ -45,7 +45,7 @@ export class PresetListPage implements Chemistry {
 
     editPreset(preset) {
         if (preset) {
-            console.log("Editing preset type: ", preset.type);
+            console.log("Editing preset type: ", preset.type, "usage: ", preset.data.use_flag);
             if (preset.type == ChemistryType.LiPo ||
                 preset.type == ChemistryType.NiMH ||
                 preset.type == ChemistryType.LiFe) {

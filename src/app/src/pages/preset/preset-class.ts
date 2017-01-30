@@ -600,4 +600,7 @@ export class Preset {
         this.data = other_preset.data;
     }
 
+    get readonly(): boolean {
+        return this.data['use_flag'] == 0; // fixed
+    }
 }
