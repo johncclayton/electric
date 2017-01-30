@@ -16,6 +16,8 @@
     <ion-refresher (ionRefresh)="refreshPresets($event)">
         <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
+    <ion-spinner *ngIf="firstLoad"></ion-spinner>
+
     <ion-list>
         <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
             <div class="item-left">{{preset.index}}:{{preset.name}}</div>
