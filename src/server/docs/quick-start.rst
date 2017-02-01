@@ -1,6 +1,6 @@
-Quick Start
+Get Running
 ===========
-You need to check that your equipment satifies the pre-requisites, and then its just a matter of firing up the software!
+You need to check that your equipment satisfies the pre-requisites, and then its just a matter of firing up the software!
 
 Prerequisites
 -------------
@@ -14,6 +14,11 @@ You should have, or make a shopping list that includes:
 Flashing the Raspberry Pi 3
 ---------------------------
 You what?!
+
+Without getting into details (see Development if you want that), we need a thing called "Docker" to run the project.
+The standard pi3 linux doesn't have it, so we're going to reflash your Pi3 memory card with a thing called "Hypriot", which does.
+
+
 
 This software is distributed as a Docker container - the Raspberry Pi 3 is a great little machine that's capable of running
 this technology.

@@ -1,5 +1,5 @@
-Overview / Goals
-================
+Overview
+========
 This project aims to provide you with a way to control
 almost all the features of the iCharger from your mobile device.  
 

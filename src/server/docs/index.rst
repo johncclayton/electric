@@ -6,8 +6,8 @@ Electric: an iCharger Mobile Interface
    :caption: Contents:
 
    goals
-   disclaimer
    quick-start
+   disclaimer
    supported_hw <supported hardware>
 
 how to get started, what to buy, how to hook it up - diff between 308 with USB and 4010 which requires external power, what chargers it works with (pre-req).
