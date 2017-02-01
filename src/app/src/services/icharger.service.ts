@@ -229,6 +229,22 @@ export class iChargerService {
         return new Channel(channelNumber, channelData, this.config.getCellLimit());
     }
 
+    stopCurrentTask(channel: Channel): Observable<any> {
+        return Observable.create((observable) => {
+            console.log("Stopping current task...");
+            let url = this.getChargerURL("/stop/" + channel.index);
+
+            this.http.put(url, null).subscribe((resp) => {
+                if (resp.ok) {
+                    // Maaay need to do this again, to get past the 'STOPS' state.
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
     savePreset(preset: Preset): Observable<any> {
         // An existing preset? in a memory slot?
         return Observable.create((observable) => {
@@ -237,8 +253,8 @@ export class iChargerService {
             let body = preset.json();
             console.log("Saving Preset: ", body);
 
-            let headers = new Headers({ 'Content-Type': 'application/json' });
-            let options = new RequestOptions({ headers: headers });
+            let headers = new Headers({'Content-Type': 'application/json'});
+            let options = new RequestOptions({headers: headers});
 
             this.http.put(putURL, body, options).subscribe((resp) => {
                 // Expect a copy of the modified preset?
@@ -264,6 +280,20 @@ export class iChargerService {
                 observable.error(error);
             });
 
+        });
+    }
+
+    startCharge(channel: Channel, preset: Preset): Observable<any> {
+        return Observable.create((observable) => {
+            let chargeURL = this.getChargerURL("/charge/" + channel.index + "/" + preset.index);
+            console.log("Beginning charge on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(chargeURL, null).subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
         });
     }
 }

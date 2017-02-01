@@ -1,8 +1,9 @@
 import {Component, Input, trigger, state, style, transition, animate} from "@angular/core";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
-import {ActionSheetController, NavController} from "ionic-angular";
+import {ActionSheetController, NavController, AlertController, ToastController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
+import {Preset} from "../../pages/preset/preset-class";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -10,12 +11,6 @@ enum ChannelDisplay {
     ChannelDisplayShowIR,
 }
 
-/*
- control_status: 3, run_status: 13 - discharging
- control_status: 0, run_status: 1 - pressed stop after discharging
- control_status: 0, run_status: 0 - pressed stop again, idle
- control_status: 0, run_status: 40 - end of charge, done
- */
 @Component({
     selector: 'channel',
     templateUrl: 'channel.html',
@@ -53,6 +48,8 @@ export class ChannelComponent {
 
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
+                public alertController: AlertController,
+                public toastController: ToastController,
                 public actionController: ActionSheetController) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
         this.channel = this.chargerService.emptyData(0);
@@ -68,82 +65,62 @@ export class ChannelComponent {
     }
 
     showChargingOptionsPage() {
-        this.navCtrlr.push(ChargeOptionsPage, this.channel);
+        this.navCtrlr.push(ChargeOptionsPage, {
+            channel: this.channel,
+            callback: (preset) => {
+                if (preset) {
+                    this.startCharge(preset);
+                }
+            }
+        });
     }
 
     showMeasureIR() {
         this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
     }
 
-    showActionAlert() {
-        let alert = this.actionController.create({
-            'title': 'Channel ' + (this.index + 1),
-            buttons: [
-                {
-                    text: 'Charge',
-                    role: 'destructive',
-                    handler: () => {
-                        this.showChargingOptionsPage();
-                    }
-                },
-                {
-                    text: 'Store',
-                    handler: () => {
-
-                    }
-                },
-                {
-                    text: 'Discharge',
-                    handler: () => {
-
-                    }
-                },
-                {
-                    text: 'Balance Only',
-                    handler: () => {
-
-                    }
-                },
-                {
-                    text: 'Measure IR',
-                    handler: () => {
-                        this.showMeasureIR();
-                    }
-                },
-                {
-                    text: 'Cancel',
-                    role: 'cancel',
-                    handler: () => {
-                    }
-                }
-            ]
+    startCharge(preset: Preset) {
+        console.log("Begin charge on channel ", this.channel.index, " using ", preset.name);
+        this.chargerService.startCharge(this.channel, preset).subscribe((resp) => {
+            console.log("Started a charge on channel " + this.channel.index + ", using preset: " + preset.name);
+            console.log("Start response: ", resp);
         });
-
-        alert.present()
-    }
-
-    startCharge() {
-
     }
 
     startDischarge() {
-
+        // this.chargerService.startDischarge(this.channel);
     }
 
     startBalance() {
-
+        // this.chargerService.startBalance(this.channel);
     }
 
     startStore() {
-
+        // this.chargerService.startStore(this.channel);
     }
 
     measureIR() {
+        // this.chargerService.measureIR(this.channel);
+    }
 
+    stopCurrentTask() {
+        this.chargerService.stopCurrentTask(this.channel).subscribe((resp) => {
+            console.log("Stopped!")
+        });
     }
 
     showChargerActions() {
-        this.showActionAlert();
+        if (!this.channel.packPluggedIn) {
+            let toast = this.toastController.create({
+                'message': "Pack not plugged in.",
+                'cssClass': 'redToast',
+                'position': 'bottom',
+                'duration' : 2000,
+            });
+            toast.present();
+            return;
+        }
+
         // this.channelMode++;
         // if (this.channelMode > ChannelDisplay.ChannelDisplayShowOptions) {
         //     this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
@@ -157,6 +134,73 @@ export class ChannelComponent {
         // }
         //
         // console.log("Switch mode to ", this.channelMode);
+
+        if (this.channel.isChargeRunning) {
+            let alert = this.actionController.create({
+                'title': 'Channel ' + (this.index + 1),
+                buttons: [
+                    {
+                        text: 'Stop',
+                        role: 'destructive',
+                        handler: () => {
+                            this.stopCurrentTask();
+                        }
+                    },
+                    {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                        }
+                    }
+                ]
+            });
+            alert.present();
+        } else {
+            let alert = this.actionController.create({
+                'title': 'Channel ' + (this.index + 1),
+                buttons: [
+                    {
+                        text: 'Charge',
+                        role: 'destructive',
+                        handler: () => {
+                            this.showChargingOptionsPage();
+                        }
+                    },
+                    {
+                        text: 'Store',
+                        handler: () => {
+                            this.startStore();
+                        }
+                    },
+                    {
+                        text: 'Discharge',
+                        handler: () => {
+                            this.startDischarge();
+                        }
+                    },
+                    {
+                        text: 'Balance Only',
+                        handler: () => {
+                            this.startBalance();
+                        }
+                    },
+                    {
+                        text: 'Measure IR',
+                        handler: () => {
+                            this.showMeasureIR();
+                        }
+                    },
+                    {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                        }
+                    }
+                ]
+            });
+            alert.present()
+        }
+
     }
 
     ionViewDidLoad() {

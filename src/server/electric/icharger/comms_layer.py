@@ -53,11 +53,13 @@ class ChargerCommsManager(object):
     Validation is not performed here - the data going in/out is assumed to be correct already.
     """
     locking = False
+    order_lock_count = 0
 
     def __init__(self, master=None):
         if master is None:
             master = iChargerMaster()
         self.charger = master
+        self.order_lock_count = 0
 
     def reset(self):
         self.charger.reset()
@@ -316,12 +318,21 @@ class ChargerCommsManager(object):
         return True
 
     def take_out_order_lock(self, message="<unknown reason>"):
-        logger.info("Taking out order lock: {0}".format(message))
+        self.order_lock_count += 1
+        logger.info("Taking out order lock ({1}): {0}".format(message, self.order_lock_count))
         self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_LOCK,))
+
+    def take_out_order_lock_on_slot_and_channel(self, memory_slot, channel, message="<unknown reason>"):
+        self.order_lock_count += 1
+        logger.info("Taking out order lock on ch:{1}/slot:{0}, {3}. Lock count: {2}".format(memory_slot, channel, self.order_lock_count, message))
+        self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel, VALUE_ORDER_LOCK,))
 
     def release_order_lock(self):
         # clear the ORDER LOCK value (no idea why - the C++ code does this)
-        self.charger.modbus_write_registers(0x8000 + 3, (0,))
+        self.order_lock_count -= 1
+        if self.order_lock_count == 0:
+            logger.info("Releasing order lock")
+            self.charger.modbus_write_registers(0x8000 + 3, (0,))
 
     def close_messagebox(self):
         # If showing a dialog, or have error, try to clear the dialog
@@ -351,30 +362,23 @@ class ChargerCommsManager(object):
     def run_operation(self, operation, channel_number, preset_memory_slot_index):
         channel_number = min(1, max(0, channel_number))
 
-        # Load the preset from this slot, and check it is valid
-        # Loading will itself perform a check for 'used', and will throw an exception it it
-        # is not available.
-        # It'll also be loaded into RAM.
         logger.info("Begin operation {0} on channel {1} using slot {2}".format(operation, channel_number, preset_memory_slot_index))
-        self.get_preset(preset_memory_slot_index)
+        self.take_out_order_lock_on_slot_and_channel(preset_memory_slot_index, channel_number, "charging")
+        try:
+            # Load the preset from this slot, and check it is valid
+            # Loading will itself perform a check for 'used', and will throw an exception it it
+            # is not available.
+            # It'll also be loaded into RAM.
+            # self.get_preset(preset_memory_slot_index)
 
-        self.take_out_order_lock("charging")
+            values_list = (preset_memory_slot_index, channel_number, VALUE_ORDER_LOCK, Order.Run, 0, 0,)
+            logger.info("Sending write: {0}".format(values_list))
+            modbus_response = self.charger.modbus_write_registers(0x8000 + 1, values_list)
+            logger.info("Got back {0} from write".format(modbus_response))
 
-        # Translate from a sensible 0..64 index, to where it is in memory
-        values_list = (
-            operation,
-            preset_memory_slot_index,
-            channel_number,
-            VALUE_ORDER_LOCK,
-            Order.Run,
-        )
+        finally:
+            self.release_order_lock()
 
-        logger.info("Sending write: {0}".format(values_list))
-        modbus_response = self.charger.modbus_write_registers(0x8000, values_list)
-
-        logger.info("Got back {0} from write".format(modbus_response))
         logger.info("Device status: {0}".format(self.get_device_info().get_status(channel_number).to_native()))
-
-        self.release_order_lock()
 
         return self.get_device_info().get_status(channel_number)

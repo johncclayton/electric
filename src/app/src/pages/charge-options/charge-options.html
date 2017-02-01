@@ -30,7 +30,7 @@
             <ion-grid>
                 <ion-row *ngFor="let some of filteredPresets()" no-padding>
                     <ion-col *ngFor="let preset of some">
-                        <button [ngClass]="chemistryClass(preset)" small block ion-button>
+                        <button [ngClass]="chemistryClass(preset)" small block ion-button (click)="chargeUsingPreset(preset)">
                             {{preset.smallButtonName()}}
                         </button>
                     </ion-col>

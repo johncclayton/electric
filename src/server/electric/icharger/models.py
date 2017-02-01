@@ -11,6 +11,32 @@ from schematics.types.serializable import serializable
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
+'''
+
+DeviceInfo:
+- General Status Word:
+
+Channel:
+- control_status
+- run_status
+
+'''
+
+# "general status word"
+# charging: cell volt, control, run, run_status
+# stopped: cell volt, run_status
+# fully stopped: cell volt
+# storage (charging): cell volt, control, run, run_status
+# discharging: ctrl_status, run, run_status
+
+# DeviceInfo.run_status
+# 7 = charging
+# 1 = stopped(showing stopped)
+# 13 = discharging
+# 17 = balance
+# 0 = really stopped
+
+
 STATUS_RUN = 0x01
 STATUS_ERROR = 0x02
 STATUS_CONTROL_STATUS = 0x04
@@ -132,31 +158,31 @@ class DeviceInfoStatus(Model):
 
     @serializable
     def run(self):
-        return self.value & STATUS_RUN
+        return (self.value & STATUS_RUN) == STATUS_RUN
 
     @serializable
     def err(self):
-        return self.value & STATUS_ERROR
+        return (self.value & STATUS_ERROR) == STATUS_ERROR
 
     @serializable
     def ctrl_status(self):
-        return self.value & STATUS_CONTROL_STATUS
+        return (self.value & STATUS_CONTROL_STATUS) == STATUS_CONTROL_STATUS
 
     @serializable
     def run_status(self):
-        return self.value & STATUS_RUN_STATUS
+        return (self.value & STATUS_RUN_STATUS) == STATUS_RUN_STATUS
 
     @serializable
     def dlg_box_status(self):
-        return self.value & STATUS_DLG_BOX_STATUS
+        return (self.value & STATUS_DLG_BOX_STATUS) == STATUS_DLG_BOX_STATUS
 
     @serializable
     def cell_volt_status(self):
-        return self.value & STATUS_CELL_VOLTAGE
+        return (self.value & STATUS_CELL_VOLTAGE) == STATUS_CELL_VOLTAGE
 
     @serializable
     def balance(self):
-        return self.value & STATUS_BALANCE
+        return (self.value & STATUS_BALANCE) == STATUS_BALANCE
 
 
 class DeviceInfo(Model):
@@ -311,7 +337,14 @@ class ChannelStatus(Model):
 
     @serializable
     def battery_plugged_in(self):
-        return self.curr_out_volts <= self.cell_total_voltage
+        total_voltage = self.cell_total_voltage
+        curr_out_volts = self.curr_out_volts
+
+        # This is more or less a "punt".
+        # You can't use exact, because sometimes total will be > sometimes a little less. Go figure.
+        plugged_in = curr_out_volts > (total_voltage * 0.8)
+        # logger.info("Pack not plugged in because {0} < {1}".format(curr_out_volts, total_voltage))
+        return plugged_in
 
     @serializable
     def balance_leads_plugged_in(self):

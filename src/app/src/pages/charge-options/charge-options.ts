@@ -18,12 +18,14 @@ export class ChargeOptionsPage implements Chemistry {
     channel: Channel;
     channelLimitReached: boolean = false;
     presets: Array<any> = [];
+    private callback: any;
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public config: Configuration,
                 public navParams: NavParams) {
-        this.channel = navParams.data;
+        this.channel = navParams.data['channel'];
+        this.callback = navParams.data['callback'];
     }
 
     ionViewDidLoad() {
@@ -31,6 +33,12 @@ export class ChargeOptionsPage implements Chemistry {
             this.presets = presetList;
         });
         this.recomputeLimitReached();
+    }
+
+    chargeUsingPreset(preset: Preset) {
+        this.navCtrl.pop().then(() => {
+            this.callback(preset);
+        })
     }
 
     get chargeMethod(): string {
@@ -84,6 +92,7 @@ export class ChargeOptionsPage implements Chemistry {
     get computedAmps() {
         return this.numPacks * (this.capacity / 1000) * this.chargeRate;
     }
+
     get amps() {
         return Math.min(this.computedAmps, this.chargerService.getMaxAmpsPerChannel());
     }

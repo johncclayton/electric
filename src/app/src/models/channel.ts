@@ -1,3 +1,5 @@
+import * as _ from "lodash";
+
 export class Channel {
     _json = {};
     _index: number = 0;
@@ -35,6 +37,27 @@ export class Channel {
         return this._json;
     }
 
+    get packPluggedIn(): boolean {
+        let cells = this._json['battery_plugged_in'];
+        let main = this._json['balance_leads_plugged_in'];
+        return cells && main;
+    }
+
+    get isChargeRunning(): boolean {
+        // 7 = charging
+        // 13 = discharging
+        // 17 = balance
+        console.log("Charge run status is: ", this._json['run_status']);
+        let run_states = [7, 13, 17];
+        return run_states.indexOf(this._json['run_status']) != -1;
+    }
+
+    get isChargeStopped(): boolean {
+        // 40 = finished charge, finished store
+        let stopped_stats = [40, 0];
+        return stopped_stats.indexOf(this._json['run_status']) != -1;
+    }
+
     get maxMilliVoltDiff() {
         let cells = this.cells;
         if (!cells) {
@@ -63,7 +86,7 @@ export class Channel {
     private limitCellsBasedOnLimit(configuredCellLimit: number) {
         // Limit the number of cells
         if (configuredCellLimit >= 0) {
-            let activeCells = this.numberOfActiveCells();
+            let activeCells = this.numberOfActiveCells;
             if (activeCells != this._json['cells'].length) {
                 // console.debug(`Limited cells on channel ${this._index} to ${activeCells}`);
                 let toShow = Math.max(activeCells, configuredCellLimit);
@@ -78,7 +101,7 @@ export class Channel {
         }
     }
 
-    private numberOfActiveCells() {
+    private get numberOfActiveCells() {
         // Maybe reduce the channels, as long as they are 0 volt.
         let cells = this._json['cells'];
         if (cells) {

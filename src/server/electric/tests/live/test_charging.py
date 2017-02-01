@@ -8,24 +8,25 @@ logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
 
 class TestCharging(BasePresetTestCase):
+    CHARGE_PRESET_NAME = "CHAARGE"
+
     def setUp(self):
         super(TestCharging, self).setUp()
         self.clear_existing_charge_preset()
 
-    # This was here to let me clean up the CHAARGE preset when things were going "badly"
     def clear_existing_charge_preset(self):
-        preset = self._find_preset_with_name("CHAARGE")
+        preset = self._find_preset_with_name(TestCharging.CHARGE_PRESET_NAME)
         while preset is not None:
             logger.info("Deleting slot {0}".format(preset.memory_slot))
             response = self.client.delete("/preset/{0}".format(preset.memory_slot))
             self.assertEqual(response.status_code, 200)
-            preset = self._find_preset_with_name("CHAARGE")
+            preset = self._find_preset_with_name(TestCharging.CHARGE_PRESET_NAME)
 
     def test_can_charge_using_test_preset(self):
         if True:
-            preset = self._find_preset_with_name("CHAARGE")
+            preset = self._find_preset_with_name(TestCharging.CHARGE_PRESET_NAME)
             if preset is None:
-                preset = self._create_new_test_preset("CHAARGE")
+                preset = self._create_new_test_preset(TestCharging.CHARGE_PRESET_NAME)
                 # First, we set it to 1A.
                 preset.charge_current = 1.0
                 native = preset.to_native()
@@ -62,5 +63,9 @@ class TestCharging(BasePresetTestCase):
             self.assertEqual(preset.charge_current, 1.5)
 
             # Wait 2s. Then stop
+            response = self.client.put("/stop/0")
+            self.assertEqual(response.status_code, 200)
+
+            # Stop again ... to get rid of STOPS message on charger
             response = self.client.put("/stop/0")
             self.assertEqual(response.status_code, 200)
