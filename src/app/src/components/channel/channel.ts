@@ -4,11 +4,20 @@ import {Channel} from "../../models/channel";
 import {ActionSheetController, NavController, AlertController, ToastController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 import {Preset} from "../../pages/preset/preset-class";
+import {Observable} from "rxjs";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
     ChannelDisplayShowCellVolts,
     ChannelDisplayShowIR,
+}
+
+enum Operation {
+    Charge = 0,
+    Storage = 1,
+    Discharge = 2,
+    Cycle = 3,
+    Balance = 4
 }
 
 @Component({
@@ -64,43 +73,72 @@ export class ChannelComponent {
         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
     }
 
-    showChargingOptionsPage() {
+    showOperationPage(title: string, operation: Operation, showCapacityAndC: boolean, charging: boolean, selectionCallback: (preset: Preset) => void) {
         this.navCtrlr.push(ChargeOptionsPage, {
+            title: title,
+            charging: charging,
+            showCapacityAndC: showCapacityAndC,
             channel: this.channel,
-            callback: (preset) => {
-                if (preset) {
-                    this.startCharge(preset);
-                }
-            }
+            callback: selectionCallback
         });
     }
 
     showMeasureIR() {
+        this.chargerService.measureIR(this.channel).subscribe((result) => {
+            console.log("Measure IR done. Result: ", result);
+        });
         this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
+
+        // Monitor the IR. When we see some amps for a short period of time, auto stop the operation
+        this.channelObserver.takeWhile((channelObject) => {
+            let less_than_one_amp = Math.abs(channelObject.curr_out_amps) < 1.0;
+            console.log("At: ", channelObject.curr_out_amps, "ltoa: ", less_than_one_amp);
+            return less_than_one_amp;
+        }).subscribe((result) => {}, (error) => {}, () => {
+            console.log("Stopping discharge because Measuer IR has seen some amps");
+            this.stopCurrentTask();
+        });
+
+    }
+
+    startOperation(preset: Preset, operation: Operation, named: string) {
+        console.log("Begin ", named, " on channel ", this.channel.index, " using ", preset.name);
+        let handler = (resp) => {
+            console.log("Started ", named, " on channel " + this.channel.index + ", using preset: " + preset.name);
+            console.log("Response: ", resp);
+        };
+        switch (operation) {
+            case Operation.Charge:
+                this.chargerService.startCharge(this.channel, preset).subscribe(handler);
+                break;
+            case Operation.Discharge:
+                this.chargerService.startDischarge(this.channel, preset).subscribe(handler);
+                break;
+            case Operation.Storage:
+                this.chargerService.startStore(this.channel, preset).subscribe(handler);
+                break;
+            case Operation.Balance:
+                this.chargerService.startBalance(this.channel, preset).subscribe(handler);
+                break;
+            default:
+                console.log("Um. Dunno what to do here, with operation ", operation, " named '", named, "'");
+        }
     }
 
     startCharge(preset: Preset) {
-        console.log("Begin charge on channel ", this.channel.index, " using ", preset.name);
-        this.chargerService.startCharge(this.channel, preset).subscribe((resp) => {
-            console.log("Started a charge on channel " + this.channel.index + ", using preset: " + preset.name);
-            console.log("Start response: ", resp);
-        });
+        this.startOperation(preset, Operation.Charge, "Charge");
     }
 
-    startDischarge() {
-        // this.chargerService.startDischarge(this.channel);
+    startDischarge(preset: Preset) {
+        this.startOperation(preset, Operation.Discharge, "Discharge");
     }
 
-    startBalance() {
-        // this.chargerService.startBalance(this.channel);
+    startStore(preset: Preset) {
+        this.startOperation(preset, Operation.Storage, "Store");
     }
 
-    startStore() {
-        // this.chargerService.startStore(this.channel);
-    }
-
-    measureIR() {
-        // this.chargerService.measureIR(this.channel);
+    startBalance(preset: Preset) {
+        this.startOperation(preset, Operation.Balance, "Balance");
     }
 
     stopCurrentTask() {
@@ -115,7 +153,7 @@ export class ChannelComponent {
                 'message': "Pack not plugged in.",
                 'cssClass': 'redToast',
                 'position': 'bottom',
-                'duration' : 2000,
+                'duration': 2000,
             });
             toast.present();
             return;
@@ -163,25 +201,41 @@ export class ChannelComponent {
                         text: 'Charge',
                         role: 'destructive',
                         handler: () => {
-                            this.showChargingOptionsPage();
+                            this.showOperationPage("Charge", Operation.Discharge, true, true, (preset => {
+                                if (preset) {
+                                    this.startCharge(preset);
+                                }
+                            }));
                         }
                     },
                     {
                         text: 'Store',
                         handler: () => {
-                            this.startStore();
+                            this.showOperationPage("Store", Operation.Storage, false, true, (preset => {
+                                if (preset) {
+                                    this.startStore(preset);
+                                }
+                            }));
                         }
                     },
                     {
                         text: 'Discharge',
                         handler: () => {
-                            this.startDischarge();
+                            this.showOperationPage("Discharge", Operation.Discharge, false, false, (preset => {
+                                if (preset) {
+                                    this.startDischarge(preset);
+                                }
+                            }));
                         }
                     },
                     {
                         text: 'Balance Only',
                         handler: () => {
-                            this.startBalance();
+                            this.showOperationPage("Balance", Operation.Balance, false, false, (preset => {
+                                if (preset) {
+                                    this.startBalance(preset);
+                                }
+                            }));
                         }
                     },
                     {
@@ -211,6 +265,12 @@ export class ChannelComponent {
     ngOnDestroy() {
         console.log("Leaving channel: ", this.channel);
         if (this.channelSubscription) {
+            this.unsubscribeFromChannel();
+        }
+    }
+
+    unsubscribeFromChannel() {
+        if (this.channelSubscription) {
             console.log("Channel ", this.channel.index, " going away, unsubscribing");
             this.channelSubscription.unsubscribe();
             this.channelSubscription = null;
@@ -220,6 +280,7 @@ export class ChannelComponent {
     ngOnChanges(changes) {
         console.log("Channel is seeing change to bound data: ", changes);
         if (this.channelObserver) {
+            this.unsubscribeFromChannel();
             console.log("Channel binding to ", this.channelObserver);
             this.channelSubscription = this.channelObserver.subscribe((channelObject) => {
                 this.channel = channelObject;

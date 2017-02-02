@@ -43,13 +43,17 @@ class TestCharging(BasePresetTestCase):
             response = self.client.put(endpoint)
             self.assertEqual(response.status_code, 200)
 
-            # Wait for the charge to begin, and get close to 1.0a
+            json_dict = json.loads(response.data)
+            self.assertFalse(json_dict['err'], "charge command returned err:True. That. Is. Bad.")
+
+            # Wait for the charge to begin...
             wait_time = 0
             time.sleep(5)
             channel_status = self._get_channel(0)
-            while channel_status.curr_out_amps < 0.8 and wait_time < 30:
+            while channel_status.curr_out_amps < 0.3 and wait_time < 30:
                 logger.info("Channel 0 charging at {0}A...".format(channel_status.curr_out_amps))
                 time.sleep(2)
+                # self.assertEqual(false, )
                 channel_status = self._get_channel(0)
                 wait_time += 2
 
@@ -66,6 +70,3 @@ class TestCharging(BasePresetTestCase):
             response = self.client.put("/stop/0")
             self.assertEqual(response.status_code, 200)
 
-            # Stop again ... to get rid of STOPS message on charger
-            response = self.client.put("/stop/0")
-            self.assertEqual(response.status_code, 200)

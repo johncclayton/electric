@@ -590,9 +590,9 @@ export class Preset {
         return "ER";
     }
 
-    smallButtonName() {
+    smallButtonName(showChargeOption = true) {
         let name = Preset.chemistryPrefix(this.type);
-        let rate = this.charge_current;
+        let rate = showChargeOption ? this.charge_current : this.discharge_current;
         return `${name} ${rate}A`;
     }
 

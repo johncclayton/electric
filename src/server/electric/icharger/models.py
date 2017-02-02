@@ -11,6 +11,17 @@ from schematics.types.serializable import serializable
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
+
+class ChemistryType:
+    LiPo = 0
+    LiLo = 1
+    LiFe = 2
+    NiMH = 3
+    NiCd = 4
+    Pb = 5
+    NiZn = 6
+
+
 '''
 
 DeviceInfo:

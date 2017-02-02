@@ -17,6 +17,9 @@ import {applyMixins} from "rxjs/util/applyMixins";
 export class ChargeOptionsPage implements Chemistry {
     channel: Channel;
     channelLimitReached: boolean = false;
+    title: string = "Charge";
+    showCapacityAndC: boolean = true;
+    charging: boolean = true;
     presets: Array<any> = [];
     private callback: any;
 
@@ -25,7 +28,15 @@ export class ChargeOptionsPage implements Chemistry {
                 public config: Configuration,
                 public navParams: NavParams) {
         this.channel = navParams.data['channel'];
+        this.showCapacityAndC = navParams.data['showCapacityAndC'];
+        this.charging = navParams.data['charging'];
+        this.title = navParams.data['title'];
         this.callback = navParams.data['callback'];
+
+        if(!this.showCapacityAndC) {
+            // Force to presets (not computed)
+            this.chargeMethod = "presets";
+        }
     }
 
     ionViewDidLoad() {

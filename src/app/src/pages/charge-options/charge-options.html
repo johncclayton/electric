@@ -1,11 +1,10 @@
 <ion-header>
 
     <ion-navbar>
-        <ion-title>Charging</ion-title>
+        <ion-title>{{title}}</ion-title>
     </ion-navbar>
 
-    <ion-toolbar>
-        <!--<h3 text-center>Select Method</h3>-->
+    <ion-toolbar *ngIf="showCapacityAndC">
         <ion-segment [(ngModel)]="chargeMethod">
             <ion-segment-button value="presets">Presets</ion-segment-button>
             <ion-segment-button value="capacity">Capacity & C</ion-segment-button>
@@ -30,8 +29,9 @@
             <ion-grid>
                 <ion-row *ngFor="let some of filteredPresets()" no-padding>
                     <ion-col *ngFor="let preset of some">
-                        <button [ngClass]="chemistryClass(preset)" small block ion-button (click)="chargeUsingPreset(preset)">
-                            {{preset.smallButtonName()}}
+                        <button [ngClass]="chemistryClass(preset)" small block ion-button
+                                (click)="chargeUsingPreset(preset)">
+                            {{preset.smallButtonName(charging)}}
                         </button>
                     </ion-col>
                 </ion-row>
@@ -55,7 +55,9 @@
                     <ion-label range-right>7000</ion-label>
                 </ion-range>
                 <ion-list-header>Charge Rate (C)
-                    <ion-badge item-right>{{chargeRate|number:'1.1-1'}}C <ion-icon *ngIf="showFlame()" name="flame"></ion-icon></ion-badge>
+                    <ion-badge item-right>{{chargeRate|number:'1.1-1'}}C
+                        <ion-icon *ngIf="showFlame()" name="flame"></ion-icon>
+                    </ion-badge>
                 </ion-list-header>
                 <ion-range min="1" max="50" [(ngModel)]="chargeRateTimesTen">
                     <ion-label range-left>1</ion-label>

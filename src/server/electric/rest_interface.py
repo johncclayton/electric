@@ -96,19 +96,37 @@ class ChargeResource(ControlRegisterResource):
 class DischargeResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        pass
+        device_status = evil_global.comms.run_operation(Operation.Discharge, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
+
+
+class StoreResource(ControlRegisterResource):
+    @exclusive
+    def put(self, channel_id, preset_memory_slot):
+        device_status = evil_global.comms.run_operation(Operation.Storage, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class BalanceResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        pass
+        device_status = evil_global.comms.run_operation(Operation.Balance, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class MeasureIRResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id):
-        pass
+        device_status = evil_global.comms.measure_ir(int(channel_id))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class StopResource(ControlRegisterResource):
@@ -116,6 +134,8 @@ class StopResource(ControlRegisterResource):
     def put(self, channel_id):
         channel_number = int(channel_id)
         logger.info("Stop, channel {0}".format(channel_number))
+        # We do this twice. Once to stop. 2nd time to get past the "STOPS" screen.
+        operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response.update(connection_state_dict())
         return operation_response
@@ -188,11 +208,12 @@ class PresetListResource(Resource):
             # Preset.index is the memory slot it's in, not the position within the index
             memory_slot_number = preset_list.indexes[index]
             preset = evil_global.comms.get_preset(memory_slot_number)
-
-            # TODO: Error handling
-
-            if preset:
-                all_presets.append(preset.to_native())
+            if preset.is_used or preset.is_fixed:
+                try:
+                    native = preset.to_native()
+                    all_presets.append(native)
+                except Exception, e:
+                    logger.info("BOOM: " + e)
 
         return all_presets
 

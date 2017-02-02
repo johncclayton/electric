@@ -234,7 +234,7 @@ export class iChargerService {
             console.log("Stopping current task...");
             let url = this.getChargerURL("/stop/" + channel.index);
 
-            this.http.put(url, null).subscribe((resp) => {
+            this.http.put(url, "").subscribe((resp) => {
                 if (resp.ok) {
                     // Maaay need to do this again, to get past the 'STOPS' state.
                     observable.complete();
@@ -285,9 +285,65 @@ export class iChargerService {
 
     startCharge(channel: Channel, preset: Preset): Observable<any> {
         return Observable.create((observable) => {
-            let chargeURL = this.getChargerURL("/charge/" + channel.index + "/" + preset.index);
+            let operationURL = this.getChargerURL("/charge/" + channel.index + "/" + preset.index);
             console.log("Beginning charge on channel ", channel.index, " using preset at slot ", preset.index);
-            this.http.put(chargeURL, null).subscribe((resp) => {
+            this.http.put(operationURL, null).subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    startDischarge(channel: Channel, preset: Preset): Observable<any> {
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/discharge/" + channel.index + "/" + preset.index);
+            console.log("Beginning discharge on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, null).subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    startStore(channel: Channel, preset: Preset) {
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/store/" + channel.index + "/" + preset.index);
+            console.log("Beginning storage on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, "").subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    startBalance(channel: Channel, preset: Preset) {
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/balance/" + channel.index + "/" + preset.index);
+            console.log("Beginning balance on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, "").subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    measureIR(channel: Channel) {
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/measureir/" + channel.index);
+            console.log("Beginning IR measurement on channel ", channel.index);
+            this.http.put(operationURL, "").subscribe((resp) => {
                 if (resp.ok) {
                     observable.complete();
                 } else {

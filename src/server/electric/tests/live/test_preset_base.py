@@ -37,6 +37,7 @@ class BasePresetTestCase(LiveIChargerTestCase):
         test_preset_dict = self.load_json_file("presets/preset-0.json")
         self.assertIsNotNone(test_preset_dict)
         test_preset = Preset(test_preset_dict)
+        test_preset.auto_save = False
         test_preset.name = name
         return test_preset
 
