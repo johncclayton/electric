@@ -58,6 +58,10 @@ export class Channel {
         return stopped_stats.indexOf(this._json['run_status']) != -1;
     }
 
+    get runState(): number {
+        return this._json['run_status'];
+    }
+
     get maxMilliVoltDiff() {
         let cells = this.cells;
         if (!cells) {
