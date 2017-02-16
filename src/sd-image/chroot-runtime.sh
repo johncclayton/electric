@@ -1,5 +1,3 @@
-export LC_ALL="en_US.UTF-8"
-
 cp /etc/ld.so.preload /etc/ld.so.preload-backup
 
 echo "# sometihng amazing" > /etc/ld.so.preload
@@ -10,6 +8,9 @@ echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE
 curl -sSL https://get.docker.com | sh
 usermod -aG docker pi
 systemctl enable electric-pi.service
+
+# ensure SSH is enabled
+touch /boot/ssh
 
 rm /etc/ld.so.preload
 mv /etc/ld.so.preload-backup /etc/ld.so.preload
