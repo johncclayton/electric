@@ -1,0 +1,12 @@
+[Unit]
+Description=Yes indeed
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/run_electric.sh
+User=pi
+Restart=on-faliure
+
+[Install]
+WantedBy=multi-user.target
