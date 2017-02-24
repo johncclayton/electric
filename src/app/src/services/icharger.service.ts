@@ -13,13 +13,13 @@ const CHARGER_COMMAND_FAILURE: string = 'charger.command.error'; // when a save 
 const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
 export enum ChargerType {
-    iCharger410Duo = 64,
+    iCharger4010Duo = 64,
     iCharger308Duo = 66
 }
 
 export let ChargerMetadata = {};
 ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
-ChargerMetadata[ChargerType.iCharger410Duo] = {'maxAmps': 40, 'name': 'iCharger 410', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO'};
 
 @Injectable()
 export class iChargerService {
