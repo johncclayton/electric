@@ -6,13 +6,20 @@ echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE
 
 # DO NOT do apt-get update/upgrade - this causes the sd-card to NOT BOOT
 apt-get -y install python-pip python-dev ipython
-apt-get -y install bluetooth libbluetooth-dev
+apt-get -y install bluetooth libbluetooth-dev hostapd dnsmasq
 pip install pybluez
 
 curl -sSL https://get.docker.com | sh
 
 usermod -aG docker pi
 systemctl enable electric-pi.service
+
+sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.old
+
+sudo mv /home/pi/dnsmasq.conf /etc/
+sudo mv /home/pi/hostapd.conf /etc/hostapd/
+
+systemctl enable dnsmasq.service
 
 # ensure SSH is enabled
 touch /boot/ssh

@@ -52,8 +52,13 @@ $PIIMG mount "$TO" "$MNT"
 
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp run_electric.sh "$MNT/home/pi/" 
+sudo cp rc.local "$MNT/etc/rc.local"
 sudo cp electric-pi.service "$MNT/etc/systemd/system/" 
 sudo cp wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
+sudo cp network_interfaces "$MNT/etc/network/interfaces"
+sudo cp hostapdstart "$MNT/usr/local/bin/hostapdstart"
+sudo cp hostapd.conf "$MNT/home/pi/hostapd.conf"
+sudo cp dnsmasq.conf "$MNT/home/pi/dnsmasq.conf" 
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
 
