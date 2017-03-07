@@ -12,7 +12,6 @@ pip install pybluez
 curl -sSL https://get.docker.com | sh
 
 usermod -aG docker pi
-systemctl enable electric-pi.service
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.old
 
@@ -20,6 +19,7 @@ sudo mv /home/pi/dnsmasq.conf /etc/
 sudo mv /home/pi/hostapd.conf /etc/hostapd/
 
 systemctl enable dnsmasq.service
+systemctl enable electric-pi.service
 
 # ensure SSH is enabled
 touch /boot/ssh

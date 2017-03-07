@@ -1,12 +1,13 @@
 [Unit]
-Description=Yes indeed
-After=multi-user.target
+Description=iCharger RESTful API Service
+After=network-online.target
 
 [Service]
 Type=simple
 ExecStart=/home/pi/run_electric.sh
+ExecStop=/home/pi/stop_electric.sh
 User=pi
-Restart=on-faliure
+Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=network-online.target
