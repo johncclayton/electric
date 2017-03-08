@@ -95,16 +95,13 @@ cp "$FROM" "$TO"
 $PIIMG mount "$TO" "$MNT"
 
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
-sudo cp run_electric.sh "$MNT/home/pi/" 
-sudo cp stop_electric.sh "$MNT/home/pi/" 
-sudo cp check_docker_container.sh "$MNT/home/pi/" 
-sudo cp rc.local "$MNT/etc/rc.local"
-sudo cp electric-pi.service "$MNT/etc/systemd/system/" 
-sudo cp wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
-sudo cp network_interfaces "$MNT/etc/network/interfaces"
-sudo cp hostapdstart "$MNT/usr/local/bin/hostapdstart"
-sudo cp hostapd.conf "$MNT/home/pi/hostapd.conf"
-sudo cp dnsmasq.conf "$MNT/home/pi/dnsmasq.conf" 
+sudo cp scripts/* "$MNT/home/pi/"
+
+sudo cp scripts/rc.local "$MNT/etc/rc.local"
+sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/" 
+sudo cp scripts/wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
+sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces"
+sudo cp scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
 
 sudo sed -i "s/APNAME/$APNAME/g" "$MNT/home/pi/hostapd.conf"
 sudo sed -i "s/APPWD/$APPWD/g" "$MNT/home/pi/hostapd.conf"
@@ -113,6 +110,6 @@ sudo sed -i "s/WIFIPWD/$WIFIPWD/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
 
-$PIIMG umount "$MNT"
+$PIIMG umount "$MNT" && mv "$TO" "$HOME/Dropbox/Public/"
 
 exit 0

@@ -1,6 +1,7 @@
 [Unit]
 Description=iCharger RESTful API Service
-After=network-online.target
+After=network-online.target dnsmasq.service 
+Requires=dnsmasq.service 
 
 [Service]
 Type=simple
