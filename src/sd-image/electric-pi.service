@@ -8,6 +8,7 @@ ExecStart=/home/pi/run_electric.sh
 ExecStop=/home/pi/stop_electric.sh
 User=pi
 Restart=on-failure
+RestartSec=8
 
 [Install]
 WantedBy=network-online.target
