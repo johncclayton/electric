@@ -1,7 +1,7 @@
 #@IgnoreInspection BashAddShebang
 cp /etc/ld.so.preload /etc/ld.so.preload-backup
 
-echo "# sometihng amazing" > /etc/ld.so.preload
+echo "# this line ensures that the qemu based commands don't abort with errors - it gets taken out later" > /etc/ld.so.preload
 echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"' > /etc/udev/rules.d/10-icharger.rules
 
 # DO NOT do apt-get update/upgrade - this causes the sd-card to NOT BOOT
@@ -9,8 +9,7 @@ apt-get -y install python-dev ipython
 apt-get -y install bluetooth libbluetooth-dev hostapd dnsmasq
 
 easy_install pip
-pip install pybluez
-pip install -r /home/pi/requirements.txt
+pip install pybluez docker
 
 curl -sSL https://get.docker.com | sh
 
