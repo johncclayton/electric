@@ -8,6 +8,7 @@ echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE
 apt-get -y install python-pip python-dev ipython
 apt-get -y install bluetooth libbluetooth-dev hostapd dnsmasq
 pip install pybluez
+pip install -r /home/pi/requirements.txt
 
 curl -sSL https://get.docker.com | sh
 

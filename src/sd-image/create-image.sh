@@ -102,6 +102,7 @@ sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 sudo cp scripts/wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
 sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces"
 sudo cp scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
+sudo cp ../server/requirements.txt "$MNT/hom/pi"
 
 sudo sed -i "s/APNAME/$APNAME/g" "$MNT/home/pi/hostapd.conf"
 sudo sed -i "s/APPWD/$APPWD/g" "$MNT/home/pi/hostapd.conf"
