@@ -110,11 +110,13 @@ sudo sed -i "s/WIFINAME/$WIFINAME/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.con
 sudo sed -i "s/WIFIPWD/$WIFIPWD/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
+RES=$?
 
 $PIIMG umount "$MNT" 
-if [ -d "$HOME/Dropbox/Public" ]; then
+if [ -d "$HOME/Dropbox/Public" -a "$RES" -eq 0 ]; then
 	mv "$TO" "$HOME/Dropbox/Public/"
+else
+	echo "$TO not moved, there was a problem"
 fi
-
 
 exit 0
