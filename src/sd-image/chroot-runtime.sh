@@ -5,8 +5,10 @@ echo "# sometihng amazing" > /etc/ld.so.preload
 echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"' > /etc/udev/rules.d/10-icharger.rules
 
 # DO NOT do apt-get update/upgrade - this causes the sd-card to NOT BOOT
-apt-get -y install python-pip python-dev ipython linux-headers gcc musl-dev
+apt-get -y install python-dev ipython
 apt-get -y install bluetooth libbluetooth-dev hostapd dnsmasq
+
+easy_install pip
 pip install pybluez
 pip install -r /home/pi/requirements.txt
 
