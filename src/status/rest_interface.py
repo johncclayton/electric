@@ -1,6 +1,6 @@
 import logging
 import os
-
+import docker
 from flask_restful import Resource
 
 logger = logging.getLogger('electric.status.{0}'.format(__name__))
