@@ -6,8 +6,7 @@ echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE
 
 # DO NOT do apt-get update/upgrade - this causes the sd-card to NOT BOOT
 apt-get -y install python-dev ipython python-setuptools python-pip
-apt-get -y install bluetooth libbluetooth-dev hostapd dnsmasq
-
+apt-get -y install hostapd dnsmasq
 pip install -r /home/pi/status-requirements.txt
 
 curl -sSL https://get.docker.com | sh
