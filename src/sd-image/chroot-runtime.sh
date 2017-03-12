@@ -1,4 +1,8 @@
 #@IgnoreInspection BashAddShebang
+
+set -e
+set -u
+
 cp /etc/ld.so.preload /etc/ld.so.preload-backup
 
 echo "# this stops the runtime from aborting entirely - its undone at the end" > /etc/ld.so.preload
