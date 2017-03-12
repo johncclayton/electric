@@ -17,8 +17,6 @@ if [ "$_IP" ]; then
   printf "My IP address is %s\n" "$_IP"
 fi
 
-systemctl restart electric-pi
-
 echo "Starting hostapd service..."
 /bin/bash /usr/local/bin/hostapdstart
 
