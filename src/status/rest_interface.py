@@ -1,6 +1,7 @@
 import logging
 import os
 import docker
+import requests
 from flask_restful import Resource
 
 logger = logging.getLogger('electric.status.{0}'.format(__name__))
@@ -10,19 +11,7 @@ class StatusResource(Resource):
         self.docker_cli = docker.from_env()
 
     def _systemctl_running(self, name):
-        return os.system("systemctl is-active %s > /dev/null" % (name,))
-
-    def is_dnsmasq_running(self):
-        """If dnsmasq is running or not, returns true / false"""
-        return self._systemctl_running("dnsmasq") == 0
-
-    def is_docker_running(self):
-        """Check if the docker server is running"""
-        return self._systemctl_running("docker") == 0
-
-    def is_hostapd_running(self):
-        """Check if the hostapd service is up"""
-        return self._systemctl_running("hostapd") == 0
+        return os.system("systemctl is-active %s > /dev/null" % (name,)) == 0
 
     def check_docker_image_exists(self):
         """Check if the scornflake/electric-pi image has been downloaded already and what version is it?"""
@@ -53,7 +42,7 @@ class StatusResource(Resource):
 
     def get_server_status(self):
         """Calls into the running container to obtain the status of the iCharger service"""
-        return {}
+        return requests.get('http://127.0.0.1:5000/status').json()
 
     def get(self):
         # simply check for the correct configuration of required system resources and return this
@@ -61,22 +50,33 @@ class StatusResource(Resource):
         res = dict()
 
         res["dnsmasq"] = {
-            "running": self.is_dnsmasq_running()
+            "running": self._systemctl_running("dnsmasq")
         }
 
         res["hostapd"] = {
-            "running": self.is_hostapd_running()
+            "running": self._systemctl_running("hostapd")
+        }
+
+        res["electric-pi.service"] = {
+            "running": self._systemctl_running("electric-pi")
+        }
+
+        res["electric-pi-status.service"] = {
+            "running": self._systemctl_running("electric-pi-status")
         }
 
         image_running = self.check_docker_image_running()
         res["docker"] = {
-            "running": self.is_docker_running(),
+            "running": self._systemctl_running("docker"),
             "image_exists": self.check_docker_image_exists(),
             "container_created": self.check_docker_container_created(),
             "container_running": image_running
         }
 
-        server_status = {}
+        server_status = {
+            "exception": "electric-pi service not running in docker"
+        }
+
         if image_running:
             server_status = self.get_server_status()
 
