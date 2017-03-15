@@ -11,7 +11,7 @@ echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE
 # DO NOT do apt-get update/upgrade - this causes the sd-card to NOT BOOT
 apt-get -y update
 apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq
-/usr/bin/pip install -r /home/pi/status-requirements.txt
+/usr/bin/pip install -r /home/pi/status/requirements.txt
 
 curl -sSL https://get.docker.com | sh
 
@@ -29,6 +29,7 @@ sudo mv /home/pi/hostapd.conf /etc/hostapd/
 
 systemctl enable dnsmasq.service
 systemctl enable electric-pi.service
+systemctl enable electric-pi-status.service
 
 # ensure SSH is enabled
 touch /boot/ssh

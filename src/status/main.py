@@ -21,3 +21,6 @@ if not debug_mode:
 
 api = Api(application)
 api.add_resource(StatusResource, "/status")
+
+if __name__ == "__main__":
+    application.run(debug=debug_mode, host='0.0.0.0', port=4999)

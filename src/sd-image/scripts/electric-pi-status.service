@@ -1,0 +1,14 @@
+[Unit]
+Description=Electric Pi Status Service
+After=network-online.target
+Requires=dnsmasq.service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/status/run_server.sh
+User=pi
+Restart=on-failure
+RestartSec=8
+
+[Install]
+WantedBy=network-online.target
