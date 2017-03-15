@@ -1,7 +1,7 @@
 [Unit]
 Description=iCharger RESTful API Service
-After=network-online.target dnsmasq.service 
-Requires=dnsmasq.service 
+After=multi-user.target
+Requires=multi-user.target
 
 [Service]
 Type=simple
@@ -12,4 +12,4 @@ Restart=on-failure
 RestartSec=8
 
 [Install]
-WantedBy=network-online.target
+WantedBy=multi-user.target
