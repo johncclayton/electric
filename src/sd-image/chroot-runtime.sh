@@ -31,6 +31,9 @@ systemctl enable dnsmasq.service
 systemctl enable electric-pi.service
 systemctl enable electric-pi-status.service
 
+# owned by the right user
+sudo chown -R pi:users /home/pi
+
 # ensure SSH is enabled
 touch /boot/ssh
 

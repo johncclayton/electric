@@ -109,6 +109,8 @@ sudo sed -i "s/APPWD/$APPWD/g" "$MNT/home/pi/hostapd.conf"
 sudo sed -i "s/WIFINAME/$WIFINAME/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
 sudo sed -i "s/WIFIPWD/$WIFIPWD/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
 
+sudo chmod +x "$MNT/home/pi/status/run_server.sh"
+
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
