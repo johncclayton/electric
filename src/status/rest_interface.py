@@ -2,10 +2,39 @@ import logging
 import os
 import docker
 import requests
+import subprocess
 from flask import request, redirect, url_for
 from flask_restful import Resource
 
 logger = logging.getLogger('electric.status.{0}'.format(__name__))
+
+def read_output_for(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    out, err = proc.communicate()
+    return out, err, proc.returncode
+
+
+class WiFiConnectionResource(Resource):
+    def read_wpa_ssid(self):
+        """Read contents of the wpa supplicant file to see what we are connected to"""
+        return read_output_for(["/home/pi/sudo_get_ssid.sh"])
+
+    def read_wifi_ipaddr(self):
+        return read_output_for(["/home/pi/get_wifi_ip_address.sh"])
+
+    def get(self):
+        ssid_out, ssid_err, ssid_rtn = self.read_wpa_ssid()
+        ip_out, ip_err, ip_rtn = self.read_wifi_ipaddr()
+
+        return {
+            "SSID": ssid_out.strip("\n"),
+            "IPADDR": ip_out.strip("\n"),
+            "PSK": "********"
+        }
+
+    def put(self):
+        print "I would set:", request.json
+        return redirect(url_for("wifi"))
 
 
 class StatusResource(Resource):
@@ -15,11 +44,13 @@ class StatusResource(Resource):
     def _systemctl_running(self, name):
         return os.system("systemctl is-active %s > /dev/null" % (name,)) == 0
 
-    def _systemctl_run(self, name):
-        return os.system("sudo systemctl start %s" % (name,)) == 0
+    def _systemctl_start(self, name):
+        out, err, rtn = read_output_for(["/home/pi/sudo_systemctl_start.sh", name])
+        return rtn == 0
 
     def _systemctl_stop(self, name):
-        return os.system("sudo systemctl stop %s" % (name,)) == 0
+        out, err, rtn = read_output_for(["/home/pi/sudo_systemctl_stop.sh", name])
+        return rtn == 0
 
     def check_docker_image_exists(self):
         """Check if the scornflake/electric-pi image has been downloaded already and what version is it?"""
@@ -57,7 +88,7 @@ class StatusResource(Resource):
             json_dict = request.json
             run_electric_pi = json_dict["electric-pi.service"]["running"]
             if run_electric_pi:
-                self._systemctl_run("electric-pi")
+                self._systemctl_start("electric-pi")
             else:
                 self._systemctl_stop("electric-pi")
 
