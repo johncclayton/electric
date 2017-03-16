@@ -2,9 +2,11 @@ import logging
 import os
 import docker
 import requests
+from flask import request, redirect, url_for
 from flask_restful import Resource
 
 logger = logging.getLogger('electric.status.{0}'.format(__name__))
+
 
 class StatusResource(Resource):
     def __init__(self):
@@ -12,6 +14,12 @@ class StatusResource(Resource):
 
     def _systemctl_running(self, name):
         return os.system("systemctl is-active %s > /dev/null" % (name,)) == 0
+
+    def _systemctl_run(self, name):
+        return os.system("sudo systemctl start %s" % (name,)) == 0
+
+    def _systemctl_stop(self, name):
+        return os.system("sudo systemctl stop %s" % (name,)) == 0
 
     def check_docker_image_exists(self):
         """Check if the scornflake/electric-pi image has been downloaded already and what version is it?"""
@@ -44,7 +52,22 @@ class StatusResource(Resource):
         """Calls into the running container to obtain the status of the iCharger service"""
         return requests.get('http://127.0.0.1:5000/status').json()
 
+    def post(self):
+        try:
+            json_dict = request.json
+            run_electric_pi = json_dict["electric-pi.service"]["running"]
+            if run_electric_pi:
+                self._systemctl_run("electric-pi")
+            else:
+                self._systemctl_stop("electric-pi")
+
+        except Exception:
+            pass
+
+        return redirect(url_for("status"))
+
     def get(self):
+        logger.debug("yeah")
         # simply check for the correct configuration of required system resources and return this
         # in a dict
         res = dict()
@@ -74,7 +97,7 @@ class StatusResource(Resource):
         }
 
         server_status = {
-            "exception": "electric-pi service not running in docker"
+            "exception": "the electric-pi container is not running (in docker)"
         }
 
         if image_running:

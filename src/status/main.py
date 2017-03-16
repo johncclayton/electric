@@ -20,7 +20,7 @@ if not debug_mode:
     application.logger.info("The status service LIVES!")
 
 api = Api(application)
-api.add_resource(StatusResource, "/status")
+api.add_resource(StatusResource, "/status", endpoint="status")
 
 if __name__ == "__main__":
     application.run(debug=debug_mode, host='0.0.0.0', port=4999)
