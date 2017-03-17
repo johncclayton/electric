@@ -154,6 +154,7 @@ class StatusResource(Resource):
         res["docker"] = {
             "running": self._systemctl_running("docker"),
             "image_exists": self.check_docker_image_exists(),
+            "image_pull": "" if self.pull_json is None else self.pull_json,
             "container_created": self.check_docker_container_created(),
             "container_running": image_running
         }
