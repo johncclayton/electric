@@ -1,8 +1,8 @@
-import logging
-import os
+import logging, os, json
 import docker
 import requests
 import subprocess
+
 from flask import request, redirect, url_for
 from flask_restful import Resource
 
@@ -15,15 +15,19 @@ def read_output_for(args):
 
 
 class WiFiConnectionResource(Resource):
-    def read_wpa_ssid(self):
+    def read_wpa_ssid_name(self):
         """Read contents of the wpa supplicant file to see what we are connected to"""
-        return read_output_for(["/home/pi/sudo_get_ssid.sh"])
+        return read_output_for(["/home/pi/sudo_get_ssid_name.sh"])
+
+    def read_wpa_ssid_psk(self):
+        """Read contents of the wpa supplicant file to see what we are connected to"""
+        return read_output_for(["/home/pi/sudo_get_ssid_psk.sh"])
 
     def read_wifi_ipaddr(self):
         return read_output_for(["/home/pi/get_wifi_ip_address.sh"])
 
     def get(self):
-        ssid_out, ssid_err, ssid_rtn = self.read_wpa_ssid()
+        ssid_out, ssid_err, ssid_rtn = self.read_wpa_ssid_name()
         ip_out, ip_err, ip_rtn = self.read_wifi_ipaddr()
 
         return {
@@ -33,13 +37,33 @@ class WiFiConnectionResource(Resource):
         }
 
     def put(self):
-        print "I would set:", request.json
+        ssid_value = request.json["SSID"]
+        ssid_psk = request.json["PSK"]
+        ssid_hash = request.json["HASH"]
+
+        psk, err, rtn = self.read_wpa_ssid_psk()
+        if ssid_hash != psk:
+            print("ssid_hash doesnt match existing AP password")
+            return redirect(url_for("wifi"))
+
+        if ssid_psk is not None and ssid_value is not None and len(ssid_value) > 0 and len(ssid_value) > 0:
+            out, err, rtn = read_output_for(["/home/pi/sudo_set_ssid.sh", ssid_value, ssid_psk])
+
+            return {
+                "SSID": ssid_value,
+                "PSK": "********",
+                "output": out,
+                "error": err,
+                "returncode": rtn
+            }
+
         return redirect(url_for("wifi"))
 
 
 class StatusResource(Resource):
     def __init__(self):
         self.docker_cli = docker.from_env()
+        self.pull_json = None
 
     def _systemctl_running(self, name):
         return os.system("systemctl is-active %s > /dev/null" % (name,)) == 0
@@ -60,6 +84,13 @@ class StatusResource(Resource):
         except docker.errors.ImageNotFound:
             pass
         return False
+
+    def download_docker_image(self):
+        """Download the image - using the streaming API to get progress information"""
+        for line in self.docker_cli.pull("scornflake/electric-pi", stream=True):
+            self.pull_json = json.loads(line)
+        self.pull_json = None
+
 
     def check_docker_container_created(self):
         """Check if the container for the iCharger service has been created"""

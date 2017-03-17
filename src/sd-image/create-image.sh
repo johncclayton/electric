@@ -48,8 +48,6 @@ fi
 
 APNAME="ELECTRIC-PI"
 APPWD="pa55word"
-WIFINAME=""
-WIFIPWD=""
 
 while [[ $# -gt 1 ]]
 do
@@ -64,14 +62,6 @@ case $key in
 	APPWD="$2"
 	shift
 	;;
-	-wn|--wifi-name)
-	WIFINAME="$2"
-	shift
-	;;
-	-wp|--wifi-password)
-	WIFIPWD="$2"
-	shift
-	;;
 	*)
 	# unknown option
 	;;
@@ -81,11 +71,9 @@ done
 
 echo "Access Point Name: $APNAME"
 echo "Access Point Pass: $APPWD"
-echo "WiFi Name        : $WIFINAME"
-echo "WiFi Pass        : $WIFIPWD"
 
-if [ -z "$APNAME" -o -z "$APPWD" -o -z "$WIFINAME" -o -z "$WIFIPWD" ]; then
-	echo "Fail - APNAME/APPWD/WIFINAME and WIFIPWD all need to be filled in"
+if [ -z "$APNAME" -o -z "$APPWD" ]; then
+	echo "Fail - APNAME/APPWD both need to be filled in"
 	exit 6
 fi
 
@@ -96,20 +84,21 @@ $PIIMG mount "$TO" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp scripts/* "$MNT/home/pi/"
 
-sudo cp scripts/rc.local "$MNT/etc/rc.local"
-sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
-sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
+sudo cp scripts/rc.local "$MNT/etc/rc.local" && rm scripts/rc.local
+sudo mv scripts/electric-pi.service "$MNT/etc/systemd/system/"
+sudo mv scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 sudo cp scripts/wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
-sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces"
-sudo cp scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
+sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces" && rm scripts/network_interfaces
+sudo mv scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
+
 sudo cp -r ../status "$MNT/home/pi/"
 
+# set up the Access Point name/password defaults.
 sudo sed -i "s/APNAME/$APNAME/g" "$MNT/home/pi/hostapd.conf"
 sudo sed -i "s/APPWD/$APPWD/g" "$MNT/home/pi/hostapd.conf"
-sudo sed -i "s/WIFINAME/$WIFINAME/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
-sudo sed -i "s/WIFIPWD/$WIFIPWD/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
 
-sudo chmod +x "$MNT/home/pi/status/run_server.sh"
+sudo chmod +x "$MNT/home/pi/status/*.sh"
+sudo chmod +x "$MNT/home/pi/*.sh"
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
