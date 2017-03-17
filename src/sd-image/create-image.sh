@@ -86,12 +86,12 @@ $PIIMG mount "$TO" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp scripts/* "$MNT/home/pi/"
 
-sudo cp scripts/rc.local "$MNT/etc/rc.local" && rm scripts/rc.local
-sudo mv scripts/electric-pi.service "$MNT/etc/systemd/system/"
-sudo mv scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
+sudo cp scripts/rc.local "$MNT/etc/rc.local"
+sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
+sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 sudo cp scripts/wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
-sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces" && rm scripts/network_interfaces
-sudo mv scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
+sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces"
+sudo cp scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
 
 sudo cp -r ../status "$MNT/home/pi/"
 
