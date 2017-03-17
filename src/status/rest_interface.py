@@ -129,7 +129,6 @@ class StatusResource(Resource):
         return redirect(url_for("status"))
 
     def get(self):
-        logger.debug("yeah")
         # simply check for the correct configuration of required system resources and return this
         # in a dict
         res = dict()
