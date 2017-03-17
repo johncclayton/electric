@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -e
 
 FROM="$1"
 TO="$2"
