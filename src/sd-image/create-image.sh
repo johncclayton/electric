@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 FROM="$1"
 TO="$2"
 PIIMG=`which piimg`
