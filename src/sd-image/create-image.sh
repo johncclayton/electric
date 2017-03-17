@@ -99,7 +99,7 @@ sudo cp -r ../status "$MNT/home/pi/"
 sudo sed -i "s/APNAME/$APNAME/g" "$MNT/home/pi/hostapd.conf"
 sudo sed -i "s/APPWD/$APPWD/g" "$MNT/home/pi/hostapd.conf"
 
-sudo chmod +x "$MNT/home/pi/status/*.sh"
+sudo chmod +x "$MNT/home/pi/status/run_server.sh"
 sudo chmod +x "$MNT/home/pi/*.sh"
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
