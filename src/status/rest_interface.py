@@ -60,6 +60,15 @@ class WiFiConnectionResource(Resource):
         return redirect(url_for("wifi"))
 
 
+def check_docker_image_exists(docker_cli):
+    """Check if the scornflake/electric-pi image has been downloaded already and what version is it?"""
+    try:
+        docker_cli.images.get("scornflake/electric-pi")
+        return True
+    except docker.errors.ImageNotFound:
+        return False
+
+
 class StatusResource(Resource):
     def __init__(self):
         self.docker_cli = docker.from_env()
@@ -75,22 +84,6 @@ class StatusResource(Resource):
     def _systemctl_stop(self, name):
         out, err, rtn = read_output_for(["/home/pi/sudo_systemctl_stop.sh", name])
         return rtn == 0
-
-    def check_docker_image_exists(self):
-        """Check if the scornflake/electric-pi image has been downloaded already and what version is it?"""
-        try:
-            image = self.docker_cli.images.get("scornflake/electric-pi")
-            return True
-        except docker.errors.ImageNotFound:
-            pass
-        return False
-
-    def download_docker_image(self):
-        """Download the image - using the streaming API to get progress information"""
-        for line in self.docker_cli.pull("scornflake/electric-pi", stream=True):
-            self.pull_json = json.loads(line)
-        self.pull_json = None
-
 
     def check_docker_container_created(self):
         """Check if the container for the iCharger service has been created"""
@@ -152,8 +145,7 @@ class StatusResource(Resource):
         image_running = self.check_docker_image_running()
         res["docker"] = {
             "running": self._systemctl_running("docker"),
-            "image_exists": self.check_docker_image_exists(),
-            "image_pull": "" if self.pull_json is None else self.pull_json,
+            "image_exists": check_docker_image_exists(self.docker_cli),
             "container_created": self.check_docker_container_created(),
             "container_running": image_running
         }
