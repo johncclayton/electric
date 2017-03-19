@@ -104,6 +104,7 @@ sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 sudo cp scripts/wpa_supplicant.conf "$MNT/etc/wpa_supplicant/"
 sudo cp scripts/network_interfaces "$MNT/etc/network/interfaces"
 sudo cp scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
+sudo cp scripts/90-wireless.rules "$MNT/etc/udev/rules.d/"
 
 sudo cp -r ../status "$MNT/home/pi/"
 
