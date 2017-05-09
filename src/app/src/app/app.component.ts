@@ -1,12 +1,13 @@
 import {Component, ViewChild} from "@angular/core";
 import {Platform, Nav} from "ionic-angular";
-import {StatusBar, Splashscreen} from "ionic-native";
 import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config";
 import {iChargerService} from "../services/icharger.service";
 import {PresetListPage} from "../pages/preset-list/preset-list";
 import {HomePage} from "../pages/home/home";
 
+import { StatusBar } from '@ionic-native/status-bar';
+import { SplashScreen } from '@ionic-native/splash-screen';
 
 @Component({
     templateUrl: 'app.html'
@@ -19,13 +20,15 @@ export class MyApp {
 
     constructor(platform: Platform,
                 public chargerService: iChargerService,
+                public statusBar : StatusBar,
+                public splashScreen : SplashScreen,
                 public config: Configuration) {
 
         platform.ready().then(() => {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
-            StatusBar.styleDefault();
-            Splashscreen.hide();
+            statusBar.styleDefault();
+            splashScreen.hide();
         });
 
         this.pages = [
