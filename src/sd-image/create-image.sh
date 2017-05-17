@@ -119,7 +119,7 @@ RES=$?
 
 $PIIMG umount "$MNT" 
 if [ -d "$HOME/Dropbox/Public" -a "$RES" -eq 0 ]; then
-	mv "$TO" "$HOME/Dropbox/Public/"
+	mv -f "$TO" "$HOME/Dropbox/Public/"
 else
 	echo "$TO not moved, there was a problem"
 fi
