@@ -4,18 +4,23 @@ set -e
 set -u
 
 cp /etc/ld.so.preload /etc/ld.so.preload-backup
-
 echo "# this stops the runtime from aborting entirely - its undone at the end" > /etc/ld.so.preload
+
+# this ensures that udev will recognize the iCharger for non-root users when plugged in.
 echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"' > /etc/udev/rules.d/10-icharger.rules
 
-# DO NOT do apt-get update/upgrade - this causes the sd-card to NOT BOOT
+# DO NOT do apt-get upgrade - this causes the sd-card to NOT BOOT
 apt-get -y update
 apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq
+
 /usr/bin/pip install -r /home/pi/status/requirements.txt
 
 curl -sSL https://get.docker.com | sh
 
 usermod -aG docker pi
+
+# compile the enumeration_interfaces.c code for raspberry pi
+pushd . && cd /home/pi && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.old
 sudo mv /home/pi/dnsmasq.conf /etc/
