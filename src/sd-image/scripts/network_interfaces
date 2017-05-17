@@ -5,7 +5,12 @@ auto eth0
 auto wlan0
 auto uap0
 
-iface eth0 inet dhcp
+iface eth0 inet static
+  address 192.168.51.1
+  netmask 255.255.255.0
+  network 192.168.51.0
+  broadcast 192.168.51.255
+
 iface lo inet loopback
 
 allow-hotplug wlan0
