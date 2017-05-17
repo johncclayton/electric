@@ -21,35 +21,33 @@ int main (int argc, const char* argv[])
   char addrbuf[1024];
   int i;
 
-  printf("Opening socket...");
   socketfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (socketfd >= 0) {
-    printf(" OK\n");
     conf.ifc_len = sizeof(data);
     conf.ifc_buf = (caddr_t) data;
     if (ioctl(socketfd,SIOCGIFCONF,&conf) < 0) {
-      perror("ioctl");
+      perror("ioctl error");
     }
 
-    printf("Discovering interfaces...\n");
     i = 0;
     ifr = (struct ifreq*)data;
     while ((char*)ifr < data+conf.ifc_len) {
       switch (ifr->ifr_addr.sa_family) {
         case AF_INET:
             ++i;
-            printf("%d. %s : %s\n", i, ifr->ifr_name, inet_ntop(ifr->ifr_addr.sa_family, &((struct sockaddr_in*)&ifr->ifr_addr)->sin_addr, addrbuf, sizeof(addrbuf)));
+            printf("%d: %s: %s\n", i, ifr->ifr_name, inet_ntop(ifr->ifr_addr.sa_family, &((struct sockaddr_in*)&ifr->ifr_addr)->sin_addr, addrbuf, sizeof(addrbuf)));
             break;
 #if 0
         case AF_INET6:
             ++i;
-            printf("%d. %s : %s\n", i, ifr->ifr_name, inet_ntop(ifr->ifr_addr.sa_family, &((struct sockaddr_in6*)&ifr->ifr_addr)->sin6_addr, addrbuf, sizeof(addrbuf)));
+            printf("%d: %s: %s\n", i, ifr->ifr_name, inet_ntop(ifr->ifr_addr.sa_family, &((struct sockaddr_in6*)&ifr->ifr_addr)->sin6_addr, addrbuf, sizeof(addrbuf)));
             break;
 #endif
       }
       ifr = (struct ifreq*)((char*)ifr +_SIZEOF_ADDR_IFREQ(*ifr));
     }
     close(socketfd);
+    printf(" Total Interfaces: %i\n", i);
   }
   else {
     printf(" Failed!\n");
