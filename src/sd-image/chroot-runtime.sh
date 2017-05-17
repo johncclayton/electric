@@ -11,9 +11,10 @@ echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE
 
 # DO NOT do apt-get upgrade - this causes the sd-card to NOT BOOT
 apt-get -y update
-apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq
+apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq sudo apt-get install libbluetooth-dev bluez
 
 /usr/bin/pip install -r /home/pi/status/requirements.txt
+/usr/bin/pip install pybluez
 
 curl -sSL https://get.docker.com | sh
 
