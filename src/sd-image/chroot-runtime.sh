@@ -20,7 +20,7 @@ curl -sSL https://get.docker.com | sh
 usermod -aG docker pi
 
 # compile the enumeration_interfaces.c code for raspberry pi
-pushd . && cd /home/pi && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
+pushd . && cd /home/pi/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.old
 sudo mv /home/pi/dnsmasq.conf /etc/
