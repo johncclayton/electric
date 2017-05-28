@@ -4,3 +4,4 @@ Flask-RESTful==0.3.5
 Jinja2==2.8
 six==1.10.0
 docker
+pybluez
