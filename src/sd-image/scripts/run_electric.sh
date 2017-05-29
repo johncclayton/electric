@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -x 
+
 IMAGE_NAME="scornflake/electric-pi"
 IMAGE_TARFILE="/home/pi/docker_image.tar"
 IMAGE_EXISTS=5
