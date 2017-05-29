@@ -7,6 +7,7 @@ TO="$2"
 PIIMG=`which piimg`
 MNT="/mnt"
 QEMU_ARM="/usr/bin/qemu-arm-static"
+DOCKER_IMAGE="scornflake/electric-pi"
 
 if [ -z "$FROM" -o -z "$TO" ]; then
 	echo "Use create-image.sh <from> <to>"
@@ -91,12 +92,17 @@ if [ -z "$APNAME" -o -z "$APPWD" -o -z "$WIFINAME" -o -z "$WIFIPWD" ]; then
 	exit 6
 fi
 
+# pull docker image and save it as a file...
+docker pull "$DOCKER_IMAGE" 
+
 # copy source -> dest
 cp "$FROM" "$TO" 
 $PIIMG mount "$TO" "$MNT"
 
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp scripts/* "$MNT/home/pi/"
+
+docker image save -o "$MNT/home/pi/docker_image.tar" "$DOCKER_IMAGE"
 
 sudo cp scripts/rc.local "$MNT/etc/rc.local"
 sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
