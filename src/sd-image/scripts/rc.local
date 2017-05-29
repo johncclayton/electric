@@ -18,6 +18,6 @@ if [ "$_IP" ]; then
 fi
 
 echo "Starting hostapd service..."
-/bin/bash /usr/local/bin/hostapdstart
+/bin/bash /usr/local/bin/hostapdstart >1&
 
 exit 0
