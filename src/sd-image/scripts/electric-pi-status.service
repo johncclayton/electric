@@ -1,0 +1,15 @@
+[Unit]
+Description=Electric Pi Status Service
+After=multi-user.target
+Requires=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/status/run_server.sh
+User=pi
+Restart=on-failure
+RestartSec=8
+WorkingDirectory=/home/pi/status
+
+[Install]
+WantedBy=multi-user.target

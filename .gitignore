@@ -5,3 +5,4 @@ src/server/dist/
 src/server/MANIFEST
 main
 live.config.json
+enumerate_interfaces

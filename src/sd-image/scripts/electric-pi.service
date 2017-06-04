@@ -1,0 +1,15 @@
+[Unit]
+Description=iCharger RESTful API Service
+After=multi-user.target
+Requires=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/run_electric.sh
+ExecStop=/home/pi/stop_electric.sh
+User=pi
+Restart=on-failure
+RestartSec=8
+
+[Install]
+WantedBy=multi-user.target

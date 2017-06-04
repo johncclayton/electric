@@ -37,7 +37,11 @@ def exclusive(func):
 
                     logger.warning("{0}/{3}, will try again (count is at {1}/{2})".format(ex, retry, RETRY_LIMIT, type(ex)))
 
-                    evil_global.comms.reset()
+                    # If the charger isn't plugged in. This could fail.
+                    try:
+                        evil_global.comms.reset()
+                    except Exception, ex:
+                        logger.error("Error resetting comms! Charger not plugged in? {0}".format(ex))
 
                     if retry >= RETRY_LIMIT:
                         logger.warning("retry limit exceeded, aborting the call completely")

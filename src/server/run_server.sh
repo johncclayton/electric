@@ -18,7 +18,7 @@ for i in "$@" ; do
         # So watch all files, kill existing, and kick off another
         DIR=`pwd`
         echo "Starting with many preloaded, multiprocess unicorns. Running from within $DIR..."
-        watchmedo auto-restart -p "*.py;*.html;*.css;*.js" --recursive 'start_gunicorn.sh'
+        watchmedo auto-restart -p "*.py;*.html;*.css;*.js" --recursive "$DIR/start_gunicorn.sh"
         exit
     fi
 
