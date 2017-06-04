@@ -380,6 +380,7 @@ export class iChargerService {
             console.log("Error while waiting for the channel to change state");
             this.cancelAutoStopForChannel(channel);
         }, () => {
+
             console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
             this.stopCurrentTask(channel).subscribe();
             this.cancelAutoStopForChannel(channel);

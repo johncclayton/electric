@@ -105,6 +105,7 @@ export class ChannelComponent {
             console.log("Started ", named, " on channel " + this.channel.index + ", using preset: " + preset.name);
             console.log("Response: ", resp);
         };
+
         switch (operation) {
             case Operation.Charge:
                 this.chargerService.startCharge(this.channel, preset).subscribe(handler);
