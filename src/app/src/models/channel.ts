@@ -1,5 +1,3 @@
-import * as _ from "lodash";
-
 export class Channel {
     _json = {};
     _index: number = 0;
@@ -9,6 +7,9 @@ export class Channel {
         this._json = jsonObject;
         this.limitCellsBasedOnLimit(configuredCellLimit);
 
+        /*
+        Migrate all the properties of the object directly onto this object, so they can be easily accessed
+         */
         for (let key of Object.keys(jsonObject)) {
             Object.defineProperty(this, key, {
                 get: () => {
@@ -49,13 +50,13 @@ export class Channel {
         // 17 = balance
         console.log("Charge run status is: ", this._json['run_status']);
         let run_states = [7, 13, 17];
-        return run_states.indexOf(this._json['run_status']) != -1;
+        return run_states.indexOf(this.runState) != -1;
     }
 
     get isChargeStopped(): boolean {
         // 40 = finished charge, finished store
         let stopped_stats = [40, 0];
-        return stopped_stats.indexOf(this._json['run_status']) != -1;
+        return stopped_stats.indexOf(this.runState) != -1;
     }
 
     get runState(): number {

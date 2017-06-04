@@ -4,7 +4,6 @@ import {Channel} from "../../models/channel";
 import {ActionSheetController, NavController, AlertController, ToastController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 import {Preset} from "../../pages/preset/preset-class";
-import {Observable} from "rxjs";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -57,7 +56,6 @@ export class ChannelComponent {
 
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
-                public alertController: AlertController,
                 public toastController: ToastController,
                 public actionController: ActionSheetController) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
@@ -149,6 +147,7 @@ export class ChannelComponent {
 
     showChargerActions() {
         if (!this.channel.packPluggedIn) {
+            // console.debug("Channel json: ", this.channel.json);
             let toast = this.toastController.create({
                 'message': "Pack not plugged in.",
                 'cssClass': 'redToast',

@@ -1,6 +1,8 @@
 <ion-grid>
     <ion-row id="heading">
-        <ion-col class="channelNumber" (click)="showChargerActions()">
+        <!--<ion-col class="channelNumber" [ngClass]="{channelNumberActive:channel.runState > 0}"-->
+        <ion-col class="channelNumber" [ngClass]="{channelNumberActive:channel.index == 0}"
+                 (click)="showChargerActions()">
             {{index + 1}}
         </ion-col>
         <ion-col>

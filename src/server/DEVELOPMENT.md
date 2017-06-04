@@ -61,7 +61,7 @@ Install the dependancies into the virtualenv - on a RPI3 this can take 5 minutes
     $ pip install -r requirements.txt
 
 
-## Neil's Setting up a fresh Pi3 using Hypriot from scratch
+## Neil's Setting up a fresh Pi3 dev env
 * Install Hypriot
   - https://github.com/hypriot/flash
 1. wget https://bootstrap.pypa.io/get-pip.py
@@ -72,6 +72,11 @@ Install the dependancies into the virtualenv - on a RPI3 this can take 5 minutes
 1. mkvirtualenv electric
 1. nano ~/.virtualenvs/electric/bin/postactivate, and add "cd ~/electric/src/server"
 1. git clone https://github.com/johncclayton/electric.git
+1. Then do the dependency installs:
+   1. sudo apt-get update
+   1. **hypriot**: sudo apt-get install libeudev-dev gcc cython cython-dev
+   1. **noobs**: sudo apt-get install libudev-dev libusb-1.0-0.dev gcc cython cython-dev
+   1. pip install -r requirements.txt
 
 ## To run the server
 1. ssh pi3 (pi3 is my SSH alias to the pi that I've just setup)
