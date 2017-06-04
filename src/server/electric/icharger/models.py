@@ -355,8 +355,9 @@ class ChannelStatus(Model):
         # You can't use exact, because sometimes total will be > sometimes a little less. Go figure.
         is_plugged_in_threshold = (total_voltage * 0.8)
         plugged_in = curr_out_volts > is_plugged_in_threshold
-        if not plugged_in:
-            logger.info("Pack not plugged in because {0}:{1} > {2}:{3}".format(curr_out_volts, type(curr_out_volts), is_plugged_in_threshold, type(is_plugged_in_threshold)))
+        if is_plugged_in_threshold > 0 and plugged_in > 0:
+            if not plugged_in:
+                logger.info("Pack not plugged in because {0}:{1} > {2}:{3}".format(curr_out_volts, type(curr_out_volts), is_plugged_in_threshold, type(is_plugged_in_threshold)))
         return plugged_in
 
     @serializable
