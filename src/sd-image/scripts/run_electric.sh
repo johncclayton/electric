@@ -3,7 +3,7 @@
 set -x 
 
 IMAGE_NAME="scornflake/electric-pi"
-IMAGE_TARFILE="/home/pi/docker_image.tar"
+IMAGE_TARFILE="/home/pi/docker_image.tar.gz"
 IMAGE_EXISTS=5
 
 function have_internet() {
@@ -31,7 +31,7 @@ while [ $IMAGE_EXISTS -ne 0 ]; do
     if [ $IMAGE_EXISTS -ne 0 ]; then
         echo "Cannot find $IMAGE_NAME image - checking for it in $IMAGE_TARFILE"
         if [ -f "$IMAGE_TARFILE" ]; then
-            docker image load -i "$IMAGE_TARFILE" && rm "$IMAGE_TARFILE"
+            gunzip -c "$IMAGE_TARFILE" | docker image load && rm "$IMAGE_TARFILE"
         else 
             have_internet
 

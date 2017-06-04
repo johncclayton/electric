@@ -103,7 +103,8 @@ $PIIMG mount "$TO" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp scripts/* "$MNT/home/pi/"
 
-sudo docker image save -o "$MNT/home/pi/docker_image.tar" "$DOCKER_IMAGE"
+sudo touch "$MNT/home/pi/docker_image.tar.gz" && sudo chmod 777 "$MNT/home/pi/docker_image.tar.gz"
+docker image save "$DOCKER_IMAGE" | gzip > "$MNT/home/pi/docker_image.tar.gz" 
 
 sudo cp scripts/rc.local "$MNT/etc/rc.local"
 sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
