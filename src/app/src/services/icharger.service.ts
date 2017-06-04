@@ -14,12 +14,14 @@ const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
+    iCharger406Duo = 67, // ??? probably not. We need to get the model number.
     iCharger308Duo = 66
 }
 
 export let ChargerMetadata = {};
-ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
-ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells' : 8};
+ChargerMetadata[ChargerType.iCharger406Duo] = {'maxAmps': 40, 'name': 'iCharger 406', 'tag': 'DUO', 'cells' : 6};
+ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO', 'cells' : 10};
 
 @Injectable()
 export class iChargerService {
