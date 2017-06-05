@@ -10,6 +10,7 @@ const CONFIG_CHANGED_EVENT = "config.changed";
 export class Configuration {
     public configDict = {};
     private versionNumber: string;
+    private versionUUID: string;
 
     public constructor(public storage: Storage,
                        public events: Events,
@@ -17,16 +18,7 @@ export class Configuration {
                        public deploy: Deploy,
                        public alert: AlertController) {
         this.versionNumber = "";
-
-        console.log("Platforms: ", this.platform.platforms());
-        if (this.canUseDeploy()) {
-            console.log("Finding current deploy info...");
-            this.deploy.info().then(v => {
-                // TODO: Need to run this, and find out what the values are here
-                // I'm hoping for a 'version' key
-                console.info("Version values: ", v);
-            });
-        }
+        this.versionUUID = "";
     }
 
     loadConfiguration(): Promise<any> {
@@ -36,9 +28,29 @@ export class Configuration {
             this.storage.get("configuration")
                 .then(v => {
                     this.bringInConfiguration(v);
-                    console.log("Configuration Loaded: ", this.configDict);
+                    console.log("Configuration loaded");
                     this.events.publish(CONFIG_LOADED_EVENT);
                     resolve();
+
+                    console.log("Platforms: ", this.platform.platforms());
+                    if (this.canUseDeploy()) {
+                        console.log("Finding current deploy info...");
+                        this.deploy.info().then(v => {
+                            this.versionNumber = "";
+                            let keys = Object.keys(v);
+                            keys.forEach((key, index) => {
+                                if (key == 'binary_version') {
+                                    this.versionNumber = v[key];
+                                }
+                                if (key == "deploy_uuid") {
+                                    this.versionUUID = v[key];
+                                }
+                                console.log("Deploy info: " + key + "=" + v[key]);
+                            });
+                        });
+                    } else {
+                        console.log("Can't use deploy - so not trying to see what version we are");
+                    }
                 })
         });
 
@@ -156,8 +168,15 @@ export class Configuration {
 
     versionNumberString(): string {
         if (this.canUseDeploy()) {
-            if(this.versionNumber) {
-                return this.versionNumber;
+            let ver: string = "";
+            if (this.versionNumber) {
+                ver += this.versionNumber;
+            }
+            if (this.versionUUID) {
+                ver += " (" + this.versionUUID + ")";
+            }
+            if (ver.length > 0) {
+                return ver;
             }
             return "0.0.1";
         }
