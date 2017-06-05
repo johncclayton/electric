@@ -1,3 +1,45 @@
+/*
+
+ DeviceInfo.run_status
+ 1 = stopped (showing stopped)
+ 5 = start
+ 6 = check
+ 7 = charging (I see: start, check, charge)
+ 14,11,12,7/13 = storage (start, check, charge/discharge)
+ 13 = discharging
+ 17 = balance
+ 40 = done, beeping.
+ 0 = idle, doing nothing
+
+ Storage & Discharge (as DISCHG):
+ - run_state=13
+ - control_state=3
+ - -ve current_out_capacity
+ - -ve current_out_amps
+ - -ve current_out_power
+
+ Storage (CHARGE)
+ - run_state=7
+ - control_state=2
+ - +ve current_out_capacity
+ - +ve current_out_amps
+ - +ve current_out_power
+
+ Run_status possible bit field:
+ 1/1 : active (stopped, charging, discharge, anything other than idle)
+ 2/2 : check
+ 3/4 : start
+ 4/8 : charge
+ 5/16:
+ 6/32:
+ 7/64:
+
+ Control_status
+ 0 = stopped
+ 2 = b.cv
+ 3 = b.cc
+ */
+
 export class Channel {
     _json = {};
     _index: number = 0;
@@ -8,7 +50,7 @@ export class Channel {
         this.limitCellsBasedOnLimit(configuredCellLimit);
 
         /*
-        Migrate all the properties of the object directly onto this object, so they can be easily accessed
+         Migrate all the properties of the object directly onto this object, so they can be easily accessed
          */
         for (let key of Object.keys(jsonObject)) {
             Object.defineProperty(this, key, {
@@ -38,10 +80,59 @@ export class Channel {
         return this._json;
     }
 
-    get packPluggedIn(): boolean {
-        let cells = this._json['battery_plugged_in'];
-        let main = this._json['balance_leads_plugged_in'];
-        return cells && main;
+    /*
+     run_state: shows what the charger is doing: checking, charging, discharging, starting, stopped, etc.
+     control_state: not really sure. It might mean "I am controlling something (like volts, current)", but I havn't found a pattern just yet.
+
+     Unfortunately, there's no var I can see that tells us the current operation (storage, balance, etc).
+     e.g: when doing Storage, you charge or discharge. run_state gives us charge/discharge, but doesn't say
+     if that's a result of us performing an actual Charge operation, or a Storage operation.
+     */
+    get headingText(): string {
+        let run_state = this.runState;
+        let control_state = this.controlState;
+
+        if (!this.packConnected) {
+            return "No pack";
+        }
+        if (!this.packBalanceLeadsConnected) {
+            return "No balance leads";
+        }
+
+        if (run_state == 5) {
+            return "Start";
+        }
+        if (run_state == 6 || run_state == 12) {
+            return "Check";
+        }
+        if (run_state == 7) {
+            return "Charging";
+        }
+        if (run_state == 13) {
+            return "Discharge";
+        }
+        if (run_state == 17) {
+            return "Balancing";
+        }
+        if (run_state == 1) {
+            return "Stopped";
+        }
+        if (run_state == 40) {
+            return "DONE";
+        }
+        return "Idle";
+    }
+
+    get packAndBalanceConnected(): boolean {
+        return this.packConnected && this.packBalanceLeadsConnected;
+    }
+
+    get packConnected(): boolean {
+        return this._json['battery_plugged_in'];
+    }
+
+    get packBalanceLeadsConnected(): boolean {
+        return this._json['balance_leads_plugged_in'];
     }
 
     get isChargeRunning(): boolean {
@@ -61,6 +152,10 @@ export class Channel {
 
     get runState(): number {
         return this._json['run_status'];
+    }
+
+    get controlState(): number {
+        return this._json['control_status'];
     }
 
     get maxMilliVoltDiff() {

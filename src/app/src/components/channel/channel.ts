@@ -147,7 +147,7 @@ export class ChannelComponent {
     }
 
     showChargerActions() {
-        if (!this.channel.packPluggedIn) {
+        if (!this.channel.packAndBalanceConnected) {
             // console.debug("Channel json: ", this.channel.json);
             let toast = this.toastController.create({
                 'message': "Pack not plugged in.",

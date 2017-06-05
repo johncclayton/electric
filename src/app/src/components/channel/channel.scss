@@ -11,9 +11,14 @@ channel {
   padding-left: $item-ios-padding-left;
   padding-right: $item-ios-padding-right;
 
-  // Puts some space between the V/A/mah row, and the cell readout
+  // Puts some space between the channel#/time row, and the cell readout
   #heading {
-    padding-bottom: 10px;
+    padding-bottom: 0px;
+
+    // More gap between the channel heading and its number
+    #title {
+      padding-left: 10px;
+    }
   }
 
   .channelNumber {
@@ -208,12 +213,18 @@ channel {
 
 // Per channel colouring
 // Don't know why it starts at 2... weird.
-channel:nth-child(2) .channelNumber {
+channel:nth-child(2) .channelColor {
   color: map-get($colors, 'channel0');
+}
+
+channel:nth-child(3) .channelColor {
+  color: map-get($colors, 'channel1');
+}
+
+channel:nth-child(2) .channelNumber {
   border-color: map-get($colors, 'channel0');
 }
 
 channel:nth-child(3) .channelNumber {
-  color: map-get($colors, 'channel1');
   border-color: map-get($colors, 'channel1');
 }

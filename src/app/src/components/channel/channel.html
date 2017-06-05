@@ -1,22 +1,34 @@
 <ion-grid>
-    <ion-row id="heading">
+    <ion-row id="heading" align-items-baseline>
         <!--<ion-col class="channelNumber" [ngClass]="{channelNumberActive:channel.runState > 0}"-->
-        <ion-col class="channelNumber" [ngClass]="{channelNumberActive:channel.index == 0}"
-                 (click)="showChargerActions()">
+        <ion-col class="channelNumber channelColor" [ngClass]="{channelNumberActive:channel.index == 0}"
+                 (click)="showChargerActions()" width-10>
             {{index + 1}}
         </ion-col>
+        <ion-col id="title">
+            <h4 class="channelColor">{{channel.headingText}}</h4>
+        </ion-col>
         <ion-col>
-            <ion-row>
-                <ion-col class="cellcontainer" text-center>{{channel.curr_out_volts|number:'1.3-3'}}</ion-col>
-                <ion-col class="cellcontainer" text-center>{{channel.curr_out_amps|number:'1.2-2'}}</ion-col>
-                <ion-col class="cellcontainer" text-center>{{channel.curr_out_capacity|number:'1.0-0'}}</ion-col>
+            <ion-row justify-content-end>
+                <ion-col class="cellcontainer" text-right>
+                    <ion-icon name="clock-outline"></ion-icon>
+                    &nbsp;{{channel.timestamp|duration}}
+                </ion-col>
             </ion-row>
-
-            <ion-row>
-                <ion-col no-padding class="label" text-center>V</ion-col>
-                <ion-col no-padding class="label" text-center>A</ion-col>
-                <ion-col no-padding class="label" text-center>mAh</ion-col>
-            </ion-row>
+        </ion-col>
+    </ion-row>
+    <ion-row nowrap>
+        <ion-col class="cellcontainer" text-left>
+            <ion-icon name="flash-outline"></ion-icon>
+            &nbsp;{{channel.curr_out_volts|number:'1.3-3'}}
+        </ion-col>
+        <ion-col class="cellcontainer" text-center>
+            <ion-icon name="flask-outline"></ion-icon>
+            &nbsp;{{channel.curr_out_capacity|number:'1.0-0'}}
+        </ion-col>
+        <ion-col class="cellcontainer" text-right>
+            <ion-icon name="pulse"></ion-icon>
+            &nbsp;{{channel.curr_out_amps|number:'1.2-2'}}
         </ion-col>
     </ion-row>
 
