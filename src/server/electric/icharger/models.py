@@ -50,6 +50,7 @@ STATUS_BALANCE = 0x40
 
 DEVICEID_4010_DUO = 64
 DEVICEID_308_DUO = 66
+DEVICEID_306_DUO = 67  # TODO: Update to the real device number
 
 
 class ObjectNotFoundException(Exception):
@@ -62,6 +63,7 @@ class BadRequestException(Exception):
 
 DeviceIdCellCount = (
     (DEVICEID_308_DUO, 8),
+    (DEVICEID_306_DUO, 6),
     (DEVICEID_4010_DUO, 10)
 )
 
@@ -334,7 +336,12 @@ class ChannelStatus(Model):
 
         if device_id:
             # With this, we can work out if the main battery lead is plugged in
-            max_voltage = 30 if device_id is DEVICEID_308_DUO else 40
+            if device_id is DEVICEID_306_DUO:
+                max_voltage = 26
+            elif device_id is DEVICEID_308_DUO:
+                max_voltage = 30
+            else:
+                max_voltage = 40
             if self.curr_out_volts > max_voltage:
                 self.curr_out_volts = 0
 

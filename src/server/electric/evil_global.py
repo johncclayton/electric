@@ -1,5 +1,4 @@
-import logging
-import multiprocessing
+import multiprocessing, logging
 
 from electric.icharger.comms_layer import ChargerCommsManager
 

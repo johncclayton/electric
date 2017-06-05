@@ -96,7 +96,7 @@ export class Channel {
             return "No pack";
         }
         if (!this.packBalanceLeadsConnected) {
-            return "No balance leads";
+            return "Balance leads?";
         }
 
         if (run_state == 5) {
