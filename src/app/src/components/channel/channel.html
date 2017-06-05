@@ -10,7 +10,7 @@
         <ion-col>
             <ion-row justify-content-end no-padding>
                 <ion-col class="cellcontainer" text-right no-padding>
-                    <ion-icon name="clock-outline"></ion-icon>
+                    <ion-icon ios="ios-clock-outline" md="md-clock"></ion-icon>
                     &nbsp;{{channel.timestamp|duration}}
                 </ion-col>
             </ion-row>
@@ -18,11 +18,11 @@
     </ion-row>
     <ion-row nowrap>
         <ion-col class="cellcontainer" text-left>
-            <ion-icon name="flash-outline"></ion-icon>
+            <ion-icon ios="ios-flash-outline" md="md-flash"></ion-icon>
             &nbsp;{{channel.curr_out_volts|number:'1.3-3'}}
         </ion-col>
         <ion-col class="cellcontainer" text-center>
-            <ion-icon name="flask-outline"></ion-icon>
+            <ion-icon ios="ios-flask-outline" md="md-flask"></ion-icon>
             &nbsp;{{channel.curr_out_capacity|number:'1.0-0'}}
         </ion-col>
         <ion-col class="cellcontainer" text-right>
