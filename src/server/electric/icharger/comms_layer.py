@@ -454,7 +454,6 @@ class ChargerCommsManager(object):
         self.run_operation(Operation.Discharge, channel_number, preset_for_ir.memory_slot)
 
         # Problem. This should be Async...
-
         # Restore original preset in RAM (possibly not actually necessary)
         # self.save_preset_to_memory_slot(original_preset, original_preset.index, write_to_flash=False, verify_write=False)
 

@@ -34,19 +34,11 @@ Channel:
 '''
 
 # "general status word"
-# charging: cell volt, control, run, run_status
-# stopped: cell volt, run_status
-# fully stopped: cell volt
-# storage (charging): cell volt, control, run, run_status
+# fully stopped / idle: cell volt (no run or control flags. run_status=0 and control_status=0)
+# charging: cell volt, control, run
+# stopped (after some operation): cell volt, run
+# storage (charging): cell volt, control, run
 # discharging: ctrl_status, run, run_status
-
-# DeviceInfo.run_status
-# 7 = charging
-# 1 = stopped(showing stopped)
-# 13 = discharging
-# 17 = balance
-# 0 = really stopped
-
 
 STATUS_RUN = 0x01
 STATUS_ERROR = 0x02
@@ -294,6 +286,9 @@ class ChannelStatus(Model):
     run_error = IntType(required=True)
     dlg_box_id = IntType(required=True)
     line_intern_resistance = FloatType(required=True)
+
+    # Optionally added to the response, when a channel status is requested
+    status = ModelType(DeviceInfoStatus)
 
     @staticmethod
     def modbus(device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):

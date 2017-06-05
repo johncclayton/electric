@@ -55,8 +55,6 @@ class StatusResource(Resource):
     def get(self):
         info = evil_global.comms.get_device_info()
 
-        evil_global.last_seen_charger_device_id = info.device_id
-
         obj = info.to_primitive()
         obj.update(connection_state_dict())
 
@@ -70,8 +68,18 @@ class ChannelResource(Resource):
         if not (channel == 0 or channel == 1):
             return connection_state_dict("Channel number must be 0 or 1"), 403
 
-        # yeh, more groan
-        status = evil_global.comms.get_channel_status(int(channel), evil_global.last_seen_charger_device_id)
+        # What the heck is it doing, right now?
+
+        # get device status, so we know more about channel state
+        device_info = evil_global.comms.get_device_info()
+
+        status = evil_global.comms.get_channel_status(int(channel), device_info.device_id)
+        if status is not None:
+            if device_info is not None:
+                if channel == 0:
+                    status.status = device_info.ch1_status
+                elif channel == 1:
+                    status.status = device_info.ch2_status
 
         obj = status.to_primitive()
         obj.update(connection_state_dict())
