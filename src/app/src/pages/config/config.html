@@ -41,9 +41,11 @@
 
     <button full color="danger" ion-button (click)="resetToDefaults()">Reset to Defaults</button>
 
-    <ion-item *ngIf="config.canUseDeploy()">
-        Version {{ config.versionNumberString() }}
-    </ion-item>
-
 </ion-content>
 
+<ion-footer>
+    <ion-list>
+        <ion-label *ngIf="config.canUseDeploy()" text-center>Version: {{ config.versionNumberString() }}</ion-label>
+        <ion-label text-center>Platform: {{ config.platformsString() }}</ion-label>
+    </ion-list>
+</ion-footer>

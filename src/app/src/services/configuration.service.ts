@@ -18,7 +18,9 @@ export class Configuration {
                        public alert: AlertController) {
         this.versionNumber = "";
 
-        if (platform.is('cordova')) {
+        console.log("Platforms: ", this.platform.platforms());
+        if (this.canUseDeploy()) {
+            console.log("Finding current deploy info...");
             this.deploy.info().then(v => {
                 // TODO: Need to run this, and find out what the values are here
                 // I'm hoping for a 'version' key
@@ -145,13 +147,21 @@ export class Configuration {
     }
 
     canUseDeploy(): boolean {
-        return this.platform.is('mobile');
+        return this.platform.is('cordova');
     }
 
-    versionNumberString() {
+    platformsString(): string {
+        return this.platform.platforms().toString();
+    }
+
+    versionNumberString(): string {
         if (this.canUseDeploy()) {
-            return this.versionNumber;
+            if(this.versionNumber) {
+                return this.versionNumber;
+            }
+            return "0.0.1";
         }
+        return "";
     }
 }
 
