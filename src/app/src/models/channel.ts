@@ -80,6 +80,10 @@ export class Channel {
         return this._json;
     }
 
+    get charger_internal_temp(): number {
+        return this._json['curr_int_temp'];
+    }
+
     /*
      run_state: shows what the charger is doing: checking, charging, discharging, starting, stopped, etc.
      control_state: not really sure. It might mean "I am controlling something (like volts, current)", but I havn't found a pattern just yet.
@@ -90,7 +94,7 @@ export class Channel {
      */
     get headingText(): string {
         let run_state = this.runState;
-        let control_state = this.controlState;
+        // let control_state = this.controlState;
 
         if (!this.packConnected) {
             return "No pack";

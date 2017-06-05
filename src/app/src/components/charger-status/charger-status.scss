@@ -1,3 +1,9 @@
 charger-status {
+  .warning {
+    color: orange;
+  }
 
+  .emergency {
+    color: red;
+  }
 }

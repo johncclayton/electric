@@ -8,7 +8,6 @@ import {iChargerService} from "../../services/icharger.service";
     templateUrl: 'config.html'
 })
 export class ConfigPage {
-
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public config: Configuration) {

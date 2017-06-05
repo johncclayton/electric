@@ -1,7 +1,7 @@
 import {Component, Input, trigger, state, style, transition, animate} from "@angular/core";
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
-import {ActionSheetController, NavController, AlertController, ToastController} from "ionic-angular";
+import {ActionSheetController, NavController, ToastController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 import {Preset} from "../../pages/preset/preset-class";
 

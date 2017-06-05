@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {Storage} from "@ionic/storage";
-import {AlertController, Events} from "ionic-angular";
+import {AlertController, Events, Platform} from "ionic-angular";
+import {Deploy} from "@ionic/cloud-angular";
 
 const CONFIG_LOADED_EVENT = "config.loaded";
 const CONFIG_CHANGED_EVENT = "config.changed";
@@ -8,10 +9,22 @@ const CONFIG_CHANGED_EVENT = "config.changed";
 @Injectable()
 export class Configuration {
     public configDict = {};
+    private versionNumber: string;
 
     public constructor(public storage: Storage,
                        public events: Events,
+                       public platform: Platform,
+                       public deploy: Deploy,
                        public alert: AlertController) {
+        this.versionNumber = "";
+
+        if (platform.is('cordova')) {
+            this.deploy.info().then(v => {
+                // TODO: Need to run this, and find out what the values are here
+                // I'm hoping for a 'version' key
+                console.info("Version values: ", v);
+            });
+        }
     }
 
     loadConfiguration(): Promise<any> {
@@ -129,6 +142,16 @@ export class Configuration {
                 "chargeMethod": "presets",
             }
         };
+    }
+
+    canUseDeploy(): boolean {
+        return this.platform.is('mobile');
+    }
+
+    versionNumberString() {
+        if (this.canUseDeploy()) {
+            return this.versionNumber;
+        }
     }
 }
 

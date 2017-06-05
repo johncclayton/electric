@@ -2,7 +2,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
 import {APP_INITIALIZER, ErrorHandler, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
-import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
+import {IonicErrorHandler, IonicModule, IonicApp} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
 import {DurationPipe, KeysPipe, ReversePipe} from "../utils/pipes";
@@ -29,6 +29,14 @@ function configServiceFactory(config: Configuration) {
   return () => config.loadConfiguration();
 }
 
+import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
+
+const cloudSettings: CloudSettings = {
+  'core': {
+    'app_id': 'f944cad8'
+  }
+};
+
 @NgModule({
   declarations: [
     MyApp,
@@ -53,6 +61,7 @@ function configServiceFactory(config: Configuration) {
     BrowserModule,
     HttpModule,
     IonicModule.forRoot(MyApp),
+    CloudModule.forRoot(cloudSettings),
     IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],

@@ -37,4 +37,5 @@
     <plugin name="cordova-sqlite-storage" spec="~2.0.0" />
     <plugin name="cordova-plugin-wkwebview-engine" spec="https://github.com/driftyco/cordova-plugin-wkwebview-engine.git" />
     <plugin name="cordova-plugin-statusbar" spec="~2.2.3" />
+    <plugin name="ionic-plugin-deploy" spec="~0.6.7" />
 </widget>
