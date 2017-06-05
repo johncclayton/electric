@@ -1,10 +1,9 @@
 import {Component} from "@angular/core";
-import {NavController, ToastController, Platform} from "ionic-angular";
+import {NavController, ToastController} from "ionic-angular";
 import {Subscription, Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
 import {Configuration} from "../../services/configuration.service";
-import {Deploy} from "@ionic/cloud-angular";
 
 @Component({
     selector: 'page-home',
@@ -20,8 +19,6 @@ export class HomePage {
                 public readonly toastController: ToastController,
                 public readonly chargerService: iChargerService,
                 public readonly config: Configuration,
-                public readonly platform: Platform,
-                public readonly deploy : Deploy,
                 public readonly http: Http) {
 
         // TODO: Use this to flash some activity lights

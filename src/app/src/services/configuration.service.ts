@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Storage} from "@ionic/storage";
-import {AlertController, Events, Platform} from "ionic-angular";
+import {AlertController, Events, Platform, ToastController, LoadingController} from "ionic-angular";
 import {Deploy} from "@ionic/cloud-angular";
 
 const CONFIG_LOADED_EVENT = "config.loaded";
@@ -16,6 +16,8 @@ export class Configuration {
                        public events: Events,
                        public platform: Platform,
                        public deploy: Deploy,
+                       public readonly toastController: ToastController,
+                       public readonly loadingController: LoadingController,
                        public alert: AlertController) {
         this.versionNumber = "";
         this.versionUUID = "";
@@ -38,6 +40,7 @@ export class Configuration {
                         this.deploy.info().then(v => {
                             this.versionNumber = "";
                             let keys = Object.keys(v);
+
                             keys.forEach((key, index) => {
                                 if (key == 'binary_version') {
                                     this.versionNumber = v[key];
@@ -45,8 +48,9 @@ export class Configuration {
                                 if (key == "deploy_uuid") {
                                     this.versionUUID = v[key];
                                 }
-                                console.log("Deploy info: " + key + "=" + v[key]);
                             });
+
+                            this.checkForUpdate();
                         });
                     } else {
                         console.log("Can't use deploy - so not trying to see what version we are");
@@ -181,6 +185,45 @@ export class Configuration {
             return "0.0.1";
         }
         return "";
+    }
+
+    /*
+     Upgrading
+     */
+
+    checkForUpdate() {
+        if (!this.canUseDeploy()) {
+            console.log("Not checking for latest version, we can't use Deploy (prob in browser)");
+            return;
+        }
+
+        console.log("Checking for update...");
+        const checking = this.loadingController.create({
+            content: 'Checking for update...'
+        });
+        checking.present();
+
+        this.deploy.check().then((snapshotAvailable: boolean) => {
+            checking.dismiss();
+            if (snapshotAvailable) {
+                this.downloadAndInstall();
+            }
+            else {
+                const toast = this.toastController.create({
+                    message: 'Using latest version',
+                    duration: 3000
+                });
+                toast.present();
+            }
+        });
+    }
+
+    private downloadAndInstall() {
+        const updating = this.loadingController.create({
+            content: 'Updating application...'
+        });
+        updating.present();
+        this.deploy.download().then(() => this.deploy.extract()).then(() => this.deploy.load());
     }
 }
 
