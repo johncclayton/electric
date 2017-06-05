@@ -1,7 +1,6 @@
 <ion-grid>
     <ion-row id="heading" align-items-baseline>
-        <!--<ion-col class="channelNumber" [ngClass]="{channelNumberActive:channel.runState > 0}"-->
-        <ion-col class="channelNumber channelColor" [ngClass]="{channelNumberActive:channel.index == 0}"
+        <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel.runState > 0}"
                  (click)="showChargerActions()" width-10>
             {{index + 1}}
         </ion-col>

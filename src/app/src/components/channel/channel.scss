@@ -39,6 +39,7 @@ channel {
     border-color: map_get($colors, 'primary');
     color: map_get($colors, 'primary');
     text-align: center;
+
   }
 
   // The channel number sits off on the edge of the cell
@@ -228,3 +229,14 @@ channel:nth-child(2) .channelNumber {
 channel:nth-child(3) .channelNumber {
   border-color: map-get($colors, 'channel1');
 }
+
+channel:nth-child(2) .channelColorInverted {
+  background-color: map-get($colors, 'channel0') !important;
+  color: white !important;
+}
+
+channel:nth-child(3) .channelColorInverted {
+  background-color: map-get($colors, 'channel1') !important;
+  color: white !important;
+}
+

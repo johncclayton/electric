@@ -345,6 +345,10 @@ class ChannelStatus(Model):
             if self.curr_out_volts > max_voltage:
                 self.curr_out_volts = 0
 
+        # If the charger isn't doing anything, make sure timestamp shows 00:00
+        if self.run_status == 0:
+            self.timestamp = 0
+
     def max_charger_input_voltage(self):
         return 0
 
