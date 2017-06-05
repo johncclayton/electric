@@ -1,15 +1,15 @@
-<ion-grid>
+<ion-grid (click)="showChargerActions()">
     <ion-row id="heading" align-items-baseline>
         <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel.runState > 0}"
-                 (click)="showChargerActions()" width-10>
+                 width-10>
             {{index + 1}}
         </ion-col>
         <ion-col id="title">
             <h4 class="channelColor">{{channel.headingText}}</h4>
         </ion-col>
         <ion-col>
-            <ion-row justify-content-end>
-                <ion-col class="cellcontainer" text-right>
+            <ion-row justify-content-end no-padding>
+                <ion-col class="cellcontainer" text-right no-padding>
                     <ion-icon name="clock-outline"></ion-icon>
                     &nbsp;{{channel.timestamp|duration}}
                 </ion-col>
@@ -36,10 +36,10 @@
             <ion-spinner></ion-spinner>
         </div>
         <div *ngSwitchCase="1" id="master">
-            <channel-volts [channel]="channel" (click)="showChargerActions()"></channel-volts>
+            <channel-volts [channel]="channel"></channel-volts>
         </div>
         <div *ngSwitchCase="2">
-            <channel-ir [channel]="channel" (click)="showCellVoltage()"></channel-ir>
+            <channel-ir [channel]="channel"></channel-ir>
         </div>
     </div>
 
