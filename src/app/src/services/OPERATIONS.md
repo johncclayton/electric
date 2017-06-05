@@ -2,7 +2,7 @@
 
 ##Goals:
 
-- **Charger is master**: always reflect what the charger is doing. Regardless what is going on, if a user performs an action on the charger, this should override / be reflected on the UI.
+- **[done/sort of] Charger is master**: always reflect what the charger is doing. Regardless what is going on, if a user performs an action on the charger, this should override / be reflected on the UI.
 - **Alarms**
   - We want to sound an alarm when charging (discharge, store, balance) completes.
   - This should happen regardless if the user started the operation on the charger, or if it was done via the UI.
@@ -14,7 +14,7 @@
   - Find previous state, and notify an alarm for that state 
 
 ##Conclusions
-- The charger must monitor **charger state** and bring the UI to match that status, regardless of current operation. Existing operations can be cancelled (or in fact, started) based on the status of the unit.
+- **[done/sort of]** The charger must monitor **charger state** and bring the UI to match that status, regardless of current operation. Existing operations can be cancelled (or in fact, started) based on the status of the unit.
 - Async operations (like stop) are performed periodically, where success is based not so much on a return value from the 'stop call', but on the current charger state.
 - To sound alarms, the UI will need to monitor state, so that it knows what the last active operation is (per channel). It can then sound an alarm for that operation, when it sees a '40'
 
