@@ -1,4 +1,4 @@
-/*
+/**
 
  DeviceInfo.run_status
  1 = stopped (showing stopped)
@@ -43,6 +43,9 @@
 export class Channel {
     _json = {};
     _index: number = 0;
+    _lastUserInitiatedCommand: string = null;
+    _timeUserSetLastInitiatedCommand: number;
+    _timeUserInitiatedCommandTimeout: number = 5;
 
     public constructor(index: number, jsonObject, configuredCellLimit: number = 0) {
         this._index = index;
@@ -62,6 +65,16 @@ export class Channel {
                 }
             });
         }
+    }
+
+    updateStateFrom(jsonResponse: any|string, cellLimit: any) {
+        this._json = jsonResponse;
+        this.limitCellsBasedOnLimit(cellLimit);
+    }
+
+    set lastUserInitiatedCommand(value: string) {
+        this._lastUserInitiatedCommand = value;
+        this._timeUserSetLastInitiatedCommand = Date.now();
     }
 
     get index(): number {
@@ -84,6 +97,20 @@ export class Channel {
         return this._json['curr_int_temp'];
     }
 
+    get hasUserInitiatedCommandText(): boolean {
+        if (!this.packConnected) {
+            return false;
+        }
+        if (!this.packBalanceLeadsConnected) {
+            return false;
+        }
+        return this._lastUserInitiatedCommand != null;
+    }
+
+    get userCommandText(): string {
+        return this._lastUserInitiatedCommand;
+    }
+
     /*
      run_state: shows what the charger is doing: checking, charging, discharging, starting, stopped, etc.
      control_state: not really sure. It might mean "I am controlling something (like volts, current)", but I havn't found a pattern just yet.
@@ -92,39 +119,62 @@ export class Channel {
      e.g: when doing Storage, you charge or discharge. run_state gives us charge/discharge, but doesn't say
      if that's a result of us performing an actual Charge operation, or a Storage operation.
      */
-    get headingText(): string {
+    get actionText(): string {
         let run_state = this.runState;
-        // let control_state = this.controlState;
 
         if (!this.packConnected) {
+            this.maybeClearLastUsedCommand(true);
             return "No pack";
         }
         if (!this.packBalanceLeadsConnected) {
+            this.maybeClearLastUsedCommand(true);
             return "Balance leads?";
         }
 
+        let text: string = "";
+
         if (run_state == 5) {
-            return "Start";
+            text += "Start";
+        } else if (run_state == 6 || run_state == 12) {
+            text += "Check";
+        } else if (run_state == 7) {
+            text += "Charging";
+        } else if (run_state == 13) {
+            text += "Discharge";
+        } else if (run_state == 17) {
+            text += "Balancing";
+        } else if (run_state == 1) {
+            text += "Stopped";
+        } else if (run_state == 40) {
+            text += "DONE";
+        } else {
+            this.maybeClearLastUsedCommand(false);
+            text += "Idle";
         }
-        if (run_state == 6 || run_state == 12) {
-            return "Check";
+
+        return text;
+    }
+
+    public set lastUserCommand(command: string) {
+        this._lastUserInitiatedCommand = command;
+        this._timeUserInitiatedCommandTimeout = Date.now();
+    }
+
+    public maybeClearLastUsedCommand(force: boolean) {
+        if (force) {
+            this._lastUserInitiatedCommand = null;
+            this._timeUserSetLastInitiatedCommand = null;
+            return;
         }
-        if (run_state == 7) {
-            return "Charging";
+        if (this._timeUserSetLastInitiatedCommand) {
+            let rightNow = Date.now();
+            let elapsedTime: number = rightNow - this._timeUserSetLastInitiatedCommand;
+            if (elapsedTime > this._timeUserInitiatedCommandTimeout) {
+                this._lastUserInitiatedCommand = null;
+                this._timeUserSetLastInitiatedCommand = null;
+                console.log("Last user task cleared due to timeout");
+            }
         }
-        if (run_state == 13) {
-            return "Discharge";
-        }
-        if (run_state == 17) {
-            return "Balancing";
-        }
-        if (run_state == 1) {
-            return "Stopped";
-        }
-        if (run_state == 40) {
-            return "DONE";
-        }
-        return "Idle";
     }
 
     get packAndBalanceConnected(): boolean {

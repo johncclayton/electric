@@ -19,6 +19,18 @@ channel {
     #title {
       padding-left: 10px;
     }
+
+    .userInitiated {
+      .operation {
+        margin-bottom: 2px;
+      }
+
+      .action {
+        font-size: 1.5rem;
+        font-weight: normal;
+        margin-top: 2px;
+      }
+    }
   }
 
   .channelNumber {

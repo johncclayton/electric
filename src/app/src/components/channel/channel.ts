@@ -106,6 +106,7 @@ export class ChannelComponent {
             console.log("Response: ", resp);
         };
 
+        this.channel.lastUserCommand = named;
         switch (operation) {
             case Operation.Charge:
                 this.chargerService.startCharge(this.channel, preset).subscribe(handler);
@@ -141,6 +142,7 @@ export class ChannelComponent {
     }
 
     stopCurrentTask() {
+        this.channel.maybeClearLastUsedCommand(true);
         this.chargerService.stopCurrentTask(this.channel).subscribe((resp) => {
             console.log("Stopped!")
         });
