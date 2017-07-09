@@ -34,9 +34,6 @@ def main_direct():
             comms.reset()
 
             time.sleep(0.3)
-
-            # ret_code = 5
-
             # break
 
     del comms

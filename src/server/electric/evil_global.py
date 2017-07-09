@@ -9,4 +9,3 @@ lock = multiprocessing.Lock()
 
 # The single instance used to talk to the iCharger
 comms = ChargerCommsManager()
-
