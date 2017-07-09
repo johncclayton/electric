@@ -53,8 +53,8 @@
     "server_user_rate": 50,
     "servo_type": 0,
     "servo_user_center": 15000,
-    "temp_fans_on": 45.0,
-    "temp_reduce": 100,
+    "temp_fans_on": 50.0,
+    "temp_reduce": 10.0,
     "temp_stop": 75.0,
     "temp_unit": "C"
 }

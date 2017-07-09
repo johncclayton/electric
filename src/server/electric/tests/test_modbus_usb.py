@@ -180,7 +180,8 @@ class TestGatewayCommunications(unittest.TestCase):
         obj = evil_global.comms
         preset_index = obj.get_full_preset_list()
         self.assertIsNotNone(preset_index)
-        self.assertTrue(preset_index.count == len(preset_index.number_of_presets))
+        self.assertTrue(preset_index.count == preset_index.number_of_presets)
+
 
     # def test_wont_cause_fire_while_charging(self):
     #     # fetch status/channel info - what are the flags
