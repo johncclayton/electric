@@ -39,7 +39,13 @@ class TestPresetModification(BasePresetTestCase):
         test_preset = self.save_and_reload_preset(test_preset)
         self.assertEqual(test_preset.capacity, 1000)
 
+        # TODO: neil; dubious?  A new preset is created with this flag set False - and its not set True as far as I can tell.
+        # TODO: neil; so I'm changing this to set the flag true, store/fetch & test
+        self.assertEqual(test_preset.auto_save, False)
+        test_preset.auto_save = True
+        test_preset = self.save_and_reload_preset(test_preset)
         self.assertEqual(test_preset.auto_save, True)
+
         test_preset.auto_save = False
         test_preset = self.save_and_reload_preset(test_preset)
         self.assertEqual(test_preset.auto_save, False)

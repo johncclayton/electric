@@ -122,10 +122,9 @@ class BasePresetTestCase(LiveIChargerTestCase):
         test_preset = None
         for index in preset_index.range_of_presets():
             preset = all_presets[index]
-            if preset.is_unused:
-                continue
-            if preset.name == "Test Preset":
+            if (preset.is_used or preset.is_fixed) and preset.name == "Test Preset":
                 test_preset = preset
+                break
         return preset_index, all_presets, test_preset
 
     def reset_to_defaults(self):
@@ -134,7 +133,7 @@ class BasePresetTestCase(LiveIChargerTestCase):
         # If the test preset exists already, reset it to defaults
         # Doing this means we can comment out / remove the tearDown, and the tests are still sensible
         if test_preset:
-            logger.info("Resaving preset back to defaults, as it already exists")
+            logger.info("Re-saving preset back to defaults, as it already exists")
             replacement_test_preset = self._create_new_test_preset()
             replacement_test_preset.memory_slot = test_preset.memory_slot
             test_preset = self.save_and_reload_preset(replacement_test_preset)
