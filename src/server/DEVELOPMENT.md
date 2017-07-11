@@ -63,6 +63,11 @@ Run the server ...
 1. wget https://bootstrap.pypa.io/get-pip.py
 1. sudo python get-pip.py
 1. sudo pip install virtualenv virtualenvwrapper
+
+which of course, on El Capitan fails on the virtualenvwrapper removing an existing version of six.  Fix / hack ala: 
+1. sudo pip install --ignore-installed six virtualenvwrapper
+Reference: https://github.com/pypa/pip/issues/3165
+
 1. nano ~/.bashrc and add "source /usr/local/bin/virtualenvwrapper.sh" (without the quotes)
 1. logout / log back in (so the shell gets the new virtualenvwrapper stuff)
 1. mkvirtualenv electric
