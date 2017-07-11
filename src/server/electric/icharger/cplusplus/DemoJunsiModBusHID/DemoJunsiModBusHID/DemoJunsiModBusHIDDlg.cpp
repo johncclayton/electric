@@ -75,6 +75,7 @@ BEGIN_MESSAGE_MAP(CDemoJunsiModBusHIDDlg, CDialog)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_BUTTON10, &CDemoJunsiModBusHIDDlg::OnBnClickedButton10)
 	ON_BN_CLICKED(IDC_BUTTON11, &CDemoJunsiModBusHIDDlg::OnBnClickedButton11)
+	ON_BN_CLICKED(IDC_BUTTON_DUMP_LOGS, &CDemoJunsiModBusHIDDlg::OnBnClickedButtonDumpLogs)
 END_MESSAGE_MAP()
 
 
@@ -449,6 +450,8 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton7()
 	RunOrderBuf[3] = VALUE_ORDER_KEY; //REG_ORDER_KEY
 	RunOrderBuf[4] = ORDER_RUN;
 
+	MasterLog l("Run");
+
 	if(	MasterWrite(REG_SEL_OP,5,(BYTE *)RunOrderBuf) != MB_EOK )
 	{
 		AfxMessageBox("error1");
@@ -467,6 +470,9 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton8()
 	{
 		return;
 	}
+
+	MasterLog l("Stop");
+
 	u16 RunOrderBuf[3];
 
 	RunOrderBuf[0] = 0;//mChannel.GetCurSel();
@@ -696,4 +702,10 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton11()
 		AfxMessageBox(str);
 	}
 	JsHID.Disconnect();
+}
+
+
+void CDemoJunsiModBusHIDDlg::OnBnClickedButtonDumpLogs()
+{
+	DumpLogRecords();
 }

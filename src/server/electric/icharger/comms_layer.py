@@ -166,7 +166,7 @@ class ChargerCommsManager(object):
             write_sys_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteSys, 0, 0,)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
         finally:
-            self.lock_order_register()
+            self.clear_order_register()
 
         return True
 
@@ -175,7 +175,7 @@ class ChargerCommsManager(object):
         try:
             (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number,))
         finally:
-            self.lock_order_register()
+            self.clear_order_register()
         return word_count
 
     def save_full_preset_list(self, preset_list):
@@ -191,7 +191,7 @@ class ChargerCommsManager(object):
             write_head_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMemHead, 0, 0,)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
         finally:
-            self.lock_order_register()
+            self.clear_order_register()
         return True
 
     def find_preset_with_name(self, named):
@@ -288,7 +288,7 @@ class ChargerCommsManager(object):
             write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem, 0, 0,)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
         finally:
-            self.lock_order_register()
+            self.clear_order_register()
 
         return True
 
@@ -353,7 +353,7 @@ class ChargerCommsManager(object):
                 write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem, 0, 0,)
                 store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
             finally:
-                self.lock_order_register()
+                self.clear_order_register()
 
         return True
 
@@ -368,31 +368,32 @@ class ChargerCommsManager(object):
             logger.info("Taking out order lock for: {0}".format(message))
             self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK,))
 
-    def lock_order_register(self):
-        # clear the ORDER LOCK value (no idea why - the C++ code does this)
+    def clear_order_register(self):
         logger.info("Clear order lock")
         self.charger.modbus_write_registers(0x8000 + 3, (0,))
 
     def close_messagebox(self):
         # If showing a dialog, or have error, try to clear the dialog
-        self.unlock_order_register("close messagebox")
+        # self.unlock_order_register("close messagebox")
         try:
             self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK, Order.MsgBoxNo, 0, 0,))
         finally:
-            self.lock_order_register()
+            pass
+            # self.clear_order_register()
 
     def stop_operation(self, channel_number):
-        self.unlock_order_register("stop")
+        # self.unlock_order_register("stop")
         try:
             channel_number = min(1, max(0, channel_number))
-            values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop, 0, 0,)
+            values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop, 0, 0)
 
             modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
             logger.info("Got back {0} from write".format(modbus_response))
             status = self.get_device_info().get_status(channel_number)
             logger.info("Device status: {0}".format(status.to_native()))
         finally:
-            self.lock_order_register()
+            pass
+            # self.clear_order_register()
 
         # If showing a dialog, or have error, try to clear the dialog
         # This also works to close the presets listing, if that is open
@@ -418,18 +419,21 @@ class ChargerCommsManager(object):
         # and write 0X55AA to the order lock register to unlock, write any other values to lock
 
         # Unlock so we can write
-        self.unlock_order_register("run operation {0}".format(operation))
+        # self.unlock_order_register("run operation {0}".format(operation))
         try:
             values_list = (operation, preset_memory_slot_index, channel_number, VALUE_ORDER_UNLOCK, Order.Run, 0, 0,)
             logger.info("Sending command to channel {1}: {0}".format(values_list, channel_number))
             modbus_response = self.charger.modbus_write_registers(0x8000, values_list)
             logger.info("Got back {0} from write".format(modbus_response))
         finally:
-            self.lock_order_register()
+            pass
+            #self.clear_order_register()
 
         return self.get_device_info().get_status(channel_number)
 
     def measure_ir(self, channel_number):
+        channel_number = min(1, max(0, channel_number))
+
         # Kick off a discharge, 2A.
         # First, pick a suitable LIPO preset.
         preset_index = self.get_full_preset_list()

@@ -1,11 +1,108 @@
 #include "stdafx.h"
+#include <shlobj.h>
 #include "MasterModBus.h"
 #include "usb.h"
 
 CUSBDevice JsHID;
+CString log_prefix;
+
 #define READ_REG_COUNT_MAX		((HID_PACK_MAX-4)/2) //30
 #define WRITE_REG_COUNT_MAX		((HID_PACK_MAX-8)/2) //28
 #define TIME_OUT	500
+
+struct LogRecord {
+	enum Operation {
+		READ, 
+		WRITE
+	};
+
+	CTime _time;
+	Operation _op;
+	CString _info;
+	BYTE* _data;
+	DWORD _ms;
+	BOOL _result;
+
+	LogRecord(Operation op, CString& info, LPVOID data = 0, DWORD len = 0, DWORD ms = 0, BOOL res = FALSE) : _op(op), _info(info), _data(0), _ms(ms), _result(res) {
+		_time = CTime::GetCurrentTime();
+		if (data) {
+			_data = new BYTE[len];
+			memcpy(_data, data, len);
+		}
+	}
+
+	LogRecord(Operation op, CString& info, const BYTE* data = 0, DWORD len = 0, BOOL res = FALSE) : _op(op), _info(info), _data(0), _ms(0), _result(res) {
+		_time = CTime::GetCurrentTime();
+		if (data) {
+			_data = new BYTE[len];
+			memcpy(_data, data, len);
+		}
+	}
+
+	~LogRecord() {
+		if (_data) {
+			delete[] _data;
+			_data = 0;
+		}
+	}
+
+	void LogRecord::WriteTo(CFile& output) {
+
+	}
+
+	int operator<(const LogRecord& other) {
+		return _time < other._time;
+	}
+
+	bool operator==(const LogRecord& other) {
+		return _time == other._time;
+	}
+};
+
+CArray<LogRecord*> log_record;
+
+void DumpLogRecords() {
+	CFile fileO;
+
+	CHAR path[MAX_PATH + 1];
+	memset(path, 0, sizeof(path));
+
+	if (SHGetFolderPathA(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, path) == S_OK) {
+		strcat(path, "\\icharger\\logs");
+		CreateDirectory(path, NULL);
+		if (fileO.Open(path, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary)) {
+			for (int index = 0; index < log_record.GetSize(); ++index) {
+				// TODO: write the LogRecord to the CFile
+				log_record[index]->WriteTo(fileO);
+			}
+
+			fileO.Close();
+		} else {
+			// TODO: report fileO.Open() failure
+		}
+	}
+}
+
+MasterLog::MasterLog(const char* log_prefix) {
+	log_prefix = CString(log_prefix);
+}
+
+MasterLog::~MasterLog() {
+	log_prefix = CString();
+}
+
+BOOL LoggedWrite(const BYTE* bytes, int bufLen) {
+	BOOL result = JsHID.Write(bytes, bufLen);
+	log_record.Add(new LogRecord(LogRecord::WRITE, log_prefix, bytes, bufLen, result));
+	return result;
+}
+
+BOOL LoggedRead(LPVOID bytes, DWORD bufLen, DWORD ms) {
+	BOOL result = JsHID.Read(bytes, bufLen, ms);
+	log_record.Add(new LogRecord(LogRecord::READ, log_prefix, bytes, bufLen, ms, result));
+	return result;
+}
+
 eMBErrorCode MasterRead(BYTE ReadType,DWORD RegStart,DWORD RegCount,BYTE *pOut)
 {
 	eMBErrorCode ret;
@@ -119,10 +216,10 @@ eMBErrorCode MasterModBus(BYTE FunCode,BYTE *pIn,BYTE *pOut,DWORD ms)
 		HidBuf[HID_PACK_MODBUS+1+i]=pIn[i];
 
 	//trans
-	if(JsHID.Write(HidBuf,HID_PACK_MAX+1)==FALSE)return MB_EIO;
+	if(LoggedWrite(HidBuf,HID_PACK_MAX+1)==FALSE)return MB_EIO;
 	//rece
 	HidBuf[HID_PACK_CH]=REPORT_ID;
-	if(JsHID.Read(HidBuf,HID_PACK_MAX+1,ms)==FALSE)return MB_ETIMEDOUT;
+	if(LoggedRead(HidBuf,HID_PACK_MAX+1,ms)==FALSE)return MB_ETIMEDOUT;
 	if(HidBuf[HID_PACK_LEN] > HID_PACK_MAX)return MB_ELEN;
 	
 

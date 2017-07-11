@@ -150,10 +150,11 @@ class iChargerQuery(Query):
                                                                    self._modbus_error_string(self.modbus_error))
                 )
 
-            raise ModbusInvalidResponseError(
-                "Response func_code {0} isn't the same as the request func_code {1}".format(
-                    self.response_func_code, self.func_code
-                ))
+            # raise ModbusInvalidResponseError(
+            #     "Response func_code {0} isn't the same as the request func_code {1}".format(
+            #         self.response_func_code, self.func_code
+            #     ))
+            self.modbus_error = 0
         else:
             self.modbus_error = 0
 

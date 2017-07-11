@@ -74,6 +74,8 @@ public:
 	CString txtCurrent;
 	afx_msg void OnBnClickedButton10();
 	afx_msg void OnBnClickedButton11();
+	afx_msg void OnBnClickedButton12();
+	afx_msg void OnBnClickedButtonDumpLogs();
 };
 
 #define JSHID_VENDORID	0x483

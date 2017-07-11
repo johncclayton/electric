@@ -475,7 +475,6 @@ class SystemStorage(Model):
         return None
 
     def set_from_modbus_data(self, ds1, ds2, ds3):
-        print("temp_reduce is:", ds1.data[3])
         dummy1 = None
         (self.temp_unit, self.temp_stop, self.temp_fans_on, self.temp_reduce, dummy1, self.fans_off_delay,
          self.lcd_contrast, self.lcd_brightness, dummy1,

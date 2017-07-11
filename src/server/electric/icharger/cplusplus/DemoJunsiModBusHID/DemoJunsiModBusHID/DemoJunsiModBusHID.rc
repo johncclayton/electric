@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中文(中华人民共和国) resources
+// Chinese (Simplified, PRC) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -65,6 +63,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\DemoJunsiModBusHID.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -119,6 +118,7 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,100,79,219,28
     PUSHBUTTON      "CH1: GetCapacity",IDC_BUTTON10,191,169,87,14
     PUSHBUTTON      "CH2:  GetIR",IDC_BUTTON11,192,193,88,14
+    PUSHBUTTON      "Dump Logs",IDC_BUTTON_DUMP_LOGS,192,227,50,14
 END
 
 
@@ -167,7 +167,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_DEMOJUNSIMODBUSHID_DIALOG, DIALOG
     BEGIN
@@ -179,7 +179,18 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 中文(中华人民共和国) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DEMOJUNSIMODBUSHID_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // Chinese (Simplified, PRC) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

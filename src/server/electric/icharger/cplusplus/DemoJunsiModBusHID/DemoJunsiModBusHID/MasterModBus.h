@@ -54,3 +54,10 @@ typedef enum
 eMBErrorCode MasterModBus(BYTE FunCode,BYTE *pIn,BYTE *pOut,DWORD ms);
 eMBErrorCode MasterRead(BYTE ReadType,DWORD RegStart,DWORD RegCount,BYTE *pOut);
 eMBErrorCode MasterWrite(DWORD RegStart,DWORD RegCount,BYTE *pIn);
+void DumpLogRecords();
+
+class MasterLog {
+public:
+	MasterLog(const char* op_title);
+	~MasterLog();
+};
