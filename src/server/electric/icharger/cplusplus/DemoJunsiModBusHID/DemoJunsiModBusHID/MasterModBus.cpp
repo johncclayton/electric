@@ -15,15 +15,17 @@ void NetWriteDesc(const char *desc) {
 	// no-op
 }
 
-void NetWrite(CFile& output, const CString& value, const char *desc) {
-	NetWriteDesc(desc);
-	output.Write((LPCSTR)value, value.GetLength());
-}
-
 void NetWrite(CFile& output, DWORD value, const char *desc) {
 	NetWriteDesc(desc);
 	DWORD n = htonl(value);
 	output.Write(&n, sizeof(n));
+}
+
+void NetWrite(CFile& output, const CString& value, const char *desc) {
+	NetWriteDesc(desc);
+	DWORD l = value.GetLength();
+	NetWrite(output, l, "str_len");
+	output.Write((LPCSTR)value, l);
 }
 
 void NetWrite(CFile& output, const char* value, int len, const char *desc) {
@@ -144,8 +146,8 @@ void DumpLogRecords() {
 	}
 }
 
-MasterLog::MasterLog(const char* log_prefix) {
-	log_prefix = CString(log_prefix);
+MasterLog::MasterLog(const char* prefix) {
+	log_prefix = CString(prefix);
 }
 
 MasterLog::~MasterLog() {
