@@ -2,6 +2,7 @@
 #include <shlobj.h>
 #include "MasterModBus.h"
 #include "usb.h"
+#include "Winsock2.h"
 
 CUSBDevice JsHID;
 CString log_prefix;
@@ -9,6 +10,40 @@ CString log_prefix;
 #define READ_REG_COUNT_MAX		((HID_PACK_MAX-4)/2) //30
 #define WRITE_REG_COUNT_MAX		((HID_PACK_MAX-8)/2) //28
 #define TIME_OUT	500
+
+void NetWriteDesc(const char *desc) {
+	// no-op
+}
+
+void NetWrite(CFile& output, const CString& value, const char *desc) {
+	NetWriteDesc(desc);
+	output.Write((LPCSTR)value, value.GetLength());
+}
+
+void NetWrite(CFile& output, DWORD value, const char *desc) {
+	NetWriteDesc(desc);
+	DWORD n = htonl(value);
+	output.Write(&n, sizeof(n));
+}
+
+void NetWrite(CFile& output, const char* value, int len, const char *desc) {
+	NetWriteDesc(desc);
+	output.Write(value, len);
+}
+
+void NetWrite(CFile& output, LPVOID data, int len, const char *desc) {
+	NetWrite(output, len, "data_len");
+	NetWrite(output, (const char*)data, len, "data");
+}
+
+void NetWrite(CFile& output, const CTime& value, const char *desc) {
+	struct tm t1;
+	value.GetGmtTm(&t1);
+	char* gmt_timestr = asctime(&t1);
+	DWORD len = strlen(gmt_timestr);
+	NetWrite(output, len, "time_len");
+	NetWrite(output, gmt_timestr, len, "time_value");
+}
 
 struct LogRecord {
 	enum Operation {
@@ -20,6 +55,7 @@ struct LogRecord {
 	Operation _op;
 	CString _info;
 	BYTE* _data;
+	DWORD _data_len;
 	DWORD _ms;
 	BOOL _result;
 
@@ -27,6 +63,7 @@ struct LogRecord {
 		_time = CTime::GetCurrentTime();
 		if (data) {
 			_data = new BYTE[len];
+			_data_len = len;
 			memcpy(_data, data, len);
 		}
 	}
@@ -35,6 +72,7 @@ struct LogRecord {
 		_time = CTime::GetCurrentTime();
 		if (data) {
 			_data = new BYTE[len];
+			_data_len = len;
 			memcpy(_data, data, len);
 		}
 	}
@@ -43,11 +81,17 @@ struct LogRecord {
 		if (_data) {
 			delete[] _data;
 			_data = 0;
+			_data_len = 0;
 		}
 	}
 
 	void LogRecord::WriteTo(CFile& output) {
-
+		NetWrite(output, _time, "time");
+		NetWrite(output, _op, "op");
+		NetWrite(output, _info, "info");
+		NetWrite(output, _data, _data_len, "data");
+		NetWrite(output, _ms, "ms");
+		NetWrite(output, (DWORD)_result, "result");
 	}
 
 	int operator<(const LogRecord& other) {
@@ -61,6 +105,14 @@ struct LogRecord {
 
 CArray<LogRecord*> log_record;
 
+void WriteFileHeader(CFile& output) {
+	// write number of elements
+	NetWrite(output, log_record.GetSize(), "size");
+}
+
+void WriteFileTrailer(CFile& output) {
+}
+
 void DumpLogRecords() {
 	CFile fileO;
 
@@ -68,13 +120,22 @@ void DumpLogRecords() {
 	memset(path, 0, sizeof(path));
 
 	if (SHGetFolderPathA(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, path) == S_OK) {
-		strcat(path, "\\icharger\\logs");
+		strcat(path, "\\icharger");
 		CreateDirectory(path, NULL);
+		strcat(path, "\\");
+		// current date/time as str appended to the log file
+		CTime now = CTime::GetCurrentTime();
+		strcat(path, (LPCTSTR)now.Format(_T("%Y-%m-%d_%H-%M-%S-junsi.dat")));
+
 		if (fileO.Open(path, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary)) {
+			WriteFileHeader(fileO);
+
 			for (int index = 0; index < log_record.GetSize(); ++index) {
 				// TODO: write the LogRecord to the CFile
 				log_record[index]->WriteTo(fileO);
 			}
+
+			WriteFileTrailer(fileO);
 
 			fileO.Close();
 		} else {
