@@ -191,9 +191,10 @@ class USBSerialFacade:
     exception from __init__.
     """
 
-    def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID):
+    def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID, capture=None):
         self._dev = None
         self._opened = False
+        self._capture = capture
 
         self.vendor = vendor
         self.product = prod
@@ -274,9 +275,15 @@ class USBSerialFacade:
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
             try:
-                return self._dev.write([ord(i) for i in content])
+                result = self._dev.write([ord(i) for i in content])
+
+                # always provide log_write with an str() content
+                self._capture.log_write(''.join(content), result)
+
+                return result
             except Exception, e:
                 logging.info("bad bad bad, %s", e)
+                raise
 
         raise IOError("Device write failure - either not present or not claimed")
 
@@ -285,8 +292,14 @@ class USBSerialFacade:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
         if self._dev is not None:
-            data = self._dev.read(MAX_READWRITE_LEN + 1, 5000)
-            return array.array('B', data[:expected_length]).tostring()
+            int_list = self._dev.read(MAX_READWRITE_LEN + 1, 5000)
+
+            result = array.array('B', int_list[:expected_length]).tostring()
+
+            # always pass log_read a str() content type
+            self._capture.log_read(MAX_READWRITE_LEN + 1, 5000, expected_length, array.array('B', int_list).tostring())
+
+            return result
 
         raise IOError("Device read failure - either not present or not claimed")
 
@@ -297,10 +310,10 @@ class iChargerMaster(RtuMaster):
     status / channel information from the device.
     """
 
-    def __init__(self, serial=None):
+    def __init__(self, serial=None, capture=None):
         if serial is None:
-            serial = USBSerialFacade()
-
+            serial = USBSerialFacade(capture=capture)
+        self.capture = capture
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):

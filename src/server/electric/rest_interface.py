@@ -1,4 +1,4 @@
-import logging
+import logging, os
 
 from flask import request
 from flask_restful import Resource, abort
@@ -8,11 +8,11 @@ import electric.evil_global as evil_global
 from electric.icharger.modbus_usb import connection_state_dict
 from electric.icharger.comms_layer import Operation
 from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException, PresetIndex
+from electric.icharger.capture import Capture
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 RETRY_LIMIT = 30
-
 
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
@@ -245,3 +245,13 @@ class PresetOrderResource(Resource):
         json_dict = request.json
         preset_list = PresetIndex(json_dict)
         return evil_global.comms.save_full_preset_list(preset_list)
+
+
+
+class LoggingCommandResource(Resource):
+    @exclusive
+    def post(self):
+        evil_global.capture.write_logs()
+
+    def put(self):
+        evil_global.capture.write_logs()

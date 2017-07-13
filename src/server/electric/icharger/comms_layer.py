@@ -1,4 +1,3 @@
-import copy
 import logging
 
 import modbus_tk.defines as cst
@@ -59,9 +58,10 @@ class ChargerCommsManager(object):
     """
     locking = False
 
-    def __init__(self, master=None):
+    def __init__(self, capture, master=None):
         if master is None:
-            master = iChargerMaster()
+            master = iChargerMaster(None, capture)
+
         self.charger = master
 
     def reset(self):
@@ -387,6 +387,8 @@ class ChargerCommsManager(object):
             channel_number = min(1, max(0, channel_number))
             values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop, 0, 0)
 
+            self.charger.capture.set_operation("Stop")
+
             modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
             logger.info("Got back {0} from write".format(modbus_response))
             status = self.get_device_info().get_status(channel_number)
@@ -409,6 +411,8 @@ class ChargerCommsManager(object):
 
         channel_number = min(1, max(0, channel_number))
         logger.info("Begin operation {0} on channel {1} using slot {2}".format(operation, channel_number, preset_memory_slot_index))
+
+        self.charger.capture.set_operation("Run")
 
         # # Load the preset from this slot, and check it is valid
         # # Loading will itself perform a check for 'used', and will throw an exception if it is not available.

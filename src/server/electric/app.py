@@ -5,12 +5,15 @@ from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
 
-from rest_interface import StatusResource, \
+from rest_interface import LoggingCommandResource, \
+    StatusResource, \
     SystemStorageResource, \
     ChannelResource, \
     ControlRegisterResource, \
     PresetListResource, \
-    PresetResource, ChargeResource, DischargeResource, BalanceResource, MeasureIRResource, StopResource, PresetOrderResource, AddNewPresetResource, StoreResource
+    PresetResource, ChargeResource, DischargeResource, \
+    BalanceResource, MeasureIRResource, StopResource, \
+    PresetOrderResource, AddNewPresetResource, StoreResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
@@ -39,3 +42,4 @@ api.add_resource(PresetResource, "/preset/<preset_memory_slot>")
 api.add_resource(PresetListResource, "/preset")
 api.add_resource(AddNewPresetResource, "/addpreset")
 api.add_resource(PresetOrderResource, "/presetorder")
+api.add_resource(LoggingCommandResource, "/logsave")

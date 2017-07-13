@@ -88,7 +88,7 @@ struct LogRecord {
 	}
 
 	void LogRecord::WriteTo(CFile& output) {
-		NetWrite(output, _time, "time");
+		NetWrite(output, _time, "timestamp");
 		NetWrite(output, _op, "op");
 		NetWrite(output, _info, "info");
 		NetWrite(output, _data, _data_len, "data");
@@ -127,7 +127,7 @@ void DumpLogRecords() {
 		strcat(path, "\\");
 		// current date/time as str appended to the log file
 		CTime now = CTime::GetCurrentTime();
-		strcat(path, (LPCTSTR)now.Format(_T("%Y-%m-%d_%H-%M-%S-junsi.dat")));
+		strcat(path, (LPCTSTR)now.Format(_T("%Y-%m-%d_%H-%M-%S-junsi-win32.dat")));
 
 		if (fileO.Open(path, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary)) {
 			WriteFileHeader(fileO);
