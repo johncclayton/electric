@@ -63,14 +63,25 @@ class StatusResource(Resource):
         return obj
 
 
+class DialogCloseResource(Resource):
+    @exclusive
+    def put(self, channel_id):
+        channel = int(channel_id)
+        if not (channel == 0 or channel == 1):
+            return connection_state_dict("Channel number must be 0 or 1"), 403
+        evil_global.comms.close_messagebox(channel)
+
+        obj = evil_global.comms.get_channel_status(channel).to_primitive()
+        obj.update(connection_state_dict())
+
+        return obj
+
 class ChannelResource(Resource):
     @exclusive
     def get(self, channel_id):
         channel = int(channel_id)
         if not (channel == 0 or channel == 1):
             return connection_state_dict("Channel number must be 0 or 1"), 403
-
-        # What the heck is it doing, right now?
 
         # get device status, so we know more about channel state
         device_info = evil_global.comms.get_device_info()
@@ -257,8 +268,5 @@ class PresetOrderResource(Resource):
 
 class LoggingCommandResource(Resource):
     @exclusive
-    def post(self):
-        evil_global.capture.write_logs()
-
     def put(self):
         evil_global.capture.write_logs()

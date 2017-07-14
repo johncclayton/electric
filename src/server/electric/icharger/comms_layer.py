@@ -161,21 +161,18 @@ class ChargerCommsManager(object):
         ws6 = self.charger.modbus_write_registers(0x8400 + 34, s6)
 
         # Now write the RAM to flash
-        self.unlock_order_register("save system configuration")
+        # self.unlock_order_register("save system configuration")
         try:
             write_sys_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteSys)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
         finally:
-            self.clear_order_register()
+            pass
+            # self.clear_order_register()
 
         return True
 
     def select_memory_program(self, memory_slot, channel_number=0):
-        self.unlock_order_register("Selecting memory slot: {0}".format(memory_slot))
-        try:
-            (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number,))
-        finally:
-            self.clear_order_register()
+        (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number, VALUE_ORDER_UNLOCK))
         return word_count
 
     def save_full_preset_list(self, preset_list):
@@ -187,11 +184,12 @@ class ChargerCommsManager(object):
 
         # Write to flash.
         try:
-            self.unlock_order_register("save preset index, writing index")
+            # self.unlock_order_register("save preset index, writing index")
             write_head_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMemHead)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
         finally:
-            self.clear_order_register()
+            pass
+            # self.clear_order_register()
         return True
 
     def find_preset_with_name(self, named):
@@ -283,12 +281,13 @@ class ChargerCommsManager(object):
         store = self.charger.modbus_write_registers(0x8c00, (0xffff,))
 
         # Now write back to flash
-        self.unlock_order_register("delete preset, writing preset to flash")
+        # self.unlock_order_register("delete preset, writing preset to flash")
         try:
             write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
         finally:
-            self.clear_order_register()
+            pass
+            # self.clear_order_register()
 
         return True
 
@@ -348,35 +347,36 @@ class ChargerCommsManager(object):
 
         # Now write back to flash
         if write_to_flash:
-            self.unlock_order_register("save preset, writing preset to flash")
+            # self.unlock_order_register("save preset, writing preset to flash")
             try:
                 write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
                 store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
             finally:
-                self.clear_order_register()
+                pass
+                # self.clear_order_register()
 
         return True
 
-    def unlock_order_register(self, message="<unknown reason>"):
-        self.take_out_order_lock_on_slot_and_channel(None, None, message=message)
+    # def unlock_order_register(self, message="<unknown reason>"):
+    #     self.take_out_order_lock_on_slot_and_channel(None, None, message=message)
+    #
+    # def take_out_order_lock_on_slot_and_channel(self, memory_slot, channel, message="<unknown reason>"):
+    #     if memory_slot is not None and channel is not None:
+    #         logger.info("Taking out order lock on ch:{1}/slot:{0}, {2}".format(memory_slot, channel, message))
+    #         self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel, VALUE_ORDER_UNLOCK))
+    #     else:
+    #         logger.info("Taking out order lock for: {0}".format(message))
+    #         self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK,))
 
-    def take_out_order_lock_on_slot_and_channel(self, memory_slot, channel, message="<unknown reason>"):
-        if memory_slot is not None and channel is not None:
-            logger.info("Taking out order lock on ch:{1}/slot:{0}, {2}".format(memory_slot, channel, message))
-            self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel, VALUE_ORDER_UNLOCK))
-        else:
-            logger.info("Taking out order lock for: {0}".format(message))
-            self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK,))
+    # def clear_order_register(self):
+    #     logger.info("Clear order lock")
+    #     self.charger.modbus_write_registers(0x8000 + 3, (0,))
 
-    def clear_order_register(self):
-        logger.info("Clear order lock")
-        self.charger.modbus_write_registers(0x8000 + 3, (0,))
-
-    def close_messagebox(self):
+    def close_messagebox(self, channel_id):
         # If showing a dialog, or have error, try to clear the dialog
         # self.unlock_order_register("close messagebox")
         try:
-            self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK, Order.MsgBoxNo))
+            self.charger.modbus_write_registers(0x8000 + 2, (channel_id, VALUE_ORDER_UNLOCK, Order.MsgBoxNo))
         finally:
             pass
             # self.clear_order_register()
@@ -398,7 +398,7 @@ class ChargerCommsManager(object):
         # This also works to close the presets listing, if that is open
         if status.dlg_box_status or status.err:
             logger.info("Have dialog showing, attempting to close dialog")
-            self.close_messagebox()
+            self.close_messagebox(channel_number)
 
         return OperationResponse(modbus_response)
 
