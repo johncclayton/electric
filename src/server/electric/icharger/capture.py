@@ -60,8 +60,8 @@ class LogRecord:
         (self.op, offset) = readnet_dword(buff, offset)
         (info_len, offset) = readnet_dword(buff, offset)
         (self.info, offset) = readnet_string(buff, info_len, offset)
-        (data_len, offset) = readnet_dword(buff, offset)
-        (self.data, offset) = readnet_string(buff, data_len, offset)
+        (self.datalen, offset) = readnet_dword(buff, offset)
+        (self.data, offset) = readnet_string(buff, self.datalen, offset)
         (self.ms, offset) = readnet_dword(buff, offset)
         (self.result, offset) = readnet_dword(buff, offset)
         return offset
@@ -70,10 +70,11 @@ class LogRecord:
         v = self.__dict__
 
         o = v["op"]
-        if o == 1:
-            v["op"] = "WRITE"
-        else:
+        if o == 0:
             v["op"] = "READ"
+        else:
+            v["op"] = "WRITE"
+
         return v
 
 
@@ -82,8 +83,8 @@ class Capture:
     Makes it a tad easier to write the same binary logging format of USB data for comparison purposes.
     '''
 
-    WRITE = 1
     READ = 0
+    WRITE = 1
 
     log_records = []
 
@@ -115,9 +116,14 @@ class Capture:
     def log_write(self, data, result):
         assert(type(data) == str)
         l = LogRecord(Capture.WRITE, self.logging_info, data, len(data), 0, result)
-        self.log_records.append(l)
+        self.add(l)
 
     def log_read(self, max_length, ms, expected_len, data_read):
         assert (type(data_read) == str)
         l = LogRecord(Capture.READ, self.logging_info, data_read, expected_len, 0, 0)
-        self.log_records.append(l)
+        self.add(l)
+
+    def add(self, r):
+        self.log_records.append(r)
+        if len(self.log_records) > 100:
+            self.log_records = self.log_records[-50:]

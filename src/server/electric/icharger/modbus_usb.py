@@ -125,7 +125,7 @@ class iChargerQuery(Query):
         if self.func_code == cst.READ_INPUT_REGISTERS or self.func_code == cst.READ_HOLDING_REGISTERS:
             self.adu_len = 7
         elif self.func_code == cst.WRITE_MULTIPLE_REGISTERS:
-            self.adu_len = 7 + (self.quantity * 2)
+            self.adu_len = 7 + (self.quantity * 2) + 1
         else:
             raise ModbusInvalidRequestError("Request func code not recognized (code is: {0})".format(self.func_code))
 
@@ -138,33 +138,32 @@ class iChargerQuery(Query):
         (self.response_length, self.adu_constant, self.response_func_code, self.modbus_error) = \
             struct.unpack("=BBBB", response[0:4])
 
-        if self.adu_constant != MODBUS_HID_FRAME_TYPE:
-            raise ModbusInvalidResponseError(
-                "Response does not contain the expected frame type constant (0x30) in ADU portion of the result, constant value found is {0}".format(
-                    self.adu_constant))
+        if self.response_length > MAX_READWRITE_LEN:
+            raise ModbusInvalidResponseError("Response length is greater than {0}".format(MAX_READWRITE_LEN))
 
-        if self.response_func_code != self.func_code:
+        # if self.func_code == cst.WRITE_MULTIPLE_REGISTERS and self.adu_constant != MODBUS_HID_FRAME_TYPE:
+        #     raise ModbusInvalidResponseError(
+        #         "Response does not contain the expected frame type constant (0x30) in ADU portion of the result, constant value found is {0}".format(
+        #             self.adu_constant))
+
+        if self.response_func_code == self.func_code:
+            # primitive byte swap the entire thing... but only if this is the READ INPUT/HOLDING type
+            if self.func_code == cst.READ_HOLDING_REGISTERS or self.func_code == cst.READ_INPUT_REGISTERS:
+                header = response[2:4]
+                data = response[4:]
+                response = header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
+            else:
+                # skip len/adu const - returning everything else
+                response = response[2:]
+
+            self.modbus_error = 0
+        else:
             if self.response_func_code == self.func_code | 0x80:
                 raise ModbusInvalidResponseError(
                     "Response contains error code {0}: {1}".format(self.modbus_error,
                                                                    self._modbus_error_string(self.modbus_error))
                 )
-
-            # raise ModbusInvalidResponseError(
-            #     "Response func_code {0} isn't the same as the request func_code {1}".format(
-            #         self.response_func_code, self.func_code
-            #     ))
             self.modbus_error = 0
-        else:
-            self.modbus_error = 0
-
-        # primitive byte swap the entire thing... but only if this is the READ INPUT/HOLDING type
-        if self.func_code == cst.READ_HOLDING_REGISTERS or self.func_code == cst.READ_INPUT_REGISTERS:
-            header = response[2:4]
-            data = response[4:]
-            response = header + ''.join([c for t in zip(data[1::2], data[::2]) for c in t])
-        else:
-            response = response[2:]
 
         return response
 
@@ -275,7 +274,8 @@ class USBSerialFacade:
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
             try:
-                result = self._dev.write([ord(i) for i in content])
+                to_write = [ord(i) for i in content]
+                result = self._dev.write(to_write)
 
                 # always provide log_write with an str() content
                 self._capture.log_write(''.join(content), result)

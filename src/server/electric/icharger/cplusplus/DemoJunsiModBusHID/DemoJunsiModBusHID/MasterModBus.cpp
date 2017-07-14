@@ -161,8 +161,10 @@ BOOL LoggedWrite(const BYTE* bytes, int bufLen) {
 }
 
 BOOL LoggedRead(LPVOID bytes, DWORD bufLen, DWORD ms) {
-	BOOL result = JsHID.Read(bytes, bufLen, ms);
-	log_record.Add(new LogRecord(LogRecord::READ, log_prefix, bytes, bufLen, ms, result));
+	DWORD actually_read = 0;
+	memset(bytes, 0, bufLen);
+	BOOL result = JsHID.Read(bytes, bufLen, ms, &actually_read);
+	log_record.Add(new LogRecord(LogRecord::READ, log_prefix, bytes, actually_read, ms, result));
 	return result;
 }
 

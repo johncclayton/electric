@@ -20,6 +20,7 @@ Data format is as follows:
     good luck.
 '''
 
+
 def read_all_records_from(content):
     num_records, offset = readnet_dword(content, 0)
     all_records = []
@@ -51,13 +52,14 @@ def summary_of(all_records):
     i = 0
     for r in all_records:
         v = r.json()
-        print "{0} {1} op: {2}, {3}".format(i, v["info"], v["op"], data_readable(v["data"][:10]))
+        print "{0} {1} op: {2}, {3}, {4}".format(i, v["info"], v["op"], v["datalen"], data_readable(v["data"][:40]))
         i += 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("compare data outputs")
-    parser.add_argument("--left", required=True, dest="left", type=argparse.FileType(mode='rb'), help="the left hand side file to compare")
-    parser.add_argument("--right", required=True, dest="right", type=argparse.FileType(mode='rb'), help="the right hand side file to compare")
+
+    parser.add_argument("--left", dest="left", type=argparse.FileType(mode='rb'), help="the left hand side file to compare")
+    parser.add_argument("--right", dest="right", type=argparse.FileType(mode='rb'), help="the right hand side file to compare")
     parser.add_argument("--ridx", type=int, dest="ridx", help="when using detailed comparison, the index to use within the right hand side list")
     parser.add_argument("--lidx", type=int, dest="lidx", help="when using detailed comparison, the index to use within the left hand side list")
     parser.add_argument("--detail", action="store_true")
@@ -65,13 +67,20 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    left_recs = read_all_records_from(args.left.read())
-    right_recs = read_all_records_from(args.right.read())
+    left_recs = []
+    if args.left:
+        left_recs = read_all_records_from(args.left.read())
+
+    right_recs = []
+    if args.right:
+        right_recs = read_all_records_from(args.right.read())
 
     if args.summary:
-        summary_of(left_recs)
-        print "----"
-        summary_of(right_recs)
+        if args.left:
+            summary_of(left_recs)
+            print "----"
+        if args.right:
+            summary_of(right_recs)
 
-    if args.detail and args.lidx and args.ridx:
+    if args.left and args.right and args.detail and args.lidx and args.ridx:
         data_comparison(left_recs[args.lidx], right_recs[args.ridx])

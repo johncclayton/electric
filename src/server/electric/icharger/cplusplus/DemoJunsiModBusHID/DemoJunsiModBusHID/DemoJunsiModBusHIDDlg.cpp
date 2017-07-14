@@ -450,7 +450,7 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton7()
 	RunOrderBuf[3] = VALUE_ORDER_KEY; //REG_ORDER_KEY
 	RunOrderBuf[4] = ORDER_RUN;
 
-	MasterLog l("Run");
+	MasterLog l("Charge/Channel/0");
 
 	if(	MasterWrite(REG_SEL_OP,5,(BYTE *)RunOrderBuf) != MB_EOK )
 	{
@@ -458,7 +458,6 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton7()
 		JsHID.Disconnect();
 		return;
 	}
-	AfxMessageBox("OK");
 	JsHID.Disconnect();
 }
 
@@ -485,7 +484,6 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton8()
 		JsHID.Disconnect();
 		return;
 	}
-	AfxMessageBox("OK");
 	JsHID.Disconnect();
 }
 

@@ -156,7 +156,7 @@ BOOL CUSBDevice::Write(const BYTE *bytes, int nBuffLen)
 	return success;
 }
 
-BOOL CUSBDevice::Read(LPVOID bytes,DWORD nBuffLen ,DWORD ms)
+BOOL CUSBDevice::Read(LPVOID bytes,DWORD nBuffLen ,DWORD ms, DWORD* actually_read)
 {
 	DWORD BytesRead = 0;
 	if(ReadFile(handle, (LPVOID)bytes, nBuffLen, &BytesRead, &HIDOverlapped)==FALSE)
@@ -167,16 +167,22 @@ BOOL CUSBDevice::Read(LPVOID bytes,DWORD nBuffLen ,DWORD ms)
 			{ 
 				CancelIo(handle);
 				ResetEvent(EventObject);
+				if (actually_read)
+					*actually_read = BytesRead;
 				return FALSE;
 			} 
 			else
 			{
 				GetOverlappedResult(handle, &HIDOverlapped, &BytesRead, FALSE);
 				ResetEvent(EventObject);
+				if (actually_read)
+					*actually_read = BytesRead;
 				return TRUE;
 			}
 		}
 	}
 	ResetEvent(EventObject);
+	if (actually_read)
+		*actually_read = BytesRead;
 	return TRUE;
 }

@@ -163,7 +163,7 @@ class ChargerCommsManager(object):
         # Now write the RAM to flash
         self.unlock_order_register("save system configuration")
         try:
-            write_sys_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteSys, 0, 0,)
+            write_sys_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteSys)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
         finally:
             self.clear_order_register()
@@ -188,7 +188,7 @@ class ChargerCommsManager(object):
         # Write to flash.
         try:
             self.unlock_order_register("save preset index, writing index")
-            write_head_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMemHead, 0, 0,)
+            write_head_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMemHead)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
         finally:
             self.clear_order_register()
@@ -285,7 +285,7 @@ class ChargerCommsManager(object):
         # Now write back to flash
         self.unlock_order_register("delete preset, writing preset to flash")
         try:
-            write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem, 0, 0,)
+            write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
             store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
         finally:
             self.clear_order_register()
@@ -350,7 +350,7 @@ class ChargerCommsManager(object):
         if write_to_flash:
             self.unlock_order_register("save preset, writing preset to flash")
             try:
-                write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem, 0, 0,)
+                write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
                 store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
             finally:
                 self.clear_order_register()
@@ -363,7 +363,7 @@ class ChargerCommsManager(object):
     def take_out_order_lock_on_slot_and_channel(self, memory_slot, channel, message="<unknown reason>"):
         if memory_slot is not None and channel is not None:
             logger.info("Taking out order lock on ch:{1}/slot:{0}, {2}".format(memory_slot, channel, message))
-            self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel, VALUE_ORDER_UNLOCK,))
+            self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel, VALUE_ORDER_UNLOCK))
         else:
             logger.info("Taking out order lock for: {0}".format(message))
             self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK,))
@@ -376,7 +376,7 @@ class ChargerCommsManager(object):
         # If showing a dialog, or have error, try to clear the dialog
         # self.unlock_order_register("close messagebox")
         try:
-            self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK, Order.MsgBoxNo, 0, 0,))
+            self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK, Order.MsgBoxNo))
         finally:
             pass
             # self.clear_order_register()
@@ -385,10 +385,7 @@ class ChargerCommsManager(object):
         # self.unlock_order_register("stop")
         try:
             channel_number = min(1, max(0, channel_number))
-            values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop, 0, 0)
-
-            self.charger.capture.set_operation("Stop")
-
+            values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop)
             modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
             logger.info("Got back {0} from write".format(modbus_response))
             status = self.get_device_info().get_status(channel_number)
@@ -412,8 +409,6 @@ class ChargerCommsManager(object):
         channel_number = min(1, max(0, channel_number))
         logger.info("Begin operation {0} on channel {1} using slot {2}".format(operation, channel_number, preset_memory_slot_index))
 
-        self.charger.capture.set_operation("Run")
-
         # # Load the preset from this slot, and check it is valid
         # # Loading will itself perform a check for 'used', and will throw an exception if it is not available.
         # # It'll also be loaded into RAM.
@@ -425,7 +420,7 @@ class ChargerCommsManager(object):
         # Unlock so we can write
         # self.unlock_order_register("run operation {0}".format(operation))
         try:
-            values_list = (operation, preset_memory_slot_index, channel_number, VALUE_ORDER_UNLOCK, Order.Run, 0, 0,)
+            values_list = (operation, preset_memory_slot_index, channel_number, VALUE_ORDER_UNLOCK, Order.Run)
             logger.info("Sending command to channel {1}: {0}".format(values_list, channel_number))
             modbus_response = self.charger.modbus_write_registers(0x8000, values_list)
             logger.info("Got back {0} from write".format(modbus_response))

@@ -36,7 +36,7 @@ public:
 	BOOL ConnectToIthDevice (DWORD i);	/* Connects to the ith USB HID device connected to the computer */
 
 	BOOL Write(const BYTE *bytes, int nBuffLen);
-	BOOL Read(LPVOID bytes,DWORD nBuffLen ,DWORD ms);
+	BOOL Read(LPVOID bytes,DWORD nBuffLen ,DWORD ms, DWORD* actually_read = 0);
 private:
 	HANDLE EventObject;
 	OVERLAPPED HIDOverlapped;	
