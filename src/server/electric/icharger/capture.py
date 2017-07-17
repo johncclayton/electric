@@ -129,17 +129,17 @@ class Capture:
     def pop_operation(self):
         self.log_context = self.log_context[:-1]
 
-    def _context_as_string(self):
+    def context_as_string(self):
         return "**##".join(self.log_context)
 
     def log_write(self, data, result):
         assert(type(data) == str)
-        l = LogRecord(Capture.WRITE, self._context_as_string(), data, len(data), 0, result)
+        l = LogRecord(Capture.WRITE, self.context_as_string(), data, len(data), 0, result)
         self.add(l)
 
     def log_read(self, max_length, ms, expected_len, data_read):
         assert (type(data_read) == str)
-        l = LogRecord(Capture.READ, self._context_as_string(), data_read, expected_len, 0, 0)
+        l = LogRecord(Capture.READ, self.context_as_string(), data_read, expected_len, 0, 0)
         self.add(l)
 
     def add(self, r):

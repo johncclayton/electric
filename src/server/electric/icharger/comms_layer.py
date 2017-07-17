@@ -370,15 +370,6 @@ class ChargerCommsManager(object):
         # no-op
         return
 
-        # logger.info("Have dialog showing, attempting to close dialog")
-
-        # If showing a dialog, or have error, try to clear the dialog
-        # self.unlock_order_register("close messagebox")
-        # try:
-        #     self.charger.modbus_write_registers(0x8000 + 2, (channel_id, VALUE_ORDER_UNLOCK, Order.MsgBoxNo))
-        # finally:
-        #     pass
-
     @capture_context
     def stop_operation(self, channel_number):
         channel_number = min(1, max(0, channel_number))

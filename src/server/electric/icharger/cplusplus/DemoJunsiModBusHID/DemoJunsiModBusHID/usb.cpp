@@ -116,6 +116,7 @@ BOOL CUSBDevice::ConnectToIthDevice (DWORD deviceIndex)
     free (deviceDetail);
 	
 	handle = deviceHandle;
+	OutputDebugStringA("DEVICE OPENED\n");
 
 	EventObject = CreateEvent(NULL, TRUE, TRUE,_T(""));
 	//Set the members of the overlapped structure.
@@ -128,8 +129,11 @@ BOOL CUSBDevice::ConnectToIthDevice (DWORD deviceIndex)
 
 void CUSBDevice::Disconnect()
 {
-	if (EventObject != INVALID_HANDLE_VALUE)
+	if (EventObject != INVALID_HANDLE_VALUE) {
+		OutputDebugStringA("DEVICE CLOSED\n");
 		CloseHandle(EventObject);
+	}
+
 	EventObject = INVALID_HANDLE_VALUE;
 	
 	if (handle != INVALID_HANDLE_VALUE)

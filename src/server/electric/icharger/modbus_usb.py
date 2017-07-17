@@ -274,7 +274,7 @@ class USBSerialFacade:
 
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
-            print "WRITING {0}, {1}".format(len(content), content[:20])
+            print "WRITING {0}, {1}. {2}".format(self._capture.context_as_string(), len(content), content[:20])
 
             try:
                 to_write = [ord(i) for i in content]
@@ -295,12 +295,12 @@ class USBSerialFacade:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
         if self._dev is not None:
-            int_list = self._dev.read(MAX_READWRITE_LEN + 1, 50000)
-
+            int_list = self._dev.read(MAX_READWRITE_LEN + 2)
+            print "READ {0}, {1}, {2}".format(self._capture.context_as_string(), len(int_list), int_list[:20])
             result = array.array('B', int_list[:expected_length]).tostring()
 
             # always pass log_read a str() content type
-            self._capture.log_read(MAX_READWRITE_LEN + 1, 50000, expected_length, array.array('B', int_list).tostring())
+            self._capture.log_read(MAX_READWRITE_LEN + 1, 0, expected_length, array.array('B', int_list).tostring())
 
             return result
 
@@ -324,6 +324,12 @@ class iChargerMaster(RtuMaster):
 
     def reset(self):
         self._serial.reset()
+
+    def _do_open(self):
+        self._serial.open()
+
+    def _do_close(self):
+        self._serial.close()
 
     def modbus_read_registers(self, addr, data_format, function_code=cst.READ_INPUT_REGISTERS):
         """
@@ -353,12 +359,15 @@ class iChargerMaster(RtuMaster):
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
-        return self.execute(1,
-                            function_code,
-                            addr,
-                            data_format=data_format,
-                            quantity_of_x=quant,
-                            expected_length=(quant * 2) + 4)
+        try:
+            return self.execute(1,
+                                function_code,
+                                addr,
+                                data_format=data_format,
+                                quantity_of_x=quant,
+                                expected_length=(quant * 2) + 4)
+        finally:
+            self.close()
 
     def modbus_write_registers(self, addr, data):
         """
@@ -367,9 +376,12 @@ class iChargerMaster(RtuMaster):
         :param data: tuple of data to be written - these are int words
         :return:
         """
-        return self.execute(1,
-                            cst.WRITE_MULTIPLE_REGISTERS,
-                            addr,
-                            data_format="B",
-                            output_value=data,
-                            expected_length=4)
+        try:
+            return self.execute(1,
+                                cst.WRITE_MULTIPLE_REGISTERS,
+                                addr,
+                                data_format="B",
+                                output_value=data,
+                                expected_length=4)
+        finally:
+            self.close()
