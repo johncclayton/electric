@@ -48,6 +48,8 @@ void NetWrite(CFile& output, const CTime& value, const char *desc) {
 }
 
 struct LogRecord {
+
+public:
 	enum Operation {
 		READ, 
 		WRITE
@@ -154,9 +156,32 @@ MasterLog::~MasterLog() {
 	log_prefix = CString();
 }
 
+void AddRecord(LogRecord* ptr) {
+	static unsigned long count = 0;
+	log_record.Add(ptr);
+	BOOL display_live = 1;
+	if (display_live) {
+		CString content;
+		content.Format(_T("%ld %s op: %s, datalen: %d, "),
+			count++,
+			(LPCTSTR)ptr->_info,
+			ptr->_op == LogRecord::Operation::READ ? "READ" : "WRITE",
+			ptr->_data_len);
+		for (int index = 0; index < 40 && index < ptr->_data_len; ++index) {
+			content.AppendFormat("%d", ptr->_data[index]);
+			if (index + 1 < 40 && index + 1 < ptr->_data_len)
+				content.Append(", ");
+		}
+
+		content.Append("\r\n");
+
+		OutputDebugString(content);
+	}
+}
+
 BOOL LoggedWrite(const BYTE* bytes, int bufLen) {
 	BOOL result = JsHID.Write(bytes, bufLen);
-	log_record.Add(new LogRecord(LogRecord::WRITE, log_prefix, bytes, bufLen, result));
+	AddRecord(new LogRecord(LogRecord::WRITE, log_prefix, bytes, bufLen, result));
 	return result;
 }
 
@@ -164,7 +189,7 @@ BOOL LoggedRead(LPVOID bytes, DWORD bufLen, DWORD ms) {
 	DWORD actually_read = 0;
 	memset(bytes, 0, bufLen);
 	BOOL result = JsHID.Read(bytes, bufLen, ms, &actually_read);
-	log_record.Add(new LogRecord(LogRecord::READ, log_prefix, bytes, actually_read, ms, result));
+	AddRecord(new LogRecord(LogRecord::READ, log_prefix, bytes, actually_read, ms, result));
 	return result;
 }
 

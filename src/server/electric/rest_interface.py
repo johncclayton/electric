@@ -1,4 +1,4 @@
-import logging, os
+import logging, os, traceback, sys
 
 from flask import request
 from flask_restful import Resource, abort
@@ -9,12 +9,13 @@ from electric.icharger.modbus_usb import connection_state_dict
 from electric.icharger.comms_layer import Operation
 from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException, PresetIndex
 from electric.icharger.capture import Capture
+import inspect
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 # TODO: make configurable?  For now I'm making this 1, so that retries do not influence binary logging/capture.
-RETRY_LIMIT = 30
-# RETRY_LIMIT = 1
+#RETRY_LIMIT = 30
+RETRY_LIMIT = 1
 
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
@@ -37,7 +38,14 @@ def exclusive(func):
                 except Exception, ex:
                     retry += 1
 
-                    logger.warning("{0}/{3}, will try again (count is at {1}/{2})".format(ex, retry, RETRY_LIMIT, type(ex)))
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    traceback.print_tb(exc_traceback)
+
+                    logger.warning("{0}/{3}, will try {4} again (count is at {1}/{2})".format(ex,
+                                                                                              retry,
+                                                                                              RETRY_LIMIT,
+                                                                                              type(ex),
+                                                                                              str(self) + "." + str(func)))
 
                     # If the charger isn't plugged in. This could fail.
                     try:
@@ -46,7 +54,7 @@ def exclusive(func):
                         logger.error("Error resetting comms! Charger not plugged in? {0}".format(ex))
 
                     if retry >= RETRY_LIMIT:
-                        logger.warning("retry limit exceeded, aborting the call completely")
+                        logger.warning("retry limit exceeded, aborting the call to {0} completely".format(str(func)))
                         return connection_state_dict(ex), 504
 
     return wrapper
@@ -75,6 +83,7 @@ class DialogCloseResource(Resource):
         obj.update(connection_state_dict())
 
         return obj
+
 
 class ChannelResource(Resource):
     @exclusive
@@ -112,7 +121,6 @@ class ControlRegisterResource(Resource):
 class ChargeResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        evil_global.capture.set_operation("Charge/Channel/{0}".format(channel_id))
         device_status = evil_global.comms.run_operation(Operation.Charge, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
         annotated_device_status.update(connection_state_dict())
@@ -122,7 +130,6 @@ class ChargeResource(ControlRegisterResource):
 class DischargeResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        evil_global.capture.set_operation("Discharge/Channel/{0}".format(channel_id))
         device_status = evil_global.comms.run_operation(Operation.Discharge, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
         annotated_device_status.update(connection_state_dict())
@@ -132,7 +139,6 @@ class DischargeResource(ControlRegisterResource):
 class StoreResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        evil_global.capture.set_operation("Store/Channel/{0}".format(channel_id))
         device_status = evil_global.comms.run_operation(Operation.Storage, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
         annotated_device_status.update(connection_state_dict())
@@ -142,7 +148,6 @@ class StoreResource(ControlRegisterResource):
 class BalanceResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        evil_global.capture.set_operation("Balance/Channel/{0}".format(channel_id))
         device_status = evil_global.comms.run_operation(Operation.Balance, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
         annotated_device_status.update(connection_state_dict())
@@ -162,8 +167,6 @@ class StopResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id):
         channel_number = int(channel_id)
-        evil_global.capture.set_operation("Stop/Channel/{0}".format(channel_id))
-        logger.info("Stop, channel {0}".format(channel_number))
         # We do this twice. Once to stop. 2nd time to get past the "STOPS" screen.
         operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
@@ -269,4 +272,4 @@ class PresetOrderResource(Resource):
 class LoggingCommandResource(Resource):
     @exclusive
     def put(self):
-        evil_global.capture.write_logs()
+        return evil_global.capture.write_logs()

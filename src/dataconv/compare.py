@@ -39,10 +39,6 @@ def data_comparison(left, right):
     print(right)
 
 
-def data_readable(data):
-    return [ord(i) for i in data]
-
-
 def summary_of(all_records):
     f = all_records[0].json()
     start_time = f["timestamp"]
@@ -51,8 +47,7 @@ def summary_of(all_records):
 
     i = 0
     for r in all_records:
-        v = r.json()
-        print "{0} {1} op: {2}, {3}, {4}".format(i, v["info"], v["op"], v["datalen"], data_readable(v["data"][:40]))
+        LogRecord.display_live(r, i, sys.stdout)
         i += 1
 
 if __name__ == "__main__":

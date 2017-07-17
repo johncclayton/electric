@@ -42,7 +42,7 @@ public:
 	void FillDeviceList(void);
 	void Enum(void);
 	afx_msg void OnBnClickedOk();
-	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedReadMem();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
 	afx_msg void OnBnClickedButton4();
@@ -54,6 +54,9 @@ public:
 	afx_msg void OnBnClickedButton9();
 	CButton m_Receive;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
+	void StartChannelProgram(int channel, int program);
+	void StopChannel(int channel);
 
 public:
 	void GetShowValue(CString *pStr,DWORD Value,WORD Len,WORD Dot);
@@ -76,6 +79,8 @@ public:
 	afx_msg void OnBnClickedButton11();
 	afx_msg void OnBnClickedButton12();
 	afx_msg void OnBnClickedButtonDumpLogs();
+	afx_msg void OnBnClickedButtonStop2();
+	afx_msg void OnBnClickedButtonRun2();
 };
 
 #define JSHID_VENDORID	0x483

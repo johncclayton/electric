@@ -15,7 +15,10 @@
 #define IDC_BUTTON7                     1008
 #define IDC_BUTTON8                     1009
 #define IDC_COMBO2                      1010
+#define IDC_BUTTON_RUN2                 1010
 #define IDC_COMBO3                      1011
+#define IDC_BUTTON_STOP                 1011
+#define IDC_BUTTON_STOP2                1011
 #define IDC_COMBO4                      1012
 #define IDC_BUTTON9                     1013
 #define IDC_TIMER                       1014

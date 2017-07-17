@@ -1,4 +1,4 @@
-import struct, os, time
+import struct, os, time, sys
 from datetime import datetime
 
 
@@ -22,6 +22,9 @@ def readnet_string(buff, len, offset):
     str_format = ">{0}s".format(len)
     (str_value,) = struct.unpack_from(str_format, buff, offset)
     return str_value.rstrip(), offset + len
+
+def data_readable(data):
+    return [ord(i) for i in data]
 
 
 class LogRecord:
@@ -77,6 +80,12 @@ class LogRecord:
 
         return v
 
+    @staticmethod
+    def display_live(r, i, out_str):
+        v = r.json()
+        content = "{0} {1} op: {2}, datalen: {3}, {4}".format(i, v["info"], v["op"], v["datalen"], data_readable(v["data"][:45]))
+        out_str.write(content + '\n')
+
 
 class Capture:
     '''
@@ -86,11 +95,12 @@ class Capture:
     READ = 0
     WRITE = 1
 
-    log_records = []
-
     def __init__(self, cap_path = None):
-        self.logging_info = None
+        self.log_records = []
+        self.log_context = []
+        self.log_records_added = 0
         self.capture_path = os.environ.get("CAPTURE_PATH", cap_path)
+        self.display_live = os.environ.get("CAPTURE_LIVE", False)
 
         if self.capture_path is not None:
             if not os.path.exists(self.capture_path):
@@ -110,20 +120,32 @@ class Capture:
 
         capture_file.close()
 
-    def set_operation(self, info):
-        self.logging_info = info
+        return path
+
+    def push_operation(self, info):
+        # print "operation info:", info
+        self.log_context.append(info)
+
+    def pop_operation(self):
+        self.log_context = self.log_context[:-1]
+
+    def _context_as_string(self):
+        return "**##".join(self.log_context)
 
     def log_write(self, data, result):
         assert(type(data) == str)
-        l = LogRecord(Capture.WRITE, self.logging_info, data, len(data), 0, result)
+        l = LogRecord(Capture.WRITE, self._context_as_string(), data, len(data), 0, result)
         self.add(l)
 
     def log_read(self, max_length, ms, expected_len, data_read):
         assert (type(data_read) == str)
-        l = LogRecord(Capture.READ, self.logging_info, data_read, expected_len, 0, 0)
+        l = LogRecord(Capture.READ, self._context_as_string(), data_read, expected_len, 0, 0)
         self.add(l)
 
     def add(self, r):
         self.log_records.append(r)
+        self.log_records_added += 1
+        if self.display_live:
+            LogRecord.display_live(r, self.log_records_added, sys.stdout)
         if len(self.log_records) > 100:
             self.log_records = self.log_records[-50:]

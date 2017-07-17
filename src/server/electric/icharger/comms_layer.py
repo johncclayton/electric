@@ -48,6 +48,17 @@ class Order:
     MsgBoxNo = 9
 
 
+def capture_context(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            self.charger.capture.push_operation(str(func) + ", args:" + str(args) + ", kwargs:" + str(kwargs))
+            result = func(self, *args, **kwargs)
+            return result
+        finally:
+            self.charger.capture.pop_operation()
+    return wrapper
+
+
 class ChargerCommsManager(object):
     """
     The comms manager is responsible for data translation between the MODBUS types and the world outside.  It uses an
@@ -67,6 +78,7 @@ class ChargerCommsManager(object):
     def reset(self):
         self.charger.reset()
 
+    @capture_context
     def get_device_info(self):
         """
         Returns the following information from the iCharger, known as the 'device only reads message'
@@ -75,6 +87,7 @@ class ChargerCommsManager(object):
         vars = ReadDataSegment(self.charger, "vars", "h12sHHHHHH", base=0x0000)
         return DeviceInfo(vars.data)
 
+    @capture_context
     def get_channel_status(self, channel, device_id=None):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
@@ -108,6 +121,7 @@ class ChargerCommsManager(object):
 
         return ChannelStatus.modbus(device_id, channel, header_data, cell_volt, cell_balance, cell_ir, footer)
 
+    @capture_context
     def get_control_register(self):
         "Returns the current run state of a particular channel"
         return Control(self.charger.modbus_read_registers(0x8000, "7H", function_code=cst.READ_HOLDING_REGISTERS))
@@ -119,6 +133,7 @@ class ChargerCommsManager(object):
             "type": type
         }
 
+    @capture_context
     def set_beep_properties(self, beep_index=0, enabled=True, volume=5):
         # for now we only access beep type values
         base = 0x8400
@@ -132,12 +147,14 @@ class ChargerCommsManager(object):
 
         return self.charger.modbus_write_registers(base + 13, value_enabled + value_volume)
 
+    @capture_context
     def set_active_channel(self, channel):
         base = 0x8000 + 2
         if channel not in (0, 1):
             return None
         return self.charger.modbus_write_registers(base, (channel,))
 
+    @capture_context
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
         # temp-unit -> beep-vol
@@ -149,6 +166,7 @@ class ChargerCommsManager(object):
 
         return SystemStorage.modbus(ds1, ds2, ds3)
 
+    @capture_context
     def save_system_storage(self, system_storage_object):
         (s1, s2, s3, s4, s5, s6) = system_storage_object.to_modbus_data()
 
@@ -161,20 +179,17 @@ class ChargerCommsManager(object):
         ws6 = self.charger.modbus_write_registers(0x8400 + 34, s6)
 
         # Now write the RAM to flash
-        # self.unlock_order_register("save system configuration")
-        try:
-            write_sys_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteSys)
-            store = self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
-        finally:
-            pass
-            # self.clear_order_register()
+        write_sys_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteSys)
+        self.charger.modbus_write_registers(0x8000 + 3, write_sys_to_flash)
 
         return True
 
+    @capture_context
     def select_memory_program(self, memory_slot, channel_number=0):
         (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number, VALUE_ORDER_UNLOCK))
         return word_count
 
+    @capture_context
     def save_full_preset_list(self, preset_list):
         (v1, v2) = preset_list.to_modbus_data()
 
@@ -183,15 +198,12 @@ class ChargerCommsManager(object):
         part2 = WriteDataSegment(self.charger, "part2", v2, "32B", prev_format=part1)
 
         # Write to flash.
-        try:
-            # self.unlock_order_register("save preset index, writing index")
-            write_head_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMemHead)
-            store = self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
-        finally:
-            pass
-            # self.clear_order_register()
+        write_head_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMemHead)
+        self.charger.modbus_write_registers(0x8000 + 3, write_head_to_flash)
+
         return True
 
+    @capture_context
     def find_preset_with_name(self, named):
         for preset in self.get_all_presets():
             preset_name = preset.name
@@ -201,6 +213,7 @@ class ChargerCommsManager(object):
                 return preset
         return None
 
+    @capture_context
     def get_all_presets(self):
         preset_list = self.get_full_preset_list()
         # TODO: Error handling
@@ -215,6 +228,7 @@ class ChargerCommsManager(object):
 
         return all_presets
 
+    @capture_context
     def get_full_preset_list(self):
         (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
 
@@ -226,6 +240,7 @@ class ChargerCommsManager(object):
         list_of_all_indexes.extend(list(data_2))
         return PresetIndex.modbus(count, list_of_all_indexes)
 
+    @capture_context
     def get_preset(self, memory_slot_number):
         # First, load the indicies and see if in fact this is mapped. If not, don't bother even trying
         preset_index = self.get_full_preset_list()
@@ -254,6 +269,7 @@ class ChargerCommsManager(object):
 
         return preset
 
+    @capture_context
     def delete_preset_at_index(self, preset_memory_slot_number):
         # Find this thing, within the index
         preset_index = self.get_full_preset_list()
@@ -278,16 +294,11 @@ class ChargerCommsManager(object):
         # Set this preset (slot) used flag to "EMPTY (useflag = 0xffff") in RAM
         logger.info("Setting slot {0} unused flag".format(preset_memory_slot_number))
         self.select_memory_program(preset_memory_slot_number)
-        store = self.charger.modbus_write_registers(0x8c00, (0xffff,))
+        self.charger.modbus_write_registers(0x8c00, (0xffff,))
 
         # Now write back to flash
-        # self.unlock_order_register("delete preset, writing preset to flash")
-        try:
-            write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
-            store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
-        finally:
-            pass
-            # self.clear_order_register()
+        write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
+        self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
 
         return True
 
@@ -296,6 +307,7 @@ class ChargerCommsManager(object):
     inserted at the end of the preset index list.
     '''
 
+    @capture_context
     def add_new_preset(self, preset):
         # Find the next free memory slot, assign that to the preset, and save both indexes + preset
         preset_index = self.get_full_preset_list()
@@ -324,6 +336,7 @@ class ChargerCommsManager(object):
     It does NOT allocate new presets, or insert them into a preset index list
     '''
 
+    @capture_context
     def save_preset_to_memory_slot(self, preset, memory_slot, write_to_flash=True, verify_write=True):
         # We don't want to verify if we're adding. In that case we KNOW we want to add it here.
         # and we want to ignore any older data that may be in that slot.
@@ -347,89 +360,59 @@ class ChargerCommsManager(object):
 
         # Now write back to flash
         if write_to_flash:
-            # self.unlock_order_register("save preset, writing preset to flash")
-            try:
-                write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
-                store = self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
-            finally:
-                pass
-                # self.clear_order_register()
+            write_to_flash = (VALUE_ORDER_UNLOCK, Order.WriteMem)
+            self.charger.modbus_write_registers(0x8000 + 3, write_to_flash)
 
         return True
 
-    # def unlock_order_register(self, message="<unknown reason>"):
-    #     self.take_out_order_lock_on_slot_and_channel(None, None, message=message)
-    #
-    # def take_out_order_lock_on_slot_and_channel(self, memory_slot, channel, message="<unknown reason>"):
-    #     if memory_slot is not None and channel is not None:
-    #         logger.info("Taking out order lock on ch:{1}/slot:{0}, {2}".format(memory_slot, channel, message))
-    #         self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel, VALUE_ORDER_UNLOCK))
-    #     else:
-    #         logger.info("Taking out order lock for: {0}".format(message))
-    #         self.charger.modbus_write_registers(0x8000 + 3, (VALUE_ORDER_UNLOCK,))
-
-    # def clear_order_register(self):
-    #     logger.info("Clear order lock")
-    #     self.charger.modbus_write_registers(0x8000 + 3, (0,))
-
+    @capture_context
     def close_messagebox(self, channel_id):
+        # no-op
+        return
+
+        # logger.info("Have dialog showing, attempting to close dialog")
+
         # If showing a dialog, or have error, try to clear the dialog
         # self.unlock_order_register("close messagebox")
-        try:
-            self.charger.modbus_write_registers(0x8000 + 2, (channel_id, VALUE_ORDER_UNLOCK, Order.MsgBoxNo))
-        finally:
-            pass
-            # self.clear_order_register()
+        # try:
+        #     self.charger.modbus_write_registers(0x8000 + 2, (channel_id, VALUE_ORDER_UNLOCK, Order.MsgBoxNo))
+        # finally:
+        #     pass
 
+    @capture_context
     def stop_operation(self, channel_number):
-        # self.unlock_order_register("stop")
-        try:
-            channel_number = min(1, max(0, channel_number))
-            values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop)
-            modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
-            logger.info("Got back {0} from write".format(modbus_response))
-            status = self.get_device_info().get_status(channel_number)
-            logger.info("Device status: {0}".format(status.to_native()))
-        finally:
-            pass
-            # self.clear_order_register()
+        channel_number = min(1, max(0, channel_number))
+        values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop)
+        modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
+        status = self.get_device_info().get_status(channel_number)
+        logger.info("Device status: {0}".format(status.to_native()))
 
         # If showing a dialog, or have error, try to clear the dialog
         # This also works to close the presets listing, if that is open
-        if status.dlg_box_status or status.err:
-            logger.info("Have dialog showing, attempting to close dialog")
-            self.close_messagebox(channel_number)
+        # if status.dlg_box_status or status.err:
+        #     self.close_messagebox(channel_number)
 
         return OperationResponse(modbus_response)
 
+    @capture_context
     def run_operation(self, operation, channel_number, preset_memory_slot_index=0):
         if operation == Operation.MeasureIR:
             return self.measure_ir(channel_number)
 
         channel_number = min(1, max(0, channel_number))
-        logger.info("Begin operation {0} on channel {1} using slot {2}".format(operation, channel_number, preset_memory_slot_index))
 
         # # Load the preset from this slot, and check it is valid
         # # Loading will itself perform a check for 'used', and will throw an exception if it is not available.
         # # It'll also be loaded into RAM.
         # self.get_preset(preset_memory_slot_index)
 
-        # Send an order to order register should first unlock order lock,
-        # and write 0X55AA to the order lock register to unlock, write any other values to lock
-
-        # Unlock so we can write
-        # self.unlock_order_register("run operation {0}".format(operation))
-        try:
-            values_list = (operation, preset_memory_slot_index, channel_number, VALUE_ORDER_UNLOCK, Order.Run)
-            logger.info("Sending command to channel {1}: {0}".format(values_list, channel_number))
-            modbus_response = self.charger.modbus_write_registers(0x8000, values_list)
-            logger.info("Got back {0} from write".format(modbus_response))
-        finally:
-            pass
-            #self.clear_order_register()
+        values_list = (operation, preset_memory_slot_index, channel_number, VALUE_ORDER_UNLOCK, Order.Run)
+        # logger.info("Sending run_op to channel {2}: op {0}, preset: {1}".format(operation, preset_memory_slot_index, channel_number))
+        self.charger.modbus_write_registers(0x8000, values_list)
 
         return self.get_device_info().get_status(channel_number)
 
+    @capture_context
     def measure_ir(self, channel_number):
         channel_number = min(1, max(0, channel_number))
 

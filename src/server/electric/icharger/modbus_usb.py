@@ -271,8 +271,11 @@ class USBSerialFacade:
 
         if self._dev is not None:
             pad_len = MAX_READWRITE_LEN - len(payload)
+
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
+            print "WRITING {0}, {1}".format(len(content), content[:20])
+
             try:
                 to_write = [ord(i) for i in content]
                 result = self._dev.write(to_write)
@@ -292,12 +295,12 @@ class USBSerialFacade:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
         if self._dev is not None:
-            int_list = self._dev.read(MAX_READWRITE_LEN + 1, 5000)
+            int_list = self._dev.read(MAX_READWRITE_LEN + 1, 50000)
 
             result = array.array('B', int_list[:expected_length]).tostring()
 
             # always pass log_read a str() content type
-            self._capture.log_read(MAX_READWRITE_LEN + 1, 5000, expected_length, array.array('B', int_list).tostring())
+            self._capture.log_read(MAX_READWRITE_LEN + 1, 50000, expected_length, array.array('B', int_list).tostring())
 
             return result
 

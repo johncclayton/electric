@@ -63,7 +63,7 @@ BEGIN_MESSAGE_MAP(CDemoJunsiModBusHIDDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_WM_DEVICECHANGE()
 	ON_BN_CLICKED(IDOK, &CDemoJunsiModBusHIDDlg::OnBnClickedOk)
-	ON_BN_CLICKED(IDC_BUTTON1, &CDemoJunsiModBusHIDDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON1, &CDemoJunsiModBusHIDDlg::OnBnClickedReadMem)
 	ON_BN_CLICKED(IDC_BUTTON2, &CDemoJunsiModBusHIDDlg::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CDemoJunsiModBusHIDDlg::OnBnClickedButton3)
 	ON_BN_CLICKED(IDC_BUTTON4, &CDemoJunsiModBusHIDDlg::OnBnClickedButton4)
@@ -76,6 +76,8 @@ BEGIN_MESSAGE_MAP(CDemoJunsiModBusHIDDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON10, &CDemoJunsiModBusHIDDlg::OnBnClickedButton10)
 	ON_BN_CLICKED(IDC_BUTTON11, &CDemoJunsiModBusHIDDlg::OnBnClickedButton11)
 	ON_BN_CLICKED(IDC_BUTTON_DUMP_LOGS, &CDemoJunsiModBusHIDDlg::OnBnClickedButtonDumpLogs)
+	ON_BN_CLICKED(IDC_BUTTON_STOP2, &CDemoJunsiModBusHIDDlg::OnBnClickedButtonStop2)
+	ON_BN_CLICKED(IDC_BUTTON_RUN2, &CDemoJunsiModBusHIDDlg::OnBnClickedButtonRun2)
 END_MESSAGE_MAP()
 
 
@@ -232,6 +234,7 @@ void CDemoJunsiModBusHIDDlg::FillDeviceList(void)
 }
 
 #include "MasterModBus.h"
+
 extern eMBErrorCode MasterModBus(BYTE FunCode,BYTE *pIn,BYTE *pOut,DWORD ms);
 extern CUSBDevice JsHID;
 void CDemoJunsiModBusHIDDlg::OnBnClickedOk()
@@ -241,7 +244,7 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedOk()
 }
 
 SYSTEM System;
-void CDemoJunsiModBusHIDDlg::OnBnClickedButton1()
+void CDemoJunsiModBusHIDDlg::OnBnClickedReadMem()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	if(JsHidEnum.Count==0)return;
@@ -437,20 +440,28 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton6()
 
 void CDemoJunsiModBusHIDDlg::OnBnClickedButton7()
 {
+	StartChannelProgram(0, 0);
+}
+
+void CDemoJunsiModBusHIDDlg::StartChannelProgram(int channel, int program)
+{
 	// TODO: 在此添加控件通知处理程序代码
 	if(JsHidEnum.Count==0)return;
 	if(JsHID.ConnectToIthDevice(JsHidEnum.Info[m_DeviceList.GetCurSel()].Index)==FALSE)
 	{
 		return;
 	}
+
 	u16 RunOrderBuf[5];
 	RunOrderBuf[0] = 3;//mRunProgram.GetCurSel();
-	RunOrderBuf[1] = 0;//mSelMemory.GetCurSel();
-	RunOrderBuf[2] = 0;//mChannel.GetCurSel();
+	RunOrderBuf[1] = program;//mSelMemory.GetCurSel();
+	RunOrderBuf[2] = channel;//mChannel.GetCurSel();
 	RunOrderBuf[3] = VALUE_ORDER_KEY; //REG_ORDER_KEY
 	RunOrderBuf[4] = ORDER_RUN;
 
-	MasterLog l("Charge/Channel/0");
+	CString str;
+	str.Format("Charge/Channel/%d/%d", channel, program);
+	MasterLog l((LPCTSTR)str);
 
 	if(	MasterWrite(REG_SEL_OP,5,(BYTE *)RunOrderBuf) != MB_EOK )
 	{
@@ -458,10 +469,16 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton7()
 		JsHID.Disconnect();
 		return;
 	}
+
 	JsHID.Disconnect();
 }
 
 void CDemoJunsiModBusHIDDlg::OnBnClickedButton8()
+{
+	StopChannel(0);
+}
+
+void CDemoJunsiModBusHIDDlg::StopChannel(int channel)
 {
 	// TODO: 在此添加控件通知处理程序代码
 	if(JsHidEnum.Count==0)return;
@@ -474,7 +491,7 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton8()
 
 	u16 RunOrderBuf[3];
 
-	RunOrderBuf[0] = 0;//mChannel.GetCurSel();
+	RunOrderBuf[0] = channel;//mChannel.GetCurSel();
 	RunOrderBuf[1] = VALUE_ORDER_KEY; //REG_ORDER_KEY
 	RunOrderBuf[2] = ORDER_STOP;
 
@@ -484,6 +501,7 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton8()
 		JsHID.Disconnect();
 		return;
 	}
+
 	JsHID.Disconnect();
 }
 
@@ -706,4 +724,15 @@ void CDemoJunsiModBusHIDDlg::OnBnClickedButton11()
 void CDemoJunsiModBusHIDDlg::OnBnClickedButtonDumpLogs()
 {
 	DumpLogRecords();
+}
+
+
+void CDemoJunsiModBusHIDDlg::OnBnClickedButtonStop2()
+{
+	StopChannel(1);
+}
+
+void CDemoJunsiModBusHIDDlg::OnBnClickedButtonRun2()
+{
+	StartChannelProgram(1, 0);
 }
