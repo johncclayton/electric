@@ -13,9 +13,7 @@ import inspect
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
-# TODO: make configurable?  For now I'm making this 1, so that retries do not influence binary logging/capture.
-#RETRY_LIMIT = 30
-RETRY_LIMIT = 1
+RETRY_LIMIT = 30
 
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
@@ -242,6 +240,7 @@ class PresetListResource(Resource):
             preset = evil_global.comms.get_preset(memory_slot_number)
             if preset.is_used or preset.is_fixed:
                 try:
+                    print "got a single preset"
                     native = preset.to_native()
                     all_presets.append(native)
                 except Exception, e:
