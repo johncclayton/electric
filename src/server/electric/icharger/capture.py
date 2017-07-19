@@ -1,6 +1,6 @@
-import struct, os, time, sys
+import struct, os, time, logging
 from datetime import datetime
-
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 def netfmt_int(value):
     result = struct.pack(">L", value)
@@ -81,11 +81,9 @@ class LogRecord:
         return v
 
     @staticmethod
-    def display_live(r, i, out_str):
+    def display_live(r, i):
         v = r.json()
-        content = "{0} {1} op: {2}, datalen: {3}, {4}".format(i, v["info"], v["op"], v["datalen"], data_readable(v["data"][:45]))
-        out_str.write(content + '\n')
-
+        return "{0} {1} op: {2}, datalen: {3}, {4}".format(i, v["info"], v["op"], v["datalen"], data_readable(v["data"][:45]))
 
 class Capture:
     '''
@@ -146,6 +144,6 @@ class Capture:
         self.log_records.append(r)
         self.log_records_added += 1
         if self.display_live:
-            LogRecord.display_live(r, self.log_records_added, sys.stdout)
+            logging.info(LogRecord.display_live(r, self.log_records_added))
         if len(self.log_records) > 100:
             self.log_records = self.log_records[-50:]

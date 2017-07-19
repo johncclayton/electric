@@ -1,5 +1,5 @@
 import array
-import hid
+import hid, threading, time
 import logging
 import struct
 
@@ -141,10 +141,8 @@ class iChargerQuery(Query):
         if self.response_length > MAX_READWRITE_LEN:
             raise ModbusInvalidResponseError("Response length is greater than {0}".format(MAX_READWRITE_LEN))
 
-        # if self.func_code == cst.WRITE_MULTIPLE_REGISTERS and self.adu_constant != MODBUS_HID_FRAME_TYPE:
-        #     raise ModbusInvalidResponseError(
-        #         "Response does not contain the expected frame type constant (0x30) in ADU portion of the result, constant value found is {0}".format(
-        #             self.adu_constant))
+        if(self.response_length == 44 and self.adu_constant == 16 and (self.response_func_code == 1 or self.response_func_code == 2)):
+            print "whaaat?"
 
         if self.response_func_code == self.func_code:
             # primitive byte swap the entire thing... but only if this is the READ INPUT/HOLDING type
@@ -163,6 +161,11 @@ class iChargerQuery(Query):
                     "Response contains error code {0}: {1}".format(self.modbus_error,
                                                                    self._modbus_error_string(self.modbus_error))
                 )
+            else:
+                # skip len/adu const - returning everything else - this avoids bitching about invalid reads, but
+                # of course does not solve the root problem.
+                response = response[2:]
+
             self.modbus_error = 0
 
         return response
@@ -189,11 +192,17 @@ class USBSerialFacade:
     be detached that's more of a problem and right now the USBSerialFacade throws a big fat
     exception from __init__.
     """
-
     def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID, capture=None):
         self._dev = None
         self._opened = False
         self._capture = capture
+
+        self._lock = threading.Lock()
+
+        self._last_info_packet = None
+        self._last_response_packet = None
+        self._read_timer = None
+        self.reset_timer()
 
         self.vendor = vendor
         self.product = prod
@@ -205,6 +214,18 @@ class USBSerialFacade:
         except IOError:
             logging.error("The USB device could not be opened")
             raise
+
+    def __del__(self):
+        # super(self, USBSerialFacade).__del__()
+        self._read_timer.cancel()
+        self._read_timer = None
+
+    def reset_timer(self):
+        if self._read_timer is not None:
+            self._read_timer.cancel()
+
+        self._read_timer = threading.Timer(0.0500, self.read_from_icharger)
+        self._read_timer.start()
 
     def reset(self):
         if self._dev is not None:
@@ -225,7 +246,7 @@ class USBSerialFacade:
     @property
     def name(self):
         if self._opened:
-            return "iCharger 4010 Duo SN:" + self.serial_number
+            return "iCharger SN:" + self.serial_number
         return "! iCharger Not Connected !"
 
     def open(self):
@@ -271,48 +292,71 @@ class USBSerialFacade:
 
         if self._dev is not None:
             pad_len = MAX_READWRITE_LEN - len(payload)
-
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
-            print "WRITING {0}, {1}. {2}".format(self._capture.context_as_string(), len(content), content[:20])
 
             try:
                 to_write = [ord(i) for i in content]
                 result = self._dev.write(to_write)
-
-                # always provide log_write with an str() content
                 self._capture.log_write(''.join(content), result)
-
                 return result
             except Exception, e:
-                logging.info("bad bad bad, %s", e)
+                logging.info("exception on device write, %s", e)
                 raise
 
         raise IOError("Device write failure - either not present or not claimed")
+
+    def read_from_icharger(self):
+        if self._dev is not None and self.is_open:
+            int_list = None
+            try:
+                int_list = self._dev.read(MAX_READWRITE_LEN, 100)
+            except IOError:
+                pass
+
+            # is this an info packet?
+            if int_list is not None and len(int_list) > 2:
+                with self._lock:
+                    if int_list[0] == 44 and int_list[1] == 16:
+                        self._last_info_packet = int_list
+                        logging.debug("Captured INFO packet")
+                    else:
+                        self._last_response_packet = int_list
+                        logging.debug("Captured RESPONSE packet")
+
+        self.reset_timer()
+
 
     def read(self, expected_length):
         if not testing_control.usb_device_present:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
-        if self._dev is not None:
-            int_list = self._dev.read(MAX_READWRITE_LEN + 2)
-            print "READ {0}, {1}, {2}".format(self._capture.context_as_string(), len(int_list), int_list[:20])
-            result = array.array('B', int_list[:expected_length]).tostring()
+        # wait for a packet in self.last_response
+        int_list = None
+        attempts = 10
 
-            # always pass log_read a str() content type
-            self._capture.log_read(MAX_READWRITE_LEN + 1, 0, expected_length, array.array('B', int_list).tostring())
+        while attempts > 0:
+            with self._lock:
+                if self._last_response_packet is not None:
+                    int_list = self._last_response_packet
+                    self._last_response_packet = None
 
-            return result
+            if int_list is not None:
+                result = array.array('B', int_list[:expected_length]).tostring()
+                self._capture.log_read(MAX_READWRITE_LEN, 0, expected_length, array.array('B', int_list).tostring())
+                return result
 
-        raise IOError("Device read failure - either not present or not claimed")
+            attempts -= 1
 
+            time.sleep(0.150)
+
+        raise IOError("unable to read response packet from USB device within 1.5 seconds")
 
 class iChargerMaster(RtuMaster):
     """
     Modbus master interface to the iCharger, implements higher level routines to get the
     status / channel information from the device.
     """
-
     def __init__(self, serial=None, capture=None):
         if serial is None:
             serial = USBSerialFacade(capture=capture)
@@ -359,15 +403,13 @@ class iChargerMaster(RtuMaster):
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus
         devices but as this is iCharger via USB-HID this is irrelevant."""
-        try:
-            return self.execute(1,
-                                function_code,
-                                addr,
-                                data_format=data_format,
-                                quantity_of_x=quant,
-                                expected_length=(quant * 2) + 4)
-        finally:
-            self.close()
+        return self.execute(1,
+                            function_code,
+                            addr,
+                            data_format=data_format,
+                            quantity_of_x=quant,
+                            expected_length=(quant * 2) + 4)
+
 
     def modbus_write_registers(self, addr, data):
         """
@@ -376,12 +418,9 @@ class iChargerMaster(RtuMaster):
         :param data: tuple of data to be written - these are int words
         :return:
         """
-        try:
-            return self.execute(1,
-                                cst.WRITE_MULTIPLE_REGISTERS,
-                                addr,
-                                data_format="B",
-                                output_value=data,
-                                expected_length=4)
-        finally:
-            self.close()
+        return self.execute(1,
+                            cst.WRITE_MULTIPLE_REGISTERS,
+                            addr,
+                            data_format="B",
+                            output_value=data,
+                            expected_length=4)

@@ -162,10 +162,11 @@ void AddRecord(LogRecord* ptr) {
 	BOOL display_live = 1;
 	if (display_live) {
 		CString content;
-		content.Format(_T("%ld %s op: %s, datalen: %d, "),
+		content.Format(_T("%ld %s op: %s (result: %d), datalen: %d, "),
 			count++,
 			(LPCTSTR)ptr->_info,
 			ptr->_op == LogRecord::Operation::READ ? "READ" : "WRITE",
+			ptr->_result,
 			ptr->_data_len);
 		for (int index = 0; index < 40 && index < ptr->_data_len; ++index) {
 			content.AppendFormat("%d", ptr->_data[index]);

@@ -1,4 +1,4 @@
-import logging
+import logging, inspect
 
 import modbus_tk.defines as cst
 
@@ -48,15 +48,19 @@ class Order:
     MsgBoxNo = 9
 
 
-def capture_context(func):
-    def wrapper(self, *args, **kwargs):
+def capture_context(f):
+    def real_decorator(self, *args, **kwargs):
         try:
-            self.charger.capture.push_operation(str(func) + ", args:" + str(args) + ", kwargs:" + str(kwargs))
-            result = func(self, *args, **kwargs)
+            curframe = inspect.currentframe()
+            calframe = inspect.getouterframes(curframe, 2)
+
+            self.charger.capture.push_operation(calframe[1][3] + " / " + f.func_name + ", args:" + str(args) + ", kwargs:" + str(kwargs))
+
+            result = f(self, *args, **kwargs)
             return result
         finally:
             self.charger.capture.pop_operation()
-    return wrapper
+    return real_decorator
 
 
 class ChargerCommsManager(object):
@@ -78,7 +82,6 @@ class ChargerCommsManager(object):
     def reset(self):
         self.charger.reset()
 
-    @capture_context
     def get_device_info(self):
         """
         Returns the following information from the iCharger, known as the 'device only reads message'
@@ -238,6 +241,7 @@ class ChargerCommsManager(object):
         data_2 = self.charger.modbus_read_registers(0x8800 + 16, read_a_bit_format, function_code=cst.READ_HOLDING_REGISTERS)
         list_of_all_indexes = list(data_1)
         list_of_all_indexes.extend(list(data_2))
+
         return PresetIndex.modbus(count, list_of_all_indexes)
 
     @capture_context
@@ -374,9 +378,11 @@ class ChargerCommsManager(object):
     def stop_operation(self, channel_number):
         channel_number = min(1, max(0, channel_number))
         values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop)
+
         modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
-        status = self.get_device_info().get_status(channel_number)
-        logger.info("Device status: {0}".format(status.to_native()))
+
+        # status = self.get_device_info().get_status(channel_number)
+        # logger.info("Device status: {0}".format(status.to_native()))
 
         # If showing a dialog, or have error, try to clear the dialog
         # This also works to close the presets listing, if that is open
@@ -398,10 +404,12 @@ class ChargerCommsManager(object):
         # self.get_preset(preset_memory_slot_index)
 
         values_list = (operation, preset_memory_slot_index, channel_number, VALUE_ORDER_UNLOCK, Order.Run)
+
         # logger.info("Sending run_op to channel {2}: op {0}, preset: {1}".format(operation, preset_memory_slot_index, channel_number))
         self.charger.modbus_write_registers(0x8000, values_list)
 
         return self.get_device_info().get_status(channel_number)
+
 
     @capture_context
     def measure_ir(self, channel_number):

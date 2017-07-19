@@ -47,7 +47,7 @@ def summary_of(all_records):
 
     i = 0
     for r in all_records:
-        LogRecord.display_live(r, i, sys.stdout)
+        print LogRecord.display_live(r, i)
         i += 1
 
 if __name__ == "__main__":
