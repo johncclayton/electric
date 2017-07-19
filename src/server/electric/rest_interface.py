@@ -167,6 +167,7 @@ class StopResource(ControlRegisterResource):
         channel_number = int(channel_id)
         # We do this twice. Once to stop. 2nd time to get past the "STOPS" screen.
         operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
+        operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response.update(connection_state_dict())
         return operation_response
 
@@ -240,7 +241,6 @@ class PresetListResource(Resource):
             preset = evil_global.comms.get_preset(memory_slot_number)
             if preset.is_used or preset.is_fixed:
                 try:
-                    print "got a single preset"
                     native = preset.to_native()
                     all_presets.append(native)
                 except Exception, e:
