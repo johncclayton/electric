@@ -2,6 +2,8 @@ import platform, sys, os
 from electric.app import application
 import signal
 
+import faulthandler, signal
+faulthandler.register(signal.SIGUSR1)
 
 def debug_signal_handler(signal, frame):
     del signal
@@ -28,7 +30,7 @@ def debug_signal_handler(signal, frame):
 
 try:
     signal.signal(
-            vars(signal).get("SIGBREAK") or vars(signal).get("SIGUSR1"),
+            vars(signal).get("SIGBREAK") or vars(signal).get("SIGUSR2"),
             debug_signal_handler
             )
 except ValueError:

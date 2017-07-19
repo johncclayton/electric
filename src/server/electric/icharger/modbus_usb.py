@@ -202,6 +202,7 @@ class USBSerialFacade:
 
         self._read_thread_exit = False
         self._read_thread = threading.Thread(name="usb reader", target=self.read_from_icharger)
+        self._read_thread.daemon = True
         self._read_thread.start()
 
         self.vendor = vendor
