@@ -141,9 +141,6 @@ class iChargerQuery(Query):
         if self.response_length > MAX_READWRITE_LEN:
             raise ModbusInvalidResponseError("Response length is greater than {0}".format(MAX_READWRITE_LEN))
 
-        if(self.response_length == 44 and self.adu_constant == 16 and (self.response_func_code == 1 or self.response_func_code == 2)):
-            print "whaaat?"
-
         if self.response_func_code == self.func_code:
             # primitive byte swap the entire thing... but only if this is the READ INPUT/HOLDING type
             if self.func_code == cst.READ_HOLDING_REGISTERS or self.func_code == cst.READ_INPUT_REGISTERS:
@@ -199,8 +196,9 @@ class USBSerialFacade:
 
         self._lock = threading.Lock()
 
-        self._last_info_packet = None
-        self._last_response_packet = None
+        self._last_info_packet_ch1 = None
+        self._last_info_packet_ch2 = None
+        self._last_response_packets = []
         self._read_timer = None
         self.reset_timer()
 
@@ -220,11 +218,11 @@ class USBSerialFacade:
         self._read_timer.cancel()
         self._read_timer = None
 
-    def reset_timer(self):
+    def reset_timer(self, timeout=0.05):
         if self._read_timer is not None:
             self._read_timer.cancel()
 
-        self._read_timer = threading.Timer(0.0500, self.read_from_icharger)
+        self._read_timer = threading.Timer(timeout, self.read_from_icharger)
         self._read_timer.start()
 
     def reset(self):
@@ -269,6 +267,7 @@ class USBSerialFacade:
     def timeout(self, new_timeout):
         pass
 
+
     @property
     def baudrate(self):
         """As this is a serial facade, we return a totally fake baudrate here"""
@@ -307,22 +306,31 @@ class USBSerialFacade:
         raise IOError("Device write failure - either not present or not claimed")
 
     def read_from_icharger(self):
-        if self._dev is not None and self.is_open:
-            int_list = None
-            try:
-                int_list = self._dev.read(MAX_READWRITE_LEN, 100)
-            except IOError:
-                pass
+        has_data = True
 
-            # is this an info packet?
-            if int_list is not None and len(int_list) > 2:
-                with self._lock:
-                    if int_list[0] == 44 and int_list[1] == 16:
-                        self._last_info_packet = int_list
-                        logging.debug("Captured INFO packet")
-                    else:
-                        self._last_response_packet = int_list
-                        logging.debug("Captured RESPONSE packet")
+        while has_data:
+            if self._dev is not None and self.is_open:
+                int_list = None
+                try:
+                    # oh look, an arbitrary timing number of 100ms
+                    int_list = self._dev.read(MAX_READWRITE_LEN, 100)
+                except IOError:
+                    logging.debug("failed to read from USB device, assuming no data yet ready")
+                    has_data = False
+
+                # is this an info packet?  does it even vaugely resemble something that we should smuggle out of here?
+                if int_list is not None and len(int_list) > 2:
+                    with self._lock:
+                        if int_list[0] == 44 and int_list[1] == 16:
+                            if int_list[2] == 1:
+                                self._last_info_packet_ch1 = int_list
+                                logging.debug("Captured INFO packet for channel 1")
+                            else:
+                                self._last_info_packet_ch2 = int_list
+                                logging.debug("Captured INFO packet for channel 2")
+                        else:
+                            self._last_response_packets.append(int_list)
+                            logging.debug("Captured RESPONSE packet")
 
         self.reset_timer()
 
@@ -331,23 +339,21 @@ class USBSerialFacade:
         if not testing_control.usb_device_present:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
-        # wait for a packet in self.last_response
-        int_list = None
         attempts = 10
-
         while attempts > 0:
             with self._lock:
-                if self._last_response_packet is not None:
-                    int_list = self._last_response_packet
-                    self._last_response_packet = None
+                int_list = None
+                if self._last_response_packets is not None and len(self._last_response_packets) > 0:
+                    int_list = self._last_response_packets.pop()
 
-            if int_list is not None:
-                result = array.array('B', int_list[:expected_length]).tostring()
-                self._capture.log_read(MAX_READWRITE_LEN, 0, expected_length, array.array('B', int_list).tostring())
-                return result
+                if int_list is not None:
+                    result = array.array('B', int_list[:expected_length]).tostring()
+                    self._capture.log_read(MAX_READWRITE_LEN, 0, expected_length, array.array('B', int_list).tostring())
+                    return result
 
             attempts -= 1
 
+            # hey, look at this also completely arbitrary timing number...
             time.sleep(0.150)
 
         raise IOError("unable to read response packet from USB device within 1.5 seconds")
