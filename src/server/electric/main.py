@@ -1,5 +1,39 @@
 import platform, sys, os
 from electric.app import application
+import signal
+
+
+def debug_signal_handler(signal, frame):
+    del signal
+    del frame
+
+    try:
+        import rpdb2
+        print
+        print
+        print "Starting embedded RPDB2 debugger. Password is 'foobar'"
+        print
+        print
+        rpdb2.start_embedded_debugger("foobar", True, True)
+        rpdb2.setbreak(depth=1)
+        return
+    except StandardError:
+        pass
+
+    try:
+        import code
+        code.interact()
+    except StandardError as ex:
+        print "%r, returning to normal program flow" % ex
+
+try:
+    signal.signal(
+            vars(signal).get("SIGBREAK") or vars(signal).get("SIGUSR1"),
+            debug_signal_handler
+            )
+except ValueError:
+    # Typically: ValueError: signal only works in main thread
+    pass
 
 def run_server():
     opts = {
