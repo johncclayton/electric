@@ -13,9 +13,7 @@ import inspect
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
-# TODO: make configurable?  For now I'm making this 1, so that retries do not influence binary logging/capture.
-#RETRY_LIMIT = 30
-RETRY_LIMIT = 1
+RETRY_LIMIT = 30
 
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
@@ -168,6 +166,7 @@ class StopResource(ControlRegisterResource):
     def put(self, channel_id):
         channel_number = int(channel_id)
         # We do this twice. Once to stop. 2nd time to get past the "STOPS" screen.
+        operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response.update(connection_state_dict())
         return operation_response

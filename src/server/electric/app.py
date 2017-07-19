@@ -21,12 +21,20 @@ cors_app = CORS(application)
 
 debug_mode = os.environ.get("DEBUG_MODE", None)
 if not debug_mode:
+    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
     handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(format)
     handler.setFormatter(formatter)
     application.logger.addHandler(handler)
-    application.logger.setLevel(logging.INFO)
+
+    # logging.basicConfig(format=format)
+    # logger = logging.getLogger()
+    # logger.setLevel(logging.DEBUG)
+
+    application.logger.setLevel(logging.DEBUG)
     application.logger.info("The charger LIVES!")
+
 
 api = Api(application)
 api.add_resource(StatusResource, "/status")

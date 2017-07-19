@@ -158,10 +158,10 @@ class iChargerQuery(Query):
                     "Response contains error code {0}: {1}".format(self.modbus_error,
                                                                    self._modbus_error_string(self.modbus_error))
                 )
-            else:
-                # skip len/adu const - returning everything else - this avoids bitching about invalid reads, but
-                # of course does not solve the root problem.
-                response = response[2:]
+            # else:
+            #     # skip len/adu const - returning everything else - this avoids bitching about invalid reads, but
+            #     # of course does not solve the root problem.
+            #     response = response[2:]
 
             self.modbus_error = 0
 
@@ -195,12 +195,14 @@ class USBSerialFacade:
         self._capture = capture
 
         self._lock = threading.Lock()
-
+        self._condition = threading.Condition(self._lock)
         self._last_info_packet_ch1 = None
         self._last_info_packet_ch2 = None
         self._last_response_packets = []
-        self._read_timer = None
-        self.reset_timer()
+
+        self._read_thread_exit = False
+        self._read_thread = threading.Thread(name="usb reader", target=self.read_from_icharger)
+        self._read_thread.start()
 
         self.vendor = vendor
         self.product = prod
@@ -210,20 +212,12 @@ class USBSerialFacade:
             if not testing_control.usb_device_present:
                 raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
         except IOError:
-            logging.error("The USB device could not be opened")
+            logger.error("The USB device could not be opened")
             raise
 
     def __del__(self):
-        # super(self, USBSerialFacade).__del__()
-        self._read_timer.cancel()
-        self._read_timer = None
-
-    def reset_timer(self, timeout=0.05):
-        if self._read_timer is not None:
-            self._read_timer.cancel()
-
-        self._read_timer = threading.Timer(timeout, self.read_from_icharger)
-        self._read_timer.start()
+        self._read_thread_exit = True
+        self._read_thread.join()
 
     def reset(self):
         if self._dev is not None:
@@ -300,63 +294,69 @@ class USBSerialFacade:
                 self._capture.log_write(''.join(content), result)
                 return result
             except Exception, e:
-                logging.info("exception on device write, %s", e)
+                logger.info("exception on device write, %s", e)
                 raise
 
         raise IOError("Device write failure - either not present or not claimed")
 
     def read_from_icharger(self):
-        has_data = True
+        while not self._read_thread_exit:
+            has_data = False
 
-        while has_data:
             if self._dev is not None and self.is_open:
                 int_list = None
+
                 try:
-                    # oh look, an arbitrary timing number of 100ms
-                    int_list = self._dev.read(MAX_READWRITE_LEN, 100)
-                except IOError:
-                    logging.debug("failed to read from USB device, assuming no data yet ready")
-                    has_data = False
+                    int_list = self._dev.read(MAX_READWRITE_LEN, 1000)
+                    if len(int_list) == 64:
+                        has_data = True
+                except IOError, e:
+                    pass
 
                 # is this an info packet?  does it even vaugely resemble something that we should smuggle out of here?
-                if int_list is not None and len(int_list) > 2:
-                    with self._lock:
+                if has_data:
+                    with self._condition:
                         if int_list[0] == 44 and int_list[1] == 16:
                             if int_list[2] == 1:
                                 self._last_info_packet_ch1 = int_list
-                                logging.debug("Captured INFO packet for channel 1")
+                                logger.debug("Captured INFO packet for channel 1")
                             else:
                                 self._last_info_packet_ch2 = int_list
-                                logging.debug("Captured INFO packet for channel 2")
+                                logger.debug("Captured INFO packet for channel 2")
                         else:
                             self._last_response_packets.append(int_list)
-                            logging.debug("Captured RESPONSE packet")
+                            logger.debug("Captured RESPONSE")
 
-        self.reset_timer()
+                        self._condition.notify_all()
+            else:
+                # not open, wait a bit...
+                time.sleep(0.1)
 
 
     def read(self, expected_length):
         if not testing_control.usb_device_present:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
-        attempts = 10
+        TOTAL_ATTEMPTS = 10
+        attempts = TOTAL_ATTEMPTS
+
         while attempts > 0:
-            with self._lock:
+            with self._condition:
+                if len(self._last_response_packets) == 0:
+                    self._condition.wait()
+
                 int_list = None
-                if self._last_response_packets is not None and len(self._last_response_packets) > 0:
+                if len(self._last_response_packets) > 0:
                     int_list = self._last_response_packets.pop()
 
-                if int_list is not None:
-                    result = array.array('B', int_list[:expected_length]).tostring()
-                    self._capture.log_read(MAX_READWRITE_LEN, 0, expected_length, array.array('B', int_list).tostring())
-                    return result
+            if int_list is not None:
+                result = array.array('B', int_list[:expected_length]).tostring()
+                self._capture.log_read(MAX_READWRITE_LEN, 0, expected_length, array.array('B', int_list).tostring())
+                return result
 
             attempts -= 1
 
-            # hey, look at this also completely arbitrary timing number...
-            time.sleep(0.150)
-
-        raise IOError("unable to read response packet from USB device within 1.5 seconds")
+        raise IOError("unable to read response packet from USB device - already tried {0} times".format(TOTAL_ATTEMPTS))
 
 class iChargerMaster(RtuMaster):
     """
