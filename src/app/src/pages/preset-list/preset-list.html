@@ -19,7 +19,7 @@
     <ion-spinner *ngIf="firstLoad"></ion-spinner>
 
     <ion-list>
-        <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
+        <ion-item *ngFor="let preset of presets" (tap)="editPreset(preset)">
             <div class="item-left">{{preset.index}}:{{preset.name}}</div>
             <!--<div class="item-left">{{preset.name}}</div>-->
             <div item-right>
