@@ -1,15 +1,14 @@
-import logging, os, traceback, sys
+import logging
+import sys
 
 from flask import request
 from flask_restful import Resource, abort
 from werkzeug.exceptions import BadRequest
 
 import electric.evil_global as evil_global
-from electric.icharger.modbus_usb import connection_state_dict
-from electric.icharger.comms_layer import Operation
-from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException, PresetIndex
-from electric.icharger.capture import Capture
-import inspect
+from worker.comms_layer import Operation
+from electric.models import ObjectNotFoundException, SystemStorage, Preset, PresetIndex
+from worker.modbus_usb import connection_state_dict
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -36,9 +35,6 @@ def exclusive(func):
                 except Exception, ex:
                     retry += 1
 
-                    exc_type, exc_value, exc_traceback = sys.exc_info()
-                    traceback.print_tb(exc_traceback)
-
                     logger.warning("{0}/{3}, will try {4} again (count is at {1}/{2})".format(ex,
                                                                                               retry,
                                                                                               RETRY_LIMIT,
@@ -46,11 +42,6 @@ def exclusive(func):
                                                                                               str(self) + "." + str(func)))
 
                     # If the charger isn't plugged in. This could fail.
-                    try:
-                        evil_global.comms.reset()
-                    except Exception, ex:
-                        logger.error("Error resetting comms! Charger not plugged in? {0}".format(ex))
-
                     if retry >= RETRY_LIMIT:
                         logger.warning("retry limit exceeded, aborting the call to {0} completely".format(str(func)))
                         return connection_state_dict(ex), 504
@@ -176,7 +167,6 @@ class SystemStorageResource(Resource):
     @exclusive
     def get(self):
         syst = evil_global.comms.get_system_storage()
-
         obj = syst.to_primitive()
         obj.update(connection_state_dict())
 
@@ -266,8 +256,3 @@ class PresetOrderResource(Resource):
         return evil_global.comms.save_full_preset_list(preset_list)
 
 
-
-class LoggingCommandResource(Resource):
-    @exclusive
-    def put(self):
-        return evil_global.capture.write_logs()

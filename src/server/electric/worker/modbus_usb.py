@@ -8,7 +8,7 @@ from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidRespons
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
 
-logger = logging.getLogger('electric.app.{0}'.format(__name__))
+logger = logging.getLogger('electric.worker.{0}'.format(__name__))
 
 MEMORY_MAX = 64
 MODBUS_HID_FRAME_TYPE = 0x30
@@ -178,24 +178,24 @@ class iChargerQuery(Query):
         return "Unknown Code"
 
 
-class USBSerialFacade:
+class USBThreadedReader:
     """
     Implements facade such that the ModBus Master thinks it is using a serial
     device when talking to the iCharger via USB-HID.
 
-    USBSerialFacade sets the active USB configuration and claims the interface,
+    USBThreadedReader sets the active USB configuration and claims the interface,
     take note - this must be released when the instance is cleaned up / destroyed.  If
     the USB device cannot be found the facade does nothing.  If the kernel driver cannot
-    be detached that's more of a problem and right now the USBSerialFacade throws a big fat
+    be detached that's more of a problem and right now the USBThreadedReader throws a big fat
     exception from __init__.
     """
-    def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID, capture=None):
+    def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID):
         self._dev = None
         self._opened = False
-        self._capture = capture
 
         self._lock = threading.Lock()
         self._condition = threading.Condition(self._lock)
+
         self._last_info_packet_ch1 = None
         self._last_info_packet_ch2 = None
         self._last_response_packets = []
@@ -203,7 +203,6 @@ class USBSerialFacade:
         self._read_thread_exit = False
         self._read_thread = threading.Thread(name="usb reader", target=self.read_from_icharger)
         self._read_thread.daemon = True
-        self._read_thread.start()
 
         self.vendor = vendor
         self.product = prod
@@ -212,13 +211,17 @@ class USBSerialFacade:
             self._dev = hid.device()
             if not testing_control.usb_device_present:
                 raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
+
+            self._read_thread.start()
         except IOError:
             logger.error("The USB device could not be opened")
             raise
 
     def __del__(self):
+        logger.info("USBThreadedReader - requesting shutdown, joining to reader thread")
         self._read_thread_exit = True
         self._read_thread.join()
+        logger.info("USBThreadedReader - shutdown complete")
 
     def reset(self):
         if self._dev is not None:
@@ -262,7 +265,6 @@ class USBSerialFacade:
     def timeout(self, new_timeout):
         pass
 
-
     @property
     def baudrate(self):
         """As this is a serial facade, we return a totally fake baudrate here"""
@@ -290,10 +292,7 @@ class USBSerialFacade:
             content = list(data + payload + ("\0" * pad_len))
 
             try:
-                to_write = [ord(i) for i in content]
-                result = self._dev.write(to_write)
-                self._capture.log_write(''.join(content), result)
-                return result
+                return self._dev.write([ord(i) for i in content])
             except Exception, e:
                 logger.info("exception on device write, %s", e)
                 raise
@@ -301,38 +300,45 @@ class USBSerialFacade:
         raise IOError("Device write failure - either not present or not claimed")
 
     def read_from_icharger(self):
+        logger.info("USB reading thread has started")
+
         while not self._read_thread_exit:
-            has_data = False
+            try:
+                has_data = False
 
-            if self._dev is not None and self.is_open:
-                int_list = None
+                if self._dev is not None and self.is_open:
+                    int_list = None
 
-                try:
-                    int_list = self._dev.read(MAX_READWRITE_LEN, 1000)
-                    if len(int_list) == 64:
-                        has_data = True
-                except IOError, e:
-                    pass
+                    try:
+                        int_list = self._dev.read(MAX_READWRITE_LEN, 1000)
+                        if len(int_list) == 64:
+                            has_data = True
+                    except IOError:
+                        pass
 
-                # is this an info packet?  does it even vaugely resemble something that we should smuggle out of here?
-                if has_data:
-                    with self._condition:
-                        if int_list[0] == 44 and int_list[1] == 16:
-                            if int_list[2] == 1:
-                                self._last_info_packet_ch1 = int_list
-                                logger.debug("Captured INFO packet for channel 1")
+                    # is this an info packet?  does it even vaugely resemble something that
+                    # we should smuggle out of here?
+                    if has_data:
+                        with self._condition:
+                            if int_list[0] == 44 and int_list[1] == 16:
+                                if int_list[2] == 1:
+                                    self._last_info_packet_ch1 = int_list
+                                    logger.debug("Captured INFO packet for channel 1")
+                                else:
+                                    self._last_info_packet_ch2 = int_list
+                                    logger.debug("Captured INFO packet for channel 2")
                             else:
-                                self._last_info_packet_ch2 = int_list
-                                logger.debug("Captured INFO packet for channel 2")
-                        else:
-                            self._last_response_packets.append(int_list)
-                            logger.debug("Captured RESPONSE")
+                                self._last_response_packets.append(int_list)
+                                logger.debug("Captured RESPONSE")
 
-                        self._condition.notify_all()
-            else:
-                # not open, wait a bit...
-                time.sleep(0.1)
+                            self._condition.notify_all()
+                else:
+                    # not open, wait a bit...
+                    time.sleep(0.1)
+            except Exception, e:
+                logger.warn("the read_from_icharger thread experienced an exception: %s", str(e))
 
+        logger.info("USB reading thread has stopped, _read_thread_exit value is: {0}".format(self._read_thread_exit))
 
     def read(self, expected_length):
         if not testing_control.usb_device_present:
@@ -351,23 +357,21 @@ class USBSerialFacade:
                     int_list = self._last_response_packets.pop()
 
             if int_list is not None:
-                result = array.array('B', int_list[:expected_length]).tostring()
-                self._capture.log_read(MAX_READWRITE_LEN, 0, expected_length, array.array('B', int_list).tostring())
-                return result
+                return array.array('B', int_list[:expected_length]).tostring()
 
             attempts -= 1
 
         raise IOError("unable to read response packet from USB device - already tried {0} times".format(TOTAL_ATTEMPTS))
+
 
 class iChargerMaster(RtuMaster):
     """
     Modbus master interface to the iCharger, implements higher level routines to get the
     status / channel information from the device.
     """
-    def __init__(self, serial=None, capture=None):
+    def __init__(self, serial=None):
         if serial is None:
-            serial = USBSerialFacade(capture=capture)
-        self.capture = capture
+            serial = USBThreadedReader()
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):

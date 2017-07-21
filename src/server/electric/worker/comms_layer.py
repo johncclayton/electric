@@ -1,10 +1,10 @@
-import logging, inspect
-
+import logging
 import modbus_tk.defines as cst
 
-from electric.icharger.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException, BadRequestException, ChemistryType
+from electric.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException, \
+    BadRequestException, ChemistryType
+from electric.models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 from modbus_usb import iChargerMaster
-from models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 
 CHANNEL_INPUT_HEADER_OFFSET = 0
 CHANNEL_INPUT_FOOTER_OFFSET = 51
@@ -20,7 +20,7 @@ SYSTEM_STORAGE_OFFSET_CHARGER_POWER = 34
 
 IR_MEASUREMENT_PRESET_NAME = "IR Measurement"
 
-logger = logging.getLogger('electric.app.{0}'.format(__name__))
+logger = logging.getLogger('electric.worker.{0}'.format(__name__))
 
 VALUE_ORDER_UNLOCK = 0x55aa
 VALUE_ORDER_LOCK = 0x1234 # any other value(s)
@@ -48,21 +48,6 @@ class Order:
     MsgBoxNo = 9
 
 
-def capture_context(f):
-    def real_decorator(self, *args, **kwargs):
-        try:
-            curframe = inspect.currentframe()
-            calframe = inspect.getouterframes(curframe, 2)
-
-            self.charger.capture.push_operation(calframe[1][3] + " / " + f.func_name + ", args:" + str(args) + ", kwargs:" + str(kwargs))
-
-            result = f(self, *args, **kwargs)
-            return result
-        finally:
-            self.charger.capture.pop_operation()
-    return real_decorator
-
-
 class ChargerCommsManager(object):
     """
     The comms manager is responsible for data translation between the MODBUS types and the world outside.  It uses an
@@ -73,9 +58,9 @@ class ChargerCommsManager(object):
     """
     locking = False
 
-    def __init__(self, capture, master=None):
+    def __init__(self, master=None):
         if master is None:
-            master = iChargerMaster(None, capture)
+            master = iChargerMaster(None)
 
         self.charger = master
 
@@ -90,7 +75,6 @@ class ChargerCommsManager(object):
         vars = ReadDataSegment(self.charger, "vars", "h12sHHHHHH", base=0x0000)
         return DeviceInfo(vars.data)
 
-    @capture_context
     def get_channel_status(self, channel, device_id=None):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
@@ -124,7 +108,6 @@ class ChargerCommsManager(object):
 
         return ChannelStatus.modbus(device_id, channel, header_data, cell_volt, cell_balance, cell_ir, footer)
 
-    @capture_context
     def get_control_register(self):
         "Returns the current run state of a particular channel"
         return Control(self.charger.modbus_read_registers(0x8000, "7H", function_code=cst.READ_HOLDING_REGISTERS))
@@ -136,7 +119,6 @@ class ChargerCommsManager(object):
             "type": type
         }
 
-    @capture_context
     def set_beep_properties(self, beep_index=0, enabled=True, volume=5):
         # for now we only access beep type values
         base = 0x8400
@@ -150,14 +132,12 @@ class ChargerCommsManager(object):
 
         return self.charger.modbus_write_registers(base + 13, value_enabled + value_volume)
 
-    @capture_context
     def set_active_channel(self, channel):
         base = 0x8000 + 2
         if channel not in (0, 1):
             return None
         return self.charger.modbus_write_registers(base, (channel,))
 
-    @capture_context
     def get_system_storage(self):
         """Returns the system storage area of the iCharger"""
         # temp-unit -> beep-vol
@@ -169,7 +149,6 @@ class ChargerCommsManager(object):
 
         return SystemStorage.modbus(ds1, ds2, ds3)
 
-    @capture_context
     def save_system_storage(self, system_storage_object):
         (s1, s2, s3, s4, s5, s6) = system_storage_object.to_modbus_data()
 
@@ -187,12 +166,10 @@ class ChargerCommsManager(object):
 
         return True
 
-    @capture_context
     def select_memory_program(self, memory_slot, channel_number=0):
         (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number, VALUE_ORDER_UNLOCK))
         return word_count
 
-    @capture_context
     def save_full_preset_list(self, preset_list):
         (v1, v2) = preset_list.to_modbus_data()
 
@@ -206,7 +183,6 @@ class ChargerCommsManager(object):
 
         return True
 
-    @capture_context
     def find_preset_with_name(self, named):
         for preset in self.get_all_presets():
             preset_name = preset.name
@@ -216,7 +192,6 @@ class ChargerCommsManager(object):
                 return preset
         return None
 
-    @capture_context
     def get_all_presets(self):
         preset_list = self.get_full_preset_list()
         # TODO: Error handling
@@ -231,7 +206,6 @@ class ChargerCommsManager(object):
 
         return all_presets
 
-    @capture_context
     def get_full_preset_list(self):
         (count,) = self.charger.modbus_read_registers(0x8800, "H", function_code=cst.READ_HOLDING_REGISTERS)
 
@@ -244,7 +218,6 @@ class ChargerCommsManager(object):
 
         return PresetIndex.modbus(count, list_of_all_indexes)
 
-    @capture_context
     def get_preset(self, memory_slot_number):
         # First, load the indicies and see if in fact this is mapped. If not, don't bother even trying
         preset_index = self.get_full_preset_list()
@@ -273,7 +246,6 @@ class ChargerCommsManager(object):
 
         return preset
 
-    @capture_context
     def delete_preset_at_index(self, preset_memory_slot_number):
         # Find this thing, within the index
         preset_index = self.get_full_preset_list()
@@ -311,7 +283,6 @@ class ChargerCommsManager(object):
     inserted at the end of the preset index list.
     '''
 
-    @capture_context
     def add_new_preset(self, preset):
         # Find the next free memory slot, assign that to the preset, and save both indexes + preset
         preset_index = self.get_full_preset_list()
@@ -340,7 +311,6 @@ class ChargerCommsManager(object):
     It does NOT allocate new presets, or insert them into a preset index list
     '''
 
-    @capture_context
     def save_preset_to_memory_slot(self, preset, memory_slot, write_to_flash=True, verify_write=True):
         # We don't want to verify if we're adding. In that case we KNOW we want to add it here.
         # and we want to ignore any older data that may be in that slot.
@@ -369,12 +339,10 @@ class ChargerCommsManager(object):
 
         return True
 
-    @capture_context
     def close_messagebox(self, channel_id):
         # no-op
-        return
+        pass
 
-    @capture_context
     def stop_operation(self, channel_number):
         channel_number = min(1, max(0, channel_number))
         values_list = (channel_number, VALUE_ORDER_UNLOCK, Order.Stop)
@@ -391,7 +359,6 @@ class ChargerCommsManager(object):
 
         return OperationResponse(modbus_response)
 
-    @capture_context
     def run_operation(self, operation, channel_number, preset_memory_slot_index=0):
         if operation == Operation.MeasureIR:
             return self.measure_ir(channel_number)
@@ -411,7 +378,6 @@ class ChargerCommsManager(object):
         return self.get_device_info().get_status(channel_number)
 
 
-    @capture_context
     def measure_ir(self, channel_number):
         channel_number = min(1, max(0, channel_number))
 

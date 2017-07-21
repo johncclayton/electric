@@ -1,15 +1,14 @@
 import struct
-import time
 import unittest
 
 import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
 import electric.evil_global as evil_global
-from electric.icharger.modbus_usb import TestingControlException
-from electric.icharger.modbus_usb import USBSerialFacade, iChargerQuery, MODBUS_HID_FRAME_TYPE
-from electric.icharger.modbus_usb import testing_control
 from electric.icharger.models import Control
+from worker.modbus_usb import TestingControlException
+from worker.modbus_usb import USBThreadedReader, iChargerQuery, MODBUS_HID_FRAME_TYPE
+from worker.modbus_usb import testing_control
 
 
 class TestChargerQuery(unittest.TestCase):
@@ -92,7 +91,7 @@ class TestSerialFacade(unittest.TestCase):
 
     def test_bad_vendor_product_combo(self):
         with self.assertRaises(IOError):
-            s = USBSerialFacade(0x9999, 0x9999)
+            s = USBThreadedReader(0x9999, 0x9999)
             s.open()
 
     def test_opening_claims_usb_interface(self):

@@ -2,7 +2,7 @@ import json
 import unittest
 
 from electric.app import application
-from electric.icharger.modbus_usb import testing_control
+from worker.modbus_usb import testing_control
 
 
 class TestRestfulAPI(unittest.TestCase):
