@@ -7,15 +7,16 @@ RUN apk update \
     && pip install --upgrade setuptools \
     && pip install --upgrade pip \
     && pip install hidapi \
-    && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
-
-RUN apk add gcc
+    && apk del libusb-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
 VOLUME /www
 WORKDIR /www
 
 COPY ./src/server/ /www
-RUN pip install -r requirements.txt && rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
+RUN apk add gcc g++ python-dev \
+    && pip install -r requirements.txt \
+    && rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
+    && apk del gcc g++ python-dev --purge
 
 EXPOSE 5000
 
