@@ -14,17 +14,20 @@ const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
+    iCharger406Duo = 67, // ??? probably not. We need to get the model number.
     iCharger308Duo = 66
 }
 
 export let ChargerMetadata = {};
-ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO'};
-ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO'};
+ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells' : 8};
+ChargerMetadata[ChargerType.iCharger406Duo] = {'maxAmps': 40, 'name': 'iCharger 406', 'tag': 'DUO', 'cells' : 6};
+ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO', 'cells' : 10};
 
 @Injectable()
 export class iChargerService {
     chargerStatus: {} = {};
     channelSnapshots: any[] = [];
+    autoStopSubscriptions: any[] = [];
     numberOfChannels: number = 0;
 
     private channelStateObservable;
@@ -156,9 +159,17 @@ export class iChargerService {
 
                     // Maybe reduce the channels, as long as they are 0 volt.
                     let cellLimit = this.config.getCellLimit();
-                    let channel = new Channel(i, jsonResponse, cellLimit);
-                    this.channelSnapshots[i] = channel;
-                    return channel;
+
+                    // Create a new channel if required. Or reuse an existing.
+                    if(i in this.channelSnapshots) {
+                        // existing channel
+                        let channel:Channel = this.channelSnapshots[i];
+                        channel.updateStateFrom(jsonResponse, cellLimit);
+                    } else {
+                        this.channelSnapshots[i] = new Channel(i, jsonResponse, cellLimit);
+                    }
+
+                    return this.channelSnapshots[i];
                 })
                 .retry()
                 .share()
@@ -229,6 +240,23 @@ export class iChargerService {
         return new Channel(channelNumber, channelData, this.config.getCellLimit());
     }
 
+    stopCurrentTask(channel: Channel): Observable<any> {
+        this.cancelAutoStopForChannel(channel);
+        return Observable.create((observable) => {
+            console.log("Stopping current task...");
+            let url = this.getChargerURL("/stop/" + channel.index);
+
+            this.http.put(url, "").subscribe((resp) => {
+                if (resp.ok) {
+                    // Maaay need to do this again, to get past the 'STOPS' state.
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
     savePreset(preset: Preset): Observable<any> {
         // An existing preset? in a memory slot?
         return Observable.create((observable) => {
@@ -237,8 +265,8 @@ export class iChargerService {
             let body = preset.json();
             console.log("Saving Preset: ", body);
 
-            let headers = new Headers({ 'Content-Type': 'application/json' });
-            let options = new RequestOptions({ headers: headers });
+            let headers = new Headers({'Content-Type': 'application/json'});
+            let options = new RequestOptions({headers: headers});
 
             this.http.put(putURL, body, options).subscribe((resp) => {
                 // Expect a copy of the modified preset?
@@ -264,6 +292,108 @@ export class iChargerService {
                 observable.error(error);
             });
 
+        });
+    }
+
+    startCharge(channel: Channel, preset: Preset): Observable<any> {
+        this.autoStopOnRunStatus([40], channel);
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/charge/" + channel.index + "/" + preset.index);
+            console.log("Beginning charge on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, null).subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    startDischarge(channel: Channel, preset: Preset): Observable<any> {
+        this.autoStopOnRunStatus([40], channel);
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/discharge/" + channel.index + "/" + preset.index);
+            console.log("Beginning discharge on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, null).subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    startStore(channel: Channel, preset: Preset) {
+        this.autoStopOnRunStatus([40], channel);
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/store/" + channel.index + "/" + preset.index);
+            console.log("Beginning storage on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, "").subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    startBalance(channel: Channel, preset: Preset) {
+        this.autoStopOnRunStatus([40], channel);
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/balance/" + channel.index + "/" + preset.index);
+            console.log("Beginning balance on channel ", channel.index, " using preset at slot ", preset.index);
+            this.http.put(operationURL, "").subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    measureIR(channel: Channel) {
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/measureir/" + channel.index);
+            console.log("Beginning IR measurement on channel ", channel.index);
+            this.http.put(operationURL, "").subscribe((resp) => {
+                if (resp.ok) {
+                    observable.complete();
+                } else {
+                    observable.error(resp);
+                }
+            });
+        });
+    }
+
+    cancelAutoStopForChannel(channel: Channel) {
+        if (this.autoStopSubscriptions[channel.index]) {
+            console.log("Cancelled auto-stop subscription for channel ", channel.index);
+            this.autoStopSubscriptions[channel.index].unsubscribe();
+            this.autoStopSubscriptions[channel.index] = null;
+        }
+    }
+
+    autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
+        this.cancelAutoStopForChannel(channel);
+
+        this.autoStopSubscriptions[channel.index] = this.channelStateObservable[channel.index].takeWhile((channel) => {
+            console.log("Channel ", channel.index, ", state: ", channel.runState);
+            return !states_to_stop_on.some((state) => {
+                return channel.runState == state;
+            });
+        }).subscribe((value) => {
+        }, (error) => {
+            console.log("Error while waiting for the channel to change state");
+            this.cancelAutoStopForChannel(channel);
+        }, () => {
+
+            console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
+            this.stopCurrentTask(channel).subscribe();
+            this.cancelAutoStopForChannel(channel);
         });
     }
 }

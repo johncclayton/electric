@@ -17,13 +17,26 @@ import {applyMixins} from "rxjs/util/applyMixins";
 export class ChargeOptionsPage implements Chemistry {
     channel: Channel;
     channelLimitReached: boolean = false;
+    title: string = "Charge";
+    showCapacityAndC: boolean = true;
+    charging: boolean = true;
     presets: Array<any> = [];
+    private callback: any;
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public config: Configuration,
                 public navParams: NavParams) {
-        this.channel = navParams.data;
+        this.channel = navParams.data['channel'];
+        this.showCapacityAndC = navParams.data['showCapacityAndC'];
+        this.charging = navParams.data['charging'];
+        this.title = navParams.data['title'];
+        this.callback = navParams.data['callback'];
+
+        if(!this.showCapacityAndC) {
+            // Force to presets (not computed)
+            this.chargeMethod = "presets";
+        }
     }
 
     ionViewDidLoad() {
@@ -31,6 +44,12 @@ export class ChargeOptionsPage implements Chemistry {
             this.presets = presetList;
         });
         this.recomputeLimitReached();
+    }
+
+    chargeUsingPreset(preset: Preset) {
+        this.navCtrl.pop().then(() => {
+            this.callback(preset);
+        })
     }
 
     get chargeMethod(): string {
@@ -84,6 +103,7 @@ export class ChargeOptionsPage implements Chemistry {
     get computedAmps() {
         return this.numPacks * (this.capacity / 1000) * this.chargeRate;
     }
+
     get amps() {
         return Math.min(this.computedAmps, this.chargerService.getMaxAmpsPerChannel());
     }

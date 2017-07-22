@@ -10,20 +10,17 @@
         <ion-col class="value" text-center>
             {{channelObject?.curr_out_capacity}}<br/>
         </ion-col>
-        <ion-col class="image" width-10>
-            <ion-icon name="time"></ion-icon>
+        <ion-col class="value" width-20 text-nowrap
+                 [ngClass]="{'warning':tempAtWarningLevel(), 'emergency':tempAtEmergencyLevel()}">
+                 {{channelObject?.charger_internal_temp }}°C
         </ion-col>
-        <ion-col class="value" width-20 text-nowrap>{{channelObject?.timestamp|duration}}</ion-col>
     </ion-row>
 
     <ion-row>
         <ion-col class="label" text-center>DC V</ion-col>
         <ion-col class="label" text-center>Amps</ion-col>
         <ion-col class="label" text-center>mAh</ion-col>
-        <ion-col class="image" width-10>
-            <ion-icon name="thermometer"></ion-icon>
-        </ion-col>
-        <ion-col class="value" width-20 text-nowrap>{{channelObject?.curr_int_temp}}°C<br/></ion-col>
+        <ion-col class="label" text-center>Temp</ion-col>
     </ion-row>
 
 </ion-grid>

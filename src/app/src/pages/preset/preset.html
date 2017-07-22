@@ -54,7 +54,7 @@
 
     <ion-list>
         <ion-list-header color="light">Task Options</ion-list-header>
-        <ion-item detail-push *ngFor="let page of optionPagesForCurrentType()" (click)="switchTo(page.component)">{{page.title}}
+        <ion-item detail-push *ngFor="let page of optionPagesForCurrentType()" (tap)="switchTo(page.component)">{{page.title}}
         </ion-item>
     </ion-list>
 

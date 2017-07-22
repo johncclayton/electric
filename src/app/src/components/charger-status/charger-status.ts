@@ -30,4 +30,17 @@ export class ChargerStatusComponent {
         }
     }
 
+    tempAtWarningLevel(): boolean {
+        if (this.channelObject != null) {
+            return this.channelObject.charger_internal_temp >= 48.0;
+        }
+        return false;
+    }
+
+    tempAtEmergencyLevel(): boolean {
+        if (this.channelObject != null) {
+            return this.channelObject.charger_internal_temp >= 50.0;
+        }
+        return false;
+    }
 }

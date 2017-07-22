@@ -2,7 +2,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
 import {APP_INITIALIZER, ErrorHandler, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
-import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
+import {IonicErrorHandler, IonicModule, IonicApp} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
 import {DurationPipe, KeysPipe, ReversePipe} from "../utils/pipes";
@@ -25,66 +25,81 @@ import {ChannelIRComponent} from "../components/channel-volts/channel-ir";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 
-function configServiceFactory(config: Configuration) {
-  return () => config.loadConfiguration();
+export function configServiceFactory(config: Configuration) {
+    return () => config.loadConfiguration();
 }
 
+import {CloudSettings, CloudModule} from '@ionic/cloud-angular';
+import {ContactPage} from "../pages/contact/contact";
+import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
+import {TabsPage} from "../pages/tabs/tabs";
+
+const cloudSettings: CloudSettings = {
+    'core': {
+        'app_id': 'f944cad8'
+    }
+};
+
 @NgModule({
-  declarations: [
-    MyApp,
-    ConfigPage,
-    HomePage,
-    KeysPipe, ReversePipe, DurationPipe,
-    DynamicDisable,
-    ChannelComponent,
-    ChannelVoltsComponent,
-    ChannelIRComponent,
-    ConnectionStateComponent,
-    PresetListPage,
-    PresetPage,
-    PresetChargePage,
-    PresetStoragePage,
-    PresetDischargePage,
-    PresetCyclePage,
-    ChargeOptionsPage,
-    ChargerStatusComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpModule,
-    IonicModule.forRoot(MyApp),
-    IonicStorageModule.forRoot()
-  ],
-  bootstrap: [IonicApp],
-  entryComponents: [
-    MyApp,
-    HomePage,
-    ConfigPage,
-    PresetListPage,
-    PresetPage,
-    PresetChargePage,
-    PresetStoragePage,
-    PresetDischargePage,
-    PresetCyclePage,
-    ChargeOptionsPage,
-    ChannelComponent,
-    ChannelVoltsComponent,
-    ChannelIRComponent,
-    ConnectionStateComponent
-  ],
-  providers: [
-    Configuration,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: configServiceFactory,
-      deps: [Configuration],
-      multi: true
-    },
-    StatusBar,
-    SplashScreen,
-    {provide: iChargerService, useClass: iChargerService},
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
-  ]
+    declarations: [
+        MyApp,
+        ContactPage,
+        ConfigPage,
+        HomePage,
+        KeysPipe, ReversePipe, DurationPipe,
+        DynamicDisable,
+        ChannelComponent,
+        ChannelVoltsComponent,
+        ChannelIRComponent,
+        ConnectionStateComponent,
+        PresetListPage,
+        PresetPage,
+        PresetChargePage,
+        PresetStoragePage,
+        PresetDischargePage,
+        PresetBalancePage,
+        TabsPage,
+        PresetCyclePage,
+        ChargeOptionsPage,
+        ChargerStatusComponent
+    ],
+    imports: [
+        BrowserModule,
+        HttpModule,
+        IonicModule.forRoot(MyApp),
+        CloudModule.forRoot(cloudSettings),
+        IonicStorageModule.forRoot()
+    ],
+    bootstrap: [IonicApp],
+    entryComponents: [
+        MyApp,
+        HomePage,
+        ConfigPage,
+        PresetListPage,
+        PresetPage,
+        PresetChargePage,
+        PresetStoragePage,
+        PresetDischargePage,
+        PresetCyclePage,
+        ChargeOptionsPage,
+        ChannelComponent,
+        ChannelVoltsComponent,
+        ChannelIRComponent,
+        ConnectionStateComponent
+    ],
+    providers: [
+        Configuration,
+        {
+            provide: APP_INITIALIZER,
+            useFactory: configServiceFactory,
+            deps: [Configuration],
+            multi: true
+        },
+        StatusBar,
+        SplashScreen,
+        {provide: iChargerService, useClass: iChargerService},
+        {provide: ErrorHandler, useClass: IonicErrorHandler}
+    ]
 })
 export class AppModule {
 }

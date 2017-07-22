@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, ToastController, Platform} from "ionic-angular";
+import {NavController, ToastController} from "ionic-angular";
 import {Subscription, Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
@@ -15,12 +15,11 @@ export class HomePage {
     private chargerStatusSubscription: Subscription;
 
 
-    constructor(public navCtrl: NavController,
-                public toastController: ToastController,
-                public chargerService: iChargerService,
-                public config: Configuration,
-                public platform: Platform,
-                public http: Http) {
+    constructor(public readonly navCtrl: NavController,
+                public readonly toastController: ToastController,
+                public readonly chargerService: iChargerService,
+                public readonly config: Configuration,
+                public readonly http: Http) {
 
         // TODO: Use this to flash some activity lights
         // this.events.subscribe(CHARGER_CHANNEL_EVENT, (channelNum) => console.log("Activity on channel ", channelNum));

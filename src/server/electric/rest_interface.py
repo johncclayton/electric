@@ -1,18 +1,18 @@
 import logging
+import sys
 
 from flask import request
 from flask_restful import Resource, abort
 from werkzeug.exceptions import BadRequest
 
 import electric.evil_global as evil_global
-from electric.icharger.modbus_usb import connection_state_dict
-from electric.icharger.comms_layer import Operation
-from electric.icharger.models import Preset, SystemStorage, ObjectNotFoundException, PresetIndex
+from worker.comms_layer import Operation
+from electric.models import ObjectNotFoundException, SystemStorage, Preset, PresetIndex
+from worker.modbus_usb import connection_state_dict
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
-RETRY_LIMIT = 30
-
+RETRY_LIMIT = 1
 
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
@@ -35,16 +35,15 @@ def exclusive(func):
                 except Exception, ex:
                     retry += 1
 
-                    logger.warning("{0}/{3}, will try again (count is at {1}/{2})".format(ex, retry, RETRY_LIMIT, type(ex)))
+                    logger.warning("{0}/{3}, will try {4} again (count is at {1}/{2})".format(ex,
+                                                                                              retry,
+                                                                                              RETRY_LIMIT,
+                                                                                              type(ex),
+                                                                                              str(self) + "." + str(func)))
 
                     # If the charger isn't plugged in. This could fail.
-                    try:
-                        evil_global.comms.reset()
-                    except Exception, ex:
-                        logger.error("Error resetting comms! Charger not plugged in? {0}".format(ex))
-
                     if retry >= RETRY_LIMIT:
-                        logger.warning("retry limit exceeded, aborting the call completely")
+                        logger.warning("retry limit exceeded, aborting the call to {0} completely".format(str(func)))
                         return connection_state_dict(ex), 504
 
     return wrapper
@@ -55,9 +54,21 @@ class StatusResource(Resource):
     def get(self):
         info = evil_global.comms.get_device_info()
 
-        evil_global.last_seen_charger_device_id = info.device_id
-
         obj = info.to_primitive()
+        obj.update(connection_state_dict())
+
+        return obj
+
+
+class DialogCloseResource(Resource):
+    @exclusive
+    def put(self, channel_id):
+        channel = int(channel_id)
+        if not (channel == 0 or channel == 1):
+            return connection_state_dict("Channel number must be 0 or 1"), 403
+        evil_global.comms.close_messagebox(channel)
+
+        obj = evil_global.comms.get_channel_status(channel).to_primitive()
         obj.update(connection_state_dict())
 
         return obj
@@ -66,17 +77,29 @@ class StatusResource(Resource):
 class ChannelResource(Resource):
     @exclusive
     def get(self, channel_id):
-        channel = int(channel_id)
-        if not (channel == 0 or channel == 1):
-            return connection_state_dict("Channel number must be 0 or 1"), 403
+        try:
+            channel = int(channel_id)
+            if not (channel == 0 or channel == 1):
+                return connection_state_dict("Channel number must be 0 or 1"), 403
 
-        # yeh, more groan
-        status = evil_global.comms.get_channel_status(int(channel), evil_global.last_seen_charger_device_id)
+            # get device status, so we know more about channel state
+            device_info = evil_global.comms.get_device_info()
+            status = evil_global.comms.get_channel_status(channel, device_info.device_id)
+            if status is not None:
+                if device_info is not None:
+                    if channel == 0:
+                        status.status = device_info.ch1_status
+                    elif channel == 1:
+                        status.status = device_info.ch2_status
 
-        obj = status.to_primitive()
-        obj.update(connection_state_dict())
+                obj = status.to_primitive()
+                obj.update(connection_state_dict())
 
-        return obj
+                return obj
+
+            return connection_state_dict("No status object returned from get_channel_status call"), 403
+        except Exception, e:
+            raise e
 
 
 class ControlRegisterResource(Resource):
@@ -100,26 +123,45 @@ class ChargeResource(ControlRegisterResource):
 class DischargeResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        pass
+        device_status = evil_global.comms.run_operation(Operation.Discharge, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
+
+
+class StoreResource(ControlRegisterResource):
+    @exclusive
+    def put(self, channel_id, preset_memory_slot):
+        device_status = evil_global.comms.run_operation(Operation.Storage, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class BalanceResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id, preset_memory_slot):
-        pass
+        device_status = evil_global.comms.run_operation(Operation.Balance, int(channel_id), int(preset_memory_slot))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class MeasureIRResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id):
-        pass
+        device_status = evil_global.comms.measure_ir(int(channel_id))
+        annotated_device_status = device_status.to_primitive()
+        annotated_device_status.update(connection_state_dict())
+        return annotated_device_status
 
 
 class StopResource(ControlRegisterResource):
     @exclusive
     def put(self, channel_id):
         channel_number = int(channel_id)
-        logger.info("Stop, channel {0}".format(channel_number))
+        # We do this twice. Once to stop. 2nd time to get past the "STOPS" screen.
+        operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response = evil_global.comms.stop_operation(channel_number).to_primitive()
         operation_response.update(connection_state_dict())
         return operation_response
@@ -129,7 +171,6 @@ class SystemStorageResource(Resource):
     @exclusive
     def get(self):
         syst = evil_global.comms.get_system_storage()
-
         obj = syst.to_primitive()
         obj.update(connection_state_dict())
 
@@ -192,11 +233,12 @@ class PresetListResource(Resource):
             # Preset.index is the memory slot it's in, not the position within the index
             memory_slot_number = preset_list.indexes[index]
             preset = evil_global.comms.get_preset(memory_slot_number)
-
-            # TODO: Error handling
-
-            if preset:
-                all_presets.append(preset.to_native())
+            if preset.is_used or preset.is_fixed:
+                try:
+                    native = preset.to_native()
+                    all_presets.append(native)
+                except Exception, e:
+                    logger.info("BOOM: " + e)
 
         return all_presets
 
@@ -216,3 +258,5 @@ class PresetOrderResource(Resource):
         json_dict = request.json
         preset_list = PresetIndex(json_dict)
         return evil_global.comms.save_full_preset_list(preset_list)
+
+

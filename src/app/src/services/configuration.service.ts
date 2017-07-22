@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {Storage} from "@ionic/storage";
-import {AlertController, Events} from "ionic-angular";
+import {AlertController, Events, Platform, ToastController, LoadingController} from "ionic-angular";
+import {Deploy} from "@ionic/cloud-angular";
 
 const CONFIG_LOADED_EVENT = "config.loaded";
 const CONFIG_CHANGED_EVENT = "config.changed";
@@ -8,10 +9,18 @@ const CONFIG_CHANGED_EVENT = "config.changed";
 @Injectable()
 export class Configuration {
     public configDict = {};
+    private versionNumber: string;
+    private versionUUID: string;
 
     public constructor(public storage: Storage,
                        public events: Events,
+                       public platform: Platform,
+                       public deploy: Deploy,
+                       public readonly toastController: ToastController,
+                       public readonly loadingController: LoadingController,
                        public alert: AlertController) {
+        this.versionNumber = "";
+        this.versionUUID = "";
     }
 
     loadConfiguration(): Promise<any> {
@@ -21,9 +30,31 @@ export class Configuration {
             this.storage.get("configuration")
                 .then(v => {
                     this.bringInConfiguration(v);
-                    console.log("Configuration Loaded: ", this.configDict);
+                    console.log("Configuration loaded");
                     this.events.publish(CONFIG_LOADED_EVENT);
                     resolve();
+
+                    console.log("Platforms: ", this.platform.platforms());
+                    if (this.canUseDeploy()) {
+                        console.log("Finding current deploy info...");
+                        this.deploy.info().then(v => {
+                            this.versionNumber = "";
+                            let keys = Object.keys(v);
+
+                            keys.forEach((key, index) => {
+                                if (key == 'binary_version') {
+                                    this.versionNumber = v[key];
+                                }
+                                if (key == "deploy_uuid") {
+                                    this.versionUUID = v[key];
+                                }
+                            });
+
+                            this.checkForUpdate();
+                        });
+                    } else {
+                        console.log("Can't use deploy - so not trying to see what version we are");
+                    }
                 })
         });
 
@@ -129,6 +160,70 @@ export class Configuration {
                 "chargeMethod": "presets",
             }
         };
+    }
+
+    canUseDeploy(): boolean {
+        return this.platform.is('cordova');
+    }
+
+    platformsString(): string {
+        return this.platform.platforms().toString();
+    }
+
+    versionNumberString(): string {
+        if (this.canUseDeploy()) {
+            let ver: string = "";
+            if (this.versionNumber) {
+                ver += this.versionNumber;
+            }
+            if (this.versionUUID) {
+                ver += " (" + this.versionUUID + ")";
+            }
+            if (ver.length > 0) {
+                return ver;
+            }
+            return "0.0.1";
+        }
+        return "";
+    }
+
+    /*
+     Upgrading
+     */
+
+    checkForUpdate() {
+        if (!this.canUseDeploy()) {
+            console.log("Not checking for latest version, we can't use Deploy (prob in browser)");
+            return;
+        }
+
+        console.log("Checking for update...");
+        const checking = this.loadingController.create({
+            content: 'Checking for update...'
+        });
+        checking.present();
+
+        this.deploy.check().then((snapshotAvailable: boolean) => {
+            checking.dismiss();
+            if (snapshotAvailable) {
+                this.downloadAndInstall();
+            }
+            else {
+                const toast = this.toastController.create({
+                    message: 'Using latest version',
+                    duration: 3000
+                });
+                toast.present();
+            }
+        });
+    }
+
+    private downloadAndInstall() {
+        const updating = this.loadingController.create({
+            content: 'Updating application...'
+        });
+        updating.present();
+        this.deploy.download().then(() => this.deploy.extract()).then(() => this.deploy.load());
     }
 }
 

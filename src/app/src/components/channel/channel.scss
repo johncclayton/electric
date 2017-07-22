@@ -11,9 +11,26 @@ channel {
   padding-left: $item-ios-padding-left;
   padding-right: $item-ios-padding-right;
 
-  // Puts some space between the V/A/mah row, and the cell readout
+  // Puts some space between the channel#/time row, and the cell readout
   #heading {
-    padding-bottom: 10px;
+    padding-bottom: 0px;
+
+    // More gap between the channel heading and its number
+    #title {
+      padding-left: 10px;
+    }
+
+    .userInitiated {
+      .operation {
+        margin-bottom: 2px;
+      }
+
+      .action {
+        font-size: 1.5rem;
+        font-weight: normal;
+        margin-top: 2px;
+      }
+    }
   }
 
   .channelNumber {
@@ -25,7 +42,8 @@ channel {
     height: $size !important;
     flex: 0 0 $size;
 
-    font-size: 2rem;
+    padding: 0;
+    font-size: 2.9rem;
     margin: auto;
     border-radius: 50%;
     border-width: 2px;
@@ -33,6 +51,7 @@ channel {
     border-color: map_get($colors, 'primary');
     color: map_get($colors, 'primary');
     text-align: center;
+
   }
 
   // The channel number sits off on the edge of the cell
@@ -41,6 +60,7 @@ channel {
     color: white;
     z-index: 1;
     float: left;
+
     padding-right: 4px;
     padding-left: 3px;
   }
@@ -206,12 +226,29 @@ channel {
 
 // Per channel colouring
 // Don't know why it starts at 2... weird.
-channel:nth-child(2) .channelNumber {
+channel:nth-child(2) .channelColor {
   color: map-get($colors, 'channel0');
+}
+
+channel:nth-child(3) .channelColor {
+  color: map-get($colors, 'channel1');
+}
+
+channel:nth-child(2) .channelNumber {
   border-color: map-get($colors, 'channel0');
 }
 
 channel:nth-child(3) .channelNumber {
-  color: map-get($colors, 'channel1');
   border-color: map-get($colors, 'channel1');
 }
+
+channel:nth-child(2) .channelColorInverted {
+  background-color: map-get($colors, 'channel0') !important;
+  color: white !important;
+}
+
+channel:nth-child(3) .channelColorInverted {
+  background-color: map-get($colors, 'channel1') !important;
+  color: white !important;
+}
+
