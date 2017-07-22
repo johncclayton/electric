@@ -12,7 +12,7 @@ from worker.modbus_usb import connection_state_dict
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
-RETRY_LIMIT = 30
+RETRY_LIMIT = 1
 
 def exclusive(func):
     def wrapper(self, *args, **kwargs):
@@ -77,25 +77,29 @@ class DialogCloseResource(Resource):
 class ChannelResource(Resource):
     @exclusive
     def get(self, channel_id):
-        channel = int(channel_id)
-        if not (channel == 0 or channel == 1):
-            return connection_state_dict("Channel number must be 0 or 1"), 403
+        try:
+            channel = int(channel_id)
+            if not (channel == 0 or channel == 1):
+                return connection_state_dict("Channel number must be 0 or 1"), 403
 
-        # get device status, so we know more about channel state
-        device_info = evil_global.comms.get_device_info()
+            # get device status, so we know more about channel state
+            device_info = evil_global.comms.get_device_info()
+            status = evil_global.comms.get_channel_status(channel, device_info.device_id)
+            if status is not None:
+                if device_info is not None:
+                    if channel == 0:
+                        status.status = device_info.ch1_status
+                    elif channel == 1:
+                        status.status = device_info.ch2_status
 
-        status = evil_global.comms.get_channel_status(int(channel), device_info.device_id)
-        if status is not None:
-            if device_info is not None:
-                if channel == 0:
-                    status.status = device_info.ch1_status
-                elif channel == 1:
-                    status.status = device_info.ch2_status
+                obj = status.to_primitive()
+                obj.update(connection_state_dict())
 
-        obj = status.to_primitive()
-        obj.update(connection_state_dict())
+                return obj
 
-        return obj
+            return connection_state_dict("No status object returned from get_channel_status call"), 403
+        except Exception, e:
+            raise e
 
 
 class ControlRegisterResource(Resource):

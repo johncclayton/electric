@@ -12,32 +12,64 @@ class ZMQCommsManager(object):
 
     def __init__(self):
         self.ctx = zmq.Context()
+
+        self.worker_loc = os.environ.get("ELECTRIC_WORKER", "tcp://0.0.0.0:5001")
+
+        self.charger = None
+        self.request_tag = 0
+
+        self.poll = zmq.Poller()
+        self.open_charger_socket()
+
+    def close_charger_socket(self):
+        logger.info("Disconnecting from worker")
+        self.poll.unregister(self.charger)
+        self.charger.close()
+        self.charger = None
+
+    def open_charger_socket(self):
+        assert(self.charger is None)
         self.charger = self.ctx.socket(zmq.REQ)
-        worker_loc = os.environ.get("ELECTRIC_WORKER", "tcp://0.0.0.0:5001")
-        logger.info("Connecting to Electric Worker at: %s", worker_loc)
-        self.charger.connect(worker_loc)
+        logger.info("Connecting to worker at: %s", self.worker_loc)
+        self.charger.set(zmq.REQ_RELAXED, 1)
+        self.charger.set(zmq.REQ_CORRELATE, 1)
+        self.charger.connect(self.worker_loc)
+        self.poll.register(self.charger, zmq.POLLIN)
 
     def _send_message_get_response(self, method_name, arg_dict = None):
         request = {
-            "method": method_name
+            "method": method_name,
+            "tag": self.request_tag
         }
+
+        self.request_tag += 1
 
         if arg_dict is not None:
             request["args"] = arg_dict
 
         self.charger.send_pyobj(request)
-        resp = self.charger.recv_pyobj()
+        sockets = dict(self.poll.poll(10000))
+        if self.charger in sockets:
+            try:
+                resp = self.charger.recv_pyobj()
 
-        if "exception" in resp:
-            e = resp["exception"]
-            logger.warn("exception from charger received: {0}".format(e))
-            raise e
+                if "exception" in resp:
+                    e = resp["exception"]
+                    logger.error("message received from ZMQ, contained exception: {0}".format(e))
+                    raise e
 
-        if "response" in resp:
-            r = resp["response"]
-            return r
+                if "response" in resp:
+                    r = resp["response"]
+                    logger.debug("response message received: {0}".format(r))
+                    return r
 
-        return None
+                raise IOError("request received - but no response was found inside, terrible!")
+
+            except Exception, e:
+                logger.error("exception received when reading message from ZMQ: {0}".format(e))
+                raise e
+        else:
+            raise IOError("request {1} failed to receive a response at all from ZMQ within 10 seconds: {0}".format(method_name), request["tag"])
 
     def get_device_info(self):
         """

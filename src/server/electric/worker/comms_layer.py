@@ -299,13 +299,17 @@ class ChargerCommsManager(object):
         # Right. Now we can save it.
         logger.info("Preset Index before add: {0}".format(preset_index.to_native()))
         logger.info("Adding new preset at slot {0}".format(preset.memory_slot))
+        logger.info("The preset being sent in is: {0}".format(preset))
+
         self.save_preset_to_memory_slot(preset, preset.memory_slot, verify_write=False)
 
         # And save the new preset list
         self.save_full_preset_list(preset_index)
         logger.info("Preset Index after add: {0}".format(self.get_full_preset_list().to_native()))
 
-        return self.get_preset(preset.memory_slot)
+        returned_preset = self.get_preset(preset.memory_slot)
+        logger.info("The preset being read out is: {0}".format(returned_preset))
+        return returned_preset
 
     '''
     This saves an existing preset to memory.

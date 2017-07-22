@@ -314,6 +314,9 @@ class USBThreadedReader:
                         int_list = self._dev.read(MAX_READWRITE_LEN, 1000)
                         if len(int_list) == 64:
                             has_data = True
+                        else:
+                            with self._condition:
+                                self._condition.notify_all()
                     except IOError:
                         pass
 
@@ -324,13 +327,13 @@ class USBThreadedReader:
                             if int_list[0] in [40, 44] and int_list[1] == 16:
                                 if int_list[2] == 1:
                                     self._last_info_packet_ch1 = int_list
-                                    logger.debug("Captured INFO packet for channel 1")
+                                    logger.debug("Captured INFO packet for channel 1: {0}".format(int_list[:15]))
                                 else:
                                     self._last_info_packet_ch2 = int_list
-                                    logger.debug("Captured INFO packet for channel 2")
+                                    logger.debug("Captured INFO packet for channel 2: {0}".format(int_list[:15]))
                             elif int_list[1] == 48:
                                 self._last_response_packets.append(int_list)
-                                logger.debug("Captured RESPONSE ... heheheh: {0}".format(int_list[:15]))
+                                logger.debug("Captured REPLY: {0}".format(int_list[:15]))
                             else:
                                 logger.debug("Holy crap, what do we have? : {0}".format(int_list))
 
@@ -347,24 +350,30 @@ class USBThreadedReader:
         if not testing_control.usb_device_present:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
-        TOTAL_ATTEMPTS = 10
-        attempts = TOTAL_ATTEMPTS
+        TOTAL_TIME_LIMIT = 5.0
+        time_spent = 0.0
 
-        while attempts > 0:
+        while time_spent <= TOTAL_TIME_LIMIT:
+            time_started_loop = time.time()
+
             with self._condition:
                 if len(self._last_response_packets) == 0:
-                    self._condition.wait()
+                    self._condition.wait(100)
+
+                time_finished_waiting = time.time()
+                time_elapsed = time_finished_waiting - time_started_loop
+                logger.debug("total time elapsed: {0}".format(time_spent))
 
                 int_list = None
                 if len(self._last_response_packets) > 0:
                     int_list = self._last_response_packets.pop()
 
+                time_spent += time_elapsed
+
             if int_list is not None:
                 return array.array('B', int_list[:expected_length]).tostring()
 
-            attempts -= 1
-
-        raise IOError("unable to read response packet from USB device - already tried {0} times".format(TOTAL_ATTEMPTS))
+        raise IOError("unable to read response packet from USB device within {0}s".format(TOTAL_TIME_LIMIT))
 
 
 class iChargerMaster(RtuMaster):

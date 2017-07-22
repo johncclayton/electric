@@ -30,7 +30,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 
     with zmq.utils.win32.allow_interrupt(stop_application):
-        logger.info("iCharger USB reader worker started. Listening on: %s", listen_on)
+        logger.info("iCharger USB reader worker listening on: %s", listen_on)
 
         try:
             while True:
@@ -41,24 +41,29 @@ if __name__ == "__main__":
 
                     if "method" not in message:
                         logger.warn("method name not specified, ignoring {0}".format(message))
-                        # ZMQ REQ/REP requires 1:1 send/response, so in error case, just send message back
-                        socket.send_pyobj(message)
-                        continue
+                        message["exception"] = IOError("no method specified in message - rejecting request")
+                    else:
+                        method = message["method"]
+                        args = None
+                        if "args" in message:
+                            args = message["args"]
 
-                    method = message["method"]
-                    args = {}
+                        message_log = "message: {0}/{1} with args: {2}".format(message["tag"], method, args)
 
-                    if "args" in message:
-                        args = message["args"]
+                        try:
+                            logger.info("executing message: {0}".format(message_log))
+                            message["response"] = route_message(charger, method, args)
+                        except Exception, e:
+                            logger.error("EXCEPTION during routing/execution for message: {0}, {1}".format(message_log, e))
+                            message["exception"] = e
 
-                    try:
-                        logger.info("executing message: {0} with args: {1}".format(method, args))
-                        message["response"] = route_message(charger, method, args)
-                    except Exception, e:
-                        logger.error("Got exception: {0}".format(e))
-                        message["exception"] = e
-
-                    socket.send_pyobj(message)
+                        try:
+                            # potentially; the receiver goes away - before we are finished sending -
+                            logger.info("sending response for: {0}".format(message_log))
+                            socket.send_pyobj(message)
+                            logger.info("sent response for: {0}".format(message_log))
+                        except Exception, e:
+                            logger.error("unable to send response for {0}, {1}".format(message_log, e))
 
         except KeyboardInterrupt:
             logger.info("Ctrl-C interrupted worker - aborting...")
