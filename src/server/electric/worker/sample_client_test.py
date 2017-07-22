@@ -1,7 +1,7 @@
 from electric.zmq_marshall import ZMQCommsManager
 import zmq.utils.win32, logging, sys, time
 
-from worker.comms_layer import Operation
+from electric.worker.comms_layer import Operation
 
 logger = logging.getLogger('electric.test')
 comms = ZMQCommsManager()

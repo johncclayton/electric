@@ -1,3 +1,6 @@
+import logging
+
+logger = logging.getLogger('electric.worker.router')
 
 def route_message(charger, method, args):
     if method == "test_exception":

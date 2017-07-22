@@ -49,9 +49,10 @@ if __name__ == "__main__":
                         args = message["args"]
 
                     try:
-                        logger.info("executing message: {0}".format(method))
+                        logger.info("executing message: {0} with args: {1}".format(method, args))
                         message["response"] = route_message(charger, method, args)
                     except Exception, e:
+                        logger.error("Got exception: {0}".format(e))
                         message["exception"] = e
 
                     socket.send_pyobj(message)

@@ -1,9 +1,10 @@
 import logging
+
 import modbus_tk.defines as cst
 
+from electric.models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 from electric.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException, \
     BadRequestException, ChemistryType
-from electric.models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
 from modbus_usb import iChargerMaster
 
 CHANNEL_INPUT_HEADER_OFFSET = 0
