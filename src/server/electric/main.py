@@ -1,4 +1,3 @@
-import platform
 from electric.app import application
 
 # import faulthandler, signal
