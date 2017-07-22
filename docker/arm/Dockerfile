@@ -9,6 +9,8 @@ RUN apk update \
     && pip install hidapi \
     && apk del libusb-dev python-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
+RUN apk add gcc
+
 VOLUME /www
 WORKDIR /www
 
