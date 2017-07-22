@@ -189,6 +189,7 @@ class USBThreadedReader:
     be detached that's more of a problem and right now the USBThreadedReader throws a big fat
     exception from __init__.
     """
+
     def __init__(self, vendor=ICHARGER_VENDOR_ID, prod=ICHARGER_PRODUCT_ID):
         self._dev = None
         self._opened = False
@@ -320,16 +321,18 @@ class USBThreadedReader:
                     # we should smuggle out of here?
                     if has_data:
                         with self._condition:
-                            if int_list[0] == 44 and int_list[1] == 16:
+                            if int_list[0] in [40, 44] and int_list[1] == 16:
                                 if int_list[2] == 1:
                                     self._last_info_packet_ch1 = int_list
                                     logger.debug("Captured INFO packet for channel 1")
                                 else:
                                     self._last_info_packet_ch2 = int_list
                                     logger.debug("Captured INFO packet for channel 2")
-                            else:
+                            elif int_list[1] == 48:
                                 self._last_response_packets.append(int_list)
-                                logger.debug("Captured RESPONSE")
+                                logger.debug("Captured RESPONSE ... heheheh: {0}".format(int_list[:15]))
+                            else:
+                                logger.debug("Holy crap, what do we have? : {0}".format(int_list))
 
                             self._condition.notify_all()
                 else:
@@ -369,6 +372,7 @@ class iChargerMaster(RtuMaster):
     Modbus master interface to the iCharger, implements higher level routines to get the
     status / channel information from the device.
     """
+
     def __init__(self, serial=None):
         if serial is None:
             serial = USBThreadedReader()
@@ -420,7 +424,6 @@ class iChargerMaster(RtuMaster):
                             data_format=data_format,
                             quantity_of_x=quant,
                             expected_length=(quant * 2) + 4)
-
 
     def modbus_write_registers(self, addr, data):
         """
