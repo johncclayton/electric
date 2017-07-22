@@ -3,7 +3,7 @@ MAINTAINER Neil Clayton
 LABEL version="1.0"
 
 RUN apk update \
-    && apk add bash python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev \
+    && apk add bash python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev gcc \
     && pip install --upgrade setuptools \
     && pip install --upgrade pip \
     && pip install hidapi \
