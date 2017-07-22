@@ -30,7 +30,7 @@ pyzmq==16.0.2
 redis==2.10.5
 rq==0.8.0
 rq-dashboard==0.3.8
-schematics==2.0.1
+schematics==1.1.1
 singledispatch==3.4.0.3
 six==1.10.0
 watchdog==0.8.3
