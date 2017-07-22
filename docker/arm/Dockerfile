@@ -1,4 +1,4 @@
-FROM hypriot/rpi-alpine:3.4
+FROM hypriot/rpi-alpine:3.6
 MAINTAINER Neil Clayton
 LABEL version="1.0"
 
@@ -12,7 +12,7 @@ RUN apk update \
     && pip install --upgrade pip \
     && pip install hidapi \
     && pip install -r requirements.txt \
-    && rm -rf /www/scripts /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
+    && rm -rf /www/scripts /www/MANIFEST /www/requirements.txt /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
     && apk del gcc g++ python-dev libusb-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
 EXPOSE 5000
