@@ -1,4 +1,4 @@
-import zmq, logging, sys, os
+import zmq, logging, sys, os, platform
 import zmq.utils.win32
 from comms_layer import ChargerCommsManager
 from router import route_message
@@ -17,13 +17,16 @@ poller.register(socket, zmq.POLLIN)
 
 charger = ChargerCommsManager()
 
-
 def stop_application():
     socket.close()
     ctx.term()
     sys.exit(0)
 
 if __name__ == "__main__":
+    if platform.system() == "Darwin":
+        print("WARNING: libusb doesnt work well for HID devices on the Mac, and this program requires it - things WILL NOT out so well without it so this program will abort now")
+        sys.exit(1)
+
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 
     with zmq.utils.win32.allow_interrupt(stop_application):
