@@ -5,6 +5,7 @@ LABEL maintainer="Neil Clayton, John Clayton" \
 VOLUME /www
 WORKDIR /www
 COPY ./src/server/ /www
+ENV ELECTRIC_WORKER=tcp://0.0.0.0:5001
 
 RUN apk update \
     && apk add bash zeromq python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev gcc g++ \
