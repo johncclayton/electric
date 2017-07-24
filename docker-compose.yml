@@ -23,7 +23,7 @@ services:
     image: johncclayton/electric-pi-worker:${DOCKER_TAG}
 
     container_name: electric-worker
-    entrypoint: sh -x /www/run_zmq_worker.sh
+    command: sh -x /www/run_zmq_worker.sh
     privileged: true
     volumes:
       - /dev/bus/usb:/dev/bus/usb
