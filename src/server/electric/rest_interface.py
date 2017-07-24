@@ -86,7 +86,7 @@ class DialogCloseResource(Resource):
         channel = int(channel_id)
         if not (channel == 0 or channel == 1):
             return connection_state_dict("Channel number must be 0 or 1"), 403
-        comms.close_messagebox(channel)
+        # comms.close_messagebox(channel)
 
         obj = comms.get_channel_status(channel).to_primitive()
         obj.update(connection_state_dict())
