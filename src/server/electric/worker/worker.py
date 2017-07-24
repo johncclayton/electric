@@ -9,7 +9,7 @@ logger = logging.getLogger('electric.worker')
 ctx = zmq.Context()
 socket = ctx.socket(zmq.REP)
 
-listen_on = os.environ.get("ELECTRIC_WORKER", "tcp://0.0.0.0:5001")
+listen_on = os.environ.get("ELECTRIC_WORKER_LISTEN", "tcp://0.0.0.0:5001")
 socket.bind(listen_on)
 
 poller = zmq.Poller()

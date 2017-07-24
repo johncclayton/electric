@@ -2,7 +2,7 @@ import zmq, os
 import logging
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
-worker_loc = os.environ.get("ELECTRIC_WORKER", "tcp://0.0.0.0:5001")
+worker_loc = os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
 
 class ZMQCommsManager(object):
     """

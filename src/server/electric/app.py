@@ -27,7 +27,9 @@ if not debug_mode:
     handler.setFormatter(formatter)
     application.logger.addHandler(handler)
     application.logger.setLevel(logging.DEBUG)
-    application.logger.info("The charger LIVES!")
+
+    from zmq_marshall import worker_loc
+    application.logger.info("The charger LIVES! ELECTRIC_WORKER located at: {0}".format(worker_loc))
 
 
 api = Api(application)

@@ -4,11 +4,13 @@ import unittest
 import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 
-import electric.evil_global as evil_global
-from electric.icharger.models import Control
-from worker.modbus_usb import TestingControlException
-from worker.modbus_usb import USBThreadedReader, iChargerQuery, MODBUS_HID_FRAME_TYPE
-from worker.modbus_usb import testing_control
+from electric.zmq_marshall import ZMQCommsManager
+comms = ZMQCommsManager()
+
+from electric.models import Control
+from electric.worker.modbus_usb import TestingControlException
+from electric.worker.modbus_usb import USBThreadedReader, iChargerQuery, MODBUS_HID_FRAME_TYPE
+from electric.worker.modbus_usb import testing_control
 
 
 class TestChargerQuery(unittest.TestCase):
@@ -108,22 +110,22 @@ class TestSerialFacade(unittest.TestCase):
 class TestGatewayCommunications(unittest.TestCase):
     def setUp(self):
         testing_control.reset()
-        evil_global.comms.charger.open()
+        comms.charger.open()
 
     def test_status_contains_num_channels(self):
-        obj = evil_global.comms
+        obj = comms
         status = obj.get_device_info()
         self.assertIsNotNone(status)
         self.assertEqual(status.channel_count, 2)
         self.assertIn("channel_count", status.to_primitive().keys())
 
     def test_fetch_status(self):
-        obj = evil_global.comms
+        obj = comms
         resp = obj.get_channel_status(0)
         self.assertIsNotNone(resp)
 
     def test_number_of_channels(self):
-        obj = evil_global.comms
+        obj = comms
         resp = obj.get_device_info()
         self.assertTrue(resp.cell_count >= 6)
 
@@ -147,11 +149,11 @@ class TestGatewayCommunications(unittest.TestCase):
         testing_control.modbus_read_should_fail = True
 
         with self.assertRaises(TestingControlException):
-            charger = evil_global.comms
+            charger = comms
             charger.get_device_info()
 
     def test_can_change_key_tone_and_volume(self):
-        charger = evil_global.comms
+        charger = comms
         new_volume = 2
         charger.set_beep_properties(beep_index=0, enabled=True, volume=new_volume)
         resp = charger.get_system_storage()
@@ -159,7 +161,7 @@ class TestGatewayCommunications(unittest.TestCase):
         self.assertEqual(resp.beep_volume_key, new_volume)
 
     def test_setting_active_channel(self):
-        charger = evil_global.comms
+        charger = comms
         self.assertIsNone(charger.set_active_channel(-1))
         self.assertIsNone(charger.set_active_channel(2))
         resp = charger.set_active_channel(0)
@@ -168,7 +170,7 @@ class TestGatewayCommunications(unittest.TestCase):
         self.assertIsNotNone(resp)
 
     def test_get_all_presets(self):
-        charger = evil_global.comms
+        charger = comms
         preset_index = charger.get_full_preset_list()
         for index in preset_index.range_of_presets():
             slot = preset_index.indexes[index]
@@ -176,7 +178,7 @@ class TestGatewayCommunications(unittest.TestCase):
             print(one_preset.name)
 
     def test_get_preset_index_list(self):
-        obj = evil_global.comms
+        obj = comms
         preset_index = obj.get_full_preset_list()
         self.assertIsNotNone(preset_index)
         self.assertTrue(preset_index.count == preset_index.number_of_presets)
