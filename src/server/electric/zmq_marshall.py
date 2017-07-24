@@ -2,6 +2,7 @@ import zmq, os
 import logging
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
+worker_loc = os.environ.get("ELECTRIC_WORKER", "tcp://0.0.0.0:5001")
 
 class ZMQCommsManager(object):
     """
@@ -12,8 +13,6 @@ class ZMQCommsManager(object):
 
     def __init__(self):
         self.ctx = zmq.Context()
-
-        self.worker_loc = os.environ.get("ELECTRIC_WORKER", "tcp://0.0.0.0:5001")
 
         self.charger = None
         self.request_tag = 0
@@ -30,10 +29,11 @@ class ZMQCommsManager(object):
     def open_charger_socket(self):
         assert(self.charger is None)
         self.charger = self.ctx.socket(zmq.REQ)
-        logger.info("Connecting to worker at: %s", self.worker_loc)
         self.charger.set(zmq.REQ_RELAXED, 1)
         self.charger.set(zmq.REQ_CORRELATE, 1)
-        self.charger.connect(self.worker_loc)
+
+        logger.info("Connecting to worker at: %s", worker_loc)
+        self.charger.connect(worker_loc)
         self.poll.register(self.charger, zmq.POLLIN)
 
     def _send_message_get_response(self, method_name, arg_dict = None):
@@ -69,7 +69,10 @@ class ZMQCommsManager(object):
                 logger.error("exception received when reading message from ZMQ: {0}".format(e))
                 raise e
         else:
-            raise IOError("request {1} failed to receive a response at all from ZMQ within 10 seconds: {0}".format(method_name), request["tag"])
+            raise IOError("request {1} failed to receive a response at all from ZMQ within 10 seconds: {0}".format(method_name, request["tag"]))
+
+    def turn_off_logging(self):
+        return self._send_message_get_response("turn_off_logging")
 
     def get_device_info(self):
         """

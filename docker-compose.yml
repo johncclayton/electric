@@ -4,14 +4,37 @@ services:
   web:
     build:
       context: .
-      dockerfile: docker/arm/Dockerfile
-    image: scornflake/electric-pi
+      dockerfile: docker/arm/Dockerfile-web
+    image: johncclayton/electric-pi-web
 
     container_name: electric-web
+    env_file: web.env
 
     ports:
       - "80:5000"
       - "5000:5000"
+
+    volumes:
+      - ./src/server:/www
+
+    restart: always
+
+    networks:
+      - charger
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/arm/Dockerfile-worker
+    image: johncclayton/electric-pi-worker
+
+    container_name: electric-worker
+    env_file: worker.env
+
+    entrypoint: /www/run_zmq_worker.sh
+
+    ports:
+      - "5001:5001"
 
     volumes:
       - ./src/server:/www

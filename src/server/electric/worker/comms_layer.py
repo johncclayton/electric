@@ -2,9 +2,10 @@ import logging
 
 import modbus_tk.defines as cst
 
-from electric.models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment
+from electric.models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment, Order, Operation
 from electric.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException, \
     BadRequestException, ChemistryType
+
 from modbus_usb import iChargerMaster
 
 CHANNEL_INPUT_HEADER_OFFSET = 0
@@ -27,28 +28,6 @@ VALUE_ORDER_UNLOCK = 0x55aa
 VALUE_ORDER_LOCK = 0x1234 # any other value(s)
 
 
-class Operation:
-    Charge = 0
-    Storage = 1
-    Discharge = 2
-    Cycle = 3
-    Balance = 4
-    MeasureIR = 5
-
-
-class Order:
-    Stop = 0
-    Run = 1
-    Modify = 2
-    WriteSys = 3
-    WriteMemHead = 4
-    WriteMem = 5
-    TransLogOn = 6
-    TransLogOff = 7
-    MsgBoxYes = 8
-    MsgBoxNo = 9
-
-
 class ChargerCommsManager(object):
     """
     The comms manager is responsible for data translation between the MODBUS types and the world outside.  It uses an
@@ -67,6 +46,10 @@ class ChargerCommsManager(object):
 
     def reset(self):
         self.charger.reset()
+
+    def turn_off_logging(self):
+        values_list = (VALUE_ORDER_UNLOCK, Order.TransLogOff)
+        return self.charger.modbus_write_registers(0x8000, values_list)
 
     def get_device_info(self):
         """

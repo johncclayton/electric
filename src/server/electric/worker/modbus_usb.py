@@ -62,27 +62,6 @@ ModbusErrors = [
     {"c": "MB_ETIMEDOUT", "v": 0x85, "d": "Timeout error occurred"},
 ]
 
-
-def connection_state_dict(exc=None):
-    """
-    Returns a dict that wraps up the information provided by the exception as well as
-    the connection state of the charger
-    """
-
-    state = "connected"
-    if exc is not None and isinstance(exc, Exception):
-        state = "disconnected"
-
-    value = {
-        "charger_presence": state
-    }
-
-    if exc is not None:
-        value.update({"exception": str(exc)})
-
-    return value
-
-
 #
 # NOTE: This isnt' relevant for Docker based installs - things run as root there anyway.
 #

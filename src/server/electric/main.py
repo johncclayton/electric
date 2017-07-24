@@ -1,4 +1,6 @@
 from electric.app import application
+import logging
+logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 # import faulthandler, signal
 # faulthandler.register(signal.SIGUSR1)
@@ -42,6 +44,9 @@ def run_server():
         "use_reloader": False,
         "use_debugger": False
     }
+
+    from zmq_marshall import worker_loc
+    logger.info("Will connect to ELECTRIC_WORKER at: {0}".format(worker_loc))
 
     application.run(debug=True, host='0.0.0.0', port=5000, **opts)
 

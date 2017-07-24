@@ -41,6 +41,8 @@ def route_message(charger, method, args):
             return charger.run_operation(args["op"], args["channel"], args["memory_slot"])
         elif method == "measure_ir":
             return charger.measure_ir(args["channel"])
+        elif method == "turn_off_logging":
+            return charger.turn_off_logging()
         else:
             raise IOError("Unknown method name, cannot execute anything: {0}".format(method))
 

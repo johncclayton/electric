@@ -1,0 +1,24 @@
+FROM hypriot/rpi-alpine:3.6
+
+LABEL maintainer="Neil Clayton, John Clayton" \
+    version="1.0"
+
+VOLUME /www
+WORKDIR /www
+ENV ELECTRIC_WORKER=tcp://0.0.0.0:5001
+
+COPY ./src/server/ /www
+RUN chmod +x /www/run_*.sh
+ENV MAKEFLAGS="-j 4"
+
+RUN apk update \
+    && apk add bash py-pip python-dev linux-headers musl-dev gcc g++ \
+    && pip install --upgrade setuptools \
+    && pip install --upgrade pip \
+    && pip install -r requirements-web.txt \
+    && chmod +x /www/run_*.sh \
+    && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
+
+EXPOSE 5000
+
+CMD [ "./start_gunicorn.sh" ]

@@ -2,7 +2,6 @@ import copy
 import logging
 import struct
 
-import modbus_tk.defines as cst
 from schematics.models import Model
 from schematics.transforms import blacklist
 from schematics.types import StringType, IntType, LongType, FloatType, BooleanType
@@ -10,6 +9,33 @@ from schematics.types.compound import ModelType, ListType
 from schematics.types.serializable import serializable
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
+
+# copied from modbus protocol spec
+READ_HOLDING_REGISTERS = 3
+READ_INPUT_REGISTERS = 4
+WRITE_MULTIPLE_REGISTERS = 16
+
+
+class Operation:
+    Charge = 0
+    Storage = 1
+    Discharge = 2
+    Cycle = 3
+    Balance = 4
+    MeasureIR = 5
+
+
+class Order:
+    Stop = 0
+    Run = 1
+    Modify = 2
+    WriteSys = 3
+    WriteMemHead = 4
+    WriteMem = 5
+    TransLogOn = 6
+    TransLogOff = 7
+    MsgBoxYes = 8
+    MsgBoxNo = 9
 
 
 class ChemistryType:
@@ -97,7 +123,7 @@ class ReadDataSegment:
     """
 
     def __init__(self, charger, name, fmt, base=None, prev_format=None):
-        self.func_code = cst.READ_INPUT_REGISTERS
+        self.func_code = READ_INPUT_REGISTERS
 
         self.name = name
         self.format = fmt
@@ -105,14 +131,14 @@ class ReadDataSegment:
         self.addr = base if base is not None else prev_format.addr + prev_format.size / 2
 
         if self.addr >= 0x8000:
-            self.func_code = cst.READ_HOLDING_REGISTERS
+            self.func_code = READ_HOLDING_REGISTERS
 
         self.data = charger.modbus_read_registers(self.addr, self.format, function_code=self.func_code)
 
 
 class WriteDataSegment(object):
     def __init__(self, charger, name, data_tuples, data_format, base=None, prev_format=None):
-        self.func_code = cst.WRITE_MULTIPLE_REGISTERS
+        self.func_code = WRITE_MULTIPLE_REGISTERS
         self.name = name
 
         self.data = self.convert_tuples_to_u16s(data_tuples, data_format)

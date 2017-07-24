@@ -1,6 +1,6 @@
 FROM hypriot/rpi-alpine:3.6
-MAINTAINER Neil Clayton
-LABEL version="1.0"
+LABEL maintainer="Neil Clayton, John Clayton" \
+    version="1.0"
 
 VOLUME /www
 WORKDIR /www
@@ -11,10 +11,11 @@ RUN apk update \
     && pip install --upgrade setuptools \
     && pip install --upgrade pip \
     && pip install hidapi \
-    && pip install -r requirements.txt \
-    && rm -rf /www/scripts /www/MANIFEST /www/requirements.txt /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
+    && pip install -r requirements-worker.txt \
+    && chmod +x /www/run_*.sh \
+    && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
     && apk del gcc g++ python-dev libusb-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
-EXPOSE 5000
+EXPOSE 5001
 
-CMD [ "./start_gunicorn.sh" ]
+CMD [ "./run_zmq_worker.sh" ]

@@ -3,9 +3,18 @@
 
 Docker image: https://hub.docker.com/r/scornflake/electric-pi/
 
-# what
+# What
 This project provides everything you need to get information from your iCharger 308/4010 DUO to an application
-running on your mobile device.
+running on your mobile device.  
 
-# documentation
-All the documentation to explain the project, the quickstart guide etc are hosted on readthedocs.
+# Installation
+There are two programs that run on the Raspberry Pi, and one for your phone.
+
+## Server Side - Docker to the Rescue
+The server apps run in docker containers.  We chose this path because that provides
+us with a repeatable, configured, predictable installation - guaranteed.
+
+To install the server side components, SSH onto your Raspberry Pi - and
+do the following:
+
+
