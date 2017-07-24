@@ -7,14 +7,17 @@ services:
     container_name: electric-web
     command: sh -x /www/run_gunicorn.sh
 
+    environment:
+      - ELECTRIC_WORKER_CONNECT=tcp://worker:5001
+
     ports:
       - "80:5000"
       - "5000:5000"
 
     restart: always
 
-    networks:
-      - charger
+    depends_on:
+      - worker
 
   worker:
     image: johncclayton/electric-pi-worker:${DOCKER_TAG}
@@ -25,13 +28,5 @@ services:
     volumes:
       - /dev/bus/usb:/dev/bus/usb
 
-    ports:
-      - "5001:5001"
-
     restart: always
 
-    networks:
-      - charger
-
-networks:
-  charger:

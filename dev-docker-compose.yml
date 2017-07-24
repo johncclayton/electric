@@ -6,19 +6,21 @@ services:
 
     container_name: electric-web
     command: sh -x /www/run_gunicorn.sh
-    volumes:
-      - ./src/server:/www
+
+    environment:
+      - ELECTRIC_WORKER_CONNECT=tcp://worker:5001
 
     ports:
       - "80:5000"
       - "5000:5000"
 
+    volumes:
+      - ./src/server:/www
+
     restart: always
+
     depends_on:
       - worker
-
-    networks:
-      - charger
 
   worker:
     image: johncclayton/electric-pi-worker:${DOCKER_TAG}
@@ -26,17 +28,10 @@ services:
     container_name: electric-worker
     command: sh -x /www/run_zmq_worker.sh
     privileged: true
+
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - ./src/server:/www
 
-    ports:
-      - "5001:5001"
-
     restart: always
 
-    networks:
-      - charger
-
-networks:
-  charger:
