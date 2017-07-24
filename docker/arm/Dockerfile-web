@@ -21,4 +21,5 @@ RUN apk update \
 
 EXPOSE 5000
 
+RUN chmod +x /www/run_gunicorn.sh
 CMD [ "./run_gunicorn.sh" ]

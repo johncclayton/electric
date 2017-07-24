@@ -12,10 +12,10 @@ RUN apk update \
     && pip install --upgrade pip \
     && pip install hidapi \
     && pip install -r requirements-worker.txt \
-    && chmod +x /www/run_*.sh \
     && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
     && apk del gcc g++ python-dev libusb-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
 
 EXPOSE 5001
 
+RUN chmod +x /www/run_zmq_worker.sh
 CMD [ "./run_zmq_worker.sh" ]
