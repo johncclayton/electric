@@ -2,14 +2,10 @@ version: '2'
 
 services:
   web:
-    build:
-      context: .
-      dockerfile: docker/arm/Dockerfile-web
-    image: johncclayton/electric-pi-web:246
+    image: johncclayton/electric-pi-web:${DOCKER_TAG}
 
     container_name: electric-web
-    env_file: web.env
-    entrypoint: sh -x /www/run_gunicorn.sh
+    command: sh -x /www/run_gunicorn.sh
 
     ports:
       - "80:5000"
@@ -24,23 +20,17 @@ services:
       - charger
 
   worker:
-    build:
-      context: .
-      dockerfile: docker/arm/Dockerfile-worker
-    image: johncclayton/electric-pi-worker:246
+    image: johncclayton/electric-pi-worker:${DOCKER_TAG}
 
     container_name: electric-worker
-    env_file: worker.env
     entrypoint: sh -x /www/run_zmq_worker.sh
     privileged: true
     volumes:
       - /dev/bus/usb:/dev/bus/usb
+      - ./src/server:/www
 
     ports:
       - "5001:5001"
-
-    volumes:
-      - ./src/server:/www
 
     restart: always
 

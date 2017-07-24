@@ -1,4 +1,5 @@
 #!/bin/bash
-export PYTHONPATH=.
-watchmedo auto-restart -p "*.py;*.txt" --recursive "python electric/worker/worker.py"
-
+BASHSOURCE=$0
+DIR="$( cd "$( dirname "$BASHSOURCE" )" && pwd )"
+export PYTHONPATH=$DIR
+watchmedo auto-restart -p "*.py;" --recursive python /www/electric/worker/worker.py
