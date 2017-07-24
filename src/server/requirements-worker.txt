@@ -4,4 +4,3 @@ pyserial==3.1
 pyzmq==16.0.2
 schematics==1.1.1
 six==1.10.0
-zmq==0.0.0
