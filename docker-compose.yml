@@ -11,9 +11,6 @@ services:
       - "80:5000"
       - "5000:5000"
 
-    volumes:
-      - ./src/server:/www
-
     restart: always
 
     networks:
@@ -27,7 +24,6 @@ services:
     privileged: true
     volumes:
       - /dev/bus/usb:/dev/bus/usb
-      - ./src/server:/www
 
     ports:
       - "5001:5001"
