@@ -12,12 +12,13 @@ RUN chmod +x /www/run_*.sh
 ENV MAKEFLAGS="-j 4"
 
 RUN apk update \
-    && apk add bash py-pip python-dev linux-headers musl-dev gcc g++ \
+    && apk add bash zeromq py-pip python-dev linux-headers musl-dev gcc g++ \
     && pip install --upgrade setuptools \
     && pip install --upgrade pip \
     && pip install -r requirements-web.txt \
     && chmod +x /www/run_*.sh \
     && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py
+    && apk del gcc g++ musl-dev linux-headers python-dev --purge
 
 EXPOSE 5000
 
