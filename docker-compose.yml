@@ -5,10 +5,11 @@ services:
     build:
       context: .
       dockerfile: docker/arm/Dockerfile-web
-    image: johncclayton/electric-pi-web
+    image: johncclayton/electric-pi-web:246
 
     container_name: electric-web
     env_file: web.env
+    entrypoint: sh -x /www/run_gunicorn.sh
 
     ports:
       - "80:5000"
@@ -26,12 +27,14 @@ services:
     build:
       context: .
       dockerfile: docker/arm/Dockerfile-worker
-    image: johncclayton/electric-pi-worker
+    image: johncclayton/electric-pi-worker:246
 
     container_name: electric-worker
     env_file: worker.env
-
-    entrypoint: /www/run_zmq_worker.sh
+    entrypoint: sh -x /www/run_zmq_worker.sh
+    privileged: true
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
 
     ports:
       - "5001:5001"
