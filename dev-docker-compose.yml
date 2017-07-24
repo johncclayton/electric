@@ -1,0 +1,40 @@
+version: '2'
+
+services:
+  web:
+    image: johncclayton/electric-pi-web:${DOCKER_TAG}
+
+    container_name: electric-web
+    command: sh -x /www/run_gunicorn.sh
+    volumes:
+      - ./src/server:/www
+
+    ports:
+      - "80:5000"
+      - "5000:5000"
+
+    restart: always
+
+    networks:
+      - charger
+
+  worker:
+    image: johncclayton/electric-pi-worker:${DOCKER_TAG}
+
+    container_name: electric-worker
+    command: sh -x /www/run_zmq_worker.sh
+    privileged: true
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - ./src/server:/www
+
+    ports:
+      - "5001:5001"
+
+    restart: always
+
+    networks:
+      - charger
+
+networks:
+  charger:
