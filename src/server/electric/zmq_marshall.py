@@ -20,6 +20,9 @@ class ZMQCommsManager(object):
         self.poll = zmq.Poller()
         self.open_charger_socket()
 
+    def __del__(self):
+        self.close_charger_socket()
+
     def close_charger_socket(self):
         logger.info("Disconnecting from worker")
         self.poll.unregister(self.charger)
