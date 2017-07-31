@@ -22,7 +22,8 @@ def stop_application():
     ctx.term()
     sys.exit(0)
 
-if __name__ == "__main__":
+
+def run_worker():
     if platform.system() == "Darwin":
         print("WARNING: libusb doesnt work well for HID devices on the Mac, and this program requires it - things WILL NOT out so well without it so this program will abort now")
         sys.exit(1)
@@ -68,3 +69,6 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             logger.info("Ctrl-C interrupted worker - aborting...")
 
+
+if __name__ == "__main__":
+    run_worker()

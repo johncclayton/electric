@@ -1,6 +1,6 @@
 from jinja2 import Template
 from pip.req import parse_requirements
-import os
+import os, itertools
 
 def default_root_path():
     return os.path.dirname(os.path.abspath(__file__))
@@ -22,11 +22,15 @@ def render_setup(root_path = None, ver="0.7.1"):
         root_path = default_root_path()
 
     template_filename = os.path.join(root_path, 'setup.txt')
-    requirements_filename = os.path.abspath(os.path.join(root_path, '..', 'requirements.txt'))
+    web_requirements_filename = os.path.abspath(os.path.join(root_path, '..', 'requirements-web.txt'))
+    worker_requirements_filename = os.path.abspath(os.path.join(root_path, '..', 'requirements-worker.txt'))
 
     template = Template(open(template_filename, 'r').read())
-    install_reqs = parse_requirements(requirements_filename, session=False)
-    reqs = [str(ir.req) for ir in install_reqs]
+
+    web_install_reqs = parse_requirements(web_requirements_filename, session=False)
+    worker_install_reqs = parse_requirements(worker_requirements_filename, session=False)
+
+    reqs = [str(ir.req) for ir in itertools.chain(web_install_reqs, worker_install_reqs)]
 
     return template.render(version=ver, requirements=reqs)
 
@@ -34,8 +38,4 @@ def render_setup(root_path = None, ver="0.7.1"):
 def render_and_write_setup(version):
     write_setup_py(render_setup(root_path=None, ver=version))
     return True
-
-
-if __name__ == "__main__":
-    render_and_write_setup()
 
