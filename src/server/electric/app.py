@@ -19,18 +19,15 @@ from rest_interface import \
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
 
-debug_mode = os.environ.get("DEBUG_MODE", None)
-if not debug_mode:
-    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter(format)
-    handler.setFormatter(formatter)
-    application.logger.addHandler(handler)
-    application.logger.setLevel(logging.DEBUG)
+format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handler = logging.StreamHandler()
+formatter = logging.Formatter(format)
+handler.setFormatter(formatter)
+application.logger.addHandler(handler)
+application.logger.setLevel(logging.DEBUG)
 
-    from zmq_marshall import worker_loc
-    application.logger.info("The charger LIVES! ELECTRIC_WORKER located at: {0}".format(worker_loc))
-
+from zmq_marshall import worker_loc
+application.logger.info("The charger LIVES! ELECTRIC_WORKER located at: {0}".format(worker_loc))
 
 api = Api(application)
 api.add_resource(StatusResource, "/status")

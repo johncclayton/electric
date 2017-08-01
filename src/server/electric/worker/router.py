@@ -1,7 +1,67 @@
-import logging, threading
+import logging, threading, time
 
 logger = logging.getLogger('electric.worker.router')
 lock = threading.Lock()
+
+
+class CachedValue(object):
+    cache_expiry_seconds = 1.0
+
+    def __init__(self, v = None):
+        super(CachedValue, self).__init__()
+        self.updated = None
+        self.attr = v
+
+    def set_stale(self):
+        self.updated = None
+
+    @property
+    def value(self):
+        return self.attr
+
+    @value.setter
+    def value(self, new_value):
+        self.attr = new_value
+        self.updated = time.time()
+
+    @property
+    def is_stale(self):
+        if self.updated is None:
+            return True
+
+        right_now = time.time()
+        difference = right_now - self.updated
+
+        return difference >= CachedValue.cache_expiry_seconds
+
+
+cached_device_info = CachedValue()
+cached_channel_status = [CachedValue(), CachedValue()]
+
+
+#
+# NOTE: this caches ONLY the GET requests, not the other uses of get_device_info() that are internal to the operation
+# of the run_op/stop_op methods.
+#
+def get_device_info_cached(charger):
+    if cached_device_info.is_stale:
+        value = charger.get_device_info()
+        cached_device_info.value = value
+    else:
+        value = cached_device_info.value
+    return value
+
+
+def get_channel_status_cached(charger, channel, device_id):
+    channel = int(channel)
+    assert (channel == 0 or channel == 1)
+
+    if cached_channel_status[channel].is_stale:
+        value = charger.get_channel_status(channel, device_id)
+        cached_channel_status[channel].value = value
+    else:
+        value = cached_channel_status[channel].value
+    return value
 
 
 def route_message(charger, method, args):
@@ -10,9 +70,9 @@ def route_message(charger, method, args):
 
     try:
         if method == "get_device_info":
-            return charger.get_device_info()
+            return get_device_info_cached(charger)
         elif method == "get_channel_status":
-            return charger.get_channel_status(args["channel"], args["device_id"])
+            return get_channel_status_cached(charger, args["channel"], args["device_id"])
         elif method == "get_control_register":
             return charger.get_control_register()
         elif method == "set_active_channel":
