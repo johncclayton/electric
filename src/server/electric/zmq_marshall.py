@@ -107,7 +107,7 @@ class ZMQCommsManager(object):
         if channel not in (0, 1):
             return None
 
-        self._send_message_get_response("set_active_channel", {
+        return self._send_message_get_response("set_active_channel", {
             "channel": channel
         })
 
