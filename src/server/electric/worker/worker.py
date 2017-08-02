@@ -31,7 +31,7 @@ def run_worker():
     logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 
     with zmq.utils.win32.allow_interrupt(stop_application):
-        logger.info("iCharger USB reader worker listening on: %s", listen_on)
+        logger.warn("iCharger USB reader worker listening on: %s", listen_on)
 
         try:
             while True:
@@ -55,7 +55,7 @@ def run_worker():
                             logger.info("executing message: {0}".format(message_log))
                             message["response"] = route_message(charger, method, args)
                         except Exception, e:
-                            logger.error("EXCEPTION during routing/execution for message: {0}, {1}".format(message_log, e))
+                            logger.error("EXCEPTION during routing/execution for : {0}, {1}".format(message_log, e))
                             message["exception"] = e
 
                         try:

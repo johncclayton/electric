@@ -96,21 +96,9 @@ class TestSerialFacade(unittest.TestCase):
             s = USBThreadedReader(0x9999, 0x9999)
             s.open()
 
-    def test_opening_claims_usb_interface(self):
-        charger = evil_global.comms
-        serial = charger.charger._serial
-        serial.close()
-        self.assertEqual(serial.is_open, False)
-        serial.open()
-        self.assertEqual(serial.is_open, True)
-        serial.close()
-        self.assertEqual(serial.is_open, False)
-
-
 class TestGatewayCommunications(unittest.TestCase):
     def setUp(self):
         testing_control.reset()
-        comms.charger.open()
 
     def test_status_contains_num_channels(self):
         obj = comms

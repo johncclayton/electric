@@ -1,8 +1,8 @@
 import json
 import logging
 
-from electric.icharger.models import SystemStorage
-from electric.tests.live.test_preset_base import BasePresetTestCase
+from electric.models import SystemStorage
+from electric.worker.tests.live.test_preset_base import BasePresetTestCase
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 

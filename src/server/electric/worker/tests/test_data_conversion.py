@@ -3,7 +3,7 @@ import struct
 import unittest
 
 from electric.app import application
-from electric.icharger.models import WriteDataSegment
+from electric.models import WriteDataSegment
 
 logger = logging.getLogger(__name__)
 

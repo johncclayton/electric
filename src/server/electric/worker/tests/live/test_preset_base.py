@@ -2,8 +2,8 @@ import json
 import logging
 
 from electric.app import application
-from electric.icharger.models import Preset, PresetIndex, ChannelStatus
-from electric.tests.live.live_testcase import LiveIChargerTestCase
+from electric.models import Preset, PresetIndex, ChannelStatus, ObjectNotFoundException
+from electric.worker.tests.live.live_testcase import LiveIChargerTestCase
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
@@ -11,6 +11,7 @@ logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 class BasePresetTestCase(LiveIChargerTestCase):
     def setUp(self):
         super(LiveIChargerTestCase, self).setUp()
+        application.testing = True
         self.client = application.test_client()
 
     def _turn_response_into_preset_object(self, response):
@@ -93,11 +94,13 @@ class BasePresetTestCase(LiveIChargerTestCase):
             self.assertEqual(new_preset_index.first_empty_index_position, preset_index.first_empty_index_position - 1)
 
             # And we should not be able to get the old preset, by memory_slot, anymore
-            response = self.client.get("/preset/{0}".format(test_preset.memory_slot))
-            if response.status_code != 404:
-                json_dict = json.loads(response.data)
-                print "Unexpected: got back a preset: {0}".format(json.dumps(json_dict, sort_keys=True, indent=True))
-            self.assertEqual(response.status_code, 404)
+            with self.assertRaises(ObjectNotFoundException):
+                response = self.client.get("/preset/{0}".format(test_preset.memory_slot))
+                if response.status_code != 404:
+                    json_dict = json.loads(response.data)
+                    print "Unexpected: received a non-404 response when attempting to find a missing preset, response: {0}".format(json.dumps(json_dict, sort_keys=True, indent=True))
+
+                self.assertEqual(response.status_code, 404)
 
     def _get_preset_index(self):
         response = self.client.get("/presetorder")

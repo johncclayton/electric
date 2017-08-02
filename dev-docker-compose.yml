@@ -1,6 +1,16 @@
 version: '2'
 
 services:
+  ui:
+    image: hypriot/rpi-dockerui
+    restart: always
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    expose:
+      - 9000
+    ports:
+      - 80:9000
+
   web:
     image: johncclayton/electric-pi-web:${DOCKER_TAG}
 
@@ -11,8 +21,7 @@ services:
       - ELECTRIC_WORKER_CONNECT=tcp://worker:5001
 
     ports:
-      - "80:5000"
-      - "5000:5000"
+      - 5000:5000
 
     volumes:
       - ./src/server:/www

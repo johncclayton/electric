@@ -103,6 +103,8 @@ def route_message(charger, method, args):
             return charger.measure_ir(args["channel"])
         elif method == "turn_off_logging":
             return charger.turn_off_logging()
+        elif method == "set_beep_properties":
+            return charger.set_beep_properties(args["beep_index"], args["enabled"], args["volume"])
         else:
             raise IOError("Unknown method name, cannot execute anything: {0}".format(method))
 

@@ -2,8 +2,7 @@ import logging
 import unittest
 
 from schematics.exceptions import ModelValidationError
-
-from electric.icharger.models import DeviceInfo, DeviceInfoStatus, PresetIndex, Preset
+from electric.models import DeviceInfo, DeviceInfoStatus, PresetIndex, Preset
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 

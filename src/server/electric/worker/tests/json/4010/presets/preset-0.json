@@ -11,7 +11,7 @@
     "channel_mode": 0, 
     "charge_current": 2.0,
     "cycle_count": 3,
-    "cycle_delay": 3,
+    "cycle_delay": 0,
     "cycle_mode": 0, 
     "discharge_current": 2.0,
     "end_charge": 10, 

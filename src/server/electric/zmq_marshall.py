@@ -2,7 +2,10 @@ import zmq, os
 import logging
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
-worker_loc = os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
+worker_loc = os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://192.168.178.164:5001")
+
+# RESPONSE_TIMEOUT_MS = 10000
+RESPONSE_TIMEOUT_MS = 1000000
 
 class ZMQCommsManager(object):
     """
@@ -51,25 +54,27 @@ class ZMQCommsManager(object):
             request["args"] = arg_dict
 
         self.charger.send_pyobj(request)
-        sockets = dict(self.poll.poll(10000))
+        sockets = dict(self.poll.poll(RESPONSE_TIMEOUT_MS))
         if self.charger in sockets:
             try:
+                e = None
                 resp = self.charger.recv_pyobj()
 
                 if "exception" in resp:
                     e = resp["exception"]
                     logger.error("message received from ZMQ, contained exception: {0}".format(e))
-                    raise e
-
-                if "response" in resp:
+                elif "response" in resp:
                     r = resp["response"]
                     logger.debug("response message received: {0}".format(r))
                     return r
+                else:
+                    e = IOError("request received - but no response was found inside, terrible!")
 
-                raise IOError("request received - but no response was found inside, terrible!")
-
-            except Exception, e:
+            except Exception, f:
                 logger.error("exception received when reading message from ZMQ: {0}".format(e))
+                e = f
+
+            if e is not None:
                 raise e
         else:
             raise IOError("request {1} failed to receive a response at all from ZMQ within 10 seconds: {0}".format(method_name, request["tag"]))
@@ -106,8 +111,15 @@ class ZMQCommsManager(object):
             "channel": channel
         })
 
+    def set_beep_properties(self, beep_index=0, enabled=True, volume=5):
+        return self._send_message_get_response("set_beep_properties", {
+            "beep_index": beep_index,
+            "enabled": enabled,
+            "volume": volume
+        })
+
     def get_system_storage(self):
-        self._send_message_get_response("get_system_storage")
+        return self._send_message_get_response("get_system_storage")
 
     def save_system_storage(self, system_storage_object):
         self._send_message_get_response("save_system_storage", {

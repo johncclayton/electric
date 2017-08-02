@@ -1,7 +1,5 @@
 import logging
-import os
-
-from flask import Flask
+from flask import Flask, Response, request
 from flask_cors import CORS
 from flask_restful import Api
 
@@ -45,3 +43,30 @@ api.add_resource(PresetListResource, "/preset")
 api.add_resource(AddNewPresetResource, "/addpreset")
 api.add_resource(PresetOrderResource, "/presetorder")
 api.add_resource(DialogCloseResource, "/closedialog/<channel_id>")
+
+# application.config['TRAP_HTTP_EXCEPTIONS']=True
+#
+# @application.errorhandler(Exception)
+# def handle_error(e):
+#     try:
+#         if e.code < 400:
+#             return Response.force_type(e, request.environ)
+#         elif e.code == 404:
+#             return "The page you're looking for was not found", 404
+#     except:
+#         return make_error_page("Error", "Something went wrong"), 500
+#
+
+# @application.errorhandler(ObjectNotFoundException)
+# def handle_object_not_found(error):
+#     response = jsonify(str(error))
+#     response.status_code = error.status_code
+#     return response
+#
+#
+# @application.errorhandler(BadRequestException)
+# def handle_bad_request(error):
+#     response = jsonify(str(error))
+#     response.status_code = error.status_code
+#     return response
+

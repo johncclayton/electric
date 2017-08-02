@@ -206,7 +206,7 @@ class ChargerCommsManager(object):
         # First, load the indicies and see if in fact this is mapped. If not, don't bother even trying
         preset_index = self.get_full_preset_list()
         if preset_index.index_of_preset_with_memory_slot_number(memory_slot_number) is None:
-            message = "No preset is mapped with slot number {0}".format(memory_slot_number)
+            message = "there is no preset mapped to slot number {0}".format(memory_slot_number)
             raise ObjectNotFoundException(message)
 
         result = self.select_memory_program(memory_slot_number)

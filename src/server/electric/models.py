@@ -80,11 +80,11 @@ DEVICEID_306_DUO = 67  # TODO: Update to the real device number
 
 
 class ObjectNotFoundException(Exception):
-    pass
+    status_code = 404
 
 
 class BadRequestException(Exception):
-    pass
+    status_code = 404
 
 
 DeviceIdCellCount = (
