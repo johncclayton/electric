@@ -34,7 +34,43 @@ def connection_state_dict(exc=None):
     return value
 
 
+# def retry_request(func):
+#     def wrapper(self, *args, **kwargs):
+#         # with evil_global.lock:
+#         retry = 0
+#         while retry < RETRY_LIMIT:
+#             try:
+#                 return func(self, *args, **kwargs)
+#
+#             except ObjectNotFoundException as e:
+#                 abort(404, message=e.message)
+#
+#             except BadRequest as badRequest:
+#                 # Just return it, it's a validation failure
+#                 raise badRequest
+#
+#             except ValueError as ve:
+#                 raise ve
+#
+#             except Exception, ex:
+#                 retry += 1
+#
+#                 logger.warning("{0}/{3}, will try {4} again (count is at {1}/{2})".format(ex,
+#                                                                                           retry,
+#                                                                                           RETRY_LIMIT,
+#                                                                                           type(ex),
+#                                                                                           str(self) + "." + str(func)))
+#
+#                 # If the charger isn't plugged in. This could fail.
+#                 if retry >= RETRY_LIMIT:
+#                     logger.warning("retry limit exceeded, aborting the call to {0} completely".format(str(func)))
+#                     return connection_state_dict(ex), 504
+#
+#     return wrapper
+
+
 class StatusResource(Resource):
+    # @retry_request
     def get(self):
         info = comms.get_device_info()
 
@@ -45,6 +81,7 @@ class StatusResource(Resource):
 
 
 class DialogCloseResource(Resource):
+    # @retry_request
     def put(self, channel_id):
         channel = int(channel_id)
         if not (channel == 0 or channel == 1):
@@ -86,6 +123,7 @@ class ChannelResource(Resource):
 
 
 class ControlRegisterResource(Resource):
+    # @retry_request
     def get(self):
         control = comms.get_control_register()
 
@@ -94,6 +132,7 @@ class ControlRegisterResource(Resource):
 
 
 class ChargeResource(ControlRegisterResource):
+    # @retry_request
     def put(self, channel_id, preset_memory_slot):
         device_status = comms.run_operation(Operation.Charge, int(channel_id), int(preset_memory_slot))
         comms.turn_off_logging()
@@ -103,6 +142,7 @@ class ChargeResource(ControlRegisterResource):
 
 
 class DischargeResource(ControlRegisterResource):
+    # @retry_request
     def put(self, channel_id, preset_memory_slot):
         device_status = comms.run_operation(Operation.Discharge, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
@@ -111,6 +151,7 @@ class DischargeResource(ControlRegisterResource):
 
 
 class StoreResource(ControlRegisterResource):
+    # @retry_request
     def put(self, channel_id, preset_memory_slot):
         device_status = comms.run_operation(Operation.Storage, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
@@ -119,6 +160,7 @@ class StoreResource(ControlRegisterResource):
 
 
 class BalanceResource(ControlRegisterResource):
+    # @retry_request
     def put(self, channel_id, preset_memory_slot):
         device_status = comms.run_operation(Operation.Balance, int(channel_id), int(preset_memory_slot))
         annotated_device_status = device_status.to_primitive()
@@ -127,6 +169,7 @@ class BalanceResource(ControlRegisterResource):
 
 
 class MeasureIRResource(ControlRegisterResource):
+    # @retry_request
     def put(self, channel_id):
         device_status = comms.measure_ir(int(channel_id))
         annotated_device_status = device_status.to_primitive()
@@ -135,6 +178,7 @@ class MeasureIRResource(ControlRegisterResource):
 
 
 class StopResource(ControlRegisterResource):
+    # @retry_request
     def put(self, channel_id):
         channel_number = int(channel_id)
         # We do this twice. Once to stop. 2nd time to get past the "STOPS" screen.
@@ -145,6 +189,7 @@ class StopResource(ControlRegisterResource):
 
 
 class SystemStorageResource(Resource):
+    # @retry_request
     def get(self):
         syst = comms.get_system_storage()
         obj = syst.to_primitive()
@@ -152,6 +197,7 @@ class SystemStorageResource(Resource):
 
         return obj
 
+    # @retry_request
     def put(self):
         json_dict = request.json
         del json_dict['charger_presence']
@@ -160,17 +206,20 @@ class SystemStorageResource(Resource):
 
 
 class PresetResource(Resource):
+    # @retry_request
     def get(self, preset_memory_slot):
         preset_memory_slot = int(preset_memory_slot)
         preset = comms.get_preset(preset_memory_slot)
         return preset.to_primitive()
 
+    # @retry_request
     def delete(self, preset_memory_slot):
         # This will only, I think ... work for "at the end"
         preset_memory_slot = int(preset_memory_slot)
         logger.info("Try to delete preset at memory slot {0}".format(preset_memory_slot))
         return comms.delete_preset_at_index(preset_memory_slot)
 
+    # @retry_request
     def put(self, preset_memory_slot):
         preset_memory_slot = int(preset_memory_slot)
         json_dict = request.json
