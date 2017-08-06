@@ -266,7 +266,6 @@ class ChargerCommsManager(object):
     This ALWAYS saves a NEW preset. The presets memory_slot is ignored, and it's
     inserted at the end of the preset index list.
     '''
-
     def add_new_preset(self, preset):
         # Find the next free memory slot, assign that to the preset, and save both indexes + preset
         preset_index = self.get_full_preset_list()
@@ -298,7 +297,6 @@ class ChargerCommsManager(object):
     This saves an existing preset to memory.
     It does NOT allocate new presets, or insert them into a preset index list
     '''
-
     def save_preset_to_memory_slot(self, preset, memory_slot, write_to_flash=True, verify_write=True):
         # We don't want to verify if we're adding. In that case we KNOW we want to add it here.
         # and we want to ignore any older data that may be in that slot.

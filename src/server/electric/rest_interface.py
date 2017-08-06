@@ -1,8 +1,7 @@
 import logging
 
 from flask import request
-from flask_restful import Resource, abort
-from werkzeug.exceptions import BadRequest
+from flask_restful import Resource
 
 from zmq_marshall import ZMQCommsManager
 from electric.models import Operation

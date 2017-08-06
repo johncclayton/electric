@@ -823,7 +823,9 @@ class Preset(Model):
 
     def verify_can_be_written_or_deleted(self):
         if self.is_fixed:
-            raise ObjectNotFoundException("This preset exists, but is marked as 'fixed' (read only)")
+            # raise ObjectNotFoundException("This preset exists, but is marked as 'fixed' (read only)")
+            pass
+        return True
 
     def _test_bit_set(self, offset):
         mask = (1 << offset)
