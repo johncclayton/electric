@@ -2,13 +2,13 @@
 
     <ion-row>
         <ion-col class="value" text-center>
-            {{channelObject?.curr_inp_volts|number:'1.3-3'}}<br/>
+            {{channelObject?.input_volts|number:'1.3-3'}}<br/>
         </ion-col>
         <ion-col class="value" text-center>
-            {{channelObject?.curr_out_amps|number:'1.2-2'}}<br/>
+            {{channelObject?.output_amps|number:'1.2-2'}}<br/>
         </ion-col>
         <ion-col class="value" text-center>
-            {{channelObject?.curr_out_capacity}}<br/>
+            {{channelObject?.total_capacity}}<br/>
         </ion-col>
         <ion-col class="value" width-20 text-nowrap
                  [ngClass]="{'warning':tempAtWarningLevel(), 'emergency':tempAtEmergencyLevel()}">

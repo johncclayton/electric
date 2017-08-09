@@ -79,7 +79,7 @@
         <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
         <charger-status
                 [status]="chargerStatusObserver"
-                [channel]="channelSubscriptions()[0]">
+                [channels]="channelSubscriptions()">
         </charger-status>
 
         <channel name="Channel 1" [channelObserver]="channelSubscriptions()[0]" [index]="0"></channel>

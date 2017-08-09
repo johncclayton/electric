@@ -67,7 +67,7 @@ export class Channel {
         }
     }
 
-    updateStateFrom(jsonResponse: any|string, cellLimit: any) {
+    updateStateFrom(jsonResponse: any | string, cellLimit: any) {
         this._json = jsonResponse;
         this.limitCellsBasedOnLimit(cellLimit);
     }
@@ -91,6 +91,18 @@ export class Channel {
 
     get json() {
         return this._json;
+    }
+
+    get input_volts(): number {
+        return this._json['curr_inp_volts'];
+    }
+
+    get output_amps(): number {
+        return this._json['curr_out_amps'];
+    }
+
+    get output_capacity(): number {
+        return this._json['curr_out_capacity'];
     }
 
     get charger_internal_temp(): number {

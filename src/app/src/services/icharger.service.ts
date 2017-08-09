@@ -37,10 +37,6 @@ export class iChargerService {
                        public events: Events,
                        public config: Configuration) {
         this.channelStateObservable = [];
-
-        // It is assumed that config is loaded by the time this component is created.
-        // Update with values from the charger
-        this.config.updateStateFromCharger(this);
     }
 
     isConnectedToServer(): boolean {
@@ -142,6 +138,9 @@ export class iChargerService {
     private chargerDidAppear(statusDict) {
         this.numberOfChannels = statusDict['channel_count'];
         console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
+
+        // Update with values from the charger
+        this.config.updateStateFromCharger(this);
 
         // Clear existing observables
         // TODO: do we need to clean these up?
