@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {NavController, NavParams, List, ToastController} from 'ionic-angular';
 import {iChargerService} from "../../services/icharger.service";
 import {PresetPage} from "../preset/preset";
-import {Preset, ChemistryType} from "../preset/preset-class";
+import {Preset, ChemistryType} from "../../models/preset-class";
 import {Chemistry} from "../../utils/mixins";
 import {applyMixins} from "rxjs/util/applyMixins";
 

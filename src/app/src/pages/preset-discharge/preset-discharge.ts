@@ -3,7 +3,7 @@ import {PresetBasePage} from "../preset-charge/preset-charge";
 import {NavController, NavParams} from "ionic-angular";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
-import {RegenerativeMode, RegenerativeToChannelMethod, ChemistryType} from "../preset/preset-class";
+import {RegenerativeMode, RegenerativeToChannelMethod, ChemistryType} from "../../models/preset-class";
 import {iChargerService} from "../../services/icharger.service";
 import {Configuration} from "../../services/configuration.service";
 

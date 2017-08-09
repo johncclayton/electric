@@ -10,6 +10,25 @@
 <ion-content padding>
 
     <ion-list>
+        <ion-list-header>Settings</ion-list-header>
+        <ion-item>
+            <ion-label>Max cells to show</ion-label>
+            <ion-select [(ngModel)]="config.configDict.cellLimit">
+                <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Temperature shown in celsius</ion-label>
+            <ion-toggle (ngModelChange)="toggleChargerTempUnits()" [(ngModel)]="config.configDict.unitsCelsius"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Prevent Dashboard Scrolling</ion-label>
+            <ion-toggle [(ngModel)]="config.configDict.preventChargerVerticalScrolling"></ion-toggle>
+        </ion-item>
+    </ion-list>
+
+    <ion-list>
+        <ion-list-header>Connection</ion-list-header>
         <ion-item>
             <ion-label stacked>IP Address of Pi</ion-label>
             <ion-input type="text" [(ngModel)]="config.configDict.ipAddress"></ion-input>
@@ -18,24 +37,19 @@
             <ion-label stacked>Port of Pi</ion-label>
             <ion-input type="text" [(ngModel)]="config.configDict.port"></ion-input>
         </ion-item>
-        <ion-item>
-            <ion-label>Max cells to show</ion-label>
-            <ion-select [(ngModel)]="config.configDict.cellLimit">
-                <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
-            </ion-select>
-        </ion-item>
-        <ion-item>
-            <ion-label>Prevent Dashboard Scrolling</ion-label>
-            <ion-toggle [(ngModel)]="config.configDict.preventChargerVerticalScrolling"></ion-toggle>
-        </ion-item>
     </ion-list>
+
     <ion-list>
         <ion-list-header>Debug</ion-list-header>
         <ion-item>
             <ion-label>Mock Charger</ion-label>
             <ion-toggle [(ngModel)]="config.configDict.mockCharger"></ion-toggle>
         </ion-item>
-        <p padding>You must restart the app for this to take effect</p>
+
+        <ion-item *ngIf="mockValueChanged()" text-center>
+            <ion-badge class="blinky" color="dark">You must restart the app for this to take effect
+            </ion-badge>
+        </ion-item>
 
     </ion-list>
 

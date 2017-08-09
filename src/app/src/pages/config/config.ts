@@ -2,16 +2,19 @@ import {Component} from "@angular/core";
 import {NavController} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {iChargerService} from "../../services/icharger.service";
+import {System} from "../../models/system";
 
 @Component({
     selector: 'page-config',
     templateUrl: 'config.html'
 })
 export class ConfigPage {
+    mockChargerOriginal: boolean;
+
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public config: Configuration) {
-
+        this.mockChargerOriginal = this.config.getIsUsingMockCharger();
     }
 
     ionViewWillLeave() {
@@ -21,6 +24,18 @@ export class ConfigPage {
 
     resetToDefaults() {
         this.config.resetToDefaults();
+    }
+
+    mockValueChanged() {
+        return this.mockChargerOriginal != this.config.getIsUsingMockCharger();
+    }
+
+    toggleChargerTempUnits() {
+        this.chargerService.toggleChargerTempUnits().subscribe((result: System) => {
+            console.info("Toggling C/F. Charger using Celsius: " + result.isCelsius);
+        }, error => {
+            console.error("Failed to change C/F on charger: " + error);
+        });
     }
 
     cellChoices() {

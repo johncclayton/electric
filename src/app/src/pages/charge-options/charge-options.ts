@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {NavController, NavParams} from 'ionic-angular';
 import {Channel} from "../../models/channel";
 import {iChargerService} from "../../services/icharger.service";
-import {ChemistryType, Preset} from "../preset/preset-class";
+import {ChemistryType, Preset} from "../../models/preset-class";
 import {Chemistry} from "../../utils/mixins";
 import {Configuration} from "../../services/configuration.service";
 

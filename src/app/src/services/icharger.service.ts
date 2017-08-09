@@ -1,10 +1,11 @@
 import {Injectable} from "@angular/core";
 import {Http, Headers, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
-import {Configuration} from "./configuration.service";
+import {CONFIG_LOADED_EVENT, Configuration} from "./configuration.service";
 import {Events} from "ionic-angular";
-import {Preset} from "../pages/preset/preset-class";
+import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";
+import {System} from "../models/system";
 
 const CHARGER_CONNECTED_EVENT: string = 'charger.connected'; // connected!
 const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected'; // connection error
@@ -19,9 +20,9 @@ export enum ChargerType {
 }
 
 export let ChargerMetadata = {};
-ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells' : 8};
-ChargerMetadata[ChargerType.iCharger406Duo] = {'maxAmps': 40, 'name': 'iCharger 406', 'tag': 'DUO', 'cells' : 6};
-ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO', 'cells' : 10};
+ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells': 8};
+ChargerMetadata[ChargerType.iCharger406Duo] = {'maxAmps': 40, 'name': 'iCharger 406', 'tag': 'DUO', 'cells': 6};
+ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO', 'cells': 10};
 
 @Injectable()
 export class iChargerService {
@@ -36,6 +37,10 @@ export class iChargerService {
                        public events: Events,
                        public config: Configuration) {
         this.channelStateObservable = [];
+
+        // It is assumed that config is loaded by the time this component is created.
+        // Update with values from the charger
+        this.config.updateStateFromCharger(this);
     }
 
     isConnectedToServer(): boolean {
@@ -161,9 +166,9 @@ export class iChargerService {
                     let cellLimit = this.config.getCellLimit();
 
                     // Create a new channel if required. Or reuse an existing.
-                    if(i in this.channelSnapshots) {
+                    if (i in this.channelSnapshots) {
                         // existing channel
-                        let channel:Channel = this.channelSnapshots[i];
+                        let channel: Channel = this.channelSnapshots[i];
                         channel.updateStateFrom(jsonResponse, cellLimit);
                     } else {
                         this.channelSnapshots[i] = new Channel(i, jsonResponse, cellLimit);
@@ -369,6 +374,46 @@ export class iChargerService {
         });
     }
 
+    getSystem(): Observable<System> {
+        return Observable.create((observable) => {
+            let operationURL = this.getChargerURL("/system");
+            this.http.get(operationURL).subscribe((resp) => {
+                if (!resp.ok) {
+                    observable.error(resp);
+                } else {
+                    let sysObj = new System(resp.json());
+                    observable.next(sysObj);
+                    observable.complete();
+                }
+            });
+        });
+    }
+
+    toggleChargerTempUnits(): Observable<System> {
+        let operationURL = this.getChargerURL("/system");
+        return Observable.create((observable) => {
+            this.getSystem().subscribe((sysObj) => {
+                sysObj.isCelsius = !sysObj.isCelsius;
+
+                let headers = new Headers({'Content-Type': 'application/json'});
+                let options = new RequestOptions({headers: headers});
+                this.http.put(operationURL, sysObj.json(), options).subscribe((resp) => {
+                    if (!resp.ok) {
+                        observable.error(resp);
+                    } else {
+                        observable.next(sysObj);
+                        observable.complete();
+                    }
+                }, error => {
+                    observable.error();
+                });
+
+            }, (error) => {
+                observable.error(error);
+            });
+        });
+    }
+
     cancelAutoStopForChannel(channel: Channel) {
         if (this.autoStopSubscriptions[channel.index]) {
             console.log("Cancelled auto-stop subscription for channel ", channel.index);
@@ -396,6 +441,7 @@ export class iChargerService {
             this.cancelAutoStopForChannel(channel);
         });
     }
+
 }
 
 export {

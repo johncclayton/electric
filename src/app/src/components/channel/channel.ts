@@ -3,7 +3,7 @@ import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
 import {ActionSheetController, NavController, ToastController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
-import {Preset} from "../../pages/preset/preset-class";
+import {Preset} from "../../models/preset-class";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,

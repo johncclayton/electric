@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {Storage} from "@ionic/storage";
 import {AlertController, Events, Platform, ToastController, LoadingController} from "ionic-angular";
 import {Deploy} from "@ionic/cloud-angular";
+import {iChargerService} from "./icharger.service";
 
 const CONFIG_LOADED_EVENT = "config.loaded";
 const CONFIG_CHANGED_EVENT = "config.changed";
@@ -23,6 +24,13 @@ export class Configuration {
         this.versionUUID = "";
     }
 
+    updateStateFromCharger(chargerService: iChargerService) {
+        console.info("Updating config with values from charger...");
+        chargerService.getSystem().subscribe((system) => {
+            this.configDict['unitsCelsius'] = system.isCelsius;
+        });
+    }
+
     loadConfiguration(): Promise<any> {
         this.setConfigToDefaults();
 
@@ -30,34 +38,17 @@ export class Configuration {
             this.storage.get("configuration")
                 .then(v => {
                     this.bringInConfiguration(v);
-                    console.log("Configuration loaded");
-                    this.events.publish(CONFIG_LOADED_EVENT);
+
+                    // The main app waits on this.
+                    // It doesn't really start until this fires...
                     resolve();
 
-                    console.log("Platforms: ", this.platform.platforms());
-                    if (this.canUseDeploy()) {
-                        console.log("Finding current deploy info...");
-                        this.deploy.info().then(v => {
-                            this.versionNumber = "";
-                            let keys = Object.keys(v);
+                    this.checkForUpdateIfCanOnThisPlatform();
 
-                            keys.forEach((key, index) => {
-                                if (key == 'binary_version') {
-                                    this.versionNumber = v[key];
-                                }
-                                if (key == "deploy_uuid") {
-                                    this.versionUUID = v[key];
-                                }
-                            });
-
-                            this.checkForUpdate();
-                        });
-                    } else {
-                        console.log("Can't use deploy - so not trying to see what version we are");
-                    }
+                    console.log("Configuration loaded from storage");
+                    this.events.publish(CONFIG_LOADED_EVENT);
                 })
         });
-
     }
 
     bringInConfiguration(configurationObject) {
@@ -85,6 +76,10 @@ export class Configuration {
 
     getCellLimit() {
         return this.configDict['cellLimit'];
+    }
+
+    getIsUsingMockCharger() {
+        return this.configDict['mockCharger'];
     }
 
     getHostName(): string {
@@ -151,6 +146,7 @@ export class Configuration {
             "isnew": true,
             "cellLimit": -1,
             "preventChargerVerticalScrolling": true,
+            "unitsCelsius": true,
             "mockCharger": false,
             "charge": {
                 "capacity": 2000,
@@ -190,6 +186,30 @@ export class Configuration {
     /*
      Upgrading
      */
+
+    private checkForUpdateIfCanOnThisPlatform() {
+        console.log("Platforms: ", this.platform.platforms());
+        if (this.canUseDeploy()) {
+            console.log("Finding current deploy info...");
+            this.deploy.info().then(v => {
+                this.versionNumber = "";
+                let keys = Object.keys(v);
+
+                keys.forEach((key, index) => {
+                    if (key == 'binary_version') {
+                        this.versionNumber = v[key];
+                    }
+                    if (key == "deploy_uuid") {
+                        this.versionUUID = v[key];
+                    }
+                });
+
+                this.checkForUpdate();
+            });
+        } else {
+            console.log("Can't use deploy - so not trying to see what version we are");
+        }
+    }
 
     checkForUpdate() {
         if (!this.canUseDeploy()) {

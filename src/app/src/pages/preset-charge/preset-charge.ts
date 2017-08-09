@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
-import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../preset/preset-class";
+import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../../models/preset-class";
 import {FormBuilder} from "@angular/forms";
 
 

@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {NavController, NavParams, AlertController} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {PresetChargePage} from "../preset-charge/preset-charge";
-import {Preset, ChemistryType} from "./preset-class";
+import {Preset, ChemistryType} from "../../models/preset-class";
 import {PresetStoragePage} from "../preset-storage/preset-storage";
 import {PresetDischargePage} from "../preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../preset-cycle/preset-cycle";

@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {PresetBasePage} from "../preset-charge/preset-charge";
 import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
-import {Cycle} from "../preset/preset-class";
+import {Cycle} from "../../models/preset-class";
 import {FormBuilder} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
 
