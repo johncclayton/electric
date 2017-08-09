@@ -10,9 +10,10 @@ logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
 class BasePresetTestCase(LiveIChargerTestCase):
     def setUp(self):
-        super(LiveIChargerTestCase, self).setUp()
+        super(BasePresetTestCase, self).setUp()
         application.testing = True
         self.client = application.test_client()
+        self.setup_environment_from_live_config()
 
     def _turn_response_into_preset_object(self, response):
         return self._turn_response_into_object(response, Preset, False)

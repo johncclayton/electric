@@ -33,7 +33,7 @@ export class ChargeOptionsPage implements Chemistry {
         this.title = navParams.data['title'];
         this.callback = navParams.data['callback'];
 
-        if(!this.showCapacityAndC) {
+        if (!this.showCapacityAndC) {
             // Force to presets (not computed)
             this.chargeMethod = "presets";
         }
@@ -123,6 +123,14 @@ export class ChargeOptionsPage implements Chemistry {
                 return true;
             }
             return Preset.chemistryPrefix(preset.type) == filter;
+        });
+        presets.sort((a: Preset, b: Preset) => {
+            if (a.charge_current < b.charge_current) {
+                return -1;
+            } else if (a.charge_current > b.charge_current) {
+                return 1;
+            }
+            return 0;
         });
         return _.chunk(presets, 3);
     }

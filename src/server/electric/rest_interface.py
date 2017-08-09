@@ -56,6 +56,12 @@ class DialogCloseResource(Resource):
         return obj
 
 
+class ZMQCommsResource(Resource):
+    def put(self):
+        comms.close_and_reopen_connection()
+        return {}
+
+
 class ChannelResource(Resource):
     # @retry_request
     def get(self, channel_id):
@@ -229,5 +235,3 @@ class PresetOrderResource(Resource):
         json_dict = request.json
         preset_list = PresetIndex(json_dict)
         return comms.save_full_preset_list(preset_list)
-
-

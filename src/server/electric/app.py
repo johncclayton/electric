@@ -5,6 +5,7 @@ from flask_restful import Api
 
 from rest_interface import \
     DialogCloseResource, \
+    ZMQCommsResource, \
     StatusResource, \
     SystemStorageResource, \
     ChannelResource, \
@@ -24,11 +25,9 @@ handler.setFormatter(formatter)
 application.logger.addHandler(handler)
 application.logger.setLevel(logging.DEBUG)
 
-from zmq_marshall import worker_loc
-application.logger.info("The charger LIVES! ELECTRIC_WORKER located at: {0}".format(worker_loc))
-
 api = Api(application)
 api.add_resource(StatusResource, "/status")
+api.add_resource(ZMQCommsResource, "/zmq/bounce")
 api.add_resource(SystemStorageResource, "/system")
 api.add_resource(ControlRegisterResource, "/control")
 api.add_resource(ChargeResource, "/charge/<channel_id>/<preset_memory_slot>")

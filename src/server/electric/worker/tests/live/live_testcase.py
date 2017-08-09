@@ -1,6 +1,8 @@
 import json
 import unittest
 
+import os
+
 HAVE_CONFIGURATION = False
 try:
     with open("live.config.json") as data:
@@ -19,10 +21,19 @@ class LiveIChargerTestCase(unittest.TestCase):
     def _turn_response_into_object(self, response, cls, expect_charger_presence=True):
         self.assertEqual(response.status_code, 200, "Response not expected. Got: {0}".format(response))
         json_dict = json.loads(response.data)
+
         if expect_charger_presence:
             self.assertEqual(json_dict['charger_presence'], "connected")
             del json_dict['charger_presence']
+
         return cls(json_dict)
+
+    def setup_environment_from_live_config(self):
+        env = configuration.get("env") or {}
+        if env:
+            # Setup the new env and bounce the ZMQ connection
+            os.environ.update(env)
+            self.client.put("/zmq/bounce")
 
     @staticmethod
     def load_json_file(named):

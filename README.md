@@ -4,7 +4,7 @@
 Docker image: https://hub.docker.com/r/scornflake/electric-pi/
 
 # What
-This project provides everything you need to get information from your iCharger 308/4010 DUO to an application
+This project provides everything you need to get information from your iCharger 308/406/4010 DUO to an application
 running on your mobile device.  
 
 # Installation

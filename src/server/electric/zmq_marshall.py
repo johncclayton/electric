@@ -2,9 +2,15 @@ import zmq, os
 import logging
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
-worker_loc = os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
+
+
+def get_worker_loc():
+    return os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
+
 
 RESPONSE_TIMEOUT_MS = 10000
+
+
 # RESPONSE_TIMEOUT_MS = 1000000
 
 class ZMQCommsManager(object):
@@ -17,7 +23,7 @@ class ZMQCommsManager(object):
     def __init__(self):
         self.ctx = zmq.Context()
 
-        self.charger = None
+        self.charger_socket = None
         self.request_tag = 0
 
         self.poll = zmq.Poller()
@@ -28,21 +34,26 @@ class ZMQCommsManager(object):
 
     def close_charger_socket(self):
         logger.info("Disconnecting from worker")
-        self.poll.unregister(self.charger)
-        self.charger.close()
-        self.charger = None
+        self.poll.unregister(self.charger_socket)
+        self.charger_socket.close()
+        self.charger_socket = None
 
     def open_charger_socket(self):
-        assert(self.charger is None)
-        self.charger = self.ctx.socket(zmq.REQ)
-        self.charger.set(zmq.REQ_RELAXED, 1)
-        self.charger.set(zmq.REQ_CORRELATE, 1)
+        assert (self.charger_socket is None)
+        self.charger_socket = self.ctx.socket(zmq.REQ)
+        self.charger_socket.set(zmq.REQ_RELAXED, 1)
+        self.charger_socket.set(zmq.REQ_CORRELATE, 1)
 
-        logger.info("Connecting to worker at: %s", worker_loc)
-        self.charger.connect(worker_loc)
-        self.poll.register(self.charger, zmq.POLLIN)
+        logger.info("Connecting to worker at: %s", get_worker_loc())
+        self.charger_socket.connect(get_worker_loc())
+        self.poll.register(self.charger_socket, zmq.POLLIN)
 
-    def _send_message_get_response(self, method_name, arg_dict = None):
+    def close_and_reopen_connection(self):
+        logger.info("Resetting ZMQ connection")
+        self.close_charger_socket()
+        self.open_charger_socket()
+
+    def _send_message_get_response(self, method_name, arg_dict=None):
         request = {
             "method": method_name,
             "tag": self.request_tag
@@ -53,12 +64,12 @@ class ZMQCommsManager(object):
         if arg_dict is not None:
             request["args"] = arg_dict
 
-        self.charger.send_pyobj(request)
+        self.charger_socket.send_pyobj(request)
         sockets = dict(self.poll.poll(RESPONSE_TIMEOUT_MS))
-        if self.charger in sockets:
+        if self.charger_socket in sockets:
             try:
                 e = None
-                resp = self.charger.recv_pyobj()
+                resp = self.charger_socket.recv_pyobj()
 
                 if "exception" in resp:
                     e = resp["exception"]
@@ -214,5 +225,3 @@ class ZMQCommsManager(object):
         return self._send_message_get_response("measure_ir", {
             "channel": channel_number
         })
-
-
