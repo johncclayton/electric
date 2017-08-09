@@ -1,3 +1,5 @@
+import {clamp} from "ionic-angular/util/util";
+
 export enum ChemistryType {
     LiPo = 0,
     LiLo,
@@ -50,7 +52,7 @@ export enum Cycle {
     DischargeChargeStore,
 }
 
-let _dischargeVoltageMinMax: Map<ChemistryType, Array<{min: number, max: number}> > = new Map();
+let _dischargeVoltageMinMax: Map<ChemistryType, Array<{ min: number, max: number }>> = new Map();
 _dischargeVoltageMinMax[ChemistryType.LiPo] = {'min': 3.0, 'max': 4.1};
 _dischargeVoltageMinMax[ChemistryType.LiFe] = {'min': 2.0, 'max': 3.5};
 _dischargeVoltageMinMax[ChemistryType.NiMH] = {'min': 0.1, 'max': 33};
@@ -281,6 +283,15 @@ export class Preset {
             case ChemistryType.LiPo:
                 this.data['lipo_discharge_cell_voltage'] = value;
         }
+    }
+
+    get charge_end_current(): number {
+        return this.data['end_charge'];
+    }
+
+    set charge_end_current(value: number) {
+        value = clamp(10, 50, value);
+        this.data['end_charge'] = value;
     }
 
     get discharge_end_current(): number {

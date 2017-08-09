@@ -20,6 +20,13 @@
                 {{this.formGroup.controls.dischargeVoltage.errors.message}}</p></ion-label>
             <ion-input type="number" no-right-padding formControlName="dischargeVoltage"></ion-input>
         </ion-item>
+        <!--<ion-item>-->
+            <!--<ion-label>End Current %</ion-label>-->
+            <!--<ion-range formControlName="dischargeCurrent" pin=true min="10" max="50">-->
+                <!--<ion-label range-left>10%</ion-label>-->
+                <!--<ion-label range-right>50%</ion-label>-->
+            <!--</ion-range>-->
+        <!--</ion-item>-->
         <ion-item>
             <ion-label>End Current %<p *ngIf="formGroup.controls.dischargeEndCurrent.errors" color="danger">
                 {{this.formGroup.controls.dischargeEndCurrent.errors.message}}</p></ion-label>
