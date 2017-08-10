@@ -1,15 +1,20 @@
 <ion-menu [content]="content" type="reveal">
     <ion-header>
         <ion-toolbar>
-            <ion-title text-center>Stuff & Things</ion-title>
+            <ion-title text-center>Settings</ion-title>
         </ion-toolbar>
     </ion-header>
 
     <ion-content>
         <ion-list>
-            <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
-                {{p.title}}
-            </button>
+            <div *ngFor="let p of pages">
+                <button *ngIf="p.visible();else greyed_out_button" menuClose ion-item (click)="openPage(p)">
+                    {{p.title}}
+                </button>
+                <ng-template #greyed_out_button>
+                    <button ion-item disabled>{{p.title}}</button>
+                </ng-template>
+            </div>
         </ion-list>
     </ion-content>
 

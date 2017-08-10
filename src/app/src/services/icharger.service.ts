@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
-import {Http, Headers, RequestOptions} from "@angular/http";
+import {Headers, Http, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
-import {CONFIG_LOADED_EVENT, Configuration} from "./configuration.service";
+import {Configuration} from "./configuration.service";
 import {Events} from "ionic-angular";
 import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";

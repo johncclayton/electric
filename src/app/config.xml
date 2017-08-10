@@ -3,7 +3,7 @@
     <name>Electric</name>
     <description>Remote control for your charging setup</description>
     <author email="electric@we.dont.have.a.domain.yet.org" href="https://github.com/johncclayton/electric">Electric at GitHub</author>
-    <content src="index.html" />
+    <content original-src="index.html" src="http://192.168.1.168:8100" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -48,8 +48,10 @@
     <feature name="StatusBar">
         <param name="ios-package" onload="true" value="CDVStatusBar" />
     </feature>
+    <allow-navigation href="http://192.168.1.168:8100" />
     <engine name="android" spec="^6.2.3" />
-    <engine name="ios" spec="~4.3.1" />
+    <engine name="browser" spec="^4.1.0" />
+    <engine name="ios" spec="^4.4.0" />
     <plugin name="cordova-plugin-console" spec="~1.0.5" />
     <plugin name="cordova-plugin-crosswalk-webview" spec="^2.3.0">
         <variable name="XWALK_VERSION" value="23+" />

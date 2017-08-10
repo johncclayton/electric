@@ -6,8 +6,8 @@ import {iChargerService} from "../services/icharger.service";
 import {PresetListPage} from "../pages/preset-list/preset-list";
 import {HomePage} from "../pages/home/home";
 
-import { StatusBar } from '@ionic-native/status-bar';
-import { SplashScreen } from '@ionic-native/splash-screen';
+import {StatusBar} from '@ionic-native/status-bar';
+import {SplashScreen} from '@ionic-native/splash-screen';
 
 @Component({
     templateUrl: 'app.html'
@@ -15,13 +15,14 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 export class MyApp {
     @ViewChild(Nav) nav: Nav;
     rootPage = HomePage;
+
     // rootPage = PresetListPage;
-    pages: Array<{title: string, component: any}>;
+    pages: Array<{ title: string, component: any, visible: any }>;
 
     constructor(platform: Platform,
                 public chargerService: iChargerService,
-                public statusBar : StatusBar,
-                public splashScreen : SplashScreen,
+                public statusBar: StatusBar,
+                public splashScreen: SplashScreen,
                 public config: Configuration) {
 
         platform.ready().then(() => {
@@ -32,8 +33,16 @@ export class MyApp {
         });
 
         this.pages = [
-            {title: 'Presets', component: PresetListPage},
-            {title: 'Config', component: ConfigPage},
+            {
+                title: 'Presets', component: PresetListPage, visible: () => {
+                return this.chargerService.isConnectedToCharger()
+            },
+            },
+            {
+                title: 'Config', component: ConfigPage, visible: () => {
+                return true;
+            }
+            },
         ]
     }
 

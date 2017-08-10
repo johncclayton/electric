@@ -8,3 +8,4 @@ live.config.json
 enumerate_interfaces
 src/server/electric/icharger/cplusplus/DemoJunsiModBusHID/DemoJunsiModBusHID/Debug/
 *.ipch
+build.json
