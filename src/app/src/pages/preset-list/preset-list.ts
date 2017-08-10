@@ -34,9 +34,22 @@ export class PresetListPage implements Chemistry {
             }
             // Was used during testing, to move to a known preset and edit it.
             // if (this.presets.length) {
-            //     this.navCtrl.push(PresetPage, this.presets[15]);
+            //     let old_preset = this.presets[7];
+            //     this.navCtrl.push(PresetPage, {
+            //         preset: old_preset,
+            //         callback: (new_preset) => {
+            //             this.presetCallback(old_preset, new_preset)
+            //         }
+            //     });
             // }
         });
+    }
+
+    presetCallback(old_preset, new_preset) {
+        if (new_preset) {
+            console.log("Got result ", new_preset, " from the save call");
+            old_preset.updateFrom(new_preset);
+        }
     }
 
     editPreset(preset) {
@@ -46,17 +59,13 @@ export class PresetListPage implements Chemistry {
                 preset.type == ChemistryType.NiMH ||
                 preset.type == ChemistryType.LiFe) {
                 this.navCtrl.push(PresetPage, {
-                    preset: preset,
-                    callback: (new_preset) => {
-                        if (new_preset) {
-                            console.log("Got result ", new_preset, " from the save call");
-                            preset.updateFrom(new_preset);
-                        }
+                    preset: preset, callback: (new_preset) => {
+                        this.presetCallback(preset, new_preset);
                     }
                 });
             } else {
                 let toast = this.toastController.create({
-                    message: "Only support editing Lipo for now",
+                    message: "Only support editing Lipo/NiMH/LiFe for now",
                     duration: 2000,
                     // dismissOnPageChange: true, // causes an exception. meh.
                     position: "top"

@@ -194,7 +194,7 @@ export class Preset {
             this.data['bal_speed'] = LipoBalanceType.User;
         } else {
             this.data['li_mode_c'] = 0;
-            this.data['bal_speed'] = value;
+            this.data['bal_speed'] = +value;
         }
     }
 
@@ -203,7 +203,7 @@ export class Preset {
     }
 
     set balance_end_type(value: BalanceEndCondition) {
-        this.data['li_balance_end_mode'] = value;
+        this.data['li_balance_end_mode'] = +value;
     }
 
     get charge_cell_voltage(): number {
@@ -458,7 +458,7 @@ export class Preset {
     }
 
     set regeneration_method(value: RegenerativeToChannelMethod) {
-        this.data['reg_ch_mode'] = value;
+        this.data['reg_ch_mode'] = +value;
     }
 
     get regeneration_volt_limit(): number {
@@ -505,7 +505,7 @@ export class Preset {
     }
 
     set storage_compensation_mv(value: number) {
-        this.data['store_compensation'] + value;
+        this.data['store_compensation'] = +value;
     }
 
     get storage_accelerated(): boolean {

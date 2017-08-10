@@ -92,7 +92,7 @@
 
             <ion-item>
                 <ion-label>End Current %</ion-label>
-                <ion-range [(ngModel)]="preset.charge_end_current" pin=true min="10" max="50">
+                <ion-range [disabled]="!chargeEndOptionUsesEndCurrent()" [(ngModel)]="preset.charge_end_current" pin=true min="10" max="50">
                     <ion-label range-left>10%</ion-label>
                     <ion-label range-right>50%</ion-label>
                 </ion-range>

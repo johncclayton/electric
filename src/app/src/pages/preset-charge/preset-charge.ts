@@ -4,6 +4,7 @@ import {Configuration} from "../../services/configuration.service";
 import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../../models/preset-class";
 import {FormBuilder} from "@angular/forms";
 import {celciusToF} from '../../utils/helpers'
+import * as _ from "lodash";
 
 export class PresetBasePage {
     public preset: Preset;
@@ -97,6 +98,11 @@ export class PresetChargePage extends PresetBasePage {
             {'value': BalanceEndCondition.EndCurrent_or_DetectBalance, 'text': 'Balance or Current'},
             {'value': BalanceEndCondition.EndCurrent_and_DetectBalance, 'text': 'Balance and Current'},
         ]
+    }
+
+    chargeEndOptionUsesEndCurrent() {
+        let valid_values = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
+        return _.includes(valid_values, this.preset.balance_end_type);
     }
 
     restoreVoltageOptions() {
