@@ -3,7 +3,7 @@
     <name>Electric</name>
     <description>Remote control for your charging setup</description>
     <author email="electric@we.dont.have.a.domain.yet.org" href="https://github.com/johncclayton/electric">Electric at GitHub</author>
-    <content original-src="index.html" src="http://192.168.1.168:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />

@@ -3,7 +3,7 @@ import {NavController, NavParams} from "ionic-angular";
 import {Configuration} from "../../services/configuration.service";
 import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../../models/preset-class";
 import {FormBuilder} from "@angular/forms";
-
+import {celciusToF} from '../../utils/helpers'
 
 export class PresetBasePage {
     public preset: Preset;
@@ -14,15 +14,11 @@ export class PresetBasePage {
         this.preset = navParams.data;
     }
 
-    celciusToF(c) {
-        return c * 9 / 5 + 32;
-    }
-
     public safetyTempOptions() {
         let list = [];
         for (let num = 200; num < 800; num += 5) {
             let celcius = (num / 10);
-            let farenheight = this.celciusToF(celcius);
+            let farenheight = celciusToF(celcius);
             list.push({'value': celcius, 'text': celcius.toString() + "°C / " + farenheight + "°F"});
         }
         return list;

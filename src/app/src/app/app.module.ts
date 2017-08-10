@@ -5,7 +5,7 @@ import {IonicStorageModule} from "@ionic/storage";
 import {IonicErrorHandler, IonicModule, IonicApp} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
-import {DurationPipe, KeysPipe, ReversePipe} from "../utils/pipes";
+import {DurationPipe, KeysPipe, ReversePipe, TempPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
 import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config";
@@ -46,7 +46,7 @@ const cloudSettings: CloudSettings = {
         ContactPage,
         ConfigPage,
         HomePage,
-        KeysPipe, ReversePipe, DurationPipe,
+        KeysPipe, ReversePipe, DurationPipe, TempPipe,
         DynamicDisable,
         ChannelComponent,
         ChannelVoltsComponent,

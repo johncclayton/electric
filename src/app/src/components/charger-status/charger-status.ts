@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {iChargerService} from "../../services/icharger.service";
 import {Channel} from "../../models/channel";
 import {Observable} from "rxjs/Observable";
+import {Configuration} from "../../services/configuration.service";
 
 @Component({
     selector: 'charger-status',
@@ -16,7 +17,7 @@ export class ChargerStatusComponent {
 
     private channelObjects: Array<Channel> = [];
 
-    constructor(public chargerService: iChargerService) {
+    constructor(public chargerService: iChargerService, public config: Configuration) {
         this.resetCombinedState();
     }
 
@@ -55,6 +56,13 @@ export class ChargerStatusComponent {
             'total_capacity': 0,
             'charger_internal_temp': 0,
         };
+    }
+
+    unitOfMeasure() {
+        if (this.config.isCelsius()) {
+            return "°C";
+        }
+        return "°F";
     }
 
     tempAtWarningLevel(): boolean {

@@ -91,6 +91,10 @@ export class Configuration {
         return this.configDict["isnew"];
     }
 
+    isCelsius(): boolean {
+        return this.configDict['unitsCelsius'];
+    }
+
     preventChargerVerticalScrolling(): boolean {
         return this.configDict['preventChargerVerticalScrolling'];
     }

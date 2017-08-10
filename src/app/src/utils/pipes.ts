@@ -1,6 +1,8 @@
 import {PipeTransform, Pipe} from "@angular/core";
 
 import {sprintf} from "sprintf-js";
+import {Configuration} from "../services/configuration.service";
+import {celciusToF} from './helpers'
 
 @Pipe({name: 'keys'})
 export class KeysPipe implements PipeTransform {
@@ -14,11 +16,23 @@ export class KeysPipe implements PipeTransform {
     }
 }
 
-
 @Pipe({name: 'reverse'})
 export class ReversePipe implements PipeTransform {
     transform(value, args: string[]): any {
         return value.slice().reverse();
+    }
+}
+
+@Pipe({name: 'temp'})
+export class TempPipe implements PipeTransform {
+    constructor(public config: Configuration) {
+    }
+
+    transform(value, args: string[]): any {
+        if (this.config.isCelsius() == false) {
+            return celciusToF(value);
+        }
+        return value;
     }
 }
 
@@ -27,7 +41,7 @@ export class ReversePipe implements PipeTransform {
 export class DurationPipe implements PipeTransform {
     transform(value, args: string[]): any {
         // Expecting seconds
-        if(isNaN(value)) {
+        if (isNaN(value)) {
             return "00:00";
         }
         let minutes = Math.floor(Number(value) / 60);

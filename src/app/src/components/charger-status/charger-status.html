@@ -12,7 +12,7 @@
         </ion-col>
         <ion-col class="value" width-20 text-nowrap
                  [ngClass]="{'warning':tempAtWarningLevel(), 'emergency':tempAtEmergencyLevel()}">
-                 {{channelObject?.charger_internal_temp }}°C
+            {{channelObject?.charger_internal_temp|temp|number:'1.1-1'}}{{unitOfMeasure()}}
         </ion-col>
     </ion-row>
 

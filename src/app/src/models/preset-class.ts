@@ -127,6 +127,7 @@ export class Preset {
     }
 
     set cells(value: number) {
+        value = +value;
         switch (this.type) {
             case ChemistryType.LiPo:
                 this.data['li_cell'] = value;
@@ -145,7 +146,7 @@ export class Preset {
     }
 
     set capacity(value: number) {
-        this.data['capacity'] = value;
+        this.data['capacity'] = +value;
     }
 
     get channel_mode(): number {
@@ -153,7 +154,7 @@ export class Preset {
     }
 
     set channel_mode(value: number) {
-        this.data['channel_mode'] = value;
+        this.data['channel_mode'] = +value;
     }
 
     get save_to_sd(): number {
@@ -161,7 +162,7 @@ export class Preset {
     }
 
     set save_to_sd(value: number) {
-        this.data['save_to_sd'] = value;
+        this.data['save_to_sd'] = +value;
     }
 
     get run_counter(): number {
@@ -169,7 +170,7 @@ export class Preset {
     }
 
     set run_counter(value: number) {
-        this.data['run_counter'] = value;
+        this.data['run_counter'] = +value;
     }
 
     get log_interval_sec(): number {
@@ -177,7 +178,7 @@ export class Preset {
     }
 
     set log_interval_sec(value: number) {
-        this.data['log_interval_sec'] = value;
+        this.data['log_interval_sec'] = +value;
     }
 
     get balance_type(): LipoBalanceType {
@@ -218,10 +219,10 @@ export class Preset {
     set charge_cell_voltage(value: number) {
         switch (this.type) {
             case ChemistryType.LiPo:
-                this.data['lipo_charge_cell_voltage'] = value;
+                this.data['lipo_charge_cell_voltage'] = +value;
                 break;
             case ChemistryType.LiFe:
-                this.data['life_charge_cell_voltage'] = value;
+                this.data['life_charge_cell_voltage'] = +value;
                 break;
         }
     }
@@ -231,7 +232,7 @@ export class Preset {
     }
 
     set charge_current(value: number) {
-        this.data['charge_current'] = value;
+        this.data['charge_current'] = +value;
     }
 
     // First saw this when doing NiMH
@@ -244,7 +245,7 @@ export class Preset {
 
     set charge_mode(value: number) {
         if (this.type == ChemistryType.NiMH) {
-            this.data['ni_mode_c'] = value;
+            this.data['ni_mode_c'] = +value;
         }
     }
 
@@ -253,7 +254,7 @@ export class Preset {
     }
 
     set discharge_current(value: number) {
-        this.data['discharge_current'] = value;
+        this.data['discharge_current'] = +value;
     }
 
     get discharge_voltage(): number {
@@ -271,6 +272,7 @@ export class Preset {
     }
 
     set discharge_voltage(value: number) {
+        value = +value;
         switch (this.type) {
             case ChemistryType.NiMH:
                 this.data['ni_discharge_voltage'] = value;
@@ -290,7 +292,7 @@ export class Preset {
     }
 
     set charge_end_current(value: number) {
-        value = clamp(10, 50, value);
+        value = clamp(10, 50, +value);
         this.data['end_charge'] = value;
     }
 
@@ -299,7 +301,7 @@ export class Preset {
     }
 
     set discharge_end_current(value: number) {
-        this.data['end_discharge'] = value;
+        this.data['end_discharge'] = +value;
     }
 
     get showChargeVoltageWarning(): boolean {
@@ -317,7 +319,7 @@ export class Preset {
     }
 
     set restore_voltage(value: number) {
-        this.data['restore_voltage'] = value;
+        this.data['restore_voltage'] = +value;
     }
 
     get restore_charge_time(): number {
@@ -325,7 +327,7 @@ export class Preset {
     }
 
     set restore_charge_time(value: number) {
-        this.data['restore_time'] = value;
+        this.data['restore_time'] = +value;
     }
 
     get restore_charge_current(): number {
@@ -333,7 +335,7 @@ export class Preset {
     }
 
     set restore_charge_current(value: number) {
-        this.data['restore_current'] = value;
+        this.data['restore_current'] = +value;
     }
 
     get keep_charging_after_done(): boolean {
@@ -358,7 +360,7 @@ export class Preset {
     }
 
     set safety_charge_cutoff_temp(value: number) {
-        this.data['safety_temp_c'] = value;
+        this.data['safety_temp_c'] = +value;
     }
 
     get safety_charge_capacity(): number {
@@ -366,7 +368,7 @@ export class Preset {
     }
 
     set safety_charge_capacity(value: number) {
-        this.data['safety_cap_c'] = value;
+        this.data['safety_cap_c'] = +value;
     }
 
     get safety_charge_timer_enabled(): boolean {
@@ -391,7 +393,7 @@ export class Preset {
     }
 
     set safety_discharge_cutoff_temp(value: number) {
-        this.data['safety_temp_d'] = value;
+        this.data['safety_temp_d'] = +value;
     }
 
     get safety_discharge_capacity(): number {
@@ -399,7 +401,7 @@ export class Preset {
     }
 
     set safety_discharge_capacity(value: number) {
-        this.data['safety_cap_d'] = value;
+        this.data['safety_cap_d'] = +value;
     }
 
     get safety_discharge_timer_enabled(): boolean {
@@ -464,7 +466,7 @@ export class Preset {
     }
 
     set regeneration_volt_limit(value: number) {
-        this.data['reg_ch_volt'] = value;
+        this.data['reg_ch_volt'] = +value;
     }
 
     get regeneration_current_limit(): number {
@@ -472,7 +474,7 @@ export class Preset {
     }
 
     set regeneration_current_limit(value: number) {
-        this.data['reg_ch_current'] = value;
+        this.data['reg_ch_current'] = +value;
     }
 
     // storage
@@ -487,6 +489,7 @@ export class Preset {
     }
 
     set storage_cell_voltage(value: number) {
+        value = +value;
         switch (this.type) {
             case ChemistryType.LiPo:
                 this.data['lipo_storage_cell_voltage'] = value;
@@ -502,7 +505,7 @@ export class Preset {
     }
 
     set storage_compensation_mv(value: number) {
-        this.data['store_compensation'] = value;
+        this.data['store_compensation'] + value;
     }
 
     get storage_accelerated(): boolean {
@@ -527,7 +530,7 @@ export class Preset {
     }
 
     set cycle_count(value: number) {
-        this.data['cycle_count'] = value;
+        this.data['cycle_count'] = +value;
     }
 
     get cycle_delay(): number {
@@ -535,7 +538,7 @@ export class Preset {
     }
 
     set cycle_delay(value: number) {
-        this.data['cycle_delay'] = value;
+        this.data['cycle_delay'] = +value;
     }
 
     // NiMH
@@ -544,7 +547,7 @@ export class Preset {
     }
 
     set ni_sensitivity(value: number) {
-        this.data['ni_peak'] = value;
+        this.data['ni_peak'] = +value;
     }
 
     get allow_zero_volt_charging(): boolean {
@@ -568,7 +571,7 @@ export class Preset {
     }
 
     set trickle_current(value: number) {
-        this.data['ni_trickle_current'] = value;
+        this.data['ni_trickle_current'] = +value;
     }
 
     get trickle_timeout(): number {
@@ -576,7 +579,7 @@ export class Preset {
     }
 
     set trickle_timeout(value: number) {
-        this.data['ni_trickle_time'] = value;
+        this.data['ni_trickle_time'] = +value;
     }
 
     public static chemistryPrefix(chemistry: ChemistryType) {
