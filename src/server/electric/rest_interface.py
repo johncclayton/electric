@@ -43,6 +43,29 @@ class StatusResource(Resource):
         return obj
 
 
+class UnifiedResource(Resource):
+    def get(self):
+        device_info = comms.get_device_info()
+
+        obj = device_info.to_primitive()
+        obj.update(connection_state_dict())
+
+        for index, channel in enumerate(range(0, device_info.channel_count)):
+            channel_status = comms.get_channel_status(channel, device_info.device_id)
+            if channel_status:
+                if not obj.get('channels'):
+                    obj['channels'] = {}
+
+                if device_info is not None:
+                    if channel == 0:
+                        channel_status.status = device_info.ch1_status
+                    elif channel == 1:
+                        device_info.status = device_info.ch2_status
+
+                obj['channels']["{0}".format(index)] = channel_status.to_primitive()
+
+        return obj
+
 class DialogCloseResource(Resource):
     def put(self, channel_id):
         channel = int(channel_id)

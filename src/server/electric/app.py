@@ -13,7 +13,7 @@ from rest_interface import \
     PresetListResource, \
     PresetResource, ChargeResource, DischargeResource, \
     BalanceResource, MeasureIRResource, StopResource, \
-    PresetOrderResource, AddNewPresetResource, StoreResource
+    PresetOrderResource, AddNewPresetResource, StoreResource, UnifiedResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
@@ -26,6 +26,7 @@ application.logger.addHandler(handler)
 application.logger.setLevel(logging.DEBUG)
 
 api = Api(application)
+api.add_resource(UnifiedResource, "/unified")
 api.add_resource(StatusResource, "/status")
 api.add_resource(ZMQCommsResource, "/zmq/bounce")
 api.add_resource(SystemStorageResource, "/system")
@@ -68,4 +69,3 @@ api.add_resource(DialogCloseResource, "/closedialog/<channel_id>")
 #     response = jsonify(str(error))
 #     response.status_code = error.status_code
 #     return response
-
