@@ -41,7 +41,7 @@ logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 def run_server():
     opts = {
-        "use_reloader": False,
+        "use_reloader": True,
         "use_debugger": False
     }
 

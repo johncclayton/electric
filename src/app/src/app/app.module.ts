@@ -2,7 +2,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
 import {APP_INITIALIZER, ErrorHandler, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
-import {IonicErrorHandler, IonicModule, IonicApp} from "ionic-angular";
+import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
 import {DurationPipe, KeysPipe, ReversePipe, TempPipe} from "../utils/pipes";
@@ -24,15 +24,17 @@ import {ChannelVoltsComponent} from "../components/channel-volts/channel-volts";
 import {ChannelIRComponent} from "../components/channel-volts/channel-ir";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
+import {CloudModule, CloudSettings} from '@ionic/cloud-angular';
+import {ContactPage} from "../pages/contact/contact";
+import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
+import {TabsPage} from "../pages/tabs/tabs";
+import {NgRedux, NgReduxModule} from "@angular-redux/store";
+import ChargerAppState from "../models/state/state";
+import {configureAppStateStore} from "../models/state/configure";
 
 export function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
 }
-
-import {CloudSettings, CloudModule} from '@ionic/cloud-angular';
-import {ContactPage} from "../pages/contact/contact";
-import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
-import {TabsPage} from "../pages/tabs/tabs";
 
 const cloudSettings: CloudSettings = {
     'core': {
@@ -66,6 +68,7 @@ const cloudSettings: CloudSettings = {
     imports: [
         BrowserModule,
         HttpModule,
+        NgReduxModule,
         IonicModule.forRoot(MyApp),
         CloudModule.forRoot(cloudSettings),
         IonicStorageModule.forRoot()
@@ -102,4 +105,7 @@ const cloudSettings: CloudSettings = {
     ]
 })
 export class AppModule {
+    constructor(ngRedux: NgRedux<ChargerAppState>) {
+        configureAppStateStore(ngRedux);
+    }
 }
