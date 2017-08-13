@@ -1,0 +1,54 @@
+  <ion-list>
+    <ion-list-header>App Settings</ion-list-header>
+    <ion-item>
+      <ion-label>Max cells to show</ion-label>
+      <ion-select [ngModel]="config.cellLimit">
+        <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Prevent Dashboard Scrolling</ion-label>
+      <ion-toggle [ngModel]="config.preventChargerVerticalScrolling"></ion-toggle>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>Charger
+      <ion-badge color="dark" item-right *ngIf="!status?.connected">Enabled when connected to
+        the charger
+      </ion-badge>
+    </ion-list-header>
+    <ion-item>
+      <ion-label>Temperature shown in celsius</ion-label>
+      <!-- TODO: How to trigger an action? -->
+      <ion-toggle [disabled]="!status?.connected"
+                  [ngModel]="config.unitsCelsius"></ion-toggle>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>Connection</ion-list-header>
+    <ion-item>
+      <ion-label stacked>IP Address of Pi</ion-label>
+      <ion-input type="text" [ngModel]="config.ipAddress"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Port of Pi</ion-label>
+      <ion-input type="text" [ngModel]="config.port"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-list-header>Debug</ion-list-header>
+    <ion-item>
+      <ion-label>Mock Charger</ion-label>
+      <ion-toggle [ngModel]="config.mockCharger"></ion-toggle>
+    </ion-item>
+
+    <ion-item *ngIf="mockValueChanged()" text-center>
+      <ion-badge class="blinky" color="dark">You must restart the app for this to take effect
+      </ion-badge>
+    </ion-item>
+
+  </ion-list>
+
+  <button full color="danger" ion-button (click)="resetToDefaults.emit()">Reset to Defaults</button>
+

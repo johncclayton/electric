@@ -47,22 +47,30 @@ class UnifiedResource(Resource):
     def get(self):
         device_info = comms.get_device_info()
 
-        obj = device_info.to_primitive()
+        obj = {}
         obj.update(connection_state_dict())
+        obj['status'] = device_info.to_primitive()
+
+        # Yeh, very meh. These are currently serialized by DeviceInfo.
+        # I want to (for now) keep them for /status, but I don't want them in my /unified response.
+        # becauuuuuse, they are within the channel response (see below)
+        del obj['status']['ch1_status']
+        del obj['status']['ch2_status']
 
         for index, channel in enumerate(range(0, device_info.channel_count)):
             channel_status = comms.get_channel_status(channel, device_info.device_id)
             if channel_status:
                 if not obj.get('channels'):
-                    obj['channels'] = {}
+                    obj['channels'] = []
 
+                # Steal the ch_status objects and put them into each channels "response".
                 if device_info is not None:
-                    if channel == 0:
+                    if index == 0:
                         channel_status.status = device_info.ch1_status
-                    elif channel == 1:
-                        device_info.status = device_info.ch2_status
+                    elif index == 1:
+                        channel_status.status = device_info.ch2_status
 
-                obj['channels']["{0}".format(index)] = channel_status.to_primitive()
+                obj['channels'].append(channel_status.to_primitive())
 
         return obj
 

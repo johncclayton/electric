@@ -225,6 +225,7 @@ class DeviceInfo(Model):
     memory_len = IntType(required=True)
     channel_count = IntType(required=True, default=2)
     cell_count = IntType(required=True, default=0)
+
     ch1_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
     ch2_status = ModelType(DeviceInfoStatus, default=DeviceInfoStatus())
 

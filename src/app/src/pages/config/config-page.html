@@ -1,0 +1,26 @@
+<ion-header>
+    <ion-navbar color="primary">
+        <button ion-button menuToggle icon-only>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title text-center>Configuration</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+    <config
+            [config]="config$|async"
+            [status]="status$|async"
+            (resetToDefaults)="actions.resetToDefaults()"
+    >
+    </config>
+
+</ion-content>
+
+<ion-footer>
+    <!--<ion-list>-->
+        <!--<ion-label *ngIf="canUseDeploy()" text-center>Version: {{ versionNumberString() }}</ion-label>-->
+        <!--<ion-label text-center>Platform: {{ platformsString() }}</ion-label>-->
+    <!--</ion-list>-->
+</ion-footer>

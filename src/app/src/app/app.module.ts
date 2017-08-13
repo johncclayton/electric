@@ -8,7 +8,7 @@ import {HomePage} from "../pages/home/home";
 import {DurationPipe, KeysPipe, ReversePipe, TempPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
 import {Configuration} from "../services/configuration.service";
-import {ConfigPage} from "../pages/config/config";
+import {ConfigPage} from "../pages/config/config-page";
 import {ChannelComponent} from "../components/channel/channel";
 import {ChargerStatusComponent} from "../components/charger-status/charger-status";
 import {PresetListPage} from "../pages/preset-list/preset-list";
@@ -29,8 +29,8 @@ import {ContactPage} from "../pages/contact/contact";
 import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
 import {TabsPage} from "../pages/tabs/tabs";
 import {NgRedux, NgReduxModule} from "@angular-redux/store";
-import ChargerAppState from "../models/state/state";
-import {configureAppStateStore} from "../models/state/configure";
+import {IChargerAppState, configureAppStateStore} from "../models/state/configure";
+import {ConfigComponent} from '../components/config/config';
 
 export function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -63,7 +63,8 @@ const cloudSettings: CloudSettings = {
         TabsPage,
         PresetCyclePage,
         ChargeOptionsPage,
-        ChargerStatusComponent
+        ChargerStatusComponent,
+        ConfigComponent
     ],
     imports: [
         BrowserModule,
@@ -84,8 +85,8 @@ const cloudSettings: CloudSettings = {
         PresetStoragePage,
         PresetDischargePage,
         PresetCyclePage,
+        ConfigComponent,
         ChargeOptionsPage,
-        ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
         ConnectionStateComponent
@@ -105,7 +106,7 @@ const cloudSettings: CloudSettings = {
     ]
 })
 export class AppModule {
-    constructor(ngRedux: NgRedux<ChargerAppState>) {
+    constructor(ngRedux: NgRedux<IChargerAppState>) {
         configureAppStateStore(ngRedux);
     }
 }

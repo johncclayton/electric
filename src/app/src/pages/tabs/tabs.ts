@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {HomePage} from "../home/home";
-import {ConfigPage} from "../config/config";
+import {ConfigPage} from "../config/config-page";
 import {Configuration} from "../../services/configuration.service";
 
 @Component({

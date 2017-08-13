@@ -1,10 +1,10 @@
 import {Component} from "@angular/core";
-import {Events, NavController, ToastController} from "ionic-angular";
-import {Subscription, Observable} from "rxjs";
+import {NavController, ToastController} from "ionic-angular";
+import {Observable, Subscription} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
-import {CONFIG_LOADED_EVENT, Configuration} from "../../services/configuration.service";
-import {ConfigPage} from "../config/config";
+import {Configuration} from "../../services/configuration.service";
+import {ConfigPage} from "../config/config-page";
 
 @Component({
     selector: 'page-home',
@@ -55,7 +55,7 @@ export class HomePage {
 
         });
 
-        // this.navCtrl.push(ConfigPage);
+        this.navCtrl.push(ConfigPage);
     }
 
     channelSubscriptions() {

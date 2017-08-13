@@ -1,4 +1,4 @@
-page-config {
+config {
   .blinky {
     animation-duration: 1400ms;
     animation-name: blink;
@@ -15,4 +15,5 @@ page-config {
       opacity: 0.5;
     }
   }
+
 }

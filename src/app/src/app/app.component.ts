@@ -1,7 +1,7 @@
 import {Component, ViewChild} from "@angular/core";
 import {Platform, Nav} from "ionic-angular";
 import {Configuration} from "../services/configuration.service";
-import {ConfigPage} from "../pages/config/config";
+import {ConfigPage} from "../pages/config/config-page";
 import {iChargerService} from "../services/icharger.service";
 import {PresetListPage} from "../pages/preset-list/preset-list";
 import {HomePage} from "../pages/home/home";
