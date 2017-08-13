@@ -12,6 +12,7 @@
     <config
             [config]="config$|async"
             [status]="status$|async"
+            (updateConfiguration)="actions.updateConfiguration($event)"
             (resetToDefaults)="actions.resetToDefaults()"
     >
     </config>

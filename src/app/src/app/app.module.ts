@@ -28,7 +28,7 @@ import {CloudModule, CloudSettings} from '@ionic/cloud-angular';
 import {ContactPage} from "../pages/contact/contact";
 import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
 import {TabsPage} from "../pages/tabs/tabs";
-import {NgRedux, NgReduxModule} from "@angular-redux/store";
+import {DevToolsExtension, NgRedux, NgReduxModule} from "@angular-redux/store";
 import {IChargerAppState, configureAppStateStore} from "../models/state/configure";
 import {ConfigComponent} from '../components/config/config';
 
@@ -106,7 +106,7 @@ const cloudSettings: CloudSettings = {
     ]
 })
 export class AppModule {
-    constructor(ngRedux: NgRedux<IChargerAppState>) {
-        configureAppStateStore(ngRedux);
+    constructor(ngRedux: NgRedux<IChargerAppState>, devTools: DevToolsExtension) {
+        configureAppStateStore(ngRedux, devTools);
     }
 }

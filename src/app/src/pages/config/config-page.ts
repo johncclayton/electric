@@ -28,4 +28,9 @@ export class ConfigPage {
         return this.platform.platforms().toString();
     }
 
+    updateConfiguration(key: string, value: any) {
+        console.log("Update " + key + ", to " + value);
+    }
+
+
 }

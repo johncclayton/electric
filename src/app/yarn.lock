@@ -95,46 +95,46 @@
     ws "1.1.1"
     xml2js "^0.4.17"
 
-"@ionic/cli-plugin-cordova@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@ionic/cli-plugin-cordova/-/cli-plugin-cordova-1.5.0.tgz#9c8669d19aaae2a8f7a3400a910d5c4ca20efc0d"
+"@ionic/cli-plugin-cordova@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@ionic/cli-plugin-cordova/-/cli-plugin-cordova-1.6.2.tgz#f71d10641df8b522f54f8274e0d5bc4dbb8b5208"
   dependencies:
-    "@ionic/cli-utils" "1.6.0"
+    "@ionic/cli-utils" "1.7.0"
     chalk "^2.0.0"
-    tslib "^1.7.1"
-    xml2js "^0.4.17"
-
-"@ionic/cli-plugin-ionic-angular@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@ionic/cli-plugin-ionic-angular/-/cli-plugin-ionic-angular-1.4.0.tgz#aa793121b2f0a271ea20e53c4f312aba299c0dfc"
-  dependencies:
-    "@ionic/cli-utils" "1.6.0"
-    chalk "^2.0.0"
+    elementtree "^0.1.7"
     tslib "^1.7.1"
 
-"@ionic/cli-utils@1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@ionic/cli-utils/-/cli-utils-1.6.0.tgz#33909ec8bdbb086121aac6fcf5c2db951e204e7d"
+"@ionic/cli-plugin-ionic-angular@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@ionic/cli-plugin-ionic-angular/-/cli-plugin-ionic-angular-1.4.1.tgz#bb94b7ad61c2f79757b2dff041c0b7e2151777ec"
   dependencies:
-    archiver "^1.3.0"
+    "@ionic/cli-utils" "1.7.0"
+    chalk "^2.0.0"
+    tslib "^1.7.1"
+
+"@ionic/cli-utils@1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@ionic/cli-utils/-/cli-utils-1.7.0.tgz#05bdbf3e7533eeeee27d58f3adbfe26bf2bf0d1d"
+  dependencies:
+    archiver "^2.0.0"
     chalk "^2.0.0"
     ci-info "^1.0.0"
-    cross-spawn "^4.0.2"
+    cross-spawn "^5.1.0"
     dargs "^5.1.0"
     dev-null "^0.1.1"
-    inquirer "^3.0.6"
+    inquirer "^3.2.1"
     leek "0.0.24"
     lodash "^4.17.4"
     minimist "^1.2.0"
     ncp "^2.0.0"
-    semver "^5.3.0"
+    semver "^5.4.1"
     slice-ansi "^1.0.0"
-    string-width "^2.1.0"
+    string-width "^2.1.1"
     strip-ansi "^4.0.0"
     superagent "^3.5.2"
     tslib "^1.7.1"
     uuid "^3.0.1"
-    wrap-ansi "^2.1.0"
+    wrap-ansi "^3.0.1"
 
 "@ionic/cloud-angular@^0.12.0":
   version "0.12.0"
@@ -287,9 +287,9 @@ archiver-utils@^1.3.0:
     normalize-path "^2.0.0"
     readable-stream "^2.0.0"
 
-archiver@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/archiver/-/archiver-1.3.0.tgz#4f2194d6d8f99df3f531e6881f14f15d55faaf22"
+archiver@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/archiver/-/archiver-2.0.0.tgz#ffb73ecccd8dd65b0019e1180f78092a053d43c4"
   dependencies:
     archiver-utils "^1.3.0"
     async "^2.0.0"
@@ -299,7 +299,7 @@ archiver@^1.3.0:
     readable-stream "^2.0.0"
     tar-stream "^1.5.0"
     walkdir "^0.0.11"
-    zip-stream "^1.1.0"
+    zip-stream "^1.2.0"
 
 are-we-there-yet@~1.1.2:
   version "1.1.4"
@@ -1390,11 +1390,12 @@ cross-spawn@^3.0.0:
     lru-cache "^4.0.1"
     which "^1.2.9"
 
-cross-spawn@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-4.0.2.tgz#7b9247621c23adfdd3856004a823cbe397424d41"
+cross-spawn@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-5.1.0.tgz#e8bd0efee58fcff6f8f94510a0a554bbfa235449"
   dependencies:
     lru-cache "^4.0.1"
+    shebang-command "^1.2.0"
     which "^1.2.9"
 
 cryptiles@2.x.x:
@@ -1577,7 +1578,7 @@ elementtree@0.1.6:
   dependencies:
     sax "0.3.5"
 
-elementtree@^0.1.6:
+elementtree@^0.1.6, elementtree@^0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/elementtree/-/elementtree-0.1.7.tgz#9ac91be6e52fb6e6244c4e54a4ac3ed8ae8e29c0"
   dependencies:
@@ -2243,7 +2244,7 @@ inline-process-browser@^1.0.0:
     falafel "^1.0.1"
     through2 "^0.6.5"
 
-inquirer@^3.0.6:
+inquirer@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-3.2.1.tgz#06ceb0f540f45ca548c17d6840959878265fa175"
   dependencies:
@@ -2294,15 +2295,15 @@ ionic-plugin-keyboard@~2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ionic-plugin-keyboard/-/ionic-plugin-keyboard-2.2.1.tgz#f2a9e169bbe9b5522400347c9fd6d3467ee3fa12"
 
-ionic@3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/ionic/-/ionic-3.6.0.tgz#f486c020765e928dbb4d6fe2c6543bb37f2a625b"
+ionic@3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/ionic/-/ionic-3.7.0.tgz#a3c32174c6d5455c3bc74b6b9152e0f97dce23c8"
   dependencies:
-    "@ionic/cli-utils" "1.6.0"
+    "@ionic/cli-utils" "1.7.0"
     chalk "^2.0.0"
     diff "^3.2.0"
     minimist "^1.2.0"
-    opn "^4.0.2"
+    opn "^5.1.0"
     os-name "^2.0.1"
     rimraf "^2.6.1"
     semver "^5.3.0"
@@ -2436,6 +2437,10 @@ is-typedarray@~1.0.0:
 is-utf8@^0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
+
+is-wsl@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/is-wsl/-/is-wsl-1.1.0.tgz#1f16e4aa22b04d1336b66188a66af3c600c3a66d"
 
 is@~0.2.6:
   version "0.2.7"
@@ -3223,12 +3228,11 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-opn@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/opn/-/opn-4.0.2.tgz#7abc22e644dff63b0a96d5ab7f2790c0f01abc95"
+opn@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/opn/-/opn-5.1.0.tgz#72ce2306a17dbea58ff1041853352b4a8fc77519"
   dependencies:
-    object-assign "^4.0.1"
-    pinkie-promise "^2.0.0"
+    is-wsl "^1.1.0"
 
 optimist@~0.6.0:
   version "0.6.1"
@@ -3630,6 +3634,10 @@ reduce-component@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/reduce-component/-/reduce-component-1.0.1.tgz#e0c93542c574521bea13df0f9488ed82ab77c5da"
 
+redux-localstorage@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/redux-localstorage/-/redux-localstorage-0.4.1.tgz#faf6d719c581397294d811473ffcedee065c933c"
+
 redux-logger@^3.0.6:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/redux-logger/-/redux-logger-3.0.6.tgz#f7555966f3098f3c88604c449cf0baf5778274bf"
@@ -3888,7 +3896,7 @@ scss-tokenizer@^0.2.3:
     js-base64 "^2.1.8"
     source-map "^0.4.2"
 
-"semver@2 || 3 || 4 || 5", semver@^5.0.1, semver@^5.3.0:
+"semver@2 || 3 || 4 || 5", semver@^5.0.1, semver@^5.3.0, semver@^5.4.1:
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.4.1.tgz#e059c09d8571f0540823733433505d3a2f00b18e"
 
@@ -4156,7 +4164,7 @@ string-width@^1.0.1, string-width@^1.0.2:
     is-fullwidth-code-point "^1.0.0"
     strip-ansi "^3.0.0"
 
-string-width@^2.1.0:
+string-width@^2.1.0, string-width@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-2.1.1.tgz#ab93f27a8dc13d28cac815c462143a6d9012ae9e"
   dependencies:
@@ -4644,12 +4652,19 @@ wordwrap@~0.0.2:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
 
-wrap-ansi@^2.0.0, wrap-ansi@^2.1.0:
+wrap-ansi@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-2.1.0.tgz#d8fc3d284dd05794fe84973caecdd1cf824fdd85"
   dependencies:
     string-width "^1.0.1"
     strip-ansi "^3.0.1"
+
+wrap-ansi@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-3.0.1.tgz#288a04d87eda5c286e060dfe8f135ce8d007f8ba"
+  dependencies:
+    string-width "^2.1.1"
+    strip-ansi "^4.0.0"
 
 wrappy@1:
   version "1.0.2"
@@ -4798,7 +4813,7 @@ yargs@~3.10.0:
     decamelize "^1.0.0"
     window-size "0.1.0"
 
-zip-stream@^1.1.0:
+zip-stream@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/zip-stream/-/zip-stream-1.2.0.tgz#a8bc45f4c1b49699c6b90198baacaacdbcd4ba04"
   dependencies:

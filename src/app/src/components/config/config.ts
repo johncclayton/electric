@@ -18,6 +18,7 @@ export class ConfigComponent {
     @Input() config?: IConfig;
     @Input() status?: IStatus;
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
+    @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     private mockChargerOriginal: boolean;
 
     constructor(public navCtrl: NavController, public platform: Platform) {
@@ -45,7 +46,7 @@ export class ConfigComponent {
     }
 
     cellChoices() {
-        if(isUndefined(this.config) || isUndefined(this.status)) {
+        if (isUndefined(this.config) || isUndefined(this.status)) {
             return [];
         }
 

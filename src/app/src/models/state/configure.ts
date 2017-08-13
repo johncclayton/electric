@@ -1,9 +1,10 @@
 import {createLogger} from 'redux-logger';
-import {NgRedux} from "@angular-redux/store";
+import {NgRedux, DevToolsExtension} from "@angular-redux/store";
 import {Channel} from "../channel";
 import {combineReducers} from "redux";
 import {configReducer, IConfig} from "./config";
 import {IStatus, statusReducer} from "./state";
+import persistState from 'redux-localstorage';
 
 export interface IChargerAppState {
     channels: Array<Channel>;
@@ -17,9 +18,17 @@ let reducers = combineReducers<IChargerAppState>({
     status: statusReducer,
 });
 
-export const configureAppStateStore = (ngRedux: NgRedux<IChargerAppState>) => {
+let enhancers = [
+    persistState('config', {key: 'electric-config'})
+];
+
+export const configureAppStateStore = (ngRedux: NgRedux<IChargerAppState>, devTools: DevToolsExtension) => {
     let middleware = [createLogger()];
-    ngRedux.configureStore(reducers, <IChargerAppState>{}, middleware);
+
+    if (devTools.isEnabled()) {
+        enhancers.push(devTools.enhancer());
+    }
+    ngRedux.configureStore(reducers, <IChargerAppState>{}, middleware, enhancers);
 
 };
 

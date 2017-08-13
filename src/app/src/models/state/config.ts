@@ -1,4 +1,5 @@
-import {Action, Reducer} from "redux";
+import {Action, AnyAction, Reducer} from "redux";
+import {ConfigurationActions} from "./charger";
 
 export interface IChargeSettings {
     capacity: number,
@@ -19,7 +20,7 @@ export interface IConfig {
     charge: IChargeSettings;
 }
 
-let chargerDefaults: IChargeSettings = {
+const chargerDefaults: IChargeSettings = {
     capacity: 2000,
     c: 2,
     numPacks: 4,
@@ -27,7 +28,7 @@ let chargerDefaults: IChargeSettings = {
     chargeMethod: "presets"
 };
 
-export let configurationDefaults: IConfig = {
+export const configurationDefaults: IConfig = {
     ipAddress: "localhost-ish",
     port: 5002,
     isnew: true,
@@ -40,6 +41,17 @@ export let configurationDefaults: IConfig = {
 
 
 export const
-    configReducer: Reducer<IConfig> = (state: IConfig, action: Action): IConfig => {
+    configReducer: Reducer<IConfig> = (state: IConfig, action: AnyAction): IConfig => {
+        switch(action.type) {
+            case ConfigurationActions.RESET_TO_DEFAULTS:
+                return configurationDefaults;
+
+            case ConfigurationActions.SET_CONFIGURATION:
+                return {
+                    ...state,
+                    ...action.payload
+                }
+        }
+
         return configurationDefaults;
     };

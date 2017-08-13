@@ -10,7 +10,8 @@ export class ConfigurationActions {
     }
 
     static TOGGLE_CELSIUS: string = 'TOGGLE_CELSIUS';
-    static RESET_TO_DEFAULTS: string = 'RESET_TI_DEFAULTS';
+    static RESET_TO_DEFAULTS: string = 'RESET_TO_DEFAULTS';
+    static SET_CONFIGURATION: string = 'SET_CONFIGURATION';
 
     toggleCelsius() {
         console.log("Me should try to change temp units");
@@ -28,9 +29,12 @@ export class ConfigurationActions {
             payload: {}
         });
     }
+
+    updateConfiguration(change) {
+        this.ngRedux.dispatch({
+            type: ConfigurationActions.SET_CONFIGURATION,
+            payload: change
+        });
+    }
 }
 
-
-export const ACTION_PROVIDERS = [
-    ConfigurationActions
-];
