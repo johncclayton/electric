@@ -24,10 +24,6 @@ def stop_application():
 
 
 def run_worker():
-    if platform.system() == "Darwin":
-        print("WARNING: libusb doesnt work well for HID devices on the Mac, and this program requires it - things WILL NOT out so well without it so this program will abort now")
-        sys.exit(1)
-
     logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 
     with zmq.utils.win32.allow_interrupt(stop_application):
