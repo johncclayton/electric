@@ -2,17 +2,17 @@
 
     <ion-row>
         <ion-col class="value" text-center>
-            {{channelObject?.input_volts|number:'1.3-3'}}<br/>
+            {{charger?.input_volts|number:'1.3-3'}}<br/>
         </ion-col>
         <ion-col class="value" text-center>
-            {{channelObject?.output_amps|number:'1.2-2'}}<br/>
+            {{charger?.total_output_amps|number:'1.2-2'}}<br/>
         </ion-col>
         <ion-col class="value" text-center>
-            {{channelObject?.total_capacity}}<br/>
+            {{charger?.total_capacity}}<br/>
         </ion-col>
         <ion-col class="value" width-20 text-nowrap
                  [ngClass]="{'warning':tempAtWarningLevel(), 'emergency':tempAtEmergencyLevel()}">
-            {{channelObject?.charger_internal_temp|temp|number:'1.1-1'}}{{unitOfMeasure()}}
+            {{charger?.charger_temp|temp|number:'1.1-1'}}{{unitOfMeasure()}}
         </ion-col>
     </ion-row>
 

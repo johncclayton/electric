@@ -1,8 +1,6 @@
 import {Component, Input} from '@angular/core';
-import {iChargerService} from "../../services/icharger.service";
-import {Channel} from "../../models/channel";
-import {Observable} from "rxjs/Observable";
-import {Configuration} from "../../services/configuration.service";
+import {IChargerState} from "../../models/state/reducers/charger";
+import {IConfig} from "../../models/state/reducers/configuration";
 
 @Component({
     selector: 'charger-status',
@@ -10,72 +8,23 @@ import {Configuration} from "../../services/configuration.service";
 })
 export class ChargerStatusComponent {
 
-    @Input() status;
-    @Input() channels: Array<Observable<any>>;
+    @Input() config: IConfig;
+    @Input() charger: IChargerState;
 
-    private channelObject: {};
-
-    private channelObjects: Array<Channel> = [];
-
-    constructor(public chargerService: iChargerService, public config: Configuration) {
-        this.resetCombinedState();
-    }
-
-    ngOnChanges(changes) {
-        if (this.status) {
-            this.status.subscribe((data) => {
-                // this.chargerStatus = data;
-            });
-        }
-
-        if (this.channels) {
-            for (let ch of this.channels) {
-                ch.subscribe((data: Channel) => {
-                    this.channelObjects[data.index] = data;
-
-                    this.resetCombinedState();
-
-                    // Sum it all up
-                    this.channelObjects.map((c: Channel) => {
-                        this.channelObject['output_amps'] += c.output_amps;
-                        this.channelObject['total_capacity'] += c.output_capacity;
-
-                        // Wonder why this is on Channel?
-                        this.channelObject['input_volts'] = c.input_volts;
-                        this.channelObject['charger_internal_temp'] = c.charger_internal_temp;
-                    })
-                })
-            }
-        }
-    }
-
-    private resetCombinedState() {
-        this.channelObject = {
-            'input_volts': 0,
-            'output_amps': 0,
-            'total_capacity': 0,
-            'charger_internal_temp': 0,
-        };
-    }
+    constructor() {    }
 
     unitOfMeasure() {
-        if (this.config.isCelsius()) {
+        if (this.config.unitsCelsius) {
             return "°C";
         }
         return "°F";
     }
 
     tempAtWarningLevel(): boolean {
-        if (this.channelObject != null) {
-            return this.channelObject['charger_internal_temp'] >= 48.0;
-        }
-        return false;
+        return this.charger.charger_temp >= 48.0;
     }
 
     tempAtEmergencyLevel(): boolean {
-        if (this.channelObject != null) {
-            return this.channelObject['charger_internal_temp'] >= 50.0;
-        }
-        return false;
+        return this.charger.charger_temp >= 50.0;
     }
 }

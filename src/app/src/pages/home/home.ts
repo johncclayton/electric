@@ -7,6 +7,7 @@ import {Configuration} from "../../services/configuration.service";
 import {ConfigPage} from "../config/config-page";
 import {NgRedux, select} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
+import {Channel} from "../../models/channel";
 
 @Component({
     selector: 'page-home',
@@ -14,6 +15,9 @@ import {IAppState} from "../../models/state/configure";
 })
 export class HomePage {
     @select('ui.exception') exception$: Observable<any>;
+    @select('charger.channels') channels$: Observable<Channel>;
+    @select('charger') charger$: Observable<Channel>;
+    @select('config') config$: Observable<Channel>;
 
     constructor(public readonly navCtrl: NavController,
                 public readonly toastController: ToastController,

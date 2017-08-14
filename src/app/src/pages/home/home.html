@@ -78,8 +78,8 @@
     <div *ngIf="!anyNetworkOrConnectivityProblems()">
         <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
         <charger-status
-                [status]="chargerStatusObserver"
-                [channels]="channelSubscriptions()">
+                [config]="config$|async"
+                [charger]="charger$|async">
         </charger-status>
 
         <channel name="Channel 1" [channelObserver]="channelSubscriptions()[0]" [index]="0"></channel>
