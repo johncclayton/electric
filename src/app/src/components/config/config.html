@@ -2,7 +2,7 @@
     <ion-list-header>App Settings</ion-list-header>
     <ion-item>
         <ion-label>Max cells to show</ion-label>
-        <ion-select [ngModel]="config.cellLimit" (ngModelChange)="change('cellLimit', $event)">
+        <ion-select [ngModel]="config.cellLimit" (ngModelChange)="change('cellLimit', num($event))">
             <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
         </ion-select>
     </ion-item>

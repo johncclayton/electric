@@ -50,9 +50,6 @@ export const
                     return state;
                 }
 
-            case ConfigurationActions.SAVE_CONFIG:
-                return state;
-
             case ConfigurationActions.RESET_TO_DEFAULTS:
                 return configurationDefaults;
 

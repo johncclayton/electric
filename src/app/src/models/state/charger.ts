@@ -11,7 +11,6 @@ export class ConfigurationActions {
     static RESET_TO_DEFAULTS: string = 'RESET_TO_DEFAULTS';
     static UPDATE_CONFIG_KEYVALUE: string = 'UPDATE_CONFIG_KEYVALUE';
     static SET_CONFIG: string = 'SET_CONFIG';
-    static SAVE_CONFIG: string = 'SAVE_CONFIG';
 
     constructor(private ngRedux: NgRedux<IChargerAppState>,
                 private configStore: ConfigStoreProvider,
@@ -62,10 +61,6 @@ export class ConfigurationActions {
         let config = this.ngRedux.getState()['config'];
         this.configStore.saveConfiguration(config).subscribe(r => {
             console.log("Configuration saved");
-        });
-
-        this.ngRedux.dispatch({
-            type: ConfigurationActions.SAVE_CONFIG
         });
     }
 }
