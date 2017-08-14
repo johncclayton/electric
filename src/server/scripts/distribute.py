@@ -1,10 +1,15 @@
 import os
-import subprocess
+import subprocess, platform
 import sys
 import argparse
 
 from setup_template import render_and_write_setup
 electric_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+ext = "zip"
+if platform.system() == "Darwin":
+    ext = "tar.gz"
+
 
 def run_these(args):
     command = ' '.join(args)
@@ -65,7 +70,7 @@ if __name__ == '__main__':
         run_these([
             "twine",
             "upload",
-            os.path.join(electric_root_path, "dist", "electric-{0}.zip".format(args.version)),
+            os.path.join(electric_root_path, "dist", "electric-{0}.{1}".format(args.version, ext)),
         ])
 
 

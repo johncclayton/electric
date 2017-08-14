@@ -3,14 +3,10 @@ import logging
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
-
 def get_worker_loc():
     return os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
 
-
-RESPONSE_TIMEOUT_MS = 10000
-
-
+RESPONSE_TIMEOUT_MS = 5000
 # RESPONSE_TIMEOUT_MS = 1000000
 
 class ZMQCommsManager(object):
@@ -82,13 +78,18 @@ class ZMQCommsManager(object):
                     e = IOError("request received - but no response was found inside, terrible!")
 
             except Exception, f:
-                logger.error("exception received when reading message from ZMQ: {0}".format(e))
+                logger.error("exception received when reading message from ZMQ: {0}".format(f))
                 e = f
 
+            # if we get here, e MUST be set
+            assert(e is not None)
             if e is not None:
                 raise e
         else:
-            raise IOError("request {1} failed to receive a response at all from ZMQ within 10 seconds: {0}".format(method_name, request["tag"]))
+            # connection is gone - lets re-open it
+            self.close_and_reopen_connection()
+            timeout_s = int(RESPONSE_TIMEOUT_MS / 1000.0)
+            raise IOError("request {1} failed to receive a response at all from ZMQ within {2} seconds: {0}".format(method_name, request["tag"], timeout_s))
 
     def turn_off_logging(self):
         return self._send_message_get_response("turn_off_logging")
