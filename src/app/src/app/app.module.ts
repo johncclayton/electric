@@ -24,26 +24,20 @@ import {ChannelVoltsComponent} from "../components/channel-volts/channel-volts";
 import {ChannelIRComponent} from "../components/channel-volts/channel-ir";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
-import {CloudModule, CloudSettings} from '@ionic/cloud-angular';
 import {ContactPage} from "../pages/contact/contact";
 import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
 import {TabsPage} from "../pages/tabs/tabs";
 import {DevToolsExtension, NgRedux, NgReduxModule} from "@angular-redux/store";
-import {IAppState, configureAppStateStore} from "../models/state/configure";
+import {configureAppStateStore, IAppState} from "../models/state/configure";
 import {ConfigComponent} from '../components/config/config';
-import { ConfigStoreProvider } from '../providers/config-store/config-store';
+import {ConfigStoreProvider} from '../providers/config-store/config-store';
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
+import {ConfigurationEpics} from "../models/state/epics/configuration";
 
 export function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
 }
-
-const cloudSettings: CloudSettings = {
-    'core': {
-        'app_id': 'f944cad8'
-    }
-};
 
 @NgModule({
     declarations: [
@@ -74,7 +68,7 @@ const cloudSettings: CloudSettings = {
         HttpModule,
         NgReduxModule,
         IonicModule.forRoot(MyApp),
-        CloudModule.forRoot(cloudSettings),
+        // CloudModule.forRoot(cloudSettings),
         IonicStorageModule.forRoot()
     ],
     bootstrap: [IonicApp],
@@ -105,15 +99,18 @@ const cloudSettings: CloudSettings = {
         ChargerActions,
         UIActions,
         ConfigStoreProvider,
+        ConfigurationEpics,
         StatusBar,
         SplashScreen,
         {provide: iChargerService, useClass: iChargerService},
         {provide: ErrorHandler, useClass: IonicErrorHandler},
-    ConfigStoreProvider
+        ConfigStoreProvider
     ]
 })
 export class AppModule {
-    constructor(ngRedux: NgRedux<IAppState>, devTools: DevToolsExtension) {
-        configureAppStateStore(ngRedux, devTools);
+    constructor(ngRedux: NgRedux<IAppState>,
+                configEpic: ConfigurationEpics,
+                devTools: DevToolsExtension) {
+        configureAppStateStore(ngRedux, configEpic, devTools);
     }
 }

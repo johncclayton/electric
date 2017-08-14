@@ -5,14 +5,22 @@ export interface IUIState {
     exception: string;
 }
 
+let defaultUIState: IUIState = {
+    exception: ""
+};
+
 export const
     uiReducer: Reducer<IUIState> = (state: IUIState, action: AnyAction): IUIState => {
+        if (state == null) {
+            return defaultUIState;
+        }
         switch (action.type) {
             case UIActions.SET_EXCEPTION_MESSAGE:
-                return action.payload;
+                return {
+                    ...state,
+                    exception: action.payload
+                };
         }
 
-        return {
-            exception: ""
-        };
+        return state;
     };

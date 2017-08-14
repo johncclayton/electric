@@ -16,7 +16,9 @@ export class ConfigPage {
     @select() config$: Observable<IConfig>;
     @select() charger$: Observable<IChargerState>;
 
-    constructor(private ngRedux: NgRedux<IAppState>, private actions: ConfigurationActions, private platform: Platform) {
+    constructor(private ngRedux: NgRedux<IAppState>,
+                private actions: ConfigurationActions,
+                private platform: Platform) {
 
     }
 
@@ -28,9 +30,9 @@ export class ConfigPage {
         return this.platform.platforms().toString();
     }
 
-    updateConfiguration(key: string, value: any) {
-        console.log("Update " + key + ", to " + value);
+    testFunc() {
+        let mockCharger = this.ngRedux.getState().config.mockCharger;
+        this.actions.updateConfiguration({"mockCharger" : !mockCharger});
+        console.log("Boo");
     }
-
-
 }

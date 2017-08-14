@@ -135,7 +135,7 @@ channel {
         margin-right: 5px;
 
         @include transform-origin(right top);
-        @include transform(scale(-1) translateY(-$balance-height));
+        @include transform(scale(-1),translateY(-$balance-height));
       }
       .b1 {
         right: ($balance-width / 2.0) + $balance-offset * 4;

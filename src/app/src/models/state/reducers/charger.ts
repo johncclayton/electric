@@ -27,10 +27,14 @@ let defaultStatus: IChargerState = {
 };
 
 export const
-    statusReducer: Reducer<IChargerState> = (state: IChargerState, action: AnyAction): IChargerState => {
+    chargerStateReducer: Reducer<IChargerState> = (state: IChargerState, action: AnyAction): IChargerState => {
+        if (state == null) {
+            return defaultStatus;
+        }
         switch (action.type) {
             case ChargerActions.UPDATE_STATE_FROM_CHARGER:
                 let unifiedStatus = action.payload;
+
                 let newState: IChargerState = {
                     ...state,
                     ...unifiedStatus['status']
@@ -52,5 +56,5 @@ export const
                 newState.channels = channels;
                 return newState;
         }
-        return defaultStatus;
+        return state;
     };

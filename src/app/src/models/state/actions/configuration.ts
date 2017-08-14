@@ -10,7 +10,8 @@ import {UIActions} from "./ui";
 export class ConfigurationActions {
     static RESET_TO_DEFAULTS: string = 'RESET_TO_DEFAULTS';
     static UPDATE_CONFIG_KEYVALUE: string = 'UPDATE_CONFIG_KEYVALUE';
-    static SET_CONFIG: string = 'SET_CONFIG';
+    static CONFIG_SAVED_TO_STORE: string = 'CONFIG_SAVED_TO_STORE';
+    static SET_FULL_CONFIG: string = 'SET_FULL_CONFIG';
 
     constructor(private ngRedux: NgRedux<IAppState>,
                 private configStore: ConfigStoreProvider,
@@ -20,19 +21,31 @@ export class ConfigurationActions {
         this.configStore.loadConfiguration().subscribe(r => {
             console.log("Configuration loaded, putting into the store...");
             this.ngRedux.dispatch({
-                type: ConfigurationActions.SET_CONFIG,
+                type: ConfigurationActions.SET_FULL_CONFIG,
                 payload: r
-            })
+            });
+
+            this.updateStateFromChargerAsync();
         });
     }
+
+    updateStateFromChargerAsync() {
+        this.chargerService.getSystem().subscribe((system) => {
+            console.info("Updating config with values from charger...");
+            this.setConfiguration("unitsCelsius", system.isCelsius);
+        }, (error) => {
+            this.uiActions.setErrorMessage(error);
+        });
+    }
+
 
     toggleCelsiusAsync(enabled) {
         console.log("Me should try to change temp units");
 
         this.chargerService.toggleChargerTempUnits().subscribe((system) => {
             // it worked, update state
-            console.log("Done, saving state ...");
-            this.updateConfiguration({'useCelsius': system.isCelsius})
+            console.log("Done, using C: " + system.isCelsius + ", saving state ...");
+            this.setConfiguration("unitsCelsius", system.isCelsius);
         }, (error) => {
             // it failed, update state
             this.uiActions.setErrorMessage(error);
@@ -44,7 +57,12 @@ export class ConfigurationActions {
             type: ConfigurationActions.RESET_TO_DEFAULTS,
             payload: {}
         });
-        this.saveConfig();
+    }
+
+    setConfiguration(key: string, value: any) {
+        let change = [];
+        change[key] = value;
+        this.updateConfiguration(change);
     }
 
     updateConfiguration(change) {
@@ -54,15 +72,7 @@ export class ConfigurationActions {
                 type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
                 payload: change
             });
-            this.saveConfig();
         }
-    }
-
-    saveConfig() {
-        let config = this.ngRedux.getState()['config'];
-        this.configStore.saveConfiguration(config).subscribe(r => {
-            console.log("Configuration saved");
-        });
     }
 }
 

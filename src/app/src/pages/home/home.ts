@@ -40,7 +40,7 @@ export class HomePage {
     }
 
     ionViewWillEnter() {
-        this.navCtrl.push(ConfigPage);
+        // this.navCtrl.push(ConfigPage);
     }
 
     channelSubscriptions() {

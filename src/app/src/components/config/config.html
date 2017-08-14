@@ -24,7 +24,7 @@
         <ion-label>Temperature shown in celsius</ion-label>
         <!-- TODO: How to trigger an action? -->
         <ion-toggle [disabled]="!charger?.connected"
-                    (ngModelChange)="toggleCelsius($event)"
+                    (ngModelChange)="toggleCelsius.emit($event)"
                     [ngModel]="config.unitsCelsius"></ion-toggle>
     </ion-item>
 </ion-list>
@@ -57,4 +57,5 @@
 </ion-list>
 
 <button full color="danger" ion-button (click)="resetToDefaults.emit()">Reset to Defaults</button>
+<!--<button full color="secondary" ion-button (click)="testFunc.emit()">Test</button>-->
 

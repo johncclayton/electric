@@ -41,9 +41,9 @@ export const configurationDefaults: IConfig = {
 
 
 export const
-    configReducer: Reducer<IConfig> = (state: IConfig, action: AnyAction): IConfig => {
+    configReducer: Reducer<IConfig> = (state: IConfig = configurationDefaults, action: AnyAction): IConfig => {
         switch (action.type) {
-            case ConfigurationActions.SET_CONFIG:
+            case ConfigurationActions.SET_FULL_CONFIG:
                 if (action.payload) {
                     return action.payload;
                 } else {
@@ -54,11 +54,14 @@ export const
                 return configurationDefaults;
 
             case ConfigurationActions.UPDATE_CONFIG_KEYVALUE:
-                return {
-                    ...state,
-                    ...action.payload
+                if (action.payload) {
+                    return {
+                        ...state,
+                        ...action.payload
+                    }
                 }
+                return state;
         }
 
-        return configurationDefaults;
+        return state;
     };

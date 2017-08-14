@@ -29,13 +29,13 @@ module.exports = {
     copyFontAwesome: {
         src: '{{ROOT}}/node_modules/font-awesome/fonts/**/*',
         dest: '{{WWW}}/assets/fonts/'
-    },
-    copyBourbon: {
-        src: '{{ROOT}}/bourbon/**/*',
-        dest: '{{WWW}}/assets/bourbon/'
-    },
-    copyWebAnimations: {
-        src: ['{{ROOT}}/node_modules/web-animations-js/web-animations.min.js', '{{ROOT}}/node_modules/web-animations-js/web-animations.min.js.map'],
-        dest: '{{WWW}}/assets/js/'
     }
+    // copyBourbon: {
+    //     src: '{{ROOT}}/bourbon/**/*',
+    //     dest: '{{WWW}}/assets/bourbon/'
+    // },
+    // copyWebAnimations: {
+    //     src: ['{{ROOT}}/node_modules/web-animations-js/web-animations.min.js', '{{ROOT}}/node_modules/web-animations-js/web-animations.min.js.map'],
+    //     dest: '{{WWW}}/assets/js/'
+    // }
 };

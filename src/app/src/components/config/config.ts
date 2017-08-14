@@ -23,6 +23,7 @@ export class ConfigComponent {
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
     @Output() toggleCelsius: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
+    @Output() testFunc: EventEmitter<any> = new EventEmitter();
 
     constructor(public navCtrl: NavController, public platform: Platform) {
     }
