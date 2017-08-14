@@ -4,6 +4,7 @@ import {Channel} from "../../models/channel";
 import {ActionSheetController, NavController, ToastController} from "ionic-angular";
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 import {Preset} from "../../models/preset-class";
+import {IChargerState} from "../../models/state/reducers/charger";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -44,14 +45,12 @@ enum Operation {
     ]
 })
 export class ChannelComponent {
-    public channel: Channel = null;
     public channelMode: number = ChannelDisplay.ChannelDisplayNothingPluggedIn;
 
-    @Input() channelObserver;
+    @Input() charger?: IChargerState;
     @Input() index: number;
     @Input() name: string;
 
-    private channelSubscription;
     private firstTime: boolean;
 
     constructor(public chargerService: iChargerService,
@@ -59,7 +58,6 @@ export class ChannelComponent {
                 public toastController: ToastController,
                 public actionController: ActionSheetController) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
-        this.channel = this.chargerService.emptyData(0);
         this.firstTime = true;
     }
 
@@ -82,20 +80,23 @@ export class ChannelComponent {
     }
 
     showMeasureIR() {
-        this.chargerService.measureIR(this.channel).subscribe((result) => {
-            console.log("Measure IR done. Result: ", result);
-        });
-        this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
-
-        // Monitor the IR. When we see some amps for a short period of time, auto stop the operation
-        this.channelObserver.takeWhile((channelObject) => {
-            let less_than_one_amp = Math.abs(channelObject.curr_out_amps) < 1.0;
-            console.log("At: ", channelObject.curr_out_amps, "ltoa: ", less_than_one_amp);
-            return less_than_one_amp;
-        }).subscribe((result) => {}, (error) => {}, () => {
-            console.log("Stopping discharge because Measuer IR has seen some amps");
-            this.stopCurrentTask();
-        });
+        // this.chargerService.measureIR(this.channel).subscribe((result) => {
+        //     console.log("Measure IR done. Result: ", result);
+        // });
+        // this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
+        //
+        // // Monitor the IR. When we see some amps for a short period of time, auto stop the operation
+        //
+        // this.channelObserver.takeWhile((channelObject) => {
+        //     let less_than_one_amp = Math.abs(channelObject.curr_out_amps) < 1.0;
+        //     console.log("At: ", channelObject.curr_out_amps, "ltoa: ", less_than_one_amp);
+        //     return less_than_one_amp;
+        // }).subscribe((result) => {
+        // }, (error) => {
+        // }, () => {
+        //     console.log("Stopping discharge because Measuer IR has seen some amps");
+        //     this.stopCurrentTask();
+        // });
 
     }
 
@@ -261,42 +262,28 @@ export class ChannelComponent {
 
     ionViewDidLoad() {
         console.log("View is initialized");
-        this.channel = this.chargerService.emptyData(this.index);
     }
 
     ngOnDestroy() {
-        console.log("Leaving channel: ", this.channel);
-        if (this.channelSubscription) {
-            this.unsubscribeFromChannel();
-        }
     }
 
     unsubscribeFromChannel() {
-        if (this.channelSubscription) {
-            console.log("Channel ", this.channel.index, " going away, unsubscribing");
-            this.channelSubscription.unsubscribe();
-            this.channelSubscription = null;
-        }
+    }
+
+    get channel(): Channel {
+        return this.charger.channels[this.index];
     }
 
     ngOnChanges(changes) {
-        console.log("Channel is seeing change to bound data: ", changes);
-        if (this.channelObserver) {
-            this.unsubscribeFromChannel();
-            console.log("Channel binding to ", this.channelObserver);
-            this.channelSubscription = this.channelObserver.subscribe((channelObject) => {
-                this.channel = channelObject;
-                if (this.channel) {
-                    if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
-                        this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
-                    }
-                    // DEBUG:
-                    if (this.firstTime && this.index == 0) {
-                        this.firstTime = false;
-                        // this.showMeasureIR();
-                    }
-                }
-            });
+        if(this.channel) {
+            if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
+                this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
+            }
+            // DEBUG:
+            if (this.firstTime && this.index == 0) {
+                this.firstTime = false;
+                // this.showMeasureIR();
+            }
         }
     }
 }

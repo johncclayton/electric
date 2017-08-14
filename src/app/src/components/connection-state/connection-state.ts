@@ -10,7 +10,6 @@ import {IAppState} from "../../models/state/configure";
 })
 export class ConnectionStateComponent {
 
-    text: string = "";
     private disconnectionAlert;
     private connectionFailure: number;
 

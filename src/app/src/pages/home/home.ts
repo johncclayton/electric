@@ -15,7 +15,6 @@ import {Channel} from "../../models/channel";
 })
 export class HomePage {
     @select('ui.exception') exception$: Observable<any>;
-    @select('charger.channels') channels$: Observable<Channel>;
     @select('charger') charger$: Observable<Channel>;
     @select('config') config$: Observable<Channel>;
 
