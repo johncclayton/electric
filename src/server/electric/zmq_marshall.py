@@ -3,11 +3,12 @@ import logging
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
+
 def get_worker_loc():
-    return os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
+    return os.environ.get("ELECTRIC_WORKER", "tcp://127.0.0.1:5001")
 
 RESPONSE_TIMEOUT_MS = 5000
-# RESPONSE_TIMEOUT_MS = 1000000
+
 
 class ZMQCommsManager(object):
     """

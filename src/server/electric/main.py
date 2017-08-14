@@ -46,7 +46,7 @@ def run_server():
     }
 
     from zmq_marshall import get_worker_loc
-    logger.info("Will connect to ELECTRIC_WORKER_CONNECT at: {0}".format(get_worker_loc()))
+    logger.info("Will connect to ELECTRIC_WORKER at: {0}".format(get_worker_loc()))
 
     application.run(debug=True, host='0.0.0.0', port=5000, **opts)
 

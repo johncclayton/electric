@@ -56,8 +56,7 @@ connection; one for the worker to use when it binds to its interface.
 
 | Environment Variable | Default Value | Where |
 | ---------------------| :------------ | ------
-| **ELECTRIC_WORKER_LISTEN** | tcp://0.0.0.0:5001 | electric-worker
-| **ELECTRIC_WORKER_CONNECT** | tcp://127.0.0.1:5001 | electric-server  
+| **ELECTRIC_WORKER** | tcp://127.0.0.1:5001 | electric-server  
 
 Note that on the worker the default is to listen on all interfaces.  
 

@@ -17,6 +17,7 @@ poller.register(socket, zmq.POLLIN)
 
 charger = ChargerCommsManager()
 
+
 def stop_application():
     socket.close()
     ctx.term()
