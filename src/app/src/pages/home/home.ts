@@ -1,29 +1,26 @@
 import {Component} from "@angular/core";
 import {NavController, ToastController} from "ionic-angular";
-import {Observable, Subscription} from "rxjs";
+import {Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
 import {Configuration} from "../../services/configuration.service";
 import {ConfigPage} from "../config/config-page";
+import {NgRedux, select} from "@angular-redux/store";
+import {IAppState} from "../../models/state/configure";
 
 @Component({
     selector: 'page-home',
     templateUrl: 'home.html'
 })
 export class HomePage {
-    public exception: string = "";
-    private chargerStatusObserver: Observable<any>;
-    private chargerStatusSubscription: Subscription;
-
+    @select('ui.exception') exception$: Observable<any>;
 
     constructor(public readonly navCtrl: NavController,
                 public readonly toastController: ToastController,
                 public readonly chargerService: iChargerService,
+                public readonly ngRedux: NgRedux<IAppState>,
                 public readonly config: Configuration,
                 public readonly http: Http) {
-
-        // TODO: Use this to flash some activity lights
-        // this.events.subscribe(CHARGER_CHANNEL_EVENT, (channelNum) => console.log("Activity on channel ", channelNum));
     }
 
     anyNetworkOrConnectivityProblems() {
@@ -43,44 +40,19 @@ export class HomePage {
     }
 
     ionViewWillEnter() {
-        // Use rxjs to poll for charger state continuously
-        console.log("Subscribing to charger status events...");
-        this.chargerStatusObserver = this.chargerService.getChargerStatus();
-        this.chargerStatusSubscription = this.chargerStatusObserver.subscribe(status => {
-            if (status['exception']) {
-                this.exception = status['exception'];
-            } else {
-                this.exception = "";
-            }
-
-        });
-
         this.navCtrl.push(ConfigPage);
     }
 
     channelSubscriptions() {
         if (this.isConnectedToCharger()) {
-            let chargerChannelRequests = this.chargerService.getChargerChannelRequests();
-            if (chargerChannelRequests) {
-                if (chargerChannelRequests.length) {
-                    return chargerChannelRequests;
-                }
-            }
+            // let chargerChannelRequests = this.chargerService.getChargerChannelRequests();
+            // if (chargerChannelRequests) {
+            //     if (chargerChannelRequests.length) {
+            //         return chargerChannelRequests;
+            //     }
+            // }
         }
         return [];
-    }
-
-    cleanupStatusSubscription() {
-        if (this.chargerStatusSubscription) {
-            console.log("Cleaning up status subscription...");
-            this.chargerStatusSubscription.unsubscribe();
-            this.chargerStatusSubscription = null;
-        }
-
-        if (this.chargerStatusObserver) {
-            console.log("Cleanup the channel status observer");
-            this.chargerStatusObserver = null;
-        }
     }
 
     showToast(message: string) {
@@ -95,7 +67,6 @@ export class HomePage {
 
     ionViewWillLeave() {
         console.log("Leaving dashboard");
-        this.cleanupStatusSubscription();
     }
 
 }

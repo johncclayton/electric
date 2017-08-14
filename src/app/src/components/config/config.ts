@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {IConfig} from "../../models/state/config";
+import {IConfig} from "../../models/state/reducers/configuration";
 import {NavController, Platform} from "ionic-angular";
 import {isUndefined} from "ionic-angular/util/util";
-import {IStatus} from "../../models/state/state";
+import {IChargerState} from "../../models/state/reducers/charger";
 
 /**
  * Generated class for the ConfigComponent component.
@@ -18,7 +18,7 @@ export class ConfigComponent {
     mockValueChanged: boolean;
 
     @Input() config?: IConfig;
-    @Input() status?: IStatus;
+    @Input() charger?: IChargerState;
 
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
     @Output() toggleCelsius: EventEmitter<any> = new EventEmitter();
@@ -46,13 +46,13 @@ export class ConfigComponent {
     }
 
     cellChoices() {
-        if (isUndefined(this.config) || isUndefined(this.status)) {
+        if (isUndefined(this.config) || isUndefined(this.charger)) {
             return [];
         }
 
         let choices = [];
         let maxCells = 10;
-        let cellsFromChargerConfig = this.status.cell_count;
+        let cellsFromChargerConfig = this.charger.cell_count;
         if (cellsFromChargerConfig > 0) {
             maxCells = cellsFromChargerConfig;
         }

@@ -29,9 +29,11 @@ import {ContactPage} from "../pages/contact/contact";
 import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
 import {TabsPage} from "../pages/tabs/tabs";
 import {DevToolsExtension, NgRedux, NgReduxModule} from "@angular-redux/store";
-import {IChargerAppState, configureAppStateStore} from "../models/state/configure";
+import {IAppState, configureAppStateStore} from "../models/state/configure";
 import {ConfigComponent} from '../components/config/config';
 import { ConfigStoreProvider } from '../providers/config-store/config-store';
+import {ChargerActions} from "../models/state/actions/charger";
+import {UIActions} from "../models/state/actions/ui";
 
 export function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -100,6 +102,8 @@ const cloudSettings: CloudSettings = {
             deps: [Configuration],
             multi: true
         },
+        ChargerActions,
+        UIActions,
         ConfigStoreProvider,
         StatusBar,
         SplashScreen,
@@ -109,7 +113,7 @@ const cloudSettings: CloudSettings = {
     ]
 })
 export class AppModule {
-    constructor(ngRedux: NgRedux<IChargerAppState>, devTools: DevToolsExtension) {
+    constructor(ngRedux: NgRedux<IAppState>, devTools: DevToolsExtension) {
         configureAppStateStore(ngRedux, devTools);
     }
 }

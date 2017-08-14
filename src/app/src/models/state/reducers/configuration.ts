@@ -1,5 +1,5 @@
-import {Action, AnyAction, Reducer} from "redux";
-import {ConfigurationActions} from "./charger";
+import {AnyAction, Reducer} from "redux";
+import {ConfigurationActions} from "../actions/configuration";
 
 export interface IChargeSettings {
     capacity: number,
@@ -42,9 +42,9 @@ export const configurationDefaults: IConfig = {
 
 export const
     configReducer: Reducer<IConfig> = (state: IConfig, action: AnyAction): IConfig => {
-        switch(action.type) {
+        switch (action.type) {
             case ConfigurationActions.SET_CONFIG:
-                if(action.payload) {
+                if (action.payload) {
                     return action.payload;
                 } else {
                     return state;

@@ -1,9 +1,9 @@
 import {Injectable} from "@angular/core";
-import {IChargerAppState} from "./configure";
+import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
-import {iChargerService} from "../../services/icharger.service";
-import {ConfigStoreProvider} from "../../providers/config-store/config-store";
-import {IConfig} from "./config";
+import {iChargerService} from "../../../services/icharger.service";
+import {ConfigStoreProvider} from "../../../providers/config-store/config-store";
+import {UIActions} from "./ui";
 
 
 @Injectable()
@@ -12,8 +12,9 @@ export class ConfigurationActions {
     static UPDATE_CONFIG_KEYVALUE: string = 'UPDATE_CONFIG_KEYVALUE';
     static SET_CONFIG: string = 'SET_CONFIG';
 
-    constructor(private ngRedux: NgRedux<IChargerAppState>,
+    constructor(private ngRedux: NgRedux<IAppState>,
                 private configStore: ConfigStoreProvider,
+                private uiActions: UIActions,
                 private chargerService: iChargerService) {
 
         this.configStore.loadConfiguration().subscribe(r => {
@@ -25,7 +26,7 @@ export class ConfigurationActions {
         });
     }
 
-    toggleCelsius(enabled) {
+    toggleCelsiusAsync(enabled) {
         console.log("Me should try to change temp units");
 
         this.chargerService.toggleChargerTempUnits().subscribe((system) => {
@@ -34,7 +35,7 @@ export class ConfigurationActions {
             this.updateConfiguration({'useCelsius': system.isCelsius})
         }, (error) => {
             // it failed, update state
-
+            this.uiActions.setErrorMessage(error);
         });
     }
 

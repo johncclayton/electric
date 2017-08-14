@@ -66,10 +66,10 @@
             </ion-list>
         </ion-card>
 
-        <div *ngIf="exception" class="tryme">
+        <div *ngIf="exception$" class="tryme">
             <ion-list>
                 <ion-list-header>The Server Said:</ion-list-header>
-                <h4 padding color="danger">{{exception}}</h4>
+                <h4 padding color="danger">{{exception$|async}}</h4>
             </ion-list>
         </div>
     </div>

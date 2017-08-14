@@ -1,7 +1,8 @@
 import {Component} from "@angular/core";
-import {Platform, ToastController, Events, NavController} from "ionic-angular";
-import {iChargerService, CHARGER_STATUS_ERROR, CHARGER_COMMAND_FAILURE} from "../../services/icharger.service";
-import {CHARGER_CONNECTED_EVENT} from "../../services/icharger.mock.service";
+import {Events, NavController, Platform, ToastController} from "ionic-angular";
+import {iChargerService} from "../../services/icharger.service";
+import {NgRedux} from "@angular-redux/store";
+import {IAppState} from "../../models/state/configure";
 
 @Component({
     selector: 'connection-state',
@@ -16,6 +17,7 @@ export class ConnectionStateComponent {
     constructor(public platform: Platform,
                 public charger: iChargerService,
                 public events: Events,
+                public ngRedux: NgRedux<IAppState>,
                 public navContoller: NavController,
                 public toastController: ToastController) {
 
@@ -28,9 +30,13 @@ export class ConnectionStateComponent {
 
         this.connectionFailure = 0;
 
-        this.events.subscribe(CHARGER_CONNECTED_EVENT, () => this.chargerConnected());
-        this.events.subscribe(CHARGER_STATUS_ERROR, () => this.chargerError(null));
-        this.events.subscribe(CHARGER_COMMAND_FAILURE, (error) => this.chargerError(error));
+        this.ngRedux.subscribe(() => {
+            // hmm. how do I listen to just 'some'?
+        });
+
+        // this.events.subscribe(CHARGER_CONNECTED_EVENT, () => this.chargerConnected());
+        // this.events.subscribe(CHARGER_STATUS_ERROR, () => this.chargerError(null));
+        // this.events.subscribe(CHARGER_COMMAND_FAILURE, (error) => this.chargerError(error));
     }
 
     chargerConnected() {

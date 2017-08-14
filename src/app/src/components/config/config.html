@@ -16,14 +16,14 @@
 </ion-list>
 <ion-list>
     <ion-list-header>Charger
-        <ion-badge color="dark" item-right *ngIf="!status?.connected">Enabled when connected to
+        <ion-badge color="dark" item-right *ngIf="!charger?.connected">Enabled when connected to
             the charger
         </ion-badge>
     </ion-list-header>
     <ion-item>
         <ion-label>Temperature shown in celsius</ion-label>
         <!-- TODO: How to trigger an action? -->
-        <ion-toggle [disabled]="!status?.connected"
+        <ion-toggle [disabled]="!charger?.connected"
                     (ngModelChange)="toggleCelsius($event)"
                     [ngModel]="config.unitsCelsius"></ion-toggle>
     </ion-item>

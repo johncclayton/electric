@@ -11,7 +11,7 @@
 
     <config
             [config]="config$|async"
-            [status]="status$|async"
+            [charger]="charger$|async"
             (updateConfiguration)="actions.updateConfiguration($event)"
             (toggleCelsius)="actions.toggleCelsius($event)"
             (resetToDefaults)="actions.resetToDefaults()"

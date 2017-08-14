@@ -1,34 +1,40 @@
 import {createLogger} from 'redux-logger';
-import {NgRedux, DevToolsExtension} from "@angular-redux/store";
-import {Channel} from "../channel";
+import {DevToolsExtension, NgRedux} from "@angular-redux/store";
 import {combineReducers} from "redux";
-import {configReducer, IConfig} from "./config";
-import {IStatus, statusReducer} from "./state";
-import persistState from 'redux-localstorage';
+import {configReducer, IConfig} from "./reducers/configuration";
+import {IChargerState, statusReducer} from "./reducers/charger";
+import {IUIState, uiReducer} from "./reducers/ui";
+import {ChargerActions} from "./actions/charger";
 
-export interface IChargerAppState {
-    channels: Array<Channel>;
-    charger_presence: string;
+export interface IAppState {
     config: IConfig;
-    status: IStatus;
+    charger: IChargerState;
+    ui: IUIState
 }
 
-let reducers = combineReducers<IChargerAppState>({
+let reducers = combineReducers<IAppState>({
     config: configReducer,
-    status: statusReducer,
+    charger: statusReducer,
+    ui: uiReducer,
 });
 
-let enhancers = [
-    persistState('config', {key: 'electric-config'})
-];
+let enhancers = [];
 
-export const configureAppStateStore = (ngRedux: NgRedux<IChargerAppState>, devTools: DevToolsExtension) => {
-    let middleware = [createLogger()];
+export const configureAppStateStore = (ngRedux: NgRedux<IAppState>, devTools: DevToolsExtension) => {
+    let middleware = [createLogger({
+        predicate: (getState, action) => {
+            // Don't show UPDATE charger actions
+            return action.type !== ChargerActions.UPDATE_STATE_FROM_CHARGER;
+        }
+    })];
 
     if (devTools.isEnabled()) {
-        enhancers.push(devTools.enhancer());
+        let options = {
+            actionsBlacklist: [ChargerActions.UPDATE_STATE_FROM_CHARGER]
+        };
+        enhancers.push(devTools.enhancer(options));
     }
-    ngRedux.configureStore(reducers, <IChargerAppState>{}, middleware, enhancers);
+    ngRedux.configureStore(reducers, <IAppState>{}, middleware, enhancers);
 
 };
 

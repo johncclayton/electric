@@ -6,12 +6,10 @@ import {Events} from "ionic-angular";
 import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";
 import {System} from "../models/system";
-
-const CHARGER_CONNECTED_EVENT: string = 'charger.connected'; // connected!
-const CHARGER_DISCONNECTED_EVENT: string = 'charger.disconnected'; // connection error
-const CHARGER_STATUS_ERROR: string = 'charger.status.error'; // when we can't get the charger status
-const CHARGER_COMMAND_FAILURE: string = 'charger.command.error'; // when a save command goes bad
-const CHARGER_CHANNEL_EVENT: string = 'charger.activity';
+import {NgRedux} from "@angular-redux/store";
+import {IAppState} from "../models/state/configure";
+import {ChargerActions} from "../models/state/actions/charger";
+import {UIActions} from "../models/state/actions/ui";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -26,21 +24,25 @@ ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger
 
 @Injectable()
 export class iChargerService {
-    chargerStatus: {} = {};
-    channelSnapshots: any[] = [];
     autoStopSubscriptions: any[] = [];
-    numberOfChannels: number = 0;
 
-    private channelStateObservable;
+    private chargerStatusSubscription;
 
     public constructor(public http: Http,
                        public events: Events,
+                       public chargerActions: ChargerActions,
+                       public uiActions: UIActions,
+                       public ngRedux: NgRedux<IAppState>,
                        public config: Configuration) {
-        this.channelStateObservable = [];
+
+
+        this.chargerStatusSubscription = this.getChargerStatus().subscribe(status => {
+            // console.log("Refreshed from charger...");
+        });
     }
 
     isConnectedToServer(): boolean {
-        return Object.keys(this.chargerStatus).length > 0;
+        return this.getState().charger.connected;
     }
 
     isConnectedToCharger(): boolean {
@@ -48,12 +50,7 @@ export class iChargerService {
             return false;
         }
 
-        if (this.channelSnapshots) {
-            let statusString = this.chargerStatus['charger_presence'];
-            let channelCount = Number(this.chargerStatus['channel_count']);
-            return statusString === 'connected' && channelCount > 0;
-        }
-        return false;
+        return this.getState().charger.channel_count > 0;
     }
 
     anyNetworkOrConnectivityProblems() {
@@ -64,16 +61,17 @@ export class iChargerService {
     }
 
     isNetworkAvailable(): boolean {
+        // TODO: Make this smarter
         return true;
     }
 
-    getNumberOfChannels(): number {
-        if (!this.isConnectedToServer()) {
-            return 0;
-        }
-        return this.numberOfChannels;
+    getState(): IAppState {
+        return this.ngRedux.getState();
     }
 
+    getNumberOfChannels(): number {
+        return this.getState().charger.channel_count;
+    }
 
     getPresets(): Observable<any> {
         let url = this.getChargerURL("/preset");
@@ -90,30 +88,19 @@ export class iChargerService {
 
     getChargerStatus(): Observable<any> {
         return Observable.timer(1000, 1000)
-            .flatMap((v) => {
-                return this.http.get(this.getChargerURL("/status"));
-            })
-            .map((v) => {
-                let connected = this.isConnectedToCharger();
-                this.chargerStatus = v.json();
-
-                let chargerHasAppeared = !connected && this.isConnectedToCharger();
-                if (chargerHasAppeared) {
-                    this.chargerDidAppear(this.chargerStatus);
-                }
-                return this.chargerStatus;
+            .flatMap(v => {
+                return this.http.get(this.getChargerURL("/unified"));
+            }).map(r => {
+                this.chargerActions.refreshStateFromCharger(r.json());
             })
             .catch(error => {
-                this.chargerStatusError();
-                this.chargerDidDisappear(error);
+                this.uiActions.setErrorMessage(error);
+
+                // I think I do this to force a 'retry'?
                 return Observable.throw(error);
             })
             .retry()
             .share();
-    }
-
-    getChargerChannelRequests() {
-        return this.channelStateObservable;
     }
 
     // Gets the status of the charger
@@ -122,77 +109,10 @@ export class iChargerService {
         return "http://" + hostName + path;
     }
 
-    private chargerStatusError() {
-        console.error("Unable to get charger status");
-        this.events.publish(CHARGER_STATUS_ERROR);
-    }
-
-    private chargerDidDisappear(error) {
-        if (this.isConnectedToCharger()) {
-            console.error("Disconnected from the charger, ", error);
-            this.events.publish(CHARGER_DISCONNECTED_EVENT);
-        }
-        this.chargerStatus = {};
-    }
-
-    private chargerDidAppear(statusDict) {
-        this.numberOfChannels = statusDict['channel_count'];
-        console.log(`Charger appeared, with ${this.numberOfChannels} channels`);
-
-        // Update with values from the charger
-        this.config.updateStateFromCharger(this);
-
-        // Clear existing observables
-        // TODO: do we need to clean these up?
-        this.channelStateObservable = [];
-
-        // Creates a series of hot observables for channel data from the charger
-        for (let i = 0; i < this.getNumberOfChannels(); i++) {
-            console.debug(`Creating hot channel observable: ${i}`);
-            this.channelStateObservable.push(Observable
-                .timer(500, 1000)
-                .filter(() => {
-                    return this.isConnectedToCharger();
-                })
-                .flatMap((v) => {
-                    return this.http.get(this.getChargerURL(`/channel/${i}`));
-                })
-                .map((response) => {
-                    this.events.publish(CHARGER_CHANNEL_EVENT, i);
-                    let jsonResponse = response.json();
-
-                    // Maybe reduce the channels, as long as they are 0 volt.
-                    let cellLimit = this.config.getCellLimit();
-
-                    // Create a new channel if required. Or reuse an existing.
-                    if (i in this.channelSnapshots) {
-                        // existing channel
-                        let channel: Channel = this.channelSnapshots[i];
-                        channel.updateStateFrom(jsonResponse, cellLimit);
-                    } else {
-                        this.channelSnapshots[i] = new Channel(i, jsonResponse, cellLimit);
-                    }
-
-                    return this.channelSnapshots[i];
-                })
-                .retry()
-                .share()
-            );
-        }
-
-        // Now need to sort them based on their actual channel number
-        // But can't do that until we get the data (which is async)
-
-        console.debug("Subscriptions are: ", this.channelStateObservable);
-        this.events.publish(CHARGER_CONNECTED_EVENT);
-    }
-
     lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
         // Not supplied? Look it up.
         if (deviceId == null) {
-            if (this.chargerStatus) {
-                deviceId = Number(this.chargerStatus['device_id']);
-            }
+            deviceId = this.getState().charger.device_id;
         }
         if (deviceId) {
             let md = ChargerMetadata[deviceId];
@@ -291,11 +211,8 @@ export class iChargerService {
                     observable.error(resp);
                 }
             }, (error) => {
-                console.log("Error saving preset: ", error);
-                this.events.publish(CHARGER_COMMAND_FAILURE, error);
-                observable.error(error);
+                this.uiActions.setErrorMessage("Can't save: " + error);
             });
-
         });
     }
 
@@ -422,31 +339,25 @@ export class iChargerService {
     }
 
     autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
-        this.cancelAutoStopForChannel(channel);
-
-        this.autoStopSubscriptions[channel.index] = this.channelStateObservable[channel.index].takeWhile((channel) => {
-            console.log("Channel ", channel.index, ", state: ", channel.runState);
-            return !states_to_stop_on.some((state) => {
-                return channel.runState == state;
-            });
-        }).subscribe((value) => {
-        }, (error) => {
-            console.log("Error while waiting for the channel to change state");
-            this.cancelAutoStopForChannel(channel);
-        }, () => {
-
-            console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
-            this.stopCurrentTask(channel).subscribe();
-            this.cancelAutoStopForChannel(channel);
-        });
+        return;
+        // this.cancelAutoStopForChannel(channel);
+        //
+        // this.autoStopSubscriptions[channel.index] = this.channelStateObservable[channel.index].takeWhile((channel) => {
+        //     console.log("Channel ", channel.index, ", state: ", channel.runState);
+        //     return !states_to_stop_on.some((state) => {
+        //         return channel.runState == state;
+        //     });
+        // }).subscribe((value) => {
+        // }, (error) => {
+        //     console.log("Error while waiting for the channel to change state");
+        //     this.cancelAutoStopForChannel(channel);
+        // }, () => {
+        //
+        //     console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
+        //     this.stopCurrentTask(channel).subscribe();
+        //     this.cancelAutoStopForChannel(channel);
+        // });
     }
 
 }
 
-export {
-    CHARGER_CONNECTED_EVENT,
-    CHARGER_DISCONNECTED_EVENT,
-    CHARGER_STATUS_ERROR,
-    CHARGER_COMMAND_FAILURE,
-    CHARGER_CHANNEL_EVENT,
-}
