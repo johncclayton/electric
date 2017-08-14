@@ -29,8 +29,8 @@ const chargerDefaults: IChargeSettings = {
 };
 
 export const configurationDefaults: IConfig = {
-    ipAddress: "localhost-ish",
-    port: 5002,
+    ipAddress: "localhost",
+    port: 5000,
     isnew: true,
     cellLimit: -1,
     preventChargerVerticalScrolling: true,
@@ -43,10 +43,20 @@ export const configurationDefaults: IConfig = {
 export const
     configReducer: Reducer<IConfig> = (state: IConfig, action: AnyAction): IConfig => {
         switch(action.type) {
+            case ConfigurationActions.SET_CONFIG:
+                if(action.payload) {
+                    return action.payload;
+                } else {
+                    return state;
+                }
+
+            case ConfigurationActions.SAVE_CONFIG:
+                return state;
+
             case ConfigurationActions.RESET_TO_DEFAULTS:
                 return configurationDefaults;
 
-            case ConfigurationActions.SET_CONFIGURATION:
+            case ConfigurationActions.UPDATE_CONFIG_KEYVALUE:
                 return {
                     ...state,
                     ...action.payload

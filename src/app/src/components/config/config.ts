@@ -15,34 +15,34 @@ import {IStatus} from "../../models/state/state";
     templateUrl: 'config.html'
 })
 export class ConfigComponent {
+    mockValueChanged: boolean;
+
     @Input() config?: IConfig;
     @Input() status?: IStatus;
+
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
+    @Output() toggleCelsius: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
-    private mockChargerOriginal: boolean;
 
     constructor(public navCtrl: NavController, public platform: Platform) {
-        // this.mockChargerOriginal = this.ngRedux.mockCharger;
-        this.mockChargerOriginal = false;
     }
 
-    ionViewWillLeave() {
-        console.log("Leaving config view. Saving config.");
-        // TODO: config
-        // this.config.saveConfiguration();
+    ngOnInit() {
+        this.mockValueChanged = false;
     }
 
-    mockValueChanged() {
-        // TODO: config
-        // return this.mockChargerOriginal != this.config.getIsUsingMockCharger();
+    num(value) {
+        return parseInt(value);
     }
 
-    toggleChargerTempUnits() {
-        // this.chargerService.toggleChargerTempUnits().subscribe((result: System) => {
-        //     console.info("Toggling C/F. Charger using Celsius: " + result.isCelsius);
-        // }, error => {
-        //     console.error("Failed to change C/F on charger: " + error);
-        // });
+    change(keyName, value) {
+        if (keyName == "mockCharger") {
+            this.mockValueChanged = true;
+        }
+
+        let change = [];
+        change[keyName] = value;
+        this.updateConfiguration.emit(change);
     }
 
     cellChoices() {

@@ -31,6 +31,7 @@ import {TabsPage} from "../pages/tabs/tabs";
 import {DevToolsExtension, NgRedux, NgReduxModule} from "@angular-redux/store";
 import {IChargerAppState, configureAppStateStore} from "../models/state/configure";
 import {ConfigComponent} from '../components/config/config';
+import { ConfigStoreProvider } from '../providers/config-store/config-store';
 
 export function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -99,10 +100,12 @@ const cloudSettings: CloudSettings = {
             deps: [Configuration],
             multi: true
         },
+        ConfigStoreProvider,
         StatusBar,
         SplashScreen,
         {provide: iChargerService, useClass: iChargerService},
-        {provide: ErrorHandler, useClass: IonicErrorHandler}
+        {provide: ErrorHandler, useClass: IonicErrorHandler},
+    ConfigStoreProvider
     ]
 })
 export class AppModule {

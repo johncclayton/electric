@@ -13,6 +13,7 @@
             [config]="config$|async"
             [status]="status$|async"
             (updateConfiguration)="actions.updateConfiguration($event)"
+            (toggleCelsius)="actions.toggleCelsius($event)"
             (resetToDefaults)="actions.resetToDefaults()"
     >
     </config>

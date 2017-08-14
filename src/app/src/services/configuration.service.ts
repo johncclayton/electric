@@ -55,7 +55,6 @@ export class Configuration {
         // Overwrite defaults with what's in the store
         let savedConfiguration = JSON.parse(configurationObject);
         this.overrideDictionary("", this.configDict, savedConfiguration);
-        // console.log("Final configuration: ", this.configDict);
     }
 
     private overrideDictionary(root, destinationDict, jsonObject) {

@@ -2,7 +2,7 @@
     <ion-list-header>App Settings</ion-list-header>
     <ion-item>
         <ion-label>Max cells to show</ion-label>
-        <ion-select [ngModel]="config.cellLimit">
+        <ion-select [ngModel]="config.cellLimit" (ngModelChange)="change('cellLimit', $event)">
             <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
         </ion-select>
     </ion-item>
@@ -10,7 +10,7 @@
         <ion-label>Prevent Dashboard Scrolling</ion-label>
         <ion-toggle
                 [ngModel]="config.preventChargerVerticalScrolling"
-                (ngModelChange)="updateConfiguration.emit({'preventChargerVerticalScrolling': !config.preventChargerVerticalScrolling})">
+                (ngModelChange)="change('preventChargerVerticalScrolling', $event)">
         </ion-toggle>
     </ion-item>
 </ion-list>
@@ -24,6 +24,7 @@
         <ion-label>Temperature shown in celsius</ion-label>
         <!-- TODO: How to trigger an action? -->
         <ion-toggle [disabled]="!status?.connected"
+                    (ngModelChange)="toggleCelsius($event)"
                     [ngModel]="config.unitsCelsius"></ion-toggle>
     </ion-item>
 </ion-list>
@@ -31,11 +32,13 @@
     <ion-list-header>Connection</ion-list-header>
     <ion-item>
         <ion-label stacked>IP Address of Pi</ion-label>
-        <ion-input type="text" [ngModel]="config.ipAddress"></ion-input>
+        <ion-input type="text" [ngModel]="config.ipAddress"
+                   (ngModelChange)="change('ipAddress', $event)"></ion-input>
     </ion-item>
     <ion-item>
         <ion-label stacked>Port of Pi</ion-label>
-        <ion-input type="text" [ngModel]="config.port"></ion-input>
+        <ion-input type="text" [ngModel]="config.port"
+                   (ngModelChange)="change('port', num($event))"></ion-input>
     </ion-item>
 </ion-list>
 
@@ -43,10 +46,10 @@
     <ion-list-header>Debug</ion-list-header>
     <ion-item>
         <ion-label>Mock Charger</ion-label>
-        <ion-toggle [ngModel]="config.mockCharger"></ion-toggle>
+        <ion-toggle [ngModel]="config.mockCharger" (ngModelChange)="change('mockCharger', $event)"></ion-toggle>
     </ion-item>
 
-    <ion-item *ngIf="mockValueChanged()" text-center>
+    <ion-item *ngIf="mockValueChanged" text-center>
         <ion-badge class="blinky" color="dark">You must restart the app for this to take effect
         </ion-badge>
     </ion-item>
