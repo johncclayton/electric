@@ -34,6 +34,7 @@ import {ConfigStoreProvider} from '../providers/config-store/config-store';
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
+import {ConfigurationActions} from "../models/state/actions/configuration";
 
 export function configServiceFactory(config: Configuration) {
     return () => config.loadConfiguration();
@@ -99,6 +100,7 @@ export function configServiceFactory(config: Configuration) {
         ChargerActions,
         UIActions,
         ConfigStoreProvider,
+        ConfigurationActions,
         ConfigurationEpics,
         StatusBar,
         SplashScreen,

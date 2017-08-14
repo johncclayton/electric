@@ -8,6 +8,10 @@ import {HomePage} from "../pages/home/home";
 
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
+import {ConfigStoreProvider} from "../providers/config-store/config-store";
+import {ConfigurationActions} from "../models/state/actions/configuration";
+import {NgRedux} from "@angular-redux/store";
+import {IAppState} from "../models/state/configure";
 
 @Component({
     templateUrl: 'app.html'
@@ -22,14 +26,28 @@ export class MyApp {
     constructor(platform: Platform,
                 public chargerService: iChargerService,
                 public statusBar: StatusBar,
-                public splashScreen: SplashScreen,
-                public config: Configuration) {
+                public config: ConfigStoreProvider,
+                public configActions: ConfigurationActions,
+                public ngRedux: NgRedux<IAppState>,
+                public splashScreen: SplashScreen) {
+
 
         platform.ready().then(() => {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
             statusBar.styleDefault();
             splashScreen.hide();
+
+            this.config.loadConfiguration().subscribe(r => {
+                console.log("Configuration loaded, putting into the store...");
+                this.ngRedux.dispatch({
+                    type: ConfigurationActions.SET_FULL_CONFIG,
+                    payload: r
+                });
+
+                this.configActions.updateStateFromChargerAsync();
+            });
+
         });
 
         this.pages = [

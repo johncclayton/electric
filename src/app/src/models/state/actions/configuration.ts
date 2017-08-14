@@ -17,16 +17,6 @@ export class ConfigurationActions {
                 private configStore: ConfigStoreProvider,
                 private uiActions: UIActions,
                 private chargerService: iChargerService) {
-
-        this.configStore.loadConfiguration().subscribe(r => {
-            console.log("Configuration loaded, putting into the store...");
-            this.ngRedux.dispatch({
-                type: ConfigurationActions.SET_FULL_CONFIG,
-                payload: r
-            });
-
-            this.updateStateFromChargerAsync();
-        });
     }
 
     updateStateFromChargerAsync() {
@@ -68,10 +58,14 @@ export class ConfigurationActions {
     updateConfiguration(change) {
         // Check the change type, coerce values
         if (change) {
-            this.ngRedux.dispatch({
-                type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
-                payload: change
-            });
+            let config = this.ngRedux.getState().config;
+            let key = Object.keys(change)[0];
+            if (config[key] != change[key]) {
+                this.ngRedux.dispatch({
+                    type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
+                    payload: change
+                });
+            }
         }
     }
 }
