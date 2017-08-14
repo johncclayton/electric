@@ -1,5 +1,6 @@
 import zmq, os
 import logging
+from electric import testing_control as testing_control
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
@@ -52,6 +53,7 @@ class ZMQCommsManager(object):
 
     def _send_message_get_response(self, method_name, arg_dict=None):
         request = {
+            "testing-control": testing_control.values,
             "method": method_name,
             "tag": self.request_tag
         }
@@ -64,12 +66,13 @@ class ZMQCommsManager(object):
         self.charger_socket.send_pyobj(request)
         sockets = dict(self.poll.poll(RESPONSE_TIMEOUT_MS))
         if self.charger_socket in sockets:
+            e = None
+
             try:
-                e = None
                 resp = self.charger_socket.recv_pyobj()
 
-                if "exception" in resp:
-                    e = resp["exception"]
+                if "raises" in resp:
+                    e = resp["raises"]
                     logger.error("message received from ZMQ, contained exception: {0}".format(e))
                 elif "response" in resp:
                     r = resp["response"]
@@ -84,8 +87,8 @@ class ZMQCommsManager(object):
 
             # if we get here, e MUST be set
             assert(e is not None)
-            if e is not None:
-                raise e
+
+            raise e
         else:
             # connection is gone - lets re-open it
             self.close_and_reopen_connection()

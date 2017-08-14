@@ -1134,3 +1134,5 @@ class Preset(Model):
         self.store_compensation /= 100.0
 
         self.name = self.name.split('\0')[0]
+
+

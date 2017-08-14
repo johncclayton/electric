@@ -1,6 +1,9 @@
-import zmq, logging, sys, os, platform
+import zmq, logging, sys, os
 import zmq.utils.win32
+
 from comms_layer import ChargerCommsManager
+import electric.testing_control as testing_control
+
 from router import route_message
 
 logger = logging.getLogger('electric.worker')
@@ -46,6 +49,9 @@ def run_worker():
                         if "args" in message:
                             args = message["args"]
 
+                        if "testing-control" in message:
+                            testing_control.values = message["testing-control"]
+
                         message_log = "message: {0}/{1} with args: {2}".format(message["tag"], method, args)
 
                         try:
@@ -53,7 +59,7 @@ def run_worker():
                             message["response"] = route_message(charger, method, args)
                         except Exception, e:
                             logger.error("EXCEPTION during routing/execution for : {0}, {1}".format(message_log, e))
-                            message["exception"] = e
+                            message["raises"] = e
 
                         try:
                             # potentially; the receiver goes away - before we are finished sending -

@@ -2,16 +2,16 @@ import json
 import unittest
 
 from electric.app import application
-from electric.worker.modbus_usb import testing_control
+import electric.testing_control as testing_control
 
 
 class TestRestfulAPI(unittest.TestCase):
     def setUp(self):
         self.client = application.test_client()
-        testing_control.reset()
+        testing_control.values.reset()
 
     def test_can_get_with_no_icharger_attached(self):
-        testing_control.usb_device_present = False
+        testing_control.values.usb_device_present = False
 
         resp = self.client.get("/status")
         d = json.loads(resp.data)
@@ -52,7 +52,7 @@ class TestRestfulAPI(unittest.TestCase):
         self.assertTrue(s2["balance"] >= 0)
 
     def test_can_request_storage_area(self):
-        testing_control.reset()
+        testing_control.values.reset()
 
         resp = self.client.get("/system")
         d = json.loads(resp.data)
@@ -63,7 +63,7 @@ class TestRestfulAPI(unittest.TestCase):
         self.assertEqual("connected", d["charger_presence"])
 
     def test_can_request_control(self):
-        testing_control.reset()
+        testing_control.values.reset()
         resp = self.client.get("/control")
         d = json.loads(resp.data)
 
