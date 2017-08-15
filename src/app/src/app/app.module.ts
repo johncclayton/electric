@@ -1,13 +1,12 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
-import {APP_INITIALIZER, ErrorHandler, NgModule} from "@angular/core";
+import {ErrorHandler, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
 import {DurationPipe, KeysPipe, ReversePipe, TempPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
-import {Configuration} from "../services/configuration.service";
 import {ConfigPage} from "../pages/config/config-page";
 import {ChannelComponent} from "../components/channel/channel";
 import {ChargerStatusComponent} from "../components/charger-status/charger-status";
@@ -35,10 +34,6 @@ import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
-
-export function configServiceFactory(config: Configuration) {
-    return () => config.loadConfiguration();
-}
 
 @NgModule({
     declarations: [
@@ -69,7 +64,6 @@ export function configServiceFactory(config: Configuration) {
         HttpModule,
         NgReduxModule,
         IonicModule.forRoot(MyApp),
-        // CloudModule.forRoot(cloudSettings),
         IonicStorageModule.forRoot()
     ],
     bootstrap: [IonicApp],
@@ -90,13 +84,6 @@ export function configServiceFactory(config: Configuration) {
         ConnectionStateComponent
     ],
     providers: [
-        Configuration,
-        {
-            provide: APP_INITIALIZER,
-            useFactory: configServiceFactory,
-            deps: [Configuration],
-            multi: true
-        },
         ChargerActions,
         UIActions,
         ConfigStoreProvider,

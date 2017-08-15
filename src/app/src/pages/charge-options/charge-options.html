@@ -15,7 +15,7 @@
 
 
 <ion-content padding>
-    <div [ngSwitch]="chargeMethod">
+    <div [ngSwitch]="chargeSettings.chargeMethod">
         <div *ngSwitchCase="'presets'">
             <!--<h4 text-center>By Preset</h4>-->
             <ion-segment [(ngModel)]="chemistryFilter">
@@ -66,8 +66,8 @@
 
 
                 <div text-center>
-                    <ion-badge color="warning" *ngIf="channelLimitReached">
-                        {{computedAmps|number:'1.1-1'}}A exceeds limit of {{ampsLimit()|number:'1.1-1'}}A<br/>
+                    <ion-badge color="warning" *ngIf="chargeSettings.channelLimitReached">
+                        {{chargeSettings?.ampsForWantedChargeRate|number:'1.1-1'}}A exceeds limit of {{ampsLimit()|number:'1.1-1'}}A<br/>
                         channel amperage limit applied
                     </ion-badge>
                 </div>

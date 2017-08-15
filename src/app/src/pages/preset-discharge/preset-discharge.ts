@@ -1,11 +1,10 @@
 import {Component} from "@angular/core";
 import {PresetBasePage} from "../preset-charge/preset-charge";
 import {NavController, NavParams} from "ionic-angular";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
-import {RegenerativeMode, RegenerativeToChannelMethod, ChemistryType} from "../../models/preset-class";
+import {ChemistryType, RegenerativeMode, RegenerativeToChannelMethod} from "../../models/preset-class";
 import {iChargerService} from "../../services/icharger.service";
-import {Configuration} from "../../services/configuration.service";
 
 @Component({
     selector: 'page-preset-discharge',
@@ -17,11 +16,10 @@ export class PresetDischargePage extends PresetBasePage {
     regenerationGroup: FormGroup = null;
 
     constructor(navCtrl: NavController,
-                config: Configuration,
                 public chargerService: iChargerService,
                 private formBuilder: FormBuilder,
                 navParams: NavParams) {
-        super(navCtrl, config, navParams);
+        super(navCtrl, navParams);
     }
 
     ionViewWillLeave() {

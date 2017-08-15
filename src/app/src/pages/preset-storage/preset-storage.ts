@@ -1,7 +1,6 @@
 import {Component} from "@angular/core";
 import {PresetBasePage} from "../preset-charge/preset-charge";
 import {NavController, NavParams} from "ionic-angular";
-import {Configuration} from "../../services/configuration.service";
 
 @Component({
     selector: 'page-preset-storage',
@@ -9,8 +8,8 @@ import {Configuration} from "../../services/configuration.service";
 })
 export class PresetStoragePage extends PresetBasePage {
 
-    constructor(navCtrl: NavController, config: Configuration, navParams: NavParams) {
-        super(navCtrl, config, navParams);
+    constructor(navCtrl: NavController, navParams: NavParams) {
+        super(navCtrl, navParams);
     }
 
     storageCellVoltOptions() {

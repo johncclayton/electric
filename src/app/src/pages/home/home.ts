@@ -3,8 +3,6 @@ import {NavController, ToastController} from "ionic-angular";
 import {Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
-import {Configuration} from "../../services/configuration.service";
-import {ConfigPage} from "../config/config-page";
 import {NgRedux, select} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {Channel} from "../../models/channel";
@@ -22,7 +20,6 @@ export class HomePage {
                 public readonly toastController: ToastController,
                 public readonly chargerService: iChargerService,
                 public readonly ngRedux: NgRedux<IAppState>,
-                public readonly config: Configuration,
                 public readonly http: Http) {
     }
 

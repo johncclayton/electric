@@ -1,7 +1,6 @@
 import {Component} from "@angular/core";
 import {HomePage} from "../home/home";
 import {ConfigPage} from "../config/config-page";
-import {Configuration} from "../../services/configuration.service";
 
 @Component({
   templateUrl: 'tabs.html'
@@ -12,7 +11,7 @@ export class TabsPage {
   tab1Root: any = HomePage;
   tab2Root: any = ConfigPage;
 
-  public constructor(public config : Configuration) {
+  public constructor() {
 
   }
 
@@ -20,12 +19,6 @@ export class TabsPage {
   }
 
   startingTab() {
-    if(this.config.isNew()) {
-      console.log("Looks like your first time - entering configuration");
-      return 1;
-    } else {
-      console.log("Not first time, trying to connect...");
-    }
     return 0;
   }
 

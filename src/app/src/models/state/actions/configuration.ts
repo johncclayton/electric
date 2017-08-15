@@ -10,6 +10,7 @@ import {UIActions} from "./ui";
 export class ConfigurationActions {
     static RESET_TO_DEFAULTS: string = 'RESET_TO_DEFAULTS';
     static UPDATE_CONFIG_KEYVALUE: string = 'UPDATE_CONFIG_KEYVALUE';
+    static UPDATE_CHARGE_CONFIG_KEYVALUE: string = 'UPDATE_CHARGE_CONFIG_KEYVALUE';
     static CONFIG_SAVED_TO_STORE: string = 'CONFIG_SAVED_TO_STORE';
     static SET_FULL_CONFIG: string = 'SET_FULL_CONFIG';
 
@@ -53,6 +54,16 @@ export class ConfigurationActions {
         let change = [];
         change[key] = value;
         this.updateConfiguration(change);
+    }
+
+    setChargeConfiguration(key: string, value: any) {
+        let change = [];
+        change[key] = value;
+        this.ngRedux.dispatch({
+            type: ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE,
+            payload: change,
+            maxAmpsPerChannel: this.chargerService.getMaxAmpsPerChannel()
+        });
     }
 
     updateConfiguration(change) {

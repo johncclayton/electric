@@ -1,7 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Headers, Http, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
-import {Configuration} from "./configuration.service";
 import {Events} from "ionic-angular";
 import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";
@@ -10,6 +9,8 @@ import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
+import {IConfig} from "../models/state/reducers/configuration";
+import {IChargerState} from "../models/state/reducers/charger";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -32,8 +33,7 @@ export class iChargerService {
                        public events: Events,
                        public chargerActions: ChargerActions,
                        public uiActions: UIActions,
-                       public ngRedux: NgRedux<IAppState>,
-                       public config: Configuration) {
+                       public ngRedux: NgRedux<IAppState>) {
 
 
         this.chargerStatusSubscription = this.getChargerStatus().subscribe(status => {
@@ -41,8 +41,16 @@ export class iChargerService {
         });
     }
 
+    getConfig(): IConfig {
+        return this.ngRedux.getState().config;
+    }
+
+    getCharger(): IChargerState {
+        return this.ngRedux.getState().charger;
+    }
+
     isConnectedToServer(): boolean {
-        return this.getState().charger.connected;
+        return this.getCharger().connected;
     }
 
     isConnectedToCharger(): boolean {
@@ -50,7 +58,7 @@ export class iChargerService {
             return false;
         }
 
-        return this.getState().charger.channel_count > 0;
+        return this.getCharger().channel_count > 0;
     }
 
     anyNetworkOrConnectivityProblems() {
@@ -65,12 +73,8 @@ export class iChargerService {
         return true;
     }
 
-    getState(): IAppState {
-        return this.ngRedux.getState();
-    }
-
     getNumberOfChannels(): number {
-        return this.getState().charger.channel_count;
+        return this.getCharger().channel_count;
     }
 
     getPresets(): Observable<any> {
@@ -103,16 +107,20 @@ export class iChargerService {
             .share();
     }
 
+    getHostName(): string {
+        let config = this.getConfig();
+        return config.ipAddress + ":" + config.port;
+    }
+
     // Gets the status of the charger
     private getChargerURL(path) {
-        let hostName = this.config.getHostName();
-        return "http://" + hostName + path;
+        return "http://" + this.getHostName() + path;
     }
 
     lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
         // Not supplied? Look it up.
         if (deviceId == null) {
-            deviceId = this.getState().charger.device_id;
+            deviceId = this.getCharger().device_id;
         }
         if (deviceId) {
             let md = ChargerMetadata[deviceId];
@@ -161,7 +169,7 @@ export class iChargerService {
             curr_int_temp: 0,
             cells: cells
         };
-        return new Channel(channelNumber, channelData, this.config.getCellLimit());
+        return new Channel(channelNumber, channelData, this.getConfig().cellLimit);
     }
 
     stopCurrentTask(channel: Channel): Observable<any> {

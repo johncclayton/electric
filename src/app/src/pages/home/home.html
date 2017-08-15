@@ -14,7 +14,7 @@
 
 <ion-nav #content [root]="rootPage"></ion-nav>
 
-<ion-content class="charger" [ngClass]="{'no-scroll': config.preventChargerVerticalScrolling()}">
+<ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
     <div *ngIf="anyNetworkOrConnectivityProblems()">
         <ion-card>
             <ion-card-header>

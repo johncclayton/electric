@@ -2,11 +2,16 @@ import {AnyAction, Reducer} from "redux";
 import {ConfigurationActions} from "../actions/configuration";
 
 export interface IChargeSettings {
+    wantedChargeRateInC: number,
     capacity: number,
-    c: number,
     numPacks: number,
     chemistryFilter: string,
     chargeMethod: string
+
+    // Synthetics
+    channelLimitReached: boolean;
+    ampsForWantedChargeRate: number;
+    safeAmpsForWantedChargeRate: number;
 }
 
 export interface IConfig {
@@ -17,15 +22,21 @@ export interface IConfig {
     preventChargerVerticalScrolling: boolean,
     unitsCelsius: boolean,
     mockCharger: boolean,
-    charge: IChargeSettings;
+
+    charge_settings: IChargeSettings;
 }
 
 const chargerDefaults: IChargeSettings = {
+    wantedChargeRateInC: 1,
     capacity: 2000,
-    c: 2,
     numPacks: 4,
     chemistryFilter: "All",
-    chargeMethod: "presets"
+    chargeMethod: "presets",
+
+    // Synthetics
+    channelLimitReached: false,
+    ampsForWantedChargeRate: 0,
+    safeAmpsForWantedChargeRate: 0
 };
 
 export const configurationDefaults: IConfig = {
@@ -36,7 +47,8 @@ export const configurationDefaults: IConfig = {
     preventChargerVerticalScrolling: true,
     unitsCelsius: true,
     mockCharger: false,
-    charge: chargerDefaults
+
+    charge_settings: chargerDefaults
 };
 
 
@@ -52,6 +64,25 @@ export const
 
             case ConfigurationActions.RESET_TO_DEFAULTS:
                 return configurationDefaults;
+
+            case ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE:
+                if (action.payload) {
+                    let maxAmpsPerChannel = action.maxAmpsPerChannel;
+                    let new_charge_settings: IChargeSettings = {
+                        ...state.charge_settings,
+                        ...action.payload
+                    };
+
+                    new_charge_settings.ampsForWantedChargeRate = new_charge_settings.numPacks * (new_charge_settings.capacity / 1000) * new_charge_settings.wantedChargeRateInC;
+                    new_charge_settings.safeAmpsForWantedChargeRate = Math.min(new_charge_settings.ampsForWantedChargeRate, maxAmpsPerChannel);
+                    new_charge_settings.channelLimitReached = new_charge_settings.ampsForWantedChargeRate > maxAmpsPerChannel;
+
+                    return {
+                        ...state,
+                        ...{charge_settings: new_charge_settings}
+                    }
+                }
+                return state;
 
             case ConfigurationActions.UPDATE_CONFIG_KEYVALUE:
                 if (action.payload) {

@@ -4,46 +4,66 @@ import {Channel} from "../../models/channel";
 import {iChargerService} from "../../services/icharger.service";
 import {ChemistryType, Preset} from "../../models/preset-class";
 import {Chemistry} from "../../utils/mixins";
-import {Configuration} from "../../services/configuration.service";
 
 import * as _ from "lodash";
 import {sprintf} from "sprintf-js";
 import {applyMixins} from "rxjs/util/applyMixins";
+import {NgRedux} from "@angular-redux/store";
+import {IAppState} from "../../models/state/configure";
+import {IChargeSettings, IConfig} from "../../models/state/reducers/configuration";
+import {ConfigurationActions} from "../../models/state/actions/configuration";
 
 @Component({
     selector: 'page-charge-options',
     templateUrl: 'charge-options.html'
 })
 export class ChargeOptionsPage implements Chemistry {
+    config: IConfig;
+    chargeSettings: IChargeSettings;
+
     channel: Channel;
-    channelLimitReached: boolean = false;
     title: string = "Charge";
     showCapacityAndC: boolean = true;
     charging: boolean = true;
     presets: Array<any> = [];
+
     private callback: any;
+    private subscription: any;
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
-                public config: Configuration,
+                public actions: ConfigurationActions,
+                public ngRedux: NgRedux<IAppState>,
                 public navParams: NavParams) {
+
         this.channel = navParams.data['channel'];
         this.showCapacityAndC = navParams.data['showCapacityAndC'];
         this.charging = navParams.data['charging'];
         this.title = navParams.data['title'];
         this.callback = navParams.data['callback'];
+        this.config = null;
+        this.chargeSettings = null;
 
-        if (!this.showCapacityAndC) {
-            // Force to presets (not computed)
-            this.chargeMethod = "presets";
-        }
+        this.subscription = ngRedux.select<IConfig>('config').subscribe(c => {
+            console.log("Charge page got some config / charge settings");
+            this.config = c;
+            this.chargeSettings = this.config.charge_settings;
+
+            if (!this.showCapacityAndC) {
+                // Force to presets (not computed)
+                this.chargeSettings.chargeMethod = "presets";
+            }
+        });
+    }
+
+    ngOnDestroy() {
+        this.subscription.unsubscribe();
     }
 
     ionViewDidLoad() {
         this.chargerService.getPresets().subscribe((presetList) => {
             this.presets = presetList;
         });
-        this.recomputeLimitReached();
     }
 
     chargeUsingPreset(preset: Preset) {
@@ -53,31 +73,31 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     get chargeMethod(): string {
-        return this.getChargeProperty('chargeMethod');
+        return this.chargeSettings.chargeMethod;
     }
 
     set chargeMethod(value) {
-        this.setChargeProperty('chargeMethod', value);
+        this.actions.setChargeConfiguration('chargeMethod', value);
     }
 
     get chemistryFilter(): string {
-        return this.getChargeProperty('chemistryFilter');
+        return this.chargeSettings.chemistryFilter;
     }
 
     set chemistryFilter(value) {
-        this.setChargeProperty('chemistryFilter', value);
+        this.actions.setChargeConfiguration('chemistryFilter', value);
     }
 
     get capacity() {
-        return this.getChargeProperty('capacity');
+        return this.chargeSettings.capacity;
     }
 
     set capacity(value) {
-        this.setChargeProperty('capacity', value);
+        this.actions.setChargeConfiguration('capacity', value);
     }
 
     get chargeRate() {
-        return this.getChargeProperty('c');
+        return this.chargeSettings.wantedChargeRateInC;
     }
 
     get chargeRateTimesTen() {
@@ -89,23 +109,15 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     set chargeRate(value) {
-        this.setChargeProperty('c', value);
+        this.actions.setChargeConfiguration('wantedChargeRateInC', value);
     }
 
     get numPacks() {
-        return this.getChargeProperty('numPacks');
+        return this.chargeSettings.numPacks;
     }
 
     set numPacks(value) {
-        this.setChargeProperty('numPacks', value);
-    }
-
-    get computedAmps() {
-        return this.numPacks * (this.capacity / 1000) * this.chargeRate;
-    }
-
-    get amps() {
-        return Math.min(this.computedAmps, this.chargerService.getMaxAmpsPerChannel());
+        this.actions.setChargeConfiguration('numPacks', value);
     }
 
     showFlame() {
@@ -113,7 +125,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     chargePlan() {
-        return "Charge at " + sprintf("%2.01fA", this.amps);
+        return "Charge at " + sprintf("%2.01fA", this.chargeSettings.safeAmpsForWantedChargeRate);
     }
 
     filteredPresets() {
@@ -135,25 +147,11 @@ export class ChargeOptionsPage implements Chemistry {
         return _.chunk(presets, 3);
     }
 
-    chemistryClass: () => string;
-
-    private getChargeProperty(propertyName: string) {
-        return this.config.configDict['charge'][propertyName];
-    }
-
-    private setChargeProperty(propertyName: string, newValue: any) {
-        this.config.configDict['charge'][propertyName] = newValue;
-        this.config.saveConfiguration();
-        this.recomputeLimitReached();
-    }
-
-    private recomputeLimitReached() {
-        this.channelLimitReached = this.computedAmps > this.ampsLimit();
-    }
-
-    private ampsLimit() {
+    ampsLimit() {
         return this.chargerService.getMaxAmpsPerChannel();
     }
+
+    chemistryClass: () => string;
 }
 
 applyMixins(ChargeOptionsPage, [Chemistry]);

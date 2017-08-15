@@ -1,7 +1,6 @@
 import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
-import {Configuration} from "../../services/configuration.service";
-import {Preset, LipoBalanceType, BalanceEndCondition, ChemistryType} from "../../models/preset-class";
+import {BalanceEndCondition, ChemistryType, LipoBalanceType, Preset} from "../../models/preset-class";
 import {FormBuilder} from "@angular/forms";
 import {celciusToF} from '../../utils/helpers'
 import * as _ from "lodash";
@@ -10,7 +9,6 @@ export class PresetBasePage {
     public preset: Preset;
 
     constructor(public navCtrl: NavController,
-                public config: Configuration,
                 public navParams: NavParams) {
         this.preset = navParams.data;
     }
@@ -44,10 +42,9 @@ export class PresetChargePage extends PresetBasePage {
 
     // Gotta have this, else DI doens't work? Huh?
     constructor(navCtrl: NavController,
-                config: Configuration,
                 public formBuilder: FormBuilder,
                 navParams: NavParams) {
-        super(navCtrl, config, navParams);
+        super(navCtrl, navParams);
     }
 
     ngOnInit() {

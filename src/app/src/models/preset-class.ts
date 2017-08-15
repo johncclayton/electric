@@ -157,12 +157,12 @@ export class Preset {
         this.data['channel_mode'] = +value;
     }
 
-    get save_to_sd(): number {
+    get save_to_sd(): boolean {
         return this.data['save_to_sd'];
     }
 
-    set save_to_sd(value: number) {
-        this.data['save_to_sd'] = +value;
+    set save_to_sd(value: boolean) {
+        this.data['save_to_sd'] = value;
     }
 
     get run_counter(): number {

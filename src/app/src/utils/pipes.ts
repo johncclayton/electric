@@ -1,8 +1,9 @@
-import {PipeTransform, Pipe} from "@angular/core";
+import {Pipe, PipeTransform} from "@angular/core";
 
 import {sprintf} from "sprintf-js";
-import {Configuration} from "../services/configuration.service";
 import {celciusToF} from './helpers'
+import {NgRedux} from "@angular-redux/store";
+import {IAppState} from "../models/state/configure";
 
 @Pipe({name: 'keys'})
 export class KeysPipe implements PipeTransform {
@@ -25,11 +26,11 @@ export class ReversePipe implements PipeTransform {
 
 @Pipe({name: 'temp'})
 export class TempPipe implements PipeTransform {
-    constructor(public config: Configuration) {
+    constructor(public  ngRedux: NgRedux<IAppState>) {
     }
 
     transform(value, args: string[]): any {
-        if (this.config.isCelsius() == false) {
+        if (this.ngRedux.getState().config.unitsCelsius == false) {
             return celciusToF(value);
         }
         return value;

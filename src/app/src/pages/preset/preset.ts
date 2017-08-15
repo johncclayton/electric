@@ -1,8 +1,7 @@
 import {Component} from "@angular/core";
-import {NavController, NavParams, AlertController} from "ionic-angular";
-import {Configuration} from "../../services/configuration.service";
+import {AlertController, NavController, NavParams} from "ionic-angular";
 import {PresetChargePage} from "../preset-charge/preset-charge";
-import {Preset, ChemistryType} from "../../models/preset-class";
+import {ChemistryType, Preset} from "../../models/preset-class";
 import {PresetStoragePage} from "../preset-storage/preset-storage";
 import {PresetDischargePage} from "../preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../preset-cycle/preset-cycle";
@@ -23,7 +22,6 @@ export class PresetPage {
     private callback: (preset: Preset) => void;
 
     constructor(public navCtrl: NavController,
-                public config: Configuration,
                 public alertController: AlertController,
                 public chargerService: iChargerService,
                 public navParams: NavParams) {
