@@ -1,7 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Headers, Http, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
-import {Events} from "ionic-angular";
 import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";
 import {System} from "../models/system";
@@ -30,7 +29,6 @@ export class iChargerService {
     private chargerStatusSubscription;
 
     public constructor(public http: Http,
-                       public events: Events,
                        public chargerActions: ChargerActions,
                        public uiActions: UIActions,
                        public ngRedux: NgRedux<IAppState>) {

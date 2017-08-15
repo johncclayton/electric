@@ -27,22 +27,28 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>, configEpic: 
         ChargerActions.UPDATE_STATE_FROM_CHARGER,
     ];
 
-    let middleware = [
-        createEpicMiddleware(configEpic.configChanged),
-        createLogger({
+    // Insert the epic middleware first.
+    let middleware = [];
+    middleware.push(createEpicMiddleware(configEpic.configChanged));
+
+    // Add logger if in development
+    if (process.env.NODE_ENV === `development`) {
+        middleware.push(createLogger({
             predicate: (getState, action) => {
                 // Don't show certain charger actions
                 return actionsBlacklist.indexOf(action.type) == -1;
             }
-        })
-    ];
+        }));
+    }
 
-    if (devTools.isEnabled()) {
-        // Don't show certain charger actions
-        let options = {
-            actionsBlacklist: actionsBlacklist
-        };
-        enhancers.push(devTools.enhancer(options));
+    if (window.navigator.userAgent.includes('Chrome')) {
+        if (devTools.isEnabled()) {
+            // Don't show certain charger actions
+            let options = {
+                actionsBlacklist: actionsBlacklist
+            };
+            enhancers.push(devTools.enhancer(options));
+        }
     }
     ngRedux.configureStore(reducers, <IAppState>{}, middleware, enhancers);
 

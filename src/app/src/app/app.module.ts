@@ -35,6 +35,7 @@ import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {NgSpinKitModule} from "ng-spin-kit";
+import {ConfigComponentModule} from "../components/config/config.module";
 
 @NgModule({
     declarations: [
@@ -58,13 +59,13 @@ import {NgSpinKitModule} from "ng-spin-kit";
         PresetCyclePage,
         ChargeOptionsPage,
         ChargerStatusComponent,
-        ConfigComponent
     ],
     imports: [
         BrowserModule,
         HttpModule,
         NgReduxModule,
         NgSpinKitModule,
+        ConfigComponentModule,
         IonicModule.forRoot(MyApp),
         IonicStorageModule.forRoot()
     ],
@@ -79,7 +80,6 @@ import {NgSpinKitModule} from "ng-spin-kit";
         PresetStoragePage,
         PresetDischargePage,
         PresetCyclePage,
-        ConfigComponent,
         ChargeOptionsPage,
         ChannelVoltsComponent,
         ChannelIRComponent,
