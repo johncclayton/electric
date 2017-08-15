@@ -5,6 +5,10 @@ import {NgRedux} from "@angular-redux/store";
 @Injectable()
 export class UIActions {
     static SET_EXCEPTION_MESSAGE: string = "SET_EXCEPTION_MESSAGE";
+    static SET_EXCEPTION_FROM_ERROR: string = "SET_EXCEPTION_FROM_ERROR";
+
+    static SERVER_DISCONNECTED: string = "SERVER_DISCONNECTED";
+    static SERVER_RECONNECTED: string = "SERVER_RECONNECTED";
 
     constructor(private ngRedux: NgRedux<IAppState>) {
     }
@@ -16,7 +20,7 @@ export class UIActions {
         }
         this.ngRedux.dispatch({
             type: UIActions.SET_EXCEPTION_MESSAGE,
-            payload: error
+            payload: error,
         });
     }
 
@@ -25,10 +29,9 @@ export class UIActions {
             console.log("setErrorFromException called with nothing");
             return;
         }
-        let message = error.message ? error.message : error.toString();
         this.ngRedux.dispatch({
-            type: UIActions.SET_EXCEPTION_MESSAGE,
-            payload: message
+            type: UIActions.SET_EXCEPTION_FROM_ERROR,
+            payload: error,
         });
     }
 
@@ -40,7 +43,19 @@ export class UIActions {
         let message = response.statusText ? response.statusText : "Code: " + response.status;
         this.ngRedux.dispatch({
             type: UIActions.SET_EXCEPTION_MESSAGE,
-            payload: message
+            payload: message,
+        });
+    }
+
+    setDisconnected() {
+        this.ngRedux.dispatch({
+            type: UIActions.SERVER_DISCONNECTED
+        });
+    }
+
+    serverReconnected() {
+        this.ngRedux.dispatch({
+            type: UIActions.SERVER_RECONNECTED
         });
     }
 }

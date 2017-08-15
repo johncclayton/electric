@@ -20,6 +20,13 @@
   // This controls what you see at the top of the dashboard
   // The main amps, volts area...
 
+  div.configButton {
+    position: absolute;
+    bottom: 70px;
+    width: 100%;
+    alignment: center;
+  }
+
   .overview {
     ion-col:nth-child(4) {
       text-align: center;
@@ -52,7 +59,7 @@
     padding: 15px;
 
     .bad {
-      background-color: map-get($colors, 'danger') ;
+      background-color: map-get($colors, 'danger');
     }
 
     .good {

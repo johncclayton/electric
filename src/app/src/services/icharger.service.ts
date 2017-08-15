@@ -96,9 +96,14 @@ export class iChargerService {
                 return this.http.get(this.getChargerURL("/unified"));
             }).map(r => {
                 this.chargerActions.refreshStateFromCharger(r.json());
+
+                if (this.ngRedux.getState().ui.disconnected) {
+                    this.uiActions.serverReconnected();
+                }
             })
             .catch(error => {
-                this.uiActions.setErrorFromException(error);
+                console.error("Probably connection problem: " + error);
+                this.uiActions.setDisconnected();
 
                 // I think I do this to force a 'retry'?
                 return Observable.throw(error);

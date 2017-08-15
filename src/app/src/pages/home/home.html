@@ -22,7 +22,7 @@
             <sk-folding-cube class="searching"></sk-folding-cube>
         </div>
 
-        <ion-grid class="errors">
+        <ion-grid class="errors" *ngIf="timeoutUp">
             <ion-row align-items-start>
                 <ion-col col-12 [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
                     <span>{{serverText()}}</span>
@@ -33,7 +33,7 @@
             </ion-row>
         </ion-grid>
 
-        <ion-grid>
+        <ion-grid *ngIf="timeoutUp">
             <ion-row>
                 <ion-col col-12>
                     <ion-list-header>Tips</ion-list-header>
@@ -51,6 +51,15 @@
                 <h4 padding color="danger">{{exception$|async}}</h4>
             </ion-list>
         </div>
+
+
+        <div class="configButton" block>
+            <button ion-button block large color="secondary" *ngIf="showConfigureButton"
+                    (click)="showConfigPage()">
+                <ion-icon name="tools"></ion-icon>
+                Configure
+            </button>
+        </div>
     </div>
 
 
@@ -60,6 +69,7 @@
 
         <channel name="Channel 1" [charger]="charger$|async" [index]="0"></channel>
         <channel name="Channel 2" [charger]="charger$|async" [index]="1"></channel>
+        <!--<button ion-button (click)="makeError()">Make Error</button>-->
     </div>
 
     <connection-state></connection-state>

@@ -35,14 +35,4 @@ export class ChargerActions {
             cellLimit: cellLimit
         });
     }
-
-    refreshStateFromChargerAsync() {
-        this.http.get(this.getChargerURL("/unified")).subscribe(r => {
-            // we get everything from the charger in one hit.
-            let unifiedState = r.json();
-            this.refreshStateFromCharger(unifiedState);
-        }, (error) => {
-            this.uiActions.setErrorMessage(error);
-        });
-    }
 }

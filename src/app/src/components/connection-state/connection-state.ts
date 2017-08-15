@@ -1,22 +1,21 @@
 import {Component} from "@angular/core";
-import {Events, NavController, Platform, ToastController} from "ionic-angular";
+import {NavController, Platform, ToastController} from "ionic-angular";
 import {iChargerService} from "../../services/icharger.service";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
-import {IUIState} from "../../models/state/reducers/ui";
+import {isDefined} from "ionic-angular/util/util";
 
 @Component({
     selector: 'connection-state',
     templateUrl: 'connection-state.html'
 })
 export class ConnectionStateComponent {
-
-    private disconnectionAlert;
+    private generalAlert;
+    private disconnectionEventWasAlertInitiator: boolean = false;
     private connectionFailure: number;
 
     constructor(public platform: Platform,
                 public charger: iChargerService,
-                public events: Events,
                 public ngRedux: NgRedux<IAppState>,
                 public navContoller: NavController,
                 public toastController: ToastController) {
@@ -31,33 +30,56 @@ export class ConnectionStateComponent {
         this.connectionFailure = 0;
 
         // Listen for changes to the exception, and do something with the UI
-        this.ngRedux.select('ui').subscribe((ui: IUIState) => {
-            if(ui.exception) {
-                this.chargerError(ui.exception);
+        this.ngRedux.select(['ui', 'exception']).subscribe((message: string) => {
+            if (isDefined(message)) {
+                if (message) {
+                    this.showGeneralError(message);
+                }
             }
         });
 
-        // this.events.subscribe(CHARGER_CONNECTED_EVENT, () => this.chargerConnected());
-        // this.events.subscribe(CHARGER_STATUS_ERROR, () => this.chargerError(null));
-        // this.events.subscribe(CHARGER_COMMAND_FAILURE, (error) => this.chargerError(error));
+        this.ngRedux.select(['ui', 'disconnectionErrorCount']).subscribe((thing) => {
+            let uiState = this.ngRedux.getState().ui;
+            if (uiState.disconnected) {
+                this.incrementDisconnectionCount();
+            } else {
+                this.serverReconnected();
+            }
+        });
     }
 
-    chargerConnected() {
-        if (this.disconnectionAlert) {
-            this.disconnectionAlert.dismiss();
-            this.disconnectionAlert = null;
+    clearAlertMessage() {
+        if (this.generalAlert) {
+            // DONT DO THIS. You get exceptions if you DO!
+            // this.generalAlert.dismiss();
+            this.generalAlert = null;
         }
-
         this.connectionFailure = 0;
+        this.disconnectionEventWasAlertInitiator = false;
     }
 
-    chargerError(message: string) {
-        if (message == null) {
-            message = 'Connection Problem'
+    serverReconnected() {
+        /*
+        If we showed an altert only because of connection problem... then take it away.
+        Otherwise, let the user do it.
+         */
+        if (this.disconnectionEventWasAlertInitiator) {
+            if (this.generalAlert) {
+                // For some reason we need to do this. Setting it to null isn't enough.
+                // YET: don't do that ALWAYS... otherwise you get exceptions.
+                this.generalAlert.dismiss();
+            }
+            this.clearAlertMessage();
         }
-        this.connectionFailure++;
-        if (!this.disconnectionAlert) {
-            this.disconnectionAlert = this.toastController.create({
+    }
+
+    showGeneralError(message: string) {
+        if (message == null) {
+            message = 'Unknown problem?!'
+        }
+
+        if (this.generalAlert == null) {
+            this.generalAlert = this.toastController.create({
                 'message': message,
                 'cssClass': 'redToast',
                 'position': 'bottom',
@@ -65,17 +87,22 @@ export class ConnectionStateComponent {
                 'closeButtonText': 'Dismiss'
             });
 
-            this.disconnectionAlert.onDidDismiss(() => {
-                // don't do anything.
-                // because we don't set the alert to 'nil', the next error won't cause it to show.
-                // we could add a timer here, so that it might show in 30s or so, by just setting it to null in 30s.
+            this.generalAlert.onDidDismiss(() => {
+                // Clear the alert.
+                this.clearAlertMessage();
             });
+        }
 
-            this.disconnectionAlert.present();
-        } else {
-            if (this.connectionFailure > 3) {
-                this.disconnectionAlert.setMessage('Reconnecting (' + this.connectionFailure + ')');
-            }
+        this.generalAlert.message = message;
+        this.generalAlert.present();
+    }
+
+    private incrementDisconnectionCount() {
+        this.connectionFailure++;
+        if (this.connectionFailure > 3) {
+            let message = 'Reconnecting (' + this.connectionFailure + ')';
+            this.disconnectionEventWasAlertInitiator = true;
+            this.showGeneralError(message);
         }
     }
 }
