@@ -3,6 +3,18 @@
   overflow: hidden;
 }
 
+.searching {
+  padding-top: 10px;
+  padding-bottom: 25px;
+
+  opacity: 0.6;
+}
+
+.folding-cube-spinner {
+  width: 100px !important;
+  height: 100px !important;
+}
+
 // This is the CSS for the charger, as a whole.
 .charger {
   // This controls what you see at the top of the dashboard
@@ -28,8 +40,23 @@
   }
 
   .errors {
-    h3 {
-      padding: 10px 15px;
+
+    ion-col {
+      border-radius: 5px;
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    padding: 15px;
+
+    .bad {
+      background-color: map-get($colors, 'danger') ;
+    }
+
+    .good {
+      background-color: map-get($colors, 'secondary');
     }
   }
 }

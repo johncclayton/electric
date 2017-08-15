@@ -17,7 +17,6 @@ export class HomePage {
     @select('config') config$: Observable<Channel>;
 
     constructor(public readonly navCtrl: NavController,
-                public readonly toastController: ToastController,
                 public readonly chargerService: iChargerService,
                 public readonly ngRedux: NgRedux<IAppState>,
                 public readonly http: Http) {
@@ -43,30 +42,31 @@ export class HomePage {
         // this.navCtrl.push(ConfigPage);
     }
 
-    channelSubscriptions() {
-        if (this.isConnectedToCharger()) {
-            // let chargerChannelRequests = this.chargerService.getChargerChannelRequests();
-            // if (chargerChannelRequests) {
-            //     if (chargerChannelRequests.length) {
-            //         return chargerChannelRequests;
-            //     }
-            // }
+    chargerText() {
+        if(this.isConnectedToCharger()) {
+            return "Charger OK!";
         }
-        return [];
+        return "Can't see the charger";
     }
-
-    showToast(message: string) {
-        // about not to be, so show a message
-        let toast = this.toastController.create({
-            message: message,
-            duration: 2000,
-            position: 'bottom',
-        });
-        toast.present();
+    serverText() {
+        if(this.isConnectedToServer()) {
+            return "Server/Pi connection is good!";
+        }
+        return "Can't see the Pi";
     }
-
-    ionViewWillLeave() {
-        console.log("Leaving dashboard");
+    tips() {
+        let tips = [];
+        if(!this.isNetworkAvailable()) {
+            tips.push("Is Wifi on? There doesn't seem to be a network.");
+        }
+        if(!this.isConnectedToServer()) {
+            tips.push("Check that you have the correct host URL in your Configuration.");
+            tips.push("Do you have network connectivity to the Pi?");
+        }
+        if(!this.isConnectedToCharger()) {
+            tips.push("Is the charger on?");
+            tips.push("Is the charger USB plugged into the Pi?");
+        }
+        return tips;
     }
-
 }

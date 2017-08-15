@@ -34,6 +34,7 @@ import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
+import {NgSpinKitModule} from "ng-spin-kit";
 
 @NgModule({
     declarations: [
@@ -63,6 +64,7 @@ import {ConfigurationActions} from "../models/state/actions/configuration";
         BrowserModule,
         HttpModule,
         NgReduxModule,
+        NgSpinKitModule,
         IonicModule.forRoot(MyApp),
         IonicStorageModule.forRoot()
     ],

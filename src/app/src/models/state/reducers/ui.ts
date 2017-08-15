@@ -6,7 +6,7 @@ export interface IUIState {
 }
 
 let defaultUIState: IUIState = {
-    exception: ""
+    exception: null
 };
 
 export const
@@ -16,9 +16,10 @@ export const
         }
         switch (action.type) {
             case UIActions.SET_EXCEPTION_MESSAGE:
+                let message = action.payload;
                 return {
                     ...state,
-                    exception: action.payload
+                    exception: message
                 };
         }
 

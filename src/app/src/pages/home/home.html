@@ -16,57 +16,36 @@
 
 <ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
     <div *ngIf="anyNetworkOrConnectivityProblems()">
-        <ion-card>
-            <ion-card-header>
-                Connection Status
-            </ion-card-header>
 
-            <ion-list class="errors">
-                <ion-item *ngIf="!isConnectedToServer()">
-                    <ion-icon name="close-circle" color="danger"></ion-icon>
-                    Can't see the Pi 'server'.
-                </ion-item>
+        <p text-center>Looking for your charger...</p>
+        <div class="searching">
+            <sk-folding-cube class="searching"></sk-folding-cube>
+        </div>
 
-                <ion-item *ngIf="isConnectedToServer()">
-                    <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
-                    Server/Pi connection is good!
-                </ion-item>
+        <ion-grid class="errors">
+            <ion-row align-items-start>
+                <ion-col col-12 [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
+                    <span>{{serverText()}}</span>
+                </ion-col>
+                <ion-col col-12 [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
+                    <span>{{chargerText()}}</span>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
 
-                <ion-item *ngIf="!isConnectedToCharger()">
-                    <ion-icon name="close-circle" color="danger"></ion-icon>
-                    Can't see the charger
-                </ion-item>
+        <ion-grid>
+            <ion-row>
+                <ion-col col-12>
+                    <ion-list-header>Tips</ion-list-header>
+                </ion-col>
+                <ion-col col-12 *ngFor="let tip of tips()">
+                    <ion-icon name="bulb"></ion-icon>
+                    {{tip}}
+                </ion-col>
+            </ion-row>
+        </ion-grid>
 
-                <ion-item *ngIf="isConnectedToCharger()">
-                    <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
-                    Charger OK!
-                </ion-item>
-
-                <ion-list-header>Please Check</ion-list-header>
-                <h3 *ngIf="!isNetworkAvailable()">
-                    <ion-icon name="bulb-outline"></ion-icon>
-                    Is Wifi on? There doesn't seem to be a network.
-                </h3>
-                <h3 *ngIf="!isConnectedToServer()">
-                    <ion-icon name="bulb-outline"></ion-icon>
-                    Check that you have the correct host URL in your Configuration.
-                </h3>
-                <h3 *ngIf="!isConnectedToServer()">
-                    <ion-icon name="bulb-outline"></ion-icon>
-                    Do you have network connectivity to the Pi?
-                </h3>
-                <h3 *ngIf="!isConnectedToCharger()">
-                    <ion-icon name="bulb-outline"></ion-icon>
-                    Is the charger on?
-                </h3>
-                <h3 *ngIf="!isConnectedToCharger()">
-                    <ion-icon name="bulb-outline"></ion-icon>
-                    Is the charger USB plugged into the Pi?
-                </h3>
-            </ion-list>
-        </ion-card>
-
-        <div *ngIf="exception$" class="tryme">
+        <div *ngIf="exception$|async" class="tryme">
             <ion-list>
                 <ion-list-header>The Server Said:</ion-list-header>
                 <h4 padding color="danger">{{exception$|async}}</h4>

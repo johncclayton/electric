@@ -3,6 +3,7 @@ import {Events, NavController, Platform, ToastController} from "ionic-angular";
 import {iChargerService} from "../../services/icharger.service";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
+import {IUIState} from "../../models/state/reducers/ui";
 
 @Component({
     selector: 'connection-state',
@@ -29,8 +30,11 @@ export class ConnectionStateComponent {
 
         this.connectionFailure = 0;
 
-        this.ngRedux.subscribe(() => {
-            // hmm. how do I listen to just 'some'?
+        // Listen for changes to the exception, and do something with the UI
+        this.ngRedux.select('ui').subscribe((ui: IUIState) => {
+            if(ui.exception) {
+                this.chargerError(ui.exception);
+            }
         });
 
         // this.events.subscribe(CHARGER_CONNECTED_EVENT, () => this.chargerConnected());
@@ -47,7 +51,7 @@ export class ConnectionStateComponent {
         this.connectionFailure = 0;
     }
 
-    chargerError(message) {
+    chargerError(message: string) {
         if (message == null) {
             message = 'Connection Problem'
         }

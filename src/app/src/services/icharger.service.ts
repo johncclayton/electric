@@ -98,7 +98,7 @@ export class iChargerService {
                 this.chargerActions.refreshStateFromCharger(r.json());
             })
             .catch(error => {
-                this.uiActions.setErrorMessage(error);
+                this.uiActions.setErrorFromException(error);
 
                 // I think I do this to force a 'retry'?
                 return Observable.throw(error);
