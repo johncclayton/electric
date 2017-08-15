@@ -12,6 +12,7 @@ import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {IChargeSettings, IConfig} from "../../models/state/reducers/configuration";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
+import {IUIState} from "../../models/state/reducers/ui";
 
 @Component({
     selector: 'page-charge-options',
@@ -20,6 +21,7 @@ import {ConfigurationActions} from "../../models/state/actions/configuration";
 export class ChargeOptionsPage implements Chemistry {
     config: IConfig;
     chargeSettings: IChargeSettings;
+    ui: IUIState;
 
     channel: Channel;
     title: string = "Charge";

@@ -3,6 +3,7 @@ import {IConfig} from "../../models/state/reducers/configuration";
 import {NavController, Platform} from "ionic-angular";
 import {isUndefined} from "ionic-angular/util/util";
 import {IChargerState} from "../../models/state/reducers/charger";
+import {IUIState} from "../../models/state/reducers/ui";
 
 /**
  * Generated class for the ConfigComponent component.
@@ -17,6 +18,8 @@ import {IChargerState} from "../../models/state/reducers/charger";
 export class ConfigComponent {
     mockValueChanged: boolean;
 
+    // huh. should probably refactor this to simply take the entire ngRedux IAppState
+    @Input() ui?: IUIState;
     @Input() config?: IConfig;
     @Input() charger?: IChargerState;
 

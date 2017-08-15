@@ -30,6 +30,7 @@ let defaultStatus: IChargerState = {
     software_ver: 0,
     channels: [],
 
+    // Synthetic state, summed from the channels
     total_output_amps: 0,
     total_capacity: 0,
     input_volts: 0,

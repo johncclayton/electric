@@ -6,6 +6,7 @@ import {NgRedux, select} from "@angular-redux/store";
 import {Observable} from "rxjs/Observable";
 import {Platform} from "ionic-angular";
 import {IChargerState} from "../../models/state/reducers/charger";
+import {IUIState} from "../../models/state/reducers/ui";
 
 @Component({
     selector: 'page-config',
@@ -15,6 +16,7 @@ import {IChargerState} from "../../models/state/reducers/charger";
 export class ConfigPage {
     @select() config$: Observable<IConfig>;
     @select() charger$: Observable<IChargerState>;
+    @select() ui$: Observable<IUIState>;
 
     constructor(private ngRedux: NgRedux<IAppState>,
                 private actions: ConfigurationActions,
@@ -32,7 +34,7 @@ export class ConfigPage {
 
     testFunc() {
         let mockCharger = this.ngRedux.getState().config.mockCharger;
-        this.actions.updateConfiguration({"mockCharger" : !mockCharger});
+        this.actions.updateConfiguration({"mockCharger": !mockCharger});
         console.log("Boo");
     }
 }

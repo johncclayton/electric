@@ -12,6 +12,7 @@
     <config
             [config]="config$|async"
             [charger]="charger$|async"
+            [ui]="ui$|async"
             (updateConfiguration)="actions.updateConfiguration($event)"
             (toggleCelsius)="actions.toggleCelsiusAsync($event)"
             (resetToDefaults)="actions.resetToDefaults()"
