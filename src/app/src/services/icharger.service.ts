@@ -329,24 +329,24 @@ export class iChargerService {
     }
 
     autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
-        return;
-        // this.cancelAutoStopForChannel(channel);
-        //
-        // this.autoStopSubscriptions[channel.index] = this.channelStateObservable[channel.index].takeWhile((channel) => {
-        //     console.log("Channel ", channel.index, ", state: ", channel.runState);
-        //     return !states_to_stop_on.some((state) => {
-        //         return channel.runState == state;
-        //     });
-        // }).subscribe((value) => {
-        // }, (error) => {
-        //     console.log("Error while waiting for the channel to change state");
-        //     this.cancelAutoStopForChannel(channel);
-        // }, () => {
-        //
-        //     console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
-        //     this.stopCurrentTask(channel).subscribe();
-        //     this.cancelAutoStopForChannel(channel);
-        // });
+        this.cancelAutoStopForChannel(channel);
+        let channel_index = channel.index;
+
+        this.autoStopSubscriptions[channel.index] = Observable.timer(250, 250).takeWhile(() => {
+            let ch: Channel = this.getCharger().channels[channel_index];
+            // console.log("Channel ", ch.index, ", state: ", ch.runState);
+            return !states_to_stop_on.some((state) => {
+                return ch.runState == state;
+            });
+        }).subscribe((value) => {
+        }, (error) => {
+            console.log("Error while waiting for the channel to change state");
+            this.cancelAutoStopForChannel(channel);
+        }, () => {
+            console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
+            this.stopCurrentTask(channel).subscribe();
+            this.cancelAutoStopForChannel(channel);
+        });
     }
 
 }
