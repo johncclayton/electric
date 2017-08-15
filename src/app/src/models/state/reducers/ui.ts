@@ -13,7 +13,7 @@ let defaultUIState: IUIState = {
     exception: null,
     details: null,
     disconnected: true,
-    disconnectionErrorCount: 0
+    disconnectionErrorCount: 0,
 };
 
 export const

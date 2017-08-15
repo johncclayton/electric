@@ -91,7 +91,8 @@ export class iChargerService {
     getChargerStatus(): Observable<any> {
         return Observable.timer(1000, 1000)
             .flatMap(v => {
-                return this.http.get(this.getChargerURL("/unified"));
+                let url = this.getChargerURL("/unified");
+                return this.http.get(url);
             }).map(r => {
                 this.chargerActions.refreshStateFromCharger(r.json());
 
@@ -106,8 +107,7 @@ export class iChargerService {
                 // I think I do this to force a 'retry'?
                 return Observable.throw(error);
             })
-            .retry()
-            .share();
+            .retry();
     }
 
     getHostName(): string {

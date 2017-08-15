@@ -1,6 +1,6 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
-import {ErrorHandler, NgModule} from "@angular/core";
+import {ErrorHandler, Inject, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
@@ -28,7 +28,6 @@ import {PresetBalancePage} from "../pages/preset-balance/preset-balance";
 import {TabsPage} from "../pages/tabs/tabs";
 import {DevToolsExtension, NgRedux, NgReduxModule} from "@angular-redux/store";
 import {configureAppStateStore, IAppState} from "../models/state/configure";
-import {ConfigComponent} from '../components/config/config';
 import {ConfigStoreProvider} from '../providers/config-store/config-store';
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
@@ -36,6 +35,8 @@ import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {NgSpinKitModule} from "ng-spin-kit";
 import {ConfigComponentModule} from "../components/config/config.module";
+import {EnvironmentsModule} from "./environment/environment-variables.module";
+import {EnvVariables} from "./environment/environment-variables.token";
 
 @NgModule({
     declarations: [
@@ -67,7 +68,8 @@ import {ConfigComponentModule} from "../components/config/config.module";
         NgSpinKitModule,
         ConfigComponentModule,
         IonicModule.forRoot(MyApp),
-        IonicStorageModule.forRoot()
+        IonicStorageModule.forRoot(),
+        EnvironmentsModule
     ],
     bootstrap: [IonicApp],
     entryComponents: [

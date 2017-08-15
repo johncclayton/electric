@@ -1,12 +1,12 @@
-import {Component} from "@angular/core";
-import {IAppState} from "../../models/state/configure";
+import {Component, Inject} from "@angular/core";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 import {IConfig} from "../../models/state/reducers/configuration";
-import {NgRedux, select} from "@angular-redux/store";
+import {select} from "@angular-redux/store";
 import {Observable} from "rxjs/Observable";
 import {Platform} from "ionic-angular";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
+import {environmentFactory} from "../../app/environment/environment-variables.module";
 
 @Component({
     selector: 'page-config',
@@ -18,9 +18,7 @@ export class ConfigPage {
     @select() charger$: Observable<IChargerState>;
     @select() ui$: Observable<IUIState>;
 
-    constructor(private ngRedux: NgRedux<IAppState>,
-                private actions: ConfigurationActions,
-                private platform: Platform) {
+    constructor(private platform: Platform) {
 
     }
 
@@ -32,9 +30,16 @@ export class ConfigPage {
         return this.platform.platforms().toString();
     }
 
-    testFunc() {
-        let mockCharger = this.ngRedux.getState().config.mockCharger;
-        this.actions.updateConfiguration({"mockCharger": !mockCharger});
-        console.log("Boo");
+    get isProduction(): boolean {
+        let environment = environmentFactory();
+        return environment.ionicEnvName == 'prod';
+    }
+
+    environmentStrings(): string[] {
+        let environment = environmentFactory();
+        let callbackfn = (value): string => {
+            return value + " = " + environment[value];
+        };
+        return Object.keys(environment).map(callbackfn);
     }
 }
