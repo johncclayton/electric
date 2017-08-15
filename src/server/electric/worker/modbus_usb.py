@@ -1,12 +1,17 @@
 import array
-import hid, threading, time
+import hid
 import logging
 import struct
+import threading
+import time
 
 import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
 from modbus_tk.modbus import Query
 from modbus_tk.modbus_rtu import RtuMaster
+
+from electric.testing_control import TestingControlException
+import electric.testing_control as testing_control
 
 logger = logging.getLogger('electric.worker.{0}'.format(__name__))
 
@@ -22,26 +27,6 @@ END_POINT_ADDRESS_READ = 0x81
 MAX_READWRITE_LEN = 64
 READ_REG_COUNT_MAX = 30
 WRITE_REG_COUNT_MAX = 28
-
-
-class TestingControlException(Exception):
-    pass
-
-
-class TestingControl:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        # Holds the global testing flags that modify the interface behaviour in simple ways to enable testing
-        self.usb_device_present = True
-        # If a read operation should fail and throw an exception
-        self.modbus_read_should_fail = False
-        # If a write operation should fail and throw an exception
-        self.modbus_write_should_fail = False
-
-
-testing_control = TestingControl()
 
 ModbusErrors = [
     {"c": "MB_EOK", "v": 0x00},
@@ -189,7 +174,7 @@ class USBThreadedReader:
 
         try:
             self._dev = hid.device()
-            if not testing_control.usb_device_present:
+            if not testing_control.values.usb_device_present:
                 raise ValueError("TEST_FAKE_CANNOT_FIND_DEVICE")
 
             self._read_thread.start()
@@ -263,7 +248,7 @@ class USBThreadedReader:
         pass
 
     def write(self, payload):
-        if not testing_control.usb_device_present:
+        if not testing_control.values.usb_device_present:
             raise IOError("FAKE TEST ON WRITE, CHARGER NOT PRESENT")
 
         if self._dev is not None:
@@ -326,7 +311,7 @@ class USBThreadedReader:
         logger.info("USB reading thread has stopped, _read_thread_exit value is: {0}".format(self._read_thread_exit))
 
     def read(self, expected_length):
-        if not testing_control.usb_device_present:
+        if not testing_control.values.usb_device_present:
             raise IOError("FAKE TEST ON READ, CHARGER NOT PRESENT")
 
         TOTAL_TIME_LIMIT = 5.0
@@ -401,7 +386,7 @@ class iChargerMaster(RtuMaster):
 
         assert (quant * 2) == byte_len
 
-        if testing_control.modbus_read_should_fail:
+        if testing_control.values.modbus_read_should_fail:
             raise TestingControlException("modbus_read_registers")
 
         """The slave param (1 in this case) is never used, its appropriate to RTU based Modbus

@@ -1,6 +1,6 @@
 {
   "charger": "308",
   "env": {
-    "ELECTRIC_WORKER_CONNECT" : "tcp://192.168.1.30:5001"
+    "ELECTRIC_WORKER" : "tcp://192.168.178.164:5001"
   }
 }

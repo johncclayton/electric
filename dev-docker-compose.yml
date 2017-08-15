@@ -18,7 +18,7 @@ services:
     command: sh -x /www/run_gunicorn.sh
 
     environment:
-      - ELECTRIC_WORKER_CONNECT=tcp://worker:5001
+      - ELECTRIC_WORKER=tcp://worker:5001
 
     ports:
       - 5000:5000

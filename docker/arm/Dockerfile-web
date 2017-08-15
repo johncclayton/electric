@@ -5,7 +5,7 @@ LABEL maintainer="Neil Clayton, John Clayton" \
 
 VOLUME /www
 WORKDIR /www
-ENV ELECTRIC_WORKER_CONNECT=tcp://127.0.0.1:5001
+ENV ELECTRIC_WORKER=tcp://127.0.0.1:5001
 
 COPY ./src/server/ /www
 ENV MAKEFLAGS="-j 4"

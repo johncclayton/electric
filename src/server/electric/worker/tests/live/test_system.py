@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 class TestSystemFunctions(LiveIChargerTestCase):
     def setUp(self):
         self.client = application.test_client()
+        self.setup_environment_from_live_config()
 
     def _turn_response_into_storage_object(self, response):
         json_dict = json.loads(response.data)

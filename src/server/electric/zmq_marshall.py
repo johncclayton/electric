@@ -1,17 +1,15 @@
 import zmq, os
 import logging
+from electric import testing_control as testing_control
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 
 
 def get_worker_loc():
-    return os.environ.get("ELECTRIC_WORKER_CONNECT", "tcp://127.0.0.1:5001")
+    return os.environ.get("ELECTRIC_WORKER", "tcp://127.0.0.1:5001")
 
+RESPONSE_TIMEOUT_MS = 5000
 
-RESPONSE_TIMEOUT_MS = 10000
-
-
-# RESPONSE_TIMEOUT_MS = 1000000
 
 class ZMQCommsManager(object):
     """
@@ -55,6 +53,7 @@ class ZMQCommsManager(object):
 
     def _send_message_get_response(self, method_name, arg_dict=None):
         request = {
+            "testing-control": testing_control.values,
             "method": method_name,
             "tag": self.request_tag
         }
@@ -67,12 +66,13 @@ class ZMQCommsManager(object):
         self.charger_socket.send_pyobj(request)
         sockets = dict(self.poll.poll(RESPONSE_TIMEOUT_MS))
         if self.charger_socket in sockets:
+            e = None
+
             try:
-                e = None
                 resp = self.charger_socket.recv_pyobj()
 
-                if "exception" in resp:
-                    e = resp["exception"]
+                if "raises" in resp:
+                    e = resp["raises"]
                     logger.error("message received from ZMQ, contained exception: {0}".format(e))
                 elif "response" in resp:
                     r = resp["response"]
@@ -82,13 +82,18 @@ class ZMQCommsManager(object):
                     e = IOError("request received - but no response was found inside, terrible!")
 
             except Exception, f:
-                logger.error("exception received when reading message from ZMQ: {0}".format(e))
+                logger.error("exception received when reading message from ZMQ: {0}".format(f))
                 e = f
 
-            if e is not None:
-                raise e
+            # if we get here, e MUST be set
+            assert(e is not None)
+
+            raise e
         else:
-            raise IOError("request {1} failed to receive a response at all from ZMQ within 10 seconds: {0}".format(method_name, request["tag"]))
+            # connection is gone - lets re-open it
+            self.close_and_reopen_connection()
+            timeout_s = int(RESPONSE_TIMEOUT_MS / 1000.0)
+            raise IOError("request {1} failed to receive a response at all from ZMQ within {2} seconds: {0}".format(method_name, request["tag"], timeout_s))
 
     def turn_off_logging(self):
         return self._send_message_get_response("turn_off_logging")
