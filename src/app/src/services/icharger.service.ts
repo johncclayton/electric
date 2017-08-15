@@ -50,7 +50,7 @@ export class iChargerService {
     }
 
     isConnectedToServer(): boolean {
-        return this.getCharger().connected;
+        return this.ngRedux.getState().ui.disconnected === false;
     }
 
     isConnectedToCharger(): boolean {

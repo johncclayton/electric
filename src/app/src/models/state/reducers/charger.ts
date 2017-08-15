@@ -1,6 +1,7 @@
 import {AnyAction, Reducer} from "redux";
 import {ChargerActions} from "../actions/charger";
 import {Channel} from "../../channel";
+import {UIActions} from "../actions/ui";
 
 export interface IChargerState {
     charger_presence: string;
@@ -10,7 +11,6 @@ export interface IChargerState {
     device_sn: string;
     memory_len: number;
     software_ver: number;
-    connected: boolean;
     channels: Array<Channel>;
 
     // Synthetic state, summed from the channels
@@ -28,7 +28,6 @@ let defaultStatus: IChargerState = {
     device_sn: "",
     memory_len: 0,
     software_ver: 0,
-    connected: false,
     channels: [],
 
     total_output_amps: 0,
@@ -51,12 +50,10 @@ export const
                     ...unifiedStatus['status']
                 };
 
-                // Synthetic. Could do more here, like "sum" the channel state :)
-                newState.connected = unifiedStatus.charger_presence === 'connected';
-                if (!newState.connected) {
-                    newState.channel_count = 0;
-                }
+                // Synthetic.
+                newState.channel_count = 0;
 
+                // "sum" the channel state :)
                 newState.total_output_amps = 0;
                 newState.total_capacity = 0;
                 newState.input_volts = 0;
@@ -72,11 +69,12 @@ export const
                         newState.total_capacity += ch.output_capacity;
 
                         // Copy the volts + temp
-                        if(index == 0) {
+                        if (index == 0) {
                             newState.input_volts = ch.input_volts;
                             newState.charger_temp = ch.charger_internal_temp;
                         }
                     });
+                    newState.channel_count = channels.length;
                 }
                 newState.channels = channels;
                 return newState;
