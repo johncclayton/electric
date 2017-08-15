@@ -154,29 +154,6 @@ export class iChargerService {
         return this.lookupChargerMetadata(null, 'cells', 0);
     }
 
-    // Mock data, representing an empty channel
-    emptyData(channelNumber: number) {
-        let cellLimit = this.getMaxCells();
-        let cells = [];
-        for (let i = 0; i > cellLimit; i++) {
-            cells.push({
-                'v': 0,
-                'cell': i,
-                'balance': 0,
-                'ir': 0,
-            });
-        }
-        let channelData = {
-            curr_inp_volts: 0,
-            curr_out_amps: 0,
-            curr_out_capacity: 0,
-            timestamp: 0,
-            curr_int_temp: 0,
-            cells: cells
-        };
-        return new Channel(channelNumber, channelData, this.getConfig().cellLimit);
-    }
-
     stopCurrentTask(channel: Channel): Observable<any> {
         this.cancelAutoStopForChannel(channel);
         return Observable.create((observable) => {

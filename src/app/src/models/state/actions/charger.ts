@@ -14,17 +14,17 @@ export class ChargerActions {
                 private http: Http) {
     }
 
+    private getChargerURL(path) {
+        let hostName = this.getHostName();
+        return "http://" + hostName + path;
+    }
+
     get config(): IConfig {
         return this.ngRedux.getState()['config'];
     }
 
     getHostName(): string {
         return this.config.ipAddress + ":" + this.config.port;
-    }
-
-    private getChargerURL(path) {
-        let hostName = this.getHostName();
-        return "http://" + hostName + path;
     }
 
     refreshStateFromCharger(unifiedState) {
@@ -35,4 +35,5 @@ export class ChargerActions {
             cellLimit: cellLimit
         });
     }
+
 }

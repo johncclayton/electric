@@ -1,4 +1,4 @@
-<ion-grid (tap)="showChargerActions()">
+<ion-grid>
     <ion-row id="heading" align-items-baseline>
         <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel.runState > 0}"
                  width-10>
@@ -42,11 +42,11 @@
         <div *ngSwitchCase="0" padding>
             <ion-spinner></ion-spinner>
         </div>
-        <div *ngSwitchCase="1" id="master">
+        <div *ngSwitchCase="1" id="master" (tap)="showChargerActions()">
             <channel-volts [channel]="channel"></channel-volts>
         </div>
         <div *ngSwitchCase="2">
-            <channel-ir [channel]="channel"></channel-ir>
+            <channel-ir [channel]="channel" (tap)="returnToShowingCellVolts($event)"></channel-ir>
         </div>
     </div>
 

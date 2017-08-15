@@ -5,6 +5,8 @@ import {ActionSheetController, NavController, ToastController} from "ionic-angul
 import {ChargeOptionsPage} from "../../pages/charge-options/charge-options";
 import {Preset} from "../../models/preset-class";
 import {IChargerState} from "../../models/state/reducers/charger";
+import {Observable} from "rxjs/Observable";
+import {Subscription} from "rxjs/Subscription";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -52,6 +54,7 @@ export class ChannelComponent {
     @Input() name: string;
 
     private firstTime: boolean;
+    private measureIRObservable: Subscription;
 
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
@@ -80,25 +83,33 @@ export class ChannelComponent {
     }
 
     showMeasureIR() {
-        // this.chargerService.measureIR(this.channel).subscribe((result) => {
-        //     console.log("Measure IR done. Result: ", result);
-        // });
-        // this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
-        //
-        // // Monitor the IR. When we see some amps for a short period of time, auto stop the operation
-        //
-        // this.channelObserver.takeWhile((channelObject) => {
-        //     let less_than_one_amp = Math.abs(channelObject.curr_out_amps) < 1.0;
-        //     console.log("At: ", channelObject.curr_out_amps, "ltoa: ", less_than_one_amp);
-        //     return less_than_one_amp;
-        // }).subscribe((result) => {
-        // }, (error) => {
-        // }, () => {
-        //     console.log("Stopping discharge because Measuer IR has seen some amps");
-        //     this.stopCurrentTask();
-        // });
+        this.chargerService.measureIR(this.channel).subscribe((result) => {
+            console.log("Measure IR done. Result: ", result);
+        });
+        this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
 
+        // Monitor the IR. When we see some amps for a short period of time, auto stop the operation
+        this.measureIRObservable = Observable.timer(1000, 1000).takeWhile(t => {
+            let less_than_one_amp = Math.abs(this.channel.output_amps) < 1.0;
+            console.log("At: ", this.channel.output_amps, "ltoa: ", less_than_one_amp);
+            return less_than_one_amp;
+        }).subscribe(r => {
+        }, e => {
+        }, () => {
+            console.log("Stopping discharge because Measure IR has seen some amps");
+            this.measureIRObservable = null;
+            this.stopCurrentTask();
+        });
     }
+
+    returnToShowingCellVolts(event) {
+        // this.measureIRObservable == null means: if we're done with the measurement
+        if (this.measureIRObservable == null) {
+            event.srcEvent.stopPropagation();
+            this.showCellVoltage();
+        }
+    }
+
 
     startOperation(preset: Preset, operation: Operation, named: string) {
         console.log("Begin ", named, " on channel ", this.channel.index, " using ", preset.name);
@@ -275,7 +286,7 @@ export class ChannelComponent {
     }
 
     ngOnChanges(changes) {
-        if(this.channel) {
+        if (this.channel) {
             if (this.channelMode == ChannelDisplay.ChannelDisplayNothingPluggedIn) {
                 this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
             }
