@@ -111,8 +111,12 @@ class TestGatewayCommunications(unittest.TestCase):
 
     def test_fetch_status(self):
         obj = comms
-        resp = obj.get_channel_status(0)
-        self.assertIsNotNone(resp)
+
+        testing_control.values.reset()
+        testing_control.values.bypass_caches = True
+        info = obj.get_device_info()
+        ch1 = obj.get_channel_status(0)
+        ch2 = obj.get_channel_status(1)
 
     def test_number_of_channels(self):
         obj = comms
