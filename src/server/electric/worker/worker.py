@@ -1,11 +1,13 @@
 import zmq, logging, sys, os, threading, datetime, time
 import zmq.utils.win32
+from router import route_message
+import electric.worker.cache as cache
 
 from comms_layer import ChargerCommsManager
 import electric.testing_control as testing_control
 
-from router import route_message
-from cache import set_channel_status, set_device_info_cached
+
+
 
 logger = logging.getLogger('electric.worker')
 
@@ -17,14 +19,11 @@ listen_on = os.environ.get("ELECTRIC_WORKER_LISTEN", "tcp://0.0.0.0:5001")
 
 charger = ChargerCommsManager()
 lock = threading.Lock()
-
+poller = zmq.Poller()
 
 def setup_zeromq():
     socket.bind(listen_on)
-    global poller
-    poller = zmq.Poller()
     poller.register(socket, zmq.POLLIN)
-
 
 
 class StatusThread(threading.Thread):
@@ -44,12 +43,12 @@ class StatusThread(threading.Thread):
 
                     device_info = self.charger.get_device_info()
                     if device_info and self.keep_going:
-                        set_device_info_cached(device_info)
+                        cache.values.set_device_info(device_info)
 
                         for channel in range(0, device_info.channel_count):
                             channel_status = self.charger.get_channel_status(channel, device_info.device_id)
                             if channel == 0 or channel == 1:
-                                set_channel_status(channel, channel_status)
+                                cache.values.set_channel_status(channel, channel_status)
                             if not self.keep_going:
                                 return
 
@@ -141,6 +140,9 @@ def run_worker():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+
+    testing_control.values.reset()
+    cache.values.reset()
 
     setup_zeromq()
     start_fetcher_thread()

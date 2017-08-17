@@ -1,6 +1,5 @@
 import logging
-
-from electric.worker.cache import get_device_info_cached, get_channel_status_cached
+import electric.worker.cache as cache
 import electric.testing_control as testing_control
 
 logger = logging.getLogger('electric.worker.router')
@@ -16,11 +15,11 @@ def route_message(charger, method, args):
     if method == "get_device_info":
         if testing_control.values.bypass_caches:
             return charger.get_device_info()
-        return get_device_info_cached()
+        return cache.values.get_device_info()
     elif method == "get_channel_status":
         if testing_control.values.bypass_caches:
             return charger.get_channel_status(args["channel"])
-        return get_channel_status_cached(args["channel"])
+        return cache.values.get_channel_status(args["channel"])
     elif method == "get_control_register":
         return charger.get_control_register()
     elif method == "set_active_channel":

@@ -51,7 +51,7 @@ class UnifiedResource(Resource):
         obj.update(connection_state_dict())
 
         for index, channel in enumerate(range(0, device_info.channel_count)):
-            channel_status = comms.get_channel_status(channel, device_info.device_id)
+            channel_status = comms.get_channel_status(channel)
             if channel_status:
                 if not obj.get('channels'):
                     obj['channels'] = {}
@@ -96,7 +96,7 @@ class ChannelResource(Resource):
 
             # get device status, so we know more about channel state
             device_info = comms.get_device_info()
-            status = comms.get_channel_status(channel, device_info.device_id)
+            status = comms.get_channel_status(channel)
             if status is not None:
                 if device_info is not None:
                     if channel == 0:
