@@ -104,6 +104,7 @@ class TestGatewayCommunications(unittest.TestCase):
 
     def test_status_contains_num_channels(self):
         obj = comms
+        testing_control.values.bypass_caches = True
         status = obj.get_device_info()
         self.assertIsNotNone(status)
         self.assertEqual(status.channel_count, 2)
@@ -120,6 +121,7 @@ class TestGatewayCommunications(unittest.TestCase):
 
     def test_number_of_channels(self):
         obj = comms
+        testing_control.values.bypass_caches = True
         resp = obj.get_device_info()
         self.assertTrue(resp.cell_count >= 6)
 

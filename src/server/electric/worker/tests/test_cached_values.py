@@ -1,7 +1,7 @@
 import logging, time
 import unittest
 
-from electric.worker.router import CachedValue, cached_channel_status
+from electric.worker.cache import CachedValue, cached_channel_status
 from electric.worker.router import route_message
 
 logger = logging.getLogger(__name__)

@@ -66,6 +66,7 @@ class UnifiedResource(Resource):
 
         return obj
 
+
 class DialogCloseResource(Resource):
     def put(self, channel_id):
         channel = int(channel_id)
