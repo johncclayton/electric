@@ -1,77 +1,26 @@
-import logging, time
-from electric import testing_control as testing_control
+import logging
+
+from electric.worker.cache import get_device_info_cached, get_channel_status_cached
+import electric.testing_control as testing_control
 
 logger = logging.getLogger('electric.worker.router')
-
-
-class CachedValue(object):
-    cache_expiry_seconds = 1.0
-
-    def __init__(self, v = None):
-        super(CachedValue, self).__init__()
-        self.updated = None
-        self.attr = v
-
-    def set_stale(self):
-        self.updated = None
-
-    @property
-    def value(self):
-        return self.attr
-
-    @value.setter
-    def value(self, new_value):
-        self.attr = new_value
-        self.updated = time.time()
-
-    @property
-    def is_stale(self):
-        if testing_control.values.bypass_caches:
-            return True
-
-        if self.updated is None:
-            return True
-
-        right_now = time.time()
-        difference = right_now - self.updated
-
-        return difference >= CachedValue.cache_expiry_seconds
-
-
-cached_device_info = CachedValue()
-cached_channel_status = [CachedValue(), CachedValue()]
 
 
 #
 # NOTE: this caches ONLY the GET requests, not the other uses of get_device_info() that are internal to the operation
 # of the run_op/stop_op methods.
 #
-def get_device_info_cached(charger):
-    if cached_device_info.is_stale:
-        value = charger.get_device_info()
-        cached_device_info.value = value
-    else:
-        value = cached_device_info.value
-    return value
-
-
-def get_channel_status_cached(charger, channel, device_id):
-    channel = int(channel)
-    assert (channel == 0 or channel == 1)
-
-    if cached_channel_status[channel].is_stale:
-        value = charger.get_channel_status(channel, device_id)
-        cached_channel_status[channel].value = value
-    else:
-        value = cached_channel_status[channel].value
-    return value
 
 
 def route_message(charger, method, args):
     if method == "get_device_info":
-        return get_device_info_cached(charger)
+        if testing_control.values.bypass_caches:
+            return charger.get_device_info()
+        return get_device_info_cached()
     elif method == "get_channel_status":
-        return get_channel_status_cached(charger, args["channel"], args["device_id"])
+        if testing_control.values.bypass_caches:
+            return charger.get_channel_status(args["channel"])
+        return get_channel_status_cached(args["channel"])
     elif method == "get_control_register":
         return charger.get_control_register()
     elif method == "set_active_channel":

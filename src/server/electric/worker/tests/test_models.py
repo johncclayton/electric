@@ -3,6 +3,7 @@ import unittest
 
 from schematics.exceptions import ModelValidationError
 from electric.models import DeviceInfo, DeviceInfoStatus, PresetIndex, Preset
+from electric.worker.cache import reset_caches, get_device_info_cached, get_channel_status_cached, set_channel_status, set_device_info_cached
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
@@ -15,6 +16,26 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
         self.assertNotIn("value", prim)
         self.assertEqual(status.run, 1)
         self.assertEqual(status.err, 0)
+
+    def test_can_fetch_device_info_when_its_not_been_set(self):
+        reset_caches()
+        self.assertIsNone(get_device_info_cached())
+        self.assertIsNone(get_channel_status_cached(0))
+        self.assertIsNone(get_channel_status_cached(1))
+
+        score = { "them": 1, "me": None }
+        set_device_info_cached(score)
+
+        self.assertEqual(get_device_info_cached(), score)
+
+        set_channel_status(0, score)
+        self.assertEqual(get_channel_status_cached(0), score)
+        self.assertIsNone(get_channel_status_cached(1))
+
+        set_channel_status(0, None)
+        set_channel_status(1, score)
+        self.assertEqual(get_channel_status_cached(1), score)
+        self.assertIsNone(get_channel_status_cached(0))
 
     def test_deviceinfostatus_json_keys(self):
         status = DeviceInfoStatus()

@@ -335,9 +335,6 @@ class ChargerCommsManager(object):
 
         modbus_response = self.charger.modbus_write_registers(0x8000 + 2, values_list)
 
-        # status = self.get_device_info().get_status(channel_number)
-        # logger.info("Device status: {0}".format(status.to_native()))
-
         # If showing a dialog, or have error, try to clear the dialog
         # This also works to close the presets listing, if that is open
         # if status.dlg_box_status or status.err:
@@ -361,8 +358,7 @@ class ChargerCommsManager(object):
         # logger.info("Sending run_op to channel {2}: op {0}, preset: {1}".format(operation, preset_memory_slot_index, channel_number))
         self.charger.modbus_write_registers(0x8000, values_list)
 
-        return self.get_device_info().get_status(channel_number)
-
+        return True
 
     def measure_ir(self, channel_number):
         channel_number = min(1, max(0, channel_number))
@@ -398,4 +394,4 @@ class ChargerCommsManager(object):
         # Restore original preset in RAM (possibly not actually necessary)
         # self.save_preset_to_memory_slot(original_preset, original_preset.index, write_to_flash=False, verify_write=False)
 
-        return self.get_device_info().get_status(channel_number)
+        return True

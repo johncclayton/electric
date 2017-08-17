@@ -105,14 +105,13 @@ class ZMQCommsManager(object):
         """
         return self._send_message_get_response("get_device_info")
 
-    def get_channel_status(self, channel, device_id=None):
+    def get_channel_status(self, channel):
         """"
         Returns the following information from the iCharger, known as the 'channel input read only' message:
         :return: ChannelStatus instance
         """
         return self._send_message_get_response("get_channel_status", {
-            "channel": channel,
-            "device_id": device_id
+            "channel": channel
         })
 
     def get_control_register(self):
