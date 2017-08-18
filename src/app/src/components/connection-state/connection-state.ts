@@ -64,7 +64,7 @@ export class ConnectionStateComponent {
         Otherwise, let the user do it.
          */
         if (this.disconnectionEventWasAlertInitiator) {
-            if (this.generalAlert) {
+            if (this.generalAlert != null) {
                 // For some reason we need to do this. Setting it to null isn't enough.
                 // YET: don't do that ALWAYS... otherwise you get exceptions.
                 this.generalAlert.dismiss();
@@ -93,13 +93,13 @@ export class ConnectionStateComponent {
             });
         }
 
-        this.generalAlert.message = message;
+        this.generalAlert.setMessage(message);
         this.generalAlert.present();
     }
 
     private incrementDisconnectionCount() {
         this.connectionFailure++;
-        if (this.connectionFailure > 3) {
+        if (this.connectionFailure > 2) {
             let message = 'Reconnecting (' + this.connectionFailure + ')';
             this.disconnectionEventWasAlertInitiator = true;
             this.showGeneralError(message);
