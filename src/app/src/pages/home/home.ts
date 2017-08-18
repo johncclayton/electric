@@ -8,6 +8,7 @@ import {IAppState} from "../../models/state/configure";
 import {Channel} from "../../models/channel";
 import {ConfigPage} from "../config/config-page";
 import {UIActions} from "../../models/state/actions/ui";
+import {SystemSettingsPage} from "../system-settings/system-settings";
 
 @Component({
     selector: 'page-home',
@@ -62,6 +63,10 @@ export class HomePage {
 
     showConfigPage() {
         this.navCtrl.push(ConfigPage);
+    }
+
+    showSystemPage() {
+        this.navCtrl.push(SystemSettingsPage);
     }
 
     makeError() {

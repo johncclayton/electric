@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {NgRedux, select} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
@@ -13,6 +13,7 @@ import {SystemActions} from "../../models/state/actions/system";
 })
 export class SystemSettingsPage {
     @select() system$: Observable<ISystem>;
+    @select() ui$: Observable<ISystem>;
 
     constructor(public navCtrl: NavController,
                 public systemActions: SystemActions,

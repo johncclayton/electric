@@ -11,4 +11,11 @@
     <ion-refresher #refresher (ionRefresh)="refreshSystem($event)">
         <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
+
+    <system-display
+            [system]="system$|async"
+            [ui]="ui$|async"
+            (saveSettings)="actions.saveSystemSettings(system)"
+    >
+    </system-display>
 </ion-content>

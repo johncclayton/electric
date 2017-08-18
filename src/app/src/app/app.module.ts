@@ -1,6 +1,6 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
-import {ErrorHandler, Inject, NgModule} from "@angular/core";
+import {ErrorHandler, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
@@ -34,12 +34,10 @@ import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {NgSpinKitModule} from "ng-spin-kit";
-import {ConfigComponentModule} from "../components/config/config.module";
 import {EnvironmentsModule} from "./environment/environment-variables.module";
-import {EnvVariables} from "./environment/environment-variables.token";
 import {SystemActions} from "../models/state/actions/system";
-import {SystemSettingsPage} from "../pages/system-settings/system-settings";
 import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
+import {ComponentsModule} from "../components/components.module";
 
 @NgModule({
     declarations: [
@@ -69,8 +67,8 @@ import {SystemSettingsPageModule} from "../pages/system-settings/system-settings
         HttpModule,
         NgReduxModule,
         NgSpinKitModule,
+        ComponentsModule,
         SystemSettingsPageModule,
-        ConfigComponentModule,
         IonicModule.forRoot(MyApp),
         IonicStorageModule.forRoot(),
         EnvironmentsModule

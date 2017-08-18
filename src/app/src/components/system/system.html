@@ -1,0 +1,31 @@
+<ion-list>
+    <ion-list-header>Temperature & Fans</ion-list-header>
+    <ion-item>
+        <ion-label>Temperature shown in celsius</ion-label>
+        <ion-toggle [disabled]="ui.disconnected"
+                    (ngModelChange)="toggleCelsius.emit($event)"
+                    [ngModel]="charger.isCelsius"></ion-toggle>
+    </ion-item>
+
+
+    <temp-range label="Shutdown Temp"
+                min=60 max=75
+                [value]="charger.temp_shutdown"></temp-range>
+
+    <temp-range label="Power Reduce"
+                min=-20 max=-5
+                [value]="charger.temp_power_reduce"></temp-range>
+
+    <temp-range label="Temp for Fans On"
+                min=30 max=50
+                [value]="charger.temp_fans_on"></temp-range>
+
+    <ion-item>
+        <ion-label>Fans Off ({{charger.fans_off_time}} mins)</ion-label>
+        <ion-range [(ngModel)]="charger.fans_off_time" pin=true min="0" max="10">
+            <ion-label range-left>0</ion-label>
+            <ion-label range-right>10</ion-label>
+        </ion-range>
+    </ion-item>
+
+</ion-list>

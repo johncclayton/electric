@@ -5,12 +5,6 @@ import {isUndefined} from "ionic-angular/util/util";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
 
-/**
- * Generated class for the ConfigComponent component.
- *
- * See https://angular.io/docs/ts/latest/api/core/index/ComponentMetadata-class.html
- * for more info on Angular Components.
- */
 @Component({
     selector: 'config',
     templateUrl: 'config.html'
