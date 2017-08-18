@@ -294,27 +294,27 @@ class CellStatus(Model):
 
 
 class ChannelStatus(Model):
-    channel = IntType(required=True, min_value=0, max_value=1)
+    channel = IntType(required=True, min_value=0, max_value=1, default=0)
     timestamp = LongType(required=True, default=0)
-    curr_out_power = FloatType(required=True)
-    curr_out_amps = FloatType(required=True)
-    curr_inp_volts = FloatType(required=True)
-    curr_out_volts = FloatType(required=True)
-    curr_out_capacity = FloatType(required=True)
-    curr_int_temp = FloatType(required=True)
-    curr_ext_temp = FloatType(required=True)
+    curr_out_power = FloatType(required=True, default=0)
+    curr_out_amps = FloatType(required=True, default=0)
+    curr_inp_volts = FloatType(required=True, default=0)
+    curr_out_volts = FloatType(required=True, default=0)
+    curr_out_capacity = FloatType(required=True, default=0)
+    curr_int_temp = FloatType(required=True, default=0)
+    curr_ext_temp = FloatType(required=True, default=0)
 
-    cells = ListType(ModelType(CellStatus))
+    cells = ListType(ModelType(CellStatus), default=[])
 
-    cell_total_ir = FloatType(required=True)
-    cell_total_voltage = FloatType(required=True)
-    cell_count_with_voltage_values = FloatType(required=True)
-    cycle_count = IntType(required=True)
-    control_status = IntType(required=True)
-    run_status = IntType(required=True)
-    run_error = IntType(required=True)
-    dlg_box_id = IntType(required=True)
-    line_intern_resistance = FloatType(required=True)
+    cell_total_ir = FloatType(required=True, default=0)
+    cell_total_voltage = FloatType(required=True, default=0)
+    cell_count_with_voltage_values = FloatType(required=True, default=0)
+    cycle_count = IntType(required=True, default=0)
+    control_status = IntType(required=True, default=0)
+    run_status = IntType(required=True, default=0)
+    run_error = IntType(required=True, default=0)
+    dlg_box_id = IntType(required=True, default=0)
+    line_intern_resistance = FloatType(required=True, default=0)
 
     # Optionally added to the response, when a channel status is requested
     status = ModelType(DeviceInfoStatus)
@@ -362,6 +362,7 @@ class ChannelStatus(Model):
         self.dlg_box_id = footer[6]
 
         if device_id:
+            max_voltage = 0
             # With this, we can work out if the main battery lead is plugged in
             if device_id is DEVICEID_306_DUO:
                 max_voltage = 26
