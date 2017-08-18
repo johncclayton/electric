@@ -45,6 +45,17 @@ export class PresetListPage implements Chemistry {
         });
     }
 
+    addPreset() {
+        let toast = this.toastController.create({
+            message: "Yep. Sometime soon",
+            duration: 2000,
+            // dismissOnPageChange: true, // causes an exception. meh.
+            position: "top"
+        });
+
+        toast.present();
+    }
+
     presetCallback(old_preset, new_preset) {
         if (new_preset) {
             console.log("Got result ", new_preset, " from the save call");
