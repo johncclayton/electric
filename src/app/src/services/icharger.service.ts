@@ -10,7 +10,6 @@ import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {IConfig} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
-import {SystemActions} from "../models/state/actions/system";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -32,7 +31,6 @@ export class iChargerService {
     public constructor(public http: Http,
                        public chargerActions: ChargerActions,
                        public uiActions: UIActions,
-                       private systemActions: SystemActions,
                        public ngRedux: NgRedux<IAppState>) {
 
 
@@ -100,7 +98,6 @@ export class iChargerService {
 
                 if (this.ngRedux.getState().ui.disconnected) {
                     this.uiActions.serverReconnected();
-                    this.systemActions.fetchSystemFromCharger();
                 }
             })
             .catch(error => {

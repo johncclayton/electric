@@ -9,6 +9,7 @@ import {Channel} from "../../models/channel";
 import {ConfigPage} from "../config/config-page";
 import {UIActions} from "../../models/state/actions/ui";
 import {SystemSettingsPage} from "../system-settings/system-settings";
+import {SystemActions} from "../../models/state/actions/system";
 
 @Component({
     selector: 'page-home',
@@ -25,6 +26,7 @@ export class HomePage {
     constructor(public readonly navCtrl: NavController,
                 public readonly chargerService: iChargerService,
                 private uiAction: UIActions,
+                private systemActions: SystemActions,
                 public readonly ngRedux: NgRedux<IAppState>,
                 public readonly http: Http) {
 
@@ -38,7 +40,9 @@ export class HomePage {
 
         Observable.timer(timeout * 2).subscribe(r => {
             this.showConfigureButton = true;
-        })
+        });
+
+        this.systemActions.fetchSystemFromCharger();
     }
 
     anyNetworkOrConnectivityProblems() {
@@ -59,6 +63,7 @@ export class HomePage {
 
     ionViewWillEnter() {
         // this.showConfigPage();
+        // this.showSystemPage();
     }
 
     showConfigPage() {

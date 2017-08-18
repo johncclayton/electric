@@ -36,7 +36,7 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
         // Insert the epic middleware first.
         let middleware = [];
         middleware.push(createEpicMiddleware(configEpic.configChanged));
-        middleware.push(createEpicMiddleware(configEpic.fetchSystem));
+        // middleware.push(createEpicMiddleware(configEpic.fetchSystem));
 
         // Add logger if in development (web browsers)
 

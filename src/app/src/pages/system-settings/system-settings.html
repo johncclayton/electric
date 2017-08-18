@@ -7,14 +7,11 @@
 </ion-header>
 
 
-<ion-content padding>
-    <ion-refresher #refresher (ionRefresh)="refreshSystem($event)">
-        <ion-refresher-content></ion-refresher-content>
-    </ion-refresher>
-
+<ion-content>
     <system-display
             [system]="system$|async"
             [ui]="ui$|async"
+            (valueWasChanged)="actions.userChangedValue($event)"
             (saveSettings)="actions.saveSystemSettings(system)"
     >
     </system-display>

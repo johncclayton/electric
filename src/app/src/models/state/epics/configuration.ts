@@ -15,16 +15,16 @@ export class ConfigurationEpics {
 
     }
 
-    fetchSystem = (action$) => {
-        return action$.ofType(
-            SystemActions.FETCH_SYSTEM
-        )
-            .mergeMap((payload) => {
-                return this.chargerService.getSystem().map(system => {
-                    return this.systemActions.endFetchAction(system);
-                })
-            });
-    };
+    // fetchSystem = (action$) => {
+    //     return action$.ofType(
+    //         SystemActions.FETCH_SYSTEM
+    //     )
+    //         .mergeMap((payload) => {
+    //             return this.chargerService.getSystem().map(system => {
+    //                 return this.actions.endFetchAction(system);
+    //             })
+    //         });
+    // };
 
     configChanged = (action$) => {
         return action$.ofType(

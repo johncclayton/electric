@@ -12,14 +12,20 @@ export class SystemComponent {
     @Input() system: ISystem;
     @Input() ui: IUIState;
 
+    @Output() valueWasChanged: EventEmitter<any> = new EventEmitter();
     @Output() saveSettings: EventEmitter<any> = new EventEmitter();
 
-    get charger() : System {
+    get charger(): System {
         return this.system.system;
     }
 
-    constructor(private actions: SystemActions) {
+    constructor() {
     }
 
+    change(keyName, event) {
+        let change = [];
+        change[keyName] = event.value;
+        this.valueWasChanged.emit(change);
+    }
 
 }

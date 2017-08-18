@@ -8,12 +8,13 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 export class TempRangeComponent {
     @Input() label: string = "Something Intelligent Here";
     @Input() metric: boolean = true;
+    @Input() disabled: boolean = false;
     @Input() pin: boolean = true;
     @Input() value: number = 0;
     @Input() min: number = 0;
     @Input() max: number = 10;
 
-    @Output() valueChange: EventEmitter<any> = new EventEmitter();
+    @Output() valueChanged: EventEmitter<any> = new EventEmitter();
 
     constructor() {
     }

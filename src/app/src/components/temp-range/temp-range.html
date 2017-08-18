@@ -3,10 +3,11 @@
     <ion-label>{{label}} | {{value}}{{unitsOfMeasure}}</ion-label>
     <ion-range [(ngModel)]="value"
                pin={{pin}}
+               disabled="{{disabled}}"
                min="{{min_val}}"
                max="{{max_val}}"
                snap="0.5"
-               ngOnChanges="valueChange.emit($event)">
+               (ionChange)="valueChanged.emit($event)">
         <ion-label range-left>{{min_val}}{{unitsOfMeasure}}</ion-label>
         <ion-label range-right>{{max_val}}{{unitsOfMeasure}}</ion-label>
     </ion-range>

@@ -24,6 +24,16 @@ export const
                     fetching: true
                 };
 
+            case SystemActions.UPDATE_SETTINGS_VALUE:
+                let newSettings = {
+                    ...state.system,
+                    ...action.payload
+                };
+                return {
+                    ...state,
+                    system: newSettings
+                };
+
             case SystemActions.END_FETCH:
                 return {
                     ...state,

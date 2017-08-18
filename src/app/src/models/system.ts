@@ -51,7 +51,23 @@ export class System {
             return "°C";
         }
         return "°F";
-
     }
+
+    get brightness(): number {
+        return this.data['lcd_brightness'];
+    }
+
+    set brightness(value: number) {
+        this.data['lcd_brightness'] = +value;
+    }
+
+    get contrast(): number {
+        return this.data['lcd_contrast'];
+    }
+
+    set contrast(value: number) {
+        this.data['lcd_contrast'] = +value;
+    }
+
 }
 
