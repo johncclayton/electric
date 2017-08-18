@@ -19,9 +19,9 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
 
     def test_can_fetch_device_info_when_its_not_been_set(self):
         reset_caches()
-        self.assertIsNone(get_device_info_cached())
-        self.assertIsNone(get_channel_status_cached(0))
-        self.assertIsNone(get_channel_status_cached(1))
+        self.assertIsNotNone(get_device_info_cached())
+        self.assertIsNotNone(get_channel_status_cached(0))
+        self.assertIsNotNone(get_channel_status_cached(1))
 
         score = { "them": 1, "me": None }
         set_device_info_cached(score)
@@ -30,7 +30,7 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
 
         set_channel_status(0, score)
         self.assertEqual(get_channel_status_cached(0), score)
-        self.assertIsNone(get_channel_status_cached(1))
+        self.assertIsNotNone(get_channel_status_cached(1))
 
         set_channel_status(0, None)
         set_channel_status(1, score)
