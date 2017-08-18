@@ -37,6 +37,9 @@ import {NgSpinKitModule} from "ng-spin-kit";
 import {ConfigComponentModule} from "../components/config/config.module";
 import {EnvironmentsModule} from "./environment/environment-variables.module";
 import {EnvVariables} from "./environment/environment-variables.token";
+import {SystemActions} from "../models/state/actions/system";
+import {SystemSettingsPage} from "../pages/system-settings/system-settings";
+import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
 
 @NgModule({
     declarations: [
@@ -66,6 +69,7 @@ import {EnvVariables} from "./environment/environment-variables.token";
         HttpModule,
         NgReduxModule,
         NgSpinKitModule,
+        SystemSettingsPageModule,
         ConfigComponentModule,
         IonicModule.forRoot(MyApp),
         IonicStorageModule.forRoot(),
@@ -85,13 +89,14 @@ import {EnvVariables} from "./environment/environment-variables.token";
         ChargeOptionsPage,
         ChannelVoltsComponent,
         ChannelIRComponent,
-        ConnectionStateComponent
+        ConnectionStateComponent,
     ],
     providers: [
         ChargerActions,
         UIActions,
         ConfigStoreProvider,
         ConfigurationActions,
+        SystemActions,
         ConfigurationEpics,
         StatusBar,
         SplashScreen,

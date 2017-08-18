@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, ToastController} from "ionic-angular";
+import {NavController} from "ionic-angular";
 import {Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";

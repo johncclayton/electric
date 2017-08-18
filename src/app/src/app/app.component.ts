@@ -11,6 +11,7 @@ import {ConfigStoreProvider} from "../providers/config-store/config-store";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
+import {SystemSettingsPage} from "../pages/system-settings/system-settings";
 
 @Component({
     templateUrl: 'app.html'
@@ -49,17 +50,24 @@ export class MyApp {
 
         });
 
-        this.pages = [
-            {
-                title: 'Presets', component: PresetListPage, visible: () => {
-                return this.chargerService.isConnectedToCharger()
-            },
-            },
-            {
-                title: 'Config', component: ConfigPage, visible: () => {
+        let connectedToCharger = () => {
+            return this.chargerService.isConnectedToCharger()
+        };
+        let presetsPage = {
+            title: 'Presets', component: PresetListPage, visible: connectedToCharger,
+        };
+        let configPage = {
+            title: 'Config', component: ConfigPage, visible: () => {
                 return true;
             }
-            },
+        };
+        let systemPage = {
+            title: 'Settings', component: SystemSettingsPage, visible: connectedToCharger
+        };
+        this.pages = [
+            presetsPage,
+            systemPage,
+            configPage,
         ]
     }
 

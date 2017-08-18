@@ -1,8 +1,5 @@
 export class System {
-    data: {} = {};
-
-    constructor(public dict: {}) {
-        this.data = dict;
+    constructor(private data: {}) {
     }
 
     json() {

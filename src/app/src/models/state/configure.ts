@@ -8,16 +8,19 @@ import {ChargerActions} from "./actions/charger";
 import {ConfigurationEpics} from "./epics/configuration";
 import {createEpicMiddleware} from "redux-observable";
 import {environmentFactory} from "../../app/environment/environment-variables.module";
+import {ISystem, systemReducer} from "./reducers/system";
 
 export interface IAppState {
     config: IConfig;
     charger: IChargerState;
+    system: ISystem;
     ui: IUIState
 }
 
 let reducers = combineReducers<IAppState>({
     config: configReducer,
     charger: chargerStateReducer,
+    system: systemReducer,
     ui: uiReducer,
 });
 
@@ -33,6 +36,7 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
         // Insert the epic middleware first.
         let middleware = [];
         middleware.push(createEpicMiddleware(configEpic.configChanged));
+        middleware.push(createEpicMiddleware(configEpic.fetchSystem));
 
         // Add logger if in development (web browsers)
 
