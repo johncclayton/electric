@@ -11,7 +11,7 @@ Check out the README.md in the src/server/ directory - this tells you how to get
 # I just want to run this RIGHT NOW
 Okay, okay - relax. Take a breath. We hear you.  
 
-You *must* have a Hypriot OS image installed onto your Raspberry Pi 3 - then you can pull down the docker images and be ready to start with just ONE (yes 1) command:
+You *must* have a Hypriot OS image installed onto your Raspberry Pi 3 - then it's as simple as:
 
        $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/install-on-rpi3.sh | sudo bash -s
        
