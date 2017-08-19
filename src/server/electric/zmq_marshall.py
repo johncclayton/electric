@@ -63,37 +63,43 @@ class ZMQCommsManager(object):
         if arg_dict is not None:
             request["args"] = arg_dict
 
-        self.charger_socket.send_pyobj(request)
-        sockets = dict(self.poll.poll(RESPONSE_TIMEOUT_MS))
-        if self.charger_socket in sockets:
-            e = None
+        try:
+            self.charger_socket.send_pyobj(request)
+            sockets = dict(self.poll.poll(RESPONSE_TIMEOUT_MS))
+            if self.charger_socket in sockets:
+                e = None
 
-            try:
-                resp = self.charger_socket.recv_pyobj()
+                try:
+                    resp = self.charger_socket.recv_pyobj()
 
-                if "raises" in resp:
-                    e = resp["raises"]
-                    logger.error("message received from ZMQ, contained exception: {0}".format(e))
-                elif "response" in resp:
-                    r = resp["response"]
-                    logger.debug("response message received: {0}".format(r))
-                    return r
-                else:
-                    e = IOError("request received - but no response was found inside, terrible!")
+                    if "raises" in resp:
+                        e = resp["raises"]
+                        logger.error("message received from ZMQ, contained exception: {0}".format(e))
+                    elif "response" in resp:
+                        r = resp["response"]
+                        logger.debug("response message received: {0}".format(r))
+                        return r
+                    else:
+                        e = IOError("request received - but no response was found inside, terrible!")
 
-            except Exception, f:
-                logger.error("exception received when reading message from ZMQ: {0}".format(f))
-                e = f
+                except Exception, f:
+                    logger.error("exception received when reading message from ZMQ: {0}".format(f))
+                    e = f
 
-            # if we get here, e MUST be set
-            assert(e is not None)
+                # if we get here, e MUST be set
+                assert(e is not None)
 
-            raise e
-        else:
-            # connection is gone - lets re-open it
+                raise e
+            else:
+                # connection is gone - lets re-open it
+                self.close_and_reopen_connection()
+                timeout_s = int(RESPONSE_TIMEOUT_MS / 1000.0)
+                raise IOError("request {1} failed to receive a response at all from ZMQ within {2} seconds: {0}".format(method_name, request["tag"], timeout_s))
+        except Exception, e:
+            # Can't send, most likely
             self.close_and_reopen_connection()
             timeout_s = int(RESPONSE_TIMEOUT_MS / 1000.0)
-            raise IOError("request {1} failed to receive a response at all from ZMQ within {2} seconds: {0}".format(method_name, request["tag"], timeout_s))
+            raise IOError("failed to send request {1} to ZMQ: {0}".format(method_name, request["tag"]))
 
     def turn_off_logging(self):
         return self._send_message_get_response("turn_off_logging")

@@ -13,7 +13,6 @@ export class ConfigStoreProvider {
     }
 
     saveConfiguration(config): Observable<any> {
-        console.log("Storing " + config + " to Ionic storage");
         return Observable.fromPromise(this.storage.set('config', config));
     }
 }

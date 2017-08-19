@@ -89,7 +89,9 @@ export class iChargerService {
     }
 
     getChargerStatus(): Observable<any> {
-        return Observable.timer(1000, 1000)
+        let interval = 1000;
+
+        return Observable.timer(interval, interval)
             .flatMap(v => {
                 let url = this.getChargerURL("/unified");
                 return this.http.get(url);

@@ -10,30 +10,27 @@ import {isDefined} from "ionic-angular/util/util";
     templateUrl: 'connection-state.html'
 })
 export class ConnectionStateComponent {
+    /*
+    Don't ever set this to nil, let the GC do it. Otherwise, you'll have race conditions when the alert is closed by the user.
+    The framework looks to be still holding onto it (well, trying to) and if you set it to nil, it seems to do some cleanup, yet STILL be referenced by the f/work later.
+    i.e: BOOM. So Just Don't.
+     */
     private generalAlert;
-    private disconnectionEventWasAlertInitiator: boolean = false;
-    private connectionFailure: number;
+    private alertHasBeenPresented: boolean;
+    private alertShownBecauseOfConnectionError: boolean = false;
+    private lastConnectionFailureCount: number = 0;
+    private haveAlertObject = false;
 
     constructor(public platform: Platform,
                 public charger: iChargerService,
                 public ngRedux: NgRedux<IAppState>,
-                public navContoller: NavController,
                 public toastController: ToastController) {
-
-        this.platform.ready().then(() => {
-            // Network.onchange().subscribe(() => {
-            //     console.log("Network changed to: ", Network.type);
-            //     this.haveNetwork = Network.type != 'none';
-            // });
-        });
-
-        this.connectionFailure = 0;
 
         // Listen for changes to the exception, and do something with the UI
         this.ngRedux.select(['ui', 'exception']).subscribe((message: string) => {
             if (isDefined(message)) {
                 if (message) {
-                    this.showGeneralError(message);
+                    this.showGeneralError(message, true);
                 }
             }
         });
@@ -48,37 +45,35 @@ export class ConnectionStateComponent {
         });
     }
 
-    clearAlertMessage() {
-        if (this.generalAlert) {
-            // DONT DO THIS. You get exceptions if you DO!
-            // this.generalAlert.dismiss();
-            this.generalAlert = null;
-        }
-        this.connectionFailure = 0;
-        this.disconnectionEventWasAlertInitiator = false;
+    get connectionFailureCount(): number {
+        return this.ngRedux.getState().ui.disconnectionErrorCount;
     }
 
+    dismissAlertMessage(wasDismissedByUser = false) {
+        if (this.haveAlertObject) {
+            // Code is calling this to dismiss the current alert programmatically.
+            this.generalAlert.dismiss().then(() => {
+                this.haveAlertObject = false;
+            });
+        }
+    }
+
+    // Server is back. Clear down the current alert if we were responsible for it.
     serverReconnected() {
-        /*
-        If we showed an altert only because of connection problem... then take it away.
-        Otherwise, let the user do it.
-         */
-        if (this.disconnectionEventWasAlertInitiator) {
-            if (this.generalAlert != null) {
-                // For some reason we need to do this. Setting it to null isn't enough.
-                // YET: don't do that ALWAYS... otherwise you get exceptions.
-                this.generalAlert.dismiss();
-            }
-            this.clearAlertMessage();
+        if (this.alertShownBecauseOfConnectionError) {
+            this.dismissAlertMessage();
+            this.alertShownBecauseOfConnectionError = false;
         }
     }
 
-    showGeneralError(message: string) {
+    showGeneralError(message: string, allowCreation = false) {
         if (message == null) {
             message = 'Unknown problem?!'
         }
 
-        if (this.generalAlert == null) {
+        if (!this.haveAlertObject && allowCreation) {
+            this.alertHasBeenPresented = false;
+            this.alertShownBecauseOfConnectionError = false;
             this.generalAlert = this.toastController.create({
                 'message': message,
                 'cssClass': 'redToast',
@@ -88,20 +83,38 @@ export class ConnectionStateComponent {
             });
 
             this.generalAlert.onDidDismiss(() => {
-                // Clear the alert.
-                this.clearAlertMessage();
+                // Clear the alert... but don't let another show up if the connection errors continue
+                this.haveAlertObject = false;
             });
+
+            this.haveAlertObject = true;
         }
 
-        this.generalAlert.setMessage(message);
-        this.generalAlert.present();
+        if (this.haveAlertObject) {
+            if (this.generalAlert != null) {
+                this.generalAlert.setMessage(message);
+
+                if (!this.alertHasBeenPresented) {
+                    this.generalAlert.present().then(() => {
+                        this.alertHasBeenPresented = true;
+                    });
+                }
+            }
+        }
     }
 
     private incrementDisconnectionCount() {
-        this.connectionFailure++;
-        if (this.connectionFailure > 2) {
-            let message = 'Reconnecting (' + this.connectionFailure + ')';
-            this.disconnectionEventWasAlertInitiator = true;
+        this.lastConnectionFailureCount = this.connectionFailureCount;
+
+        // If we get to three, begin showing the dialog.
+        let message = 'Reconnecting (' + this.connectionFailureCount + ')';
+        let numberOfWarningsToSkip = 2;
+        if (this.connectionFailureCount == numberOfWarningsToSkip) {
+            // Show a new warning. Low failure counts mean "new connection failure".
+            this.showGeneralError(message, true);
+            this.alertShownBecauseOfConnectionError = true;
+        } else {
+            // This will update the message, but it won't show a NEW message if that has already been dismissed
             this.showGeneralError(message);
         }
     }

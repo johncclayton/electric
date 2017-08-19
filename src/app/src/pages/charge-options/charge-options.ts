@@ -47,7 +47,6 @@ export class ChargeOptionsPage implements Chemistry {
         this.chargeSettings = null;
 
         this.subscription = ngRedux.select<IConfig>('config').subscribe(c => {
-            console.log("Charge page got some config / charge settings");
             this.config = c;
             this.chargeSettings = this.config.charge_settings;
 

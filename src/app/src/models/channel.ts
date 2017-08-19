@@ -116,7 +116,9 @@ export class Channel {
         if (!this.packBalanceLeadsConnected) {
             return false;
         }
-        return this._lastUserInitiatedCommand != null;
+        let b = this._lastUserInitiatedCommand != null;
+        // console.log("Has last command: ", b);
+        return b;
     }
 
     get userCommandText(): string {
@@ -173,9 +175,14 @@ export class Channel {
     }
 
     public maybeClearLastUsedCommand(force: boolean) {
+        if (this.index == 0 && force) {
+            console.log("maybeClearLastUsedCommand called: force:", force);
+        }
         if (force) {
-            this._lastUserInitiatedCommand = null;
-            this._timeUserSetLastInitiatedCommand = null;
+            if(this._lastUserInitiatedCommand != null) {
+                this._lastUserInitiatedCommand = null;
+                this._timeUserSetLastInitiatedCommand = null;
+            }
             return;
         }
         if (this._timeUserSetLastInitiatedCommand) {
