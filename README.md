@@ -27,8 +27,9 @@ The script will do the following:
     1. Install a set of udev rules into the system that will expose the iCharger to user space programs
     1. **WARNING** the services WILL NOT be started, that's up to you
     
-After installation, to start the docker services (which may call images to be pulled down):
+After installation, to start the docker services (which likely will cause docker images to be downloaded):
 
        $ DOCKER_TAG=332 docker-compose up -d
        
+For now you MUST define the DOCKER_TAG, which is simply the Travis build number that succeeded - we're working on turning this into something sane for the future.       
  
