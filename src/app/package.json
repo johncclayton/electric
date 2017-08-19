@@ -70,7 +70,6 @@
         "cordova-plugin-device",
         "cordova-plugin-console",
         "cordova-plugin-splashscreen",
-        "cordova-plugin-deploy",
         "ionic-plugin-keyboard"
     ],
     "cordovaPlatforms": [
