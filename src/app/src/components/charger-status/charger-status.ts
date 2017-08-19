@@ -1,6 +1,8 @@
 import {Component, Input} from '@angular/core';
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IConfig} from "../../models/state/reducers/configuration";
+import {ISystem} from "../../models/state/reducers/system";
+import {System} from "../../models/system";
 
 @Component({
     selector: 'charger-status',
@@ -8,16 +10,14 @@ import {IConfig} from "../../models/state/reducers/configuration";
 })
 export class ChargerStatusComponent {
 
-    @Input() config: IConfig;
+    @Input() system: ISystem;
     @Input() charger: IChargerState;
 
-    constructor() {    }
+    constructor() {
+    }
 
     unitOfMeasure() {
-        if (this.config.unitsCelsius) {
-            return "°C";
-        }
-        return "°F";
+        return System.unitsOfMeasure(this.system.system.isCelsius);
     }
 
     tempAtWarningLevel(): boolean {

@@ -1,4 +1,14 @@
 export class System {
+    public static CELSIUS: string = "°C";
+    public static FARENHEIGHT: string = "°F";
+
+    static unitsOfMeasure(celcius: boolean): string {
+        if (celcius) {
+            return System.CELSIUS;
+        }
+        return System.FARENHEIGHT;
+    }
+
     constructor(private data: {}) {
     }
 

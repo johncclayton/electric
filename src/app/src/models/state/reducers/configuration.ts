@@ -20,7 +20,6 @@ export interface IConfig {
     isnew: boolean,
     cellLimit: number,
     preventChargerVerticalScrolling: boolean,
-    unitsCelsius: boolean,
     mockCharger: boolean,
 
     charge_settings: IChargeSettings;
@@ -45,7 +44,6 @@ export const configurationDefaults: IConfig = {
     isnew: true,
     cellLimit: -1,
     preventChargerVerticalScrolling: true,
-    unitsCelsius: true,
     mockCharger: false,
 
     charge_settings: chargerDefaults

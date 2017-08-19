@@ -44,8 +44,6 @@ export class MyApp {
                     type: ConfigurationActions.SET_FULL_CONFIG,
                     payload: r
                 });
-
-                this.configActions.updateStateFromChargerAsync();
             });
 
         });

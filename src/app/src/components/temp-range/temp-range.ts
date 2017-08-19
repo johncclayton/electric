@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {System} from "../../models/system";
 
 
 @Component({
@@ -10,11 +11,31 @@ export class TempRangeComponent {
     @Input() metric: boolean = true;
     @Input() disabled: boolean = false;
     @Input() pin: boolean = true;
-    @Input() value: number = 0;
+    @Input() value: number = 0; // this is ALWAYS in Celsius
     @Input() min: number = 0;
     @Input() max: number = 10;
 
-    @Output() valueChanged: EventEmitter<any> = new EventEmitter();
+    @Output() valueChange: EventEmitter<any> = new EventEmitter();
+
+    get displayableValue(): number {
+        return this.toDisplayValue(this.value);
+    }
+
+    set displayableValue(value: number) {
+        if (this.metric) {
+            this.value = value;
+        } else {
+            this.value = this.farenheightToC(value);
+        }
+        this.value = Math.round(this.value);
+    }
+
+    emitChangedCelsiusValue(event) {
+        this.displayableValue = event.value;
+        // We ALWAYS emit celsius values.
+        // event.value = this.value;
+        this.valueChange.emit(this.value);
+    }
 
     constructor() {
     }
@@ -23,23 +44,24 @@ export class TempRangeComponent {
         return c * 9 / 5 + 32;
     }
 
-    displayableValue(celcius: number): number {
+    farenheightToC(f): number {
+        return (f - 32) / (9 / 5);
+    }
+
+    toDisplayValue(celcius: number): number {
         return this.metric ? celcius : this.celciusToF(celcius);
     }
 
     get min_val(): number {
-        return this.displayableValue(this.min);
+        return this.toDisplayValue(this.min);
     }
 
     get max_val(): number {
-        return this.displayableValue(this.max);
+        return this.toDisplayValue(this.max);
     }
 
     get unitsOfMeasure(): string {
-        if (this.metric) {
-            return "°C";
-        }
-        return "°F";
+        return System.unitsOfMeasure(this.metric);
     }
 
 }

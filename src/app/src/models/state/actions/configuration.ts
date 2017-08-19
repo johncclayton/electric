@@ -18,15 +18,6 @@ export class ConfigurationActions {
                 private chargerService: iChargerService) {
     }
 
-    updateStateFromChargerAsync() {
-        this.chargerService.getSystem().subscribe((system) => {
-            console.info("Updating config with values from charger...");
-            this.setConfiguration("unitsCelsius", system.isCelsius);
-        }, (error) => {
-            this.uiActions.setErrorMessage(error);
-        });
-    }
-
     resetToDefaults() {
         this.ngRedux.dispatch({
             type: ConfigurationActions.RESET_TO_DEFAULTS,

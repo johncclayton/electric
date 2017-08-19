@@ -17,8 +17,8 @@ import {SystemActions} from "../../models/state/actions/system";
 })
 export class HomePage {
     @select('ui.exception') exception$: Observable<any>;
-    @select('charger') charger$: Observable<Channel>;
-    @select('config') config$: Observable<Channel>;
+    @select() charger$: Observable<Channel>;
+    @select() system$: Observable<Channel>;
 
     timeoutUp: boolean;
     showConfigureButton: boolean;

@@ -4,6 +4,7 @@ import {BalanceEndCondition, ChemistryType, LipoBalanceType, Preset} from "../..
 import {FormBuilder} from "@angular/forms";
 import {celciusToF} from '../../utils/helpers'
 import * as _ from "lodash";
+import {System} from "../../models/system";
 
 export class PresetBasePage {
     public preset: Preset;
@@ -18,7 +19,10 @@ export class PresetBasePage {
         for (let num = 200; num < 800; num += 5) {
             let celcius = (num / 10);
             let farenheight = celciusToF(celcius);
-            list.push({'value': celcius, 'text': celcius.toString() + "°C / " + farenheight + "°F"});
+            list.push({
+                'value': celcius,
+                'text': celcius.toString() + System.CELSIUS + " / " + farenheight + System.FARENHEIGHT
+            });
         }
         return list;
     }

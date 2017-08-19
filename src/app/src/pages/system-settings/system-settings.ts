@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {AlertController, IonicPage, NavController, NavParams, Toast, ToastController} from 'ionic-angular';
 import {NgRedux, select} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {Observable} from "rxjs/Observable";
@@ -20,12 +20,13 @@ export class SystemSettingsPage {
     @select() ui$: Observable<IUIState>;
 
     originalUnmodified: System;
+    savingAlert: Toast;
 
     constructor(public navCtrl: NavController,
                 public actions: SystemActions,
                 public uiActions: UIActions,
+                public toastController: ToastController,
                 public alertController: AlertController,
-                public navParams: NavParams,
                 private ngRedux: NgRedux<IAppState>) {
     }
 
@@ -60,11 +61,20 @@ export class SystemSettingsPage {
                     {
                         text: "Save",
                         handler: () => {
+
+                            this.savingAlert = this.toastController.create({
+                                'message': "Saving...",
+                                'position': 'bottom',
+                            });
+                            this.savingAlert.present();
+
                             this.actions.saveSystemSettings(system).subscribe(sys => {
                                 resolve();
                             }, err => {
                                 this.uiActions.setErrorMessage(err);
                                 reject();
+                            }, () => {
+                                this.savingAlert.dismiss();
                             });
                         }
                     },

@@ -4,6 +4,7 @@ import {sprintf} from "sprintf-js";
 import {celciusToF} from './helpers'
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
+import {System} from "../models/system";
 
 @Pipe({name: 'keys'})
 export class KeysPipe implements PipeTransform {
@@ -30,7 +31,8 @@ export class TempPipe implements PipeTransform {
     }
 
     transform(value, args: string[]): any {
-        if (this.ngRedux.getState().config.unitsCelsius == false) {
+        let system: System = this.ngRedux.getState().system.system;
+        if (system.isCelsius == false) {
             return celciusToF(value);
         }
         return value;
