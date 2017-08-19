@@ -21,6 +21,8 @@ export interface IConfig {
     cellLimit: number,
     preventChargerVerticalScrolling: boolean,
     mockCharger: boolean,
+    vibrateWhenDone: boolean,
+    notificationWhenDone: boolean,
 
     charge_settings: IChargeSettings;
 }
@@ -45,6 +47,8 @@ export const configurationDefaults: IConfig = {
     cellLimit: -1,
     preventChargerVerticalScrolling: true,
     mockCharger: false,
+    vibrateWhenDone: false,
+    notificationWhenDone: false,
 
     charge_settings: chargerDefaults
 };

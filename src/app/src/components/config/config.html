@@ -1,10 +1,24 @@
 <ion-list>
-    <ion-list-header>App Settings</ion-list-header>
+    <ion-list-header color="light">App Settings</ion-list-header>
     <ion-item>
         <ion-label>Max cells to show</ion-label>
         <ion-select [ngModel]="config.cellLimit" (ngModelChange)="change('cellLimit', num($event))">
             <ion-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-option>
         </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Notification when done</ion-label>
+        <ion-toggle
+                [ngModel]="config.notificationWhenDone"
+                (ngModelChange)="change('notificationWhenDone', $event)">
+        </ion-toggle>
+    </ion-item>
+    <ion-item>
+        <ion-label>Vibrate when done</ion-label>
+        <ion-toggle
+                [ngModel]="config.vibrateWhenDone"
+                (ngModelChange)="change('vibrateWhenDone', $event)">
+        </ion-toggle>
     </ion-item>
     <ion-item>
         <ion-label>Prevent Dashboard Scrolling</ion-label>
@@ -15,7 +29,7 @@
     </ion-item>
 </ion-list>
 <ion-list>
-    <ion-list-header>Connection</ion-list-header>
+    <ion-list-header color="light">Connection</ion-list-header>
     <ion-item>
         <ion-label stacked>IP Address of Pi</ion-label>
         <ion-input type="text" [ngModel]="config.ipAddress"
@@ -29,7 +43,7 @@
 </ion-list>
 
 <ion-list>
-    <ion-list-header>Debug</ion-list-header>
+    <ion-list-header color="light">Debug</ion-list-header>
     <ion-item>
         <ion-label>Mock Charger</ion-label>
         <ion-toggle [ngModel]="config.mockCharger" (ngModelChange)="change('mockCharger', $event)"></ion-toggle>
