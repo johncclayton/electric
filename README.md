@@ -5,13 +5,10 @@
 This project provides everything you need to get information from your iCharger 308/406/4010 DUO to an application
 running on your mobile device.  
 
-# Installation
-There are two programs that run on the Raspberry Pi, and one app for your phone.
-
-# What now?
+# I really want to do all the stuff manually
 Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.
 
-# But I just want to run this RIGHT NOW
+# I just want to run this RIGHT NOW
 Okay, okay - we hear you.  
 
 IF you have a basic Hypriot OS based image - then you can pull down the docker images and be ready to start with
