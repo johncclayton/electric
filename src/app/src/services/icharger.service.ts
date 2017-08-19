@@ -171,13 +171,26 @@ export class iChargerService {
         });
     }
 
-    savePreset(preset: Preset): Observable<any> {
+    /* Same as savePreset(), but it forces the index to -1 so that the save will result in an "add" on the server */
+    addPreset(preset: Preset): Observable<any> {
+        preset.setWillSaveNewPreset();
+        return this.savePreset(preset, true);
+    }
+
+    savePreset(preset: Preset, mustBeAddition: boolean = false): Observable<any> {
         // An existing preset? in a memory slot?
         return Observable.create((observable) => {
             let addingNewPreset = preset.index < 0;
+
+            if(!addingNewPreset && mustBeAddition) {
+                observable.error("Asked to add preset, but it has an index of " + preset.index + ". This would result in an overwrite.");
+                return;
+            }
+
             let putURL = addingNewPreset ? this.getChargerURL("/addpreset") : this.getChargerURL("/preset/" + preset.index);
             let body = preset.json();
-            console.log("Saving Preset: ", body);
+            let action = addingNewPreset ? "Adding" : "Saving";
+            console.log(action + " Preset: ", body);
 
             let headers = new Headers({'Content-Type': 'application/json'});
             let options = new RequestOptions({headers: headers});

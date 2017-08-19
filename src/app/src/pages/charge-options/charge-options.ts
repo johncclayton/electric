@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController, NavParams} from 'ionic-angular';
+import {NavController, NavParams, Toast, ToastController} from 'ionic-angular';
 import {Channel} from "../../models/channel";
 import {iChargerService} from "../../services/icharger.service";
 import {ChemistryType, Preset} from "../../models/preset-class";
@@ -13,6 +13,7 @@ import {IAppState} from "../../models/state/configure";
 import {IChargeSettings, IConfig} from "../../models/state/reducers/configuration";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 import {IUIState} from "../../models/state/reducers/ui";
+import {UIActions} from "../../models/state/actions/ui";
 
 @Component({
     selector: 'page-charge-options',
@@ -31,10 +32,15 @@ export class ChargeOptionsPage implements Chemistry {
 
     private callback: any;
     private subscription: any;
+    private simpleAlert: Toast;
+
+    public static CHARGE_BY_PLAN_PRESET_NAME: string = "Electric Charge Plan";
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public actions: ConfigurationActions,
+                public uiActions: UIActions,
+                public toastController: ToastController,
                 public ngRedux: NgRedux<IAppState>,
                 public navParams: NavParams) {
 
@@ -71,6 +77,58 @@ export class ChargeOptionsPage implements Chemistry {
         this.navCtrl.pop().then(() => {
             this.callback(preset);
         })
+    }
+
+    chargeUsingPlan() {
+        let chargePlanPreset: Preset = this.presets.find((p: Preset) => {
+            return p.name == ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME;
+        });
+
+        let createNewPreset: boolean = chargePlanPreset == null;
+
+        if (!chargePlanPreset) {
+            // Clone the first lipo we can find
+            let toClone = this.filterByChemistryAndSort(Preset.chemistryPrefix(ChemistryType.LiPo)).shift();
+
+            // The newly cloned preset will have index == -1.
+            // Meaning: it'll be ADDED when saved.
+            chargePlanPreset = toClone.clone();
+            if (chargePlanPreset.index != -1) {
+                this.uiActions.setErrorMessage("Oh oh! New preset doesn't have -1 index");
+                return;
+            }
+
+            chargePlanPreset.charge_current = this.chargeSettings.safeAmpsForWantedChargeRate;
+            chargePlanPreset.name = ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME;
+            console.log("No charge plan preset. Creating one for:", chargePlanPreset.charge_current, "amps");
+        } else {
+            chargePlanPreset.charge_current = this.chargeSettings.safeAmpsForWantedChargeRate;
+        }
+
+        this.simpleAlert = this.toastController.create({
+            'message': "Setting up preset...",
+            'position': 'bottom',
+        });
+        this.simpleAlert.present();
+
+        let observable;
+        if(createNewPreset) {
+            observable = this.chargerService.addPreset(chargePlanPreset);
+        } else {
+            observable = this.chargerService.savePreset(chargePlanPreset);
+        }
+
+        observable.subscribe((preset: Preset) => {
+            this.simpleAlert.dismiss();
+
+            this.navCtrl.pop().then(() => {
+                this.callback(preset);
+            })
+        }, (error) => {
+            this.simpleAlert.dismiss();
+            this.uiActions.setErrorMessage(error);
+        }, () => {
+        });
     }
 
     get chargeMethod(): string {
@@ -129,13 +187,12 @@ export class ChargeOptionsPage implements Chemistry {
         return "Charge at " + sprintf("%2.01fA", this.chargeSettings.safeAmpsForWantedChargeRate);
     }
 
-    filteredPresets() {
+    filterByChemistryAndSort(chemistry: string) {
         let presets = this.presets.filter((preset) => {
-            let filter = this.chemistryFilter;
-            if (filter == Preset.chemistryPrefix(ChemistryType.Anything)) {
+            if (chemistry == Preset.chemistryPrefix(ChemistryType.Anything)) {
                 return true;
             }
-            return Preset.chemistryPrefix(preset.type) == filter;
+            return Preset.chemistryPrefix(preset.type) == chemistry;
         });
         presets.sort((a: Preset, b: Preset) => {
             if (a.charge_current < b.charge_current) {
@@ -145,6 +202,11 @@ export class ChargeOptionsPage implements Chemistry {
             }
             return 0;
         });
+        return presets;
+    }
+
+    filteredPresets() {
+        let presets = this.filterByChemistryAndSort(this.chemistryFilter);
         return _.chunk(presets, 3);
     }
 

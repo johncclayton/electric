@@ -16,7 +16,7 @@ export enum LipoBalanceType {
     Normal = 1,
     Fast = 2,
     User = 3,
-        // only returned when li_mode_c is 1
+    // only returned when li_mode_c is 1
     DontBalance = 4
 }
 
@@ -25,7 +25,7 @@ export enum BalanceEndCondition {
     // Charge End Current is disabled in the UI
     EndCurrentOff_DetectBalanceOn,
 
-        // Charge End Current enabled for all remaining options,
+    // Charge End Current enabled for all remaining options,
     EndCurrentOn_DetectBalanceOff,
     EndCurrent_or_DetectBalance,
     EndCurrent_and_DetectBalance,
@@ -58,14 +58,18 @@ _dischargeVoltageMinMax[ChemistryType.LiFe] = {'min': 2.0, 'max': 3.5};
 _dischargeVoltageMinMax[ChemistryType.NiMH] = {'min': 0.1, 'max': 33};
 
 export class Preset {
-    data: {} = {};
-
-    constructor(public presetDict: {}) {
-        this.data = presetDict;
+    constructor(public data: {}) {
     }
 
     json() {
         return JSON.stringify(this.data);
+    }
+
+    clone(): Preset {
+        let jsonString = this.json();
+        let newThing: Preset = new Preset(JSON.parse(jsonString));
+        newThing.setWillSaveNewPreset();
+        return newThing;
     }
 
     dischargeVoltageMinMax() {
@@ -85,6 +89,10 @@ export class Preset {
                 return {min: 310, max: 340}
         }
         return {min: 0.0, max: 0};
+    }
+
+    setWillSaveNewPreset() {
+        this.data['index'] = -1;
     }
 
     get name(): string {
