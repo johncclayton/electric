@@ -31,7 +31,7 @@ Install the OS, and log into it via terminal / SSH.
 
        $ sudo apt-get update 
        $ sudo apt-get upgrade
-       $ sudo apt-get install gcc python-dev
+       $ sudo apt-get install gcc g++ python-dev
 
 ## Install the Electric codebase using PyPi
 
