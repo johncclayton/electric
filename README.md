@@ -1,14 +1,14 @@
 # Build Job Status
 [![Build Status](https://travis-ci.org/johncclayton/electric.svg?branch=master)](https://travis-ci.org/johncclayton/electric)
 
-# What
+# What is this thing?
 This project provides everything you need to get information from your iCharger 308/406/4010 DUO to an application
 running on your mobile device.  
 
 # I really want to do all the stuff manually
 Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.
 
-# I just want to run this RIGHT NOW
+# I just want to run this Right Now (tm)
 Okay, okay - relax. Take a breath. We hear you.  
 
 You *must* have a Hypriot OS image installed onto your Raspberry Pi 3 - then it's as simple as:
