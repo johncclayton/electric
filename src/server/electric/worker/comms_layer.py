@@ -5,7 +5,6 @@ import modbus_tk.defines as cst
 from electric.models import DeviceInfo, ChannelStatus, Control, PresetIndex, Preset, ReadDataSegment, Order, Operation
 from electric.models import SystemStorage, WriteDataSegment, OperationResponse, ObjectNotFoundException, \
     BadRequestException, ChemistryType
-
 from modbus_usb import iChargerMaster
 
 CHANNEL_INPUT_HEADER_OFFSET = 0
@@ -25,7 +24,7 @@ IR_MEASUREMENT_PRESET_NAME = "IR Measurement"
 logger = logging.getLogger('electric.worker.{0}'.format(__name__))
 
 VALUE_ORDER_UNLOCK = 0x55aa
-VALUE_ORDER_LOCK = 0x1234 # any other value(s)
+VALUE_ORDER_LOCK = 0x1234  # any other value(s)
 
 
 class ChargerCommsManager(object):
@@ -41,7 +40,6 @@ class ChargerCommsManager(object):
     def __init__(self, master=None):
         if master is None:
             master = iChargerMaster(None)
-
         self.charger = master
 
     def reset(self):
@@ -151,7 +149,8 @@ class ChargerCommsManager(object):
         return True
 
     def select_memory_program(self, memory_slot, channel_number=0):
-        (word_count,) = self.charger.modbus_write_registers(0x8000 + 1, (memory_slot, channel_number, VALUE_ORDER_UNLOCK))
+        (word_count,) = self.charger.modbus_write_registers(0x8000 + 1,
+                                                            (memory_slot, channel_number, VALUE_ORDER_UNLOCK))
         return word_count
 
     def save_full_preset_list(self, preset_list):
@@ -195,8 +194,10 @@ class ChargerCommsManager(object):
 
         # There are apparently 64 indexes. Apparently.
         read_a_bit_format = "32B"
-        data_1 = self.charger.modbus_read_registers(0x8800 + 1, read_a_bit_format, function_code=cst.READ_HOLDING_REGISTERS)
-        data_2 = self.charger.modbus_read_registers(0x8800 + 16, read_a_bit_format, function_code=cst.READ_HOLDING_REGISTERS)
+        data_1 = self.charger.modbus_read_registers(0x8800 + 1, read_a_bit_format,
+                                                    function_code=cst.READ_HOLDING_REGISTERS)
+        data_2 = self.charger.modbus_read_registers(0x8800 + 16, read_a_bit_format,
+                                                    function_code=cst.READ_HOLDING_REGISTERS)
         list_of_all_indexes = list(data_1)
         list_of_all_indexes.extend(list(data_2))
 
@@ -266,6 +267,7 @@ class ChargerCommsManager(object):
     This ALWAYS saves a NEW preset. The presets memory_slot is ignored, and it's
     inserted at the end of the preset index list.
     '''
+
     def add_new_preset(self, preset):
         # Find the next free memory slot, assign that to the preset, and save both indexes + preset
         preset_index = self.get_full_preset_list()
@@ -297,6 +299,7 @@ class ChargerCommsManager(object):
     This saves an existing preset to memory.
     It does NOT allocate new presets, or insert them into a preset index list
     '''
+
     def save_preset_to_memory_slot(self, preset, memory_slot, write_to_flash=True, verify_write=True):
         # We don't want to verify if we're adding. In that case we KNOW we want to add it here.
         # and we want to ignore any older data that may be in that slot.
