@@ -63,7 +63,16 @@ export const
                 let channels = [];
                 if ('channels' in unifiedStatus) {
                     unifiedStatus.channels.map((json, index) => {
-                        let ch = new Channel(index, json, action.cellLimit);
+                        let ch: Channel = new Channel(index, json, action.cellLimit);
+
+                        // Get the old channel
+                        if (state.channels.length >= index) {
+                            let oldChannel = state.channels[index];
+                            if (oldChannel) {
+                                ch.recomputePackPluggedIn(newState.device_id, oldChannel);
+                            }
+                        }
+
                         channels.push(ch);
 
                         newState.total_output_amps += ch.output_amps;
@@ -74,6 +83,7 @@ export const
                             newState.input_volts = ch.input_volts;
                             newState.charger_temp = ch.charger_internal_temp;
                         }
+
                     });
                     newState.channel_count = channels.length;
                 }

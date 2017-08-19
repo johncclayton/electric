@@ -39,6 +39,7 @@
  2 = b.cv
  3 = b.cc
  */
+import {ChargerType, iChargerService} from "../services/icharger.service";
 
 export class Channel {
     _json = {};
@@ -46,6 +47,10 @@ export class Channel {
     _lastUserInitiatedCommand: string = null;
     _timeUserSetLastInitiatedCommand: number;
     _timeUserInitiatedCommandTimeout: number = 5;
+
+    private requiresCellStablization: boolean = false;
+    private noCellChangesCount: number = 0;
+    private lastActionText: string;
 
     public constructor(index: number, jsonObject, configuredCellLimit: number = 0) {
         this._index = index;
@@ -93,6 +98,10 @@ export class Channel {
         return this._json;
     }
 
+    get cell_count_with_voltage_values(): number {
+        return this._json['cell_count_with_voltage_values'];
+    }
+
     get input_volts(): number {
         return this._json['curr_inp_volts'];
     }
@@ -134,6 +143,14 @@ export class Channel {
      if that's a result of us performing an actual Charge operation, or a Storage operation.
      */
     get actionText(): string {
+        if (this.requiresCellStablization) {
+            return this.lastActionText;
+        }
+        this.lastActionText = this.actionBasedOnState();
+        return this.lastActionText;
+    }
+
+    private actionBasedOnState(): string {
         let run_state = this.runState;
 
         if (!this.packConnected) {
@@ -196,15 +213,75 @@ export class Channel {
         }
     }
 
+    packPluggedInBasic(device_id): boolean {
+        let max_voltage = iChargerService.lookupChargerMetadata(device_id, 'maxVolts', 0);
+        if (max_voltage > 0) {
+            if (this.cell_count_with_voltage_values > 0) {
+                return this.curr_out_volts <= max_voltage;
+            }
+        }
+        return false;
+    }
+
+    public recomputePackPluggedIn(device_id, oldChannel: Channel) {
+        this.noCellChangesCount = oldChannel.noCellChangesCount;
+        this.requiresCellStablization = oldChannel.requiresCellStablization;
+        this.lastActionText = oldChannel.lastActionText;
+
+        let old_plugged_in: boolean = oldChannel.packPluggedInBasic(device_id);
+        let plugged_in: boolean = this.packPluggedInBasic(device_id);
+
+        // If we think the pack is plugged in... check more thoroughly.
+        // If we see a change in number of cells connected, this change must stabilize before we can take any action
+        let change_to_basic_state = old_plugged_in != plugged_in;
+        let change_to_number_of_cells = this.numberOfActiveCells != oldChannel.numberOfActiveCells;
+
+        if (change_to_number_of_cells || change_to_basic_state) {
+            this.requiresCellStablization = true;
+            this.noCellChangesCount = 0;
+        }
+
+        // When stabilizing, increment noCellChangesCount continuously while the cell count remains ... stable!
+        if (this.requiresCellStablization) {
+            this.noCellChangesCount++;
+
+            // If we've seen no change to the active number of cells, in N cycles
+            if (this.noCellChangesCount > 1) {
+                this.requiresCellStablization = false;
+            }
+        }
+
+        // No change to active cell count, and no need to stablize.
+        // We can check for cell's using cell volts & balance volts
+        if (!this.requiresCellStablization) {
+            if (this.cell_count_with_voltage_values > 0) {
+                let diff: number = Math.abs(100.0 - ((this.curr_out_volts / this.cell_total_voltage) * 100.0))
+                if (diff < 3) {
+                    plugged_in = true;
+                }
+            }
+        }
+
+        return plugged_in;
+    }
+
     get packAndBalanceConnected(): boolean {
         return this.packConnected && this.packBalanceLeadsConnected;
+    }
+
+    get curr_out_volts(): number {
+        return this._json['curr_out_volts'];
+    }
+
+    get cell_total_voltage(): number {
+        return this._json['cell_total_voltage'];
     }
 
     get channel_volts(): number {
         if (!this.packConnected) {
             return 0.0;
         }
-        return this._json['curr_out_volts'];
+        return this.curr_out_volts;
     }
 
     get packConnected(): boolean {

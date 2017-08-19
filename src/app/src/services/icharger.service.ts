@@ -14,14 +14,32 @@ import {Vibration} from "@ionic-native/vibration";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
-    iCharger406Duo = 67, // ??? probably not. We need to get the model number.
-    iCharger308Duo = 66
+    iCharger308Duo = 66,
+    iCharger406Duo = 67 // ??? probably not. We need to get the model number.
 }
 
 export let ChargerMetadata = {};
-ChargerMetadata[ChargerType.iCharger308Duo] = {'maxAmps': 30, 'name': 'iCharger 308', 'tag': 'DUO', 'cells': 8};
-ChargerMetadata[ChargerType.iCharger406Duo] = {'maxAmps': 40, 'name': 'iCharger 406', 'tag': 'DUO', 'cells': 6};
-ChargerMetadata[ChargerType.iCharger4010Duo] = {'maxAmps': 40, 'name': 'iCharger 4010', 'tag': 'DUO', 'cells': 10};
+ChargerMetadata[ChargerType.iCharger308Duo] = {
+    'maxAmps': 30,
+    'name': 'iCharger 308',
+    'tag': 'DUO',
+    'cells': 8,
+    'maxVolts': 30
+};
+ChargerMetadata[ChargerType.iCharger406Duo] = {
+    'maxAmps': 40,
+    'name': 'iCharger 406',
+    'tag': 'DUO',
+    'cells': 6,
+    'maxVolts': 26
+};
+ChargerMetadata[ChargerType.iCharger4010Duo] = {
+    'maxAmps': 40,
+    'name': 'iCharger 4010',
+    'tag': 'DUO',
+    'cells': 10,
+    'maxVolts': 38
+};
 
 @Injectable()
 export class iChargerService {
@@ -124,10 +142,10 @@ export class iChargerService {
         return "http://" + this.getHostName() + path;
     }
 
-    lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
+    static lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
         // Not supplied? Look it up.
-        if (deviceId == null) {
-            deviceId = this.getCharger().device_id;
+        if (!deviceId) {
+            return defaultValue;
         }
         if (deviceId) {
             let md = ChargerMetadata[deviceId];
@@ -141,19 +159,19 @@ export class iChargerService {
     }
 
     getMaxAmpsPerChannel() {
-        return this.lookupChargerMetadata(null, 'maxAmps', 15);
+        return iChargerService.lookupChargerMetadata(null, 'maxAmps', 15);
     }
 
     getChargerName() {
-        return this.lookupChargerMetadata(null, 'name', 'iCharger');
+        return iChargerService.lookupChargerMetadata(null, 'name', 'iCharger');
     }
 
     getChargerTag() {
-        return this.lookupChargerMetadata(null, 'tag', '');
+        return iChargerService.lookupChargerMetadata(null, 'tag', '');
     }
 
     getMaxCells() {
-        return this.lookupChargerMetadata(null, 'cells', 0);
+        return iChargerService.lookupChargerMetadata(null, 'cells', 0);
     }
 
     stopCurrentTask(channel: Channel): Observable<any> {
