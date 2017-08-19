@@ -16,9 +16,9 @@ RUN apk update \
     && pip install --upgrade pip \
     && pip install -r requirements-web.txt \
     && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/old-setup /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
+    && chmod +x /www/run_gunicorn.sh \
     && apk del gcc g++ musl-dev linux-headers python-dev --purge
 
 EXPOSE 5000
 
-RUN chmod +x /www/run_gunicorn.sh
 CMD [ "./run_gunicorn.sh" ]

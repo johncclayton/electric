@@ -11,5 +11,4 @@ running on your mobile device.
 There are two programs that run on the Raspberry Pi, and one app for your phone.
 
 # What now?
-
 Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.

@@ -44,8 +44,8 @@ Install the OS, and log into it via terminal / SSH.
 
        $ sudo pip install electric
        
-**WARNING** this can take about 20 minutes - because it will cause hidapi and zeromq compilation jobs.  And the Pi 
-is very slow with compiling.  
+**WARNING** this can take about 45 minutes - because it will cause hidapi and zeromq compilation jobs.  And the Pi 
+is very slow with compiling.  Very very slow.  
 
 ## To run the server
 
@@ -66,3 +66,4 @@ You will need to add our app to your Ionic View installation, use the menu optio
 following app ID:
 
        f944cad8
+       
