@@ -30,12 +30,39 @@ export class SystemSettingsPage {
                 private ngRedux: NgRedux<IAppState>) {
     }
 
+    createSaveAlert() {
+        this.savingAlert = this.toastController.create({
+            'message': "Saving...",
+            'position': 'bottom',
+        });
+        this.savingAlert.present();
+        return this.savingAlert;
+    }
+
+    saveSettings() {
+        this.createSaveAlert();
+        let system = this.ngRedux.getState().system.system;
+
+        this.actions.saveSystemSettings(system).subscribe(sys => {
+        }, err => {
+            this.uiActions.setErrorMessage(err);
+        }, () => {
+            this.savingAlert.dismiss();
+        });
+    }
+
+    get settingsAreModified(): boolean {
+        if (this.originalUnmodified == null) {
+            return false;
+        }
+        let current = this.ngRedux.getState().system.system;
+        return objectHasBeenModified(this.originalUnmodified, current);
+    }
+
     ionViewCanLeave() {
-        if (this.originalUnmodified != null) {
+        if (this.settingsAreModified) {
             let current = this.ngRedux.getState().system.system;
-            if (objectHasBeenModified(this.originalUnmodified, current)) {
-                return this.changeAlert(current);
-            }
+            return this.changeAlert(current);
         }
     }
 
@@ -61,13 +88,7 @@ export class SystemSettingsPage {
                     {
                         text: "Save",
                         handler: () => {
-
-                            this.savingAlert = this.toastController.create({
-                                'message': "Saving...",
-                                'position': 'bottom',
-                            });
-                            this.savingAlert.present();
-
+                            this.createSaveAlert();
                             this.actions.saveSystemSettings(system).subscribe(sys => {
                                 resolve();
                             }, err => {

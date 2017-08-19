@@ -46,7 +46,9 @@ export class SystemActions {
     }
 
     saveSystemSettings(systemObject: System): Observable<System> {
-        return this.chargerService.saveSystem(systemObject);
+        return this.chargerService.saveSystem(systemObject).map((s: System) => {
+            this.ngRedux.dispatch(this.endFetchAction(s));
+        });
     }
 
     startFetch() {
