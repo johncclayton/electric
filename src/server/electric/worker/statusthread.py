@@ -39,7 +39,7 @@ class StatusThread(threading.Thread):
                 elapsed_ms = end_time - start_time
                 wait_seconds = self.wait_time - elapsed_ms.total_seconds()
 
-                logger.warn("*** status fetch completed, elapsed_sec: {0}, will now wait: {1}".format(elapsed_ms.total_seconds(), wait_seconds))
+                # logger.warn("*** status fetch completed, elapsed_sec: {0}, will now wait: {1}".format(elapsed_ms.total_seconds(), wait_seconds))
 
                 if wait_seconds > 0:
                     time.sleep(wait_seconds)
