@@ -7,7 +7,7 @@ from setup_template import render_and_write_setup
 electric_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 ext = "zip"
-if platform.system() == "Darwin":
+if platform.system() == "Darwin" or platform.system() == "Linux":
     ext = "tar.gz"
 
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if rendered and args.publish:
-        print("Uploading distribution to repo using twine: {0}".format(repo))
+        print("Uploading distribution to repo using twine: {0}, for platform: {1}".format(repo, platform.system()))
 
         run_these([
             "twine",

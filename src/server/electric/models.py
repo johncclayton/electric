@@ -408,13 +408,14 @@ class ChannelStatus(Model):
             if pcnt_diff < 3.0:
                 plugged_in = True
 
-        # logger.info("channel: {0}, plugged_in: {1}, cells: {2}, pcnt_diff: {3}, curr_out_volts: {4}, cell_total_voltage: {5}".format(
-        #     self.channel,
-        #     plugged_in,
-        #     self.cell_count_with_voltage_values,
-        #     pcnt_diff,
-        #     self.curr_out_volts,
-        #     self.cell_total_voltage))
+        # if self.channel == 0:
+        #     logger.info("channel: {0}, plugged_in: {1}, cells: {2}, pcnt_diff: {3}, curr_out_volts: {4}, cell_total_voltage: {5}".format(
+        #         self.channel,
+        #         plugged_in,
+        #         self.cell_count_with_voltage_values,
+        #         pcnt_diff,
+        #         self.curr_out_volts,
+        #         self.cell_total_voltage))
 
         return plugged_in
 
