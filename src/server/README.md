@@ -1,5 +1,7 @@
 # Beta Testing
 
+***WARNING*** OUT OF DATE AND NEEDS TO BE UPDATED
+
 This second is devoted to getting you up & running as a BETA tester.  
 
 You will need a Raspberry Pi 3, some terminal skills, connectivity to Mr Internet and about 45 minutes :-) 
