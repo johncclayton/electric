@@ -1,4 +1,4 @@
-# status
+# Build Job Status
 [![Build Status](https://travis-ci.org/johncclayton/electric.svg?branch=master)](https://travis-ci.org/johncclayton/electric)
 
 # What
