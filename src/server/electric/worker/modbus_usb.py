@@ -3,7 +3,8 @@ import hid
 import logging
 import struct
 import threading
-import time
+import time, sys
+import traceback
 
 import modbus_tk.defines as cst
 from modbus_tk.exceptions import ModbusInvalidRequestError, ModbusInvalidResponseError
@@ -166,7 +167,7 @@ class USBThreadedReader:
         self._last_response_packets = []
 
         self._read_thread_exit = False
-        self._read_thread = threading.Thread(name="usb reader", target=self.read_from_icharger)
+        self._read_thread = threading.Thread(name="HID Reader", target=self.read_from_icharger)
         self._read_thread.daemon = True
 
         self.vendor = vendor
@@ -188,39 +189,43 @@ class USBThreadedReader:
         self._read_thread.join()
         logger.info("USBThreadedReader - shutdown complete")
 
-    def reset(self):
-        if self._dev is not None:
-            self.close()
-            self.open()
-        return True
-
     @property
     def serial_number(self):
         if self._opened:
             return self._dev.get_serial_number_string()
-        return "<not yet opened - no serial number>"
+        return "<device not open - no serial number>"
+
+    @property
+    def product_name(self):
+        if self._opened:
+            return self._dev.get_product_string()
+        return "<device not open - no product string>"
 
     @property
     def is_open(self):
+        # INTENTIONAL: no lock - only reading a flag/state
         return self._opened
 
     @property
     def name(self):
         if self._opened:
-            return "iCharger SN:" + self.serial_number
-        return "! iCharger Not Connected !"
+            return "iCharger {0}, Serial: {1}".format(self.product_name, self.serial_number)
+        return "<device not open - no product name/serial>"
 
     def open(self):
-        if self._dev is not None:
+        if self._dev is not None and not self._opened:
             self._dev.open(self.vendor, self.product)
             self._opened = True
-        return True
+        return self._opened
 
     def close(self):
         if self._opened:
             self._dev.close()
         self._opened = False
-        return True
+
+    def reset(self):
+        self.close()
+        self.open()
 
     @property
     def timeout(self):
@@ -251,7 +256,7 @@ class USBThreadedReader:
         if not testing_control.values.usb_device_present:
             raise IOError("FAKE TEST ON WRITE, CHARGER NOT PRESENT")
 
-        if self._dev is not None:
+        if self.valid and self.is_open:
             pad_len = MAX_READWRITE_LEN - len(payload)
             data = struct.pack("B", 0)
             content = list(data + payload + ("\0" * pad_len))
@@ -265,24 +270,36 @@ class USBThreadedReader:
         raise IOError("Device write failure - either not present or not claimed")
 
     def read_from_icharger(self):
-        logger.info("USB reading thread has started")
+        a__b_i_t = 0.01
 
         while not self._read_thread_exit:
             try:
                 has_data = False
 
-                if self._dev is not None and self.is_open:
+                # if the USB bus isn't open - try to do so
+                if self.valid and not self.is_open:
+                    try:
+                        self.reset()
+                    except IOError:
+                        pass
+
+                # if its STILL not open, well hang around a bit and try later
+                if self.valid and not self.is_open:
+                    time.sleep(a__b_i_t)
+                else:
                     int_list = None
 
                     try:
                         int_list = self._dev.read(MAX_READWRITE_LEN, 1000)
+
                         if len(int_list) == 64:
                             has_data = True
                         else:
                             with self._condition:
                                 self._condition.notify_all()
-                    except IOError:
-                        pass
+                    except IOError, i:
+                        self.close()
+                        time.sleep(a__b_i_t)
 
                     # is this an info packet?  does it even vaugely resemble something that
                     # we should smuggle out of here?
@@ -302,10 +319,8 @@ class USBThreadedReader:
                                 logger.debug("Holy crap, what do we have? : {0}".format(int_list))
 
                             self._condition.notify_all()
-                else:
-                    # not open, wait a bit...
-                    time.sleep(0.1)
             except Exception, e:
+                traceback.print_exc(file=sys.stdout)
                 logger.warn("the read_from_icharger thread experienced an exception: %s", str(e))
 
         logger.info("USB reading thread has stopped, _read_thread_exit value is: {0}".format(self._read_thread_exit))
@@ -349,6 +364,7 @@ class iChargerMaster(RtuMaster):
     def __init__(self, serial=None):
         if serial is None:
             serial = USBThreadedReader()
+
         super(iChargerMaster, self).__init__(serial)
 
     def _make_query(self):

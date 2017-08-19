@@ -319,6 +319,10 @@ class ChannelStatus(Model):
     # Optionally added to the response, when a channel status is requested
     status = ModelType(DeviceInfoStatus)
 
+    def __init__(self):
+        super(ChannelStatus, self).__init__()
+        self.device_id = None
+
     @staticmethod
     def modbus(device_id=None, channel=0, header=None, cell_v=None, cell_b=None, cell_i=None, footer=None):
         status = ChannelStatus()
@@ -327,6 +331,8 @@ class ChannelStatus(Model):
         return status
 
     def set_from_modbus_data(self, device_id, channel, data, cell_v, cell_b, cell_i, footer):
+        self.device_id = device_id
+
         self.channel = channel
 
         self.timestamp = data[0] / 1000.0
@@ -361,17 +367,10 @@ class ChannelStatus(Model):
         self.run_error = footer[5]
         self.dlg_box_id = footer[6]
 
-        if device_id:
-            max_voltage = 0
-            # With this, we can work out if the main battery lead is plugged in
-            if device_id is DEVICEID_306_DUO:
-                max_voltage = 26
-            elif device_id is DEVICEID_308_DUO:
-                max_voltage = 30
-            else:
-                max_voltage = 40
-            if self.curr_out_volts > max_voltage:
-                self.curr_out_volts = 0
+        # print "channel: {0}, len cels: {3}, cell_total_volt: {1}, curr_out_volt is: {2}".format(channel,
+        #                                                                                         self.cell_total_voltage,
+        #                                                                                         self.curr_out_volts,
+        #                                                                                         self.cell_count_with_voltage_values)
 
         # If the charger isn't doing anything, make sure timestamp shows 00:00
         if self.run_status == 0:
@@ -382,16 +381,41 @@ class ChannelStatus(Model):
 
     @serializable
     def battery_plugged_in(self):
-        total_voltage = self.cell_total_voltage
-        curr_out_volts = self.curr_out_volts
+        plugged_in = False
 
-        # This is more or less a "punt".
-        # You can't use exact, because sometimes total will be > sometimes a little less. Go figure.
-        is_plugged_in_threshold = (total_voltage * 0.8)
-        plugged_in = curr_out_volts > is_plugged_in_threshold
-        if is_plugged_in_threshold > 0 and plugged_in > 0:
-            if not plugged_in:
-                logger.info("Pack not plugged in because {0}:{1} > {2}:{3}".format(curr_out_volts, type(curr_out_volts), is_plugged_in_threshold, type(is_plugged_in_threshold)))
+        if self.device_id:
+            max_voltage = 0
+
+            # With this, we can work out if the main battery lead is plugged in
+            if self.device_id is DEVICEID_306_DUO:
+                max_voltage = 26
+            elif self.device_id is DEVICEID_308_DUO:
+                max_voltage = 30
+            elif self.device_id is DEVICEID_4010_DUO:
+                max_voltage = 38
+
+            # if there are no balance leads plugged in, zero out the curr_out_volts
+            if self.cell_count_with_voltage_values == 0:
+                if self.curr_out_volts > max_voltage:
+                    plugged_in = False
+                else:
+                    plugged_in = True
+
+        pcnt_diff = 0
+        if self.cell_count_with_voltage_values > 0:
+            pcnt_diff = abs(100.0 - ((self.curr_out_volts / self.cell_total_voltage) * 100.0))
+            # if the difference is too great - then we think that curr_out_volts is total lies
+            if pcnt_diff < 3.0:
+                plugged_in = True
+
+        # logger.info("channel: {0}, plugged_in: {1}, cells: {2}, pcnt_diff: {3}, curr_out_volts: {4}, cell_total_voltage: {5}".format(
+        #     self.channel,
+        #     plugged_in,
+        #     self.cell_count_with_voltage_values,
+        #     pcnt_diff,
+        #     self.curr_out_volts,
+        #     self.cell_total_voltage))
+
         return plugged_in
 
     @serializable

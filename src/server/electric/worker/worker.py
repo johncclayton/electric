@@ -1,13 +1,15 @@
-import zmq, logging, sys, os, threading, datetime, time
+import datetime
+import logging
+import os
+import sys
+import zmq
 import zmq.utils.win32
-from router import route_message
 import electric.worker.cache as cache
-
-from comms_layer import ChargerCommsManager
 import electric.testing_control as testing_control
 
-
-
+from comms_layer import ChargerCommsManager
+from electric.worker.statusthread import StatusThread
+from router import route_message
 
 logger = logging.getLogger('electric.worker')
 
@@ -18,54 +20,12 @@ socket = ctx.socket(zmq.REP)
 listen_on = os.environ.get("ELECTRIC_WORKER_LISTEN", "tcp://0.0.0.0:5001")
 
 charger = ChargerCommsManager()
-lock = threading.Lock()
 poller = zmq.Poller()
+
 
 def setup_zeromq():
     socket.bind(listen_on)
     poller.register(socket, zmq.POLLIN)
-
-
-class StatusThread(threading.Thread):
-    def __init__(self, charger):
-        super(StatusThread, self).__init__(name="Status Reader")
-        self.daemon = True
-        self.charger = charger
-        self.keep_going = True
-
-    def run(self):
-        while self.keep_going:
-            # fetch charger status, channel 0/1 and store
-            # pause to breath - it is after all only good form
-            try:
-                with lock:
-                    start_time = datetime.datetime.now()
-
-                    device_info = self.charger.get_device_info()
-                    if device_info and self.keep_going:
-                        cache.values.set_device_info(device_info)
-
-                        for channel in range(0, device_info.channel_count):
-                            channel_status = self.charger.get_channel_status(channel, device_info.device_id)
-                            if channel == 0 or channel == 1:
-                                cache.values.set_channel_status(channel, channel_status)
-                            if not self.keep_going:
-                                return
-
-                    end_time = datetime.datetime.now()
-
-                # wait for about 500ms minus the time it took, in other words - try to update these twice a second
-                elapsed_ms = end_time - start_time
-                wait_seconds = 0.5 - elapsed_ms.total_seconds()
-                if wait_seconds > 0:
-                    time.sleep(wait_seconds)
-                else:
-                    # well, it too longer than 500ms, so pause a wee bit more (>700 ms total - yeah, a stab in the dark)
-                    time.sleep(0.2)
-
-            except Exception, e:
-                logger.error("exception while reading status/channel info: {0}".format(e))
-                time.sleep(5)
 
 
 fetcher = StatusThread(charger)
@@ -99,6 +59,7 @@ def run_worker():
 
                 if socket in socks:
                     message = socket.recv_pyobj()
+                    start_time = datetime.datetime.now()
 
                     if "method" not in message:
                         logger.warn("method name not specified, ignoring {0}".format(message))
@@ -110,26 +71,27 @@ def run_worker():
                             args = message["args"]
 
                         try:
-                            with lock:
-                                if "testing-control" in message:
-                                    testing_control.values = message["testing-control"]
+                            if "testing-control" in message:
+                                testing_control.values = message["testing-control"]
 
-                                message_log = "message: {0}/{1} with args: {2}".format(message["tag"], method, args)
+                            message_log = "message: {0}/{1} with args: {2}".format(message["tag"], method, args)
 
-                                try:
-                                    logger.info("executing {0}".format(message_log))
-                                    message["response"] = route_message(charger, method, args)
-                                except Exception, e:
-                                    logger.error("EXCEPTION during routing of {0}, {1}".format(message_log, e))
-                                    message["raises"] = e
+                            try:
+                                logger.info("executing {0}".format(message_log))
+                                message["response"] = route_message(charger, method, args)
+                            except Exception, e:
+                                logger.error("EXCEPTION during routing of {0}, {1}".format(message_log, e))
+                                message["raises"] = e
 
-                                try:
-                                    # potentially; the receiver goes away - before we are finished sending -
-                                    logger.info("sending response for {0}".format(message_log))
-                                    socket.send_pyobj(message)
-                                    logger.info("sent response for {0}".format(message_log))
-                                except Exception, e:
-                                    logger.error("unable to send response for {0}, {1}".format(message_log, e))
+                            try:
+                                # potentially; the receiver goes away - before we are finished sending -
+                                end_time = datetime.datetime.now()
+                                elapsed_time = end_time - start_time
+                                socket.send_pyobj(message)
+                                logger.info("sent response for {0}, elapsed_sec: {1}".format(message_log, elapsed_time.total_seconds()))
+
+                            except Exception, e:
+                                logger.error("unable to send response for {0}, {1}".format(message_log, e))
 
                         finally:
                             testing_control.values.reset()

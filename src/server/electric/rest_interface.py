@@ -95,7 +95,6 @@ class ZMQCommsResource(Resource):
 
 
 class ChannelResource(Resource):
-    # @retry_request
     def get(self, channel_id):
         try:
             channel = int(channel_id)
@@ -220,7 +219,6 @@ class PresetResource(Resource):
 
 
 class AddNewPresetResource(Resource):
-    # @retry_request
     def put(self):
         json_dict = request.json
 
@@ -232,7 +230,6 @@ class AddNewPresetResource(Resource):
 
 
 class PresetListResource(Resource):
-    # @retry_request
     def get(self):
         preset_list = comms.get_full_preset_list()
         # TODO: Error handling
@@ -251,18 +248,15 @@ class PresetListResource(Resource):
 
         return all_presets
 
-    # @retry_request
     def post(self):
         pass
 
 
 class PresetOrderResource(Resource):
-    # @retry_request
     def get(self):
         preset_list = comms.get_full_preset_list()
         return preset_list.to_native()
 
-    # @retry_request
     def post(self):
         json_dict = request.json
         preset_list = PresetIndex(json_dict)
