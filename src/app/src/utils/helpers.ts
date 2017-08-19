@@ -14,7 +14,3 @@ export function objectHasBeenModified(original, current): boolean {
     let are_equal = modifiedProperties.length == 0;
     return !are_equal;
 }
-
-export function cloneDeep(object) {
-    return _.clone(object, true);
-}

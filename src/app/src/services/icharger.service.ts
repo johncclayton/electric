@@ -294,30 +294,48 @@ export class iChargerService {
         });
     }
 
-    toggleChargerTempUnits(): Observable<System> {
+    saveSystem(system: System) {
+        let headers = new Headers({'Content-Type': 'application/json'});
+        let options = new RequestOptions({headers: headers});
         let operationURL = this.getChargerURL("/system");
         return Observable.create((observable) => {
-            this.getSystem().subscribe((sysObj) => {
-                sysObj.isCelsius = !sysObj.isCelsius;
-
-                let headers = new Headers({'Content-Type': 'application/json'});
-                let options = new RequestOptions({headers: headers});
-                this.http.put(operationURL, sysObj.json(), options).subscribe((resp) => {
-                    if (!resp.ok) {
-                        observable.error(resp);
-                    } else {
-                        observable.next(sysObj);
-                        observable.complete();
-                    }
-                }, error => {
-                    observable.error();
-                });
-
-            }, (error) => {
-                observable.error(error);
+            this.http.put(operationURL, system.json(), options).subscribe((resp) => {
+                if (!resp.ok) {
+                    observable.error(resp);
+                } else {
+                    observable.next(system);
+                    observable.complete();
+                }
+            }, error => {
+                observable.error();
             });
         });
     }
+
+    // toggleChargerTempUnits(): Observable<System> {
+    //     let operationURL = this.getChargerURL("/system");
+    //     return Observable.create((observable) => {
+    //         this.getSystem().subscribe((sysObj) => {
+    //             sysObj.isCelsius = !sysObj.isCelsius;
+    //
+    //             let headers = new Headers({'Content-Type': 'application/json'});
+    //             let options = new RequestOptions({headers: headers});
+    //             this.http.put(operationURL, sysObj.json(), options).subscribe((resp) => {
+    //                 if (!resp.ok) {
+    //                     observable.error(resp);
+    //                 } else {
+    //                     observable.next(sysObj);
+    //                     observable.complete();
+    //                 }
+    //             }, error => {
+    //                 observable.error();
+    //             });
+    //
+    //         }, (error) => {
+    //             observable.error(error);
+    //         });
+    //     });
+    // }
 
     cancelAutoStopForChannel(channel: Channel) {
         if (this.autoStopSubscriptions[channel.index]) {

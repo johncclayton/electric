@@ -5,6 +5,7 @@ import {ISystem} from "../reducers/system";
 import {System} from "../../system";
 import {iChargerService} from "../../../services/icharger.service";
 import {UIActions} from "./ui";
+import {Observable} from "rxjs/Observable";
 
 @Injectable()
 export class SystemActions {
@@ -44,11 +45,8 @@ export class SystemActions {
         this.userChangedValue(change);
     }
 
-    saveSystemSettings(systemObject: ISystem) {
-        this.ngRedux.dispatch({
-            type: SystemActions.SAVE_SETTINGS,
-            payload: systemObject.system
-        })
+    saveSystemSettings(systemObject: System): Observable<System> {
+        return this.chargerService.saveSystem(systemObject);
     }
 
     startFetch() {

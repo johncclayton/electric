@@ -15,19 +15,6 @@
     </ion-item>
 </ion-list>
 <ion-list>
-    <ion-list-header>Charger
-        <ion-badge color="dark" item-right *ngIf="ui?.disconnected">Enabled when connected to
-            the charger
-        </ion-badge>
-    </ion-list-header>
-    <ion-item>
-        <ion-label>Temperature shown in celsius</ion-label>
-        <ion-toggle [disabled]="ui?.disconnected"
-                    (ngModelChange)="toggleCelsius.emit($event)"
-                    [ngModel]="config.unitsCelsius"></ion-toggle>
-    </ion-item>
-</ion-list>
-<ion-list>
     <ion-list-header>Connection</ion-list-header>
     <ion-item>
         <ion-label stacked>IP Address of Pi</ion-label>

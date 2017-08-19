@@ -2,6 +2,14 @@ export class System {
     constructor(private data: {}) {
     }
 
+    clone(): System {
+        let system: System = new System({});
+        for (let k in this.data) {
+            system.data[k] = this.data[k];
+        }
+        return system;
+    }
+
     json() {
         return JSON.stringify(this.data);
     }

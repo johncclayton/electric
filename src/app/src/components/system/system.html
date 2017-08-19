@@ -1,5 +1,5 @@
 <ion-list>
-    <ion-list-header>Temperature & Fans</ion-list-header>
+    <ion-list-header color="light">Temperature & Fans</ion-list-header>
     <ion-item>
         <ion-label>Temperature shown in celsius</ion-label>
         <ion-toggle [disabled]="ui.disconnected"
@@ -10,7 +10,7 @@
 
     <temp-range label="Shutdown Temp"
                 [disabled]="ui.disconnected"
-                (valueChanged)="change('temp_shutdown', $event)"
+                (valueChanged)="charger.temp_shutdown = $event.value"
                 min=60 max=75
                 [value]=" charger.temp_shutdown
     "></temp-range>
@@ -18,22 +18,21 @@
     <temp-range label="Power Reduce"
                 [disabled]="ui.disconnected"
                 min=-20 max=-5
-                (valueChanged)="change('temp_power_reduce', $event)"
+                (valueChanged)="charger.temp_power_reduce = $event.value"
                 [value]=" charger.temp_power_reduce
     "></temp-range>
 
     <temp-range label="Temp for Fans On"
                 [disabled]="ui.disconnected"
                 min=30 max=50
-                (valueChanged)="change('temp_fans_on', $event)"
-                [value]=" charger.temp_fans_on
-    "></temp-range>
+                (valueChanged)="charger.temp_fans_on = $event.value"
+                [value]="charger.temp_fans_on"></temp-range>
 
     <ion-item>
         <ion-label>Fans Off ({{charger.fans_off_time}} mins)</ion-label>
         <ion-range [(ngModel)]="charger.fans_off_time"
                    pin=true min="0" max="10"
-                   (ngModelChange)="change('fans_off_time', $event)"
+
                    [disabled]="ui.disconnected">
             <ion-label range-left>0</ion-label>
             <ion-label range-right>10</ion-label>
@@ -41,12 +40,11 @@
     </ion-item>
 </ion-list>
 <ion-list>
-    <ion-list-header>LCD Screen</ion-list-header>
+    <ion-list-header color="light">LCD Screen</ion-list-header>
     <ion-item>
         <ion-label>Brightness</ion-label>
         <ion-range [(ngModel)]="charger.brightness"
                    pin=true min="0" max="30"
-                   (ngModelChange)="change('brightness', $event)"
                    [disabled]="ui.disconnected">
         </ion-range>
     </ion-item>
@@ -54,7 +52,6 @@
         <ion-label>Contrast</ion-label>
         <ion-range [(ngModel)]="charger.contrast"
                    pin=true min="0" max="30"
-                   (ngModelChange)="change('contrast', $event)"
                    [disabled]="ui.disconnected">
         </ion-range>
     </ion-item>

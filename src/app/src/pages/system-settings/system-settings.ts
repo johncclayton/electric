@@ -5,8 +5,10 @@ import {IAppState} from "../../models/state/configure";
 import {Observable} from "rxjs/Observable";
 import {ISystem} from "../../models/state/reducers/system";
 import {SystemActions} from "../../models/state/actions/system";
+import {objectHasBeenModified} from "../../utils/helpers";
+import {IUIState} from "../../models/state/reducers/ui";
 import {System} from "../../models/system";
-import {cloneDeep, objectHasBeenModified} from "../../utils/helpers";
+import {UIActions} from "../../models/state/actions/ui";
 
 @IonicPage()
 @Component({
@@ -15,12 +17,13 @@ import {cloneDeep, objectHasBeenModified} from "../../utils/helpers";
 })
 export class SystemSettingsPage {
     @select() system$: Observable<ISystem>;
-    @select() ui$: Observable<ISystem>;
+    @select() ui$: Observable<IUIState>;
 
     originalUnmodified: System;
 
     constructor(public navCtrl: NavController,
                 public actions: SystemActions,
+                public uiActions: UIActions,
                 public alertController: AlertController,
                 public navParams: NavParams,
                 private ngRedux: NgRedux<IAppState>) {
@@ -28,32 +31,27 @@ export class SystemSettingsPage {
 
     ionViewCanLeave() {
         if (this.originalUnmodified != null) {
-            console.log("Have original...");
             let current = this.ngRedux.getState().system.system;
             if (objectHasBeenModified(this.originalUnmodified, current)) {
-                return this.changeAlert();
-            } else {
-                console.log("Have identical original...");
+                return this.changeAlert(current);
             }
-        } else {
-            console.log("I don't have original...?");
         }
     }
 
     ionViewDidLoad() {
         this.system$.subscribe((v: ISystem) => {
-            if(v.fetching == true) {
+            if (v.fetching == true) {
 
             }
             if (v.fetching == false) {
                 console.log("I've made a clone...");
-                this.originalUnmodified = cloneDeep(v.system);
+                this.originalUnmodified = v.system.clone();
             }
         });
         this.actions.fetchSystemFromCharger();
     }
 
-    private changeAlert() {
+    private changeAlert(system: System) {
         return new Promise((resolve, reject) => {
             let alert = this.alertController.create({
                 title: "Save settings",
@@ -62,7 +60,12 @@ export class SystemSettingsPage {
                     {
                         text: "Save",
                         handler: () => {
-                            resolve();
+                            this.actions.saveSystemSettings(system).subscribe(sys => {
+                                resolve();
+                            }, err => {
+                                this.uiActions.setErrorMessage(err);
+                                reject();
+                            });
                         }
                     },
                     {
@@ -78,7 +81,8 @@ export class SystemSettingsPage {
                         }
                     }
                 ]
-            })
+            });
+            alert.present();
         });
     }
 

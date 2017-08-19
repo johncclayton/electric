@@ -18,7 +18,6 @@ export class ConfigComponent {
     @Input() charger?: IChargerState;
 
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
-    @Output() toggleCelsius: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() testFunc: EventEmitter<any> = new EventEmitter();
 
