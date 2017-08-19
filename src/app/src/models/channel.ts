@@ -48,6 +48,7 @@ export class Channel {
     _timeUserSetLastInitiatedCommand: number;
     _timeUserInitiatedCommandTimeout: number = 5;
 
+    private packPluggedIn: boolean;
     private requiresCellStablization: boolean = false;
     private noCellChangesCount: number = 0;
     private lastActionText: string;
@@ -262,6 +263,7 @@ export class Channel {
             }
         }
 
+        this.packPluggedIn = plugged_in;
         return plugged_in;
     }
 
@@ -285,7 +287,7 @@ export class Channel {
     }
 
     get packConnected(): boolean {
-        return this._json['battery_plugged_in'];
+        return this.packPluggedIn;
     }
 
     get packBalanceLeadsConnected(): boolean {
