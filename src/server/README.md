@@ -40,8 +40,11 @@ Assuming you want to publish to version 0.7.5 - do this:
     
 Done.  Now anyone can simply run this to install electric:
 
-    $ (sudo) pip install electric
+    $ (sudo) pip install electric 
     
+If you are upgrading an existing installation, do the same but add '--upgrade':
+    
+    $ (sudo) pip install electric --upgrade
 
 ## How to run the servers 
 When you install electric via PyPi, there are two commands available after installation.
@@ -108,7 +111,7 @@ Copy the scripts/10-icharger.rules file so that udevd can ensure the iCharger is
     $ sudo cp src/server/scripts/10-icharger.rules /etc/udev/rules.d/
     $ sudo udevadm control --reload
 
-Install the dependancies into the virtualenv - on a RPI3 this can take 5 minutes due to cython + hidapi
+Install the dependencies into the virtualenv - on a RPI3 this can take 5 minutes due to cython + hidapi
 
 
     $ cd electric
