@@ -11,11 +11,15 @@ Remember to do the following, so that a user-space program can access the iCharg
   
     echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"' > /etc/udev/rules.d/10-icharger.rules
 
-Install Hypriot
+## Install the Hypriot Image
 
-1. https://github.com/hypriot/flash
+Go an grab their flashing tool from here: https://github.com/hypriot/flash
 
-1. enable WIFI, log in and edit /boot/device-init.yaml
+Install the OS, and log into it via terminal / SSH. 
+
+## Configure WIFI and Update via APT
+
+1. Enable WIFI, log in and edit /boot/device-init.yaml
 
        wifi:
          interfaces:
@@ -27,53 +31,38 @@ Install Hypriot
 
        $ sudo apt-get update 
        $ sudo apt-get upgrade
+       $ sudo apt-get install gcc python-dev
+
+## Install the Electric codebase using PyPi
 
 1. pull down pip
        
        $ wget https://bootstrap.pypa.io/get-pip.py
        $ sudo python get-pip.py
-       $ sudo pip install virtualenv virtualenvwrapper
 
-1. adjust your term to run virtualenvwrapper on login
+1. install electric from PyPi 
 
-       $ echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc 
-    
-1. logout / log back in (so the shell gets the new virtualenvwrapper stuff)
-1. make up a new virtual environment for python
-
-       $ mkvirtualenv electric
-    
-1. nano ~/.virtualenvs/electric/bin/postactivate, and add "cd ~/electric/src/server"
-1. git clone https://github.com/johncclayton/electric.git
-1. If you are setting up PyCharm, remember to use 'workon electric' to get the right python path.  
-    1. The 'run configuration' will need a source mapping from your dev system to the remote destination 
-   path, for example on my Windows machine this is from d:\src\electric => /home/pirate/electric 
-    1. In the case above I used hypriot, so double-check the Raspberry Pi path when setting up the Remote Python Interpreter
-   and Deployment and Run Configurations.
-   
-1. Then do the dependency installs - very important to get libusb-dev :
-
-       $ sudo apt-get update
-       $ sudo apt-get install libudev-dev libusb-1.0-0-dev gcc cython cython-dbg
+       $ sudo pip install electric
        
-1. the pull in the required python modules
-
-       $ workon electric
-       $ pip install hidapi
-       $ pip install -r requirements.txt
-    
-NOTE - hidapi can take 30 minutes to compile / install, make sure you have libusb-dev installed first
+**WARNING** this can take about 20 minutes - because it will cause hidapi and zeromq compilation jobs.  And the Pi 
+is very slow with compiling.  
 
 ## To run the server
-1. ssh pi3 (pi3 is my SSH alias to the pi that I've just setup)
 
-    $ workon electric 
-    $ ./run_server.sh --unicorns
+1. Run a Terminal then type:
+
+       $ electric-worker
     
-    or
-    
-    $ workon electric 
-    $ cd ~/electric/src/server 
-    $ PYTHONPATH=. sh ./run_server.sh
+1. Run another Terminal and type: 
 
+       $ electric-server
 
+## Get Ionic View 
+
+We distribute testing versions of the iOS/Android apps using Ionic View.  Head on over to https://ionic.io/ and sign
+up then pull down the Ionic View app from the appropriate app store. 
+
+You will need to add our app to your Ionic View installation, use the menu option "Preview an app" and type in the 
+following app ID:
+
+       f944cad8
