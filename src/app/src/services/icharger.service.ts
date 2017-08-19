@@ -341,10 +341,6 @@ export class iChargerService {
         this.cancelAutoStopForChannel(channel);
         let channel_index = channel.index;
 
-        if (this.getConfig().vibrateWhenDone) {
-            this.vibrateTaskDone();
-        }
-
         this.autoStopSubscriptions[channel.index] = Observable.timer(250, 250).takeWhile(() => {
             let ch: Channel = this.getCharger().channels[channel_index];
             // console.log("Channel ", ch.index, ", state: ", ch.runState);
@@ -356,6 +352,9 @@ export class iChargerService {
             console.log("Error while waiting for the channel to change state");
             this.cancelAutoStopForChannel(channel);
         }, () => {
+            if (this.getConfig().vibrateWhenDone) {
+                this.vibrateTaskDone();
+            }
             console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
             this.stopCurrentTask(channel).subscribe();
             this.cancelAutoStopForChannel(channel);
