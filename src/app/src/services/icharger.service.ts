@@ -10,6 +10,7 @@ import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {IConfig} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
+import {Vibration} from "@ionic-native/vibration";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -30,6 +31,7 @@ export class iChargerService {
 
     public constructor(public http: Http,
                        public chargerActions: ChargerActions,
+                       public vibration: Vibration,
                        public uiActions: UIActions,
                        public ngRedux: NgRedux<IAppState>) {
 
@@ -182,7 +184,7 @@ export class iChargerService {
         return Observable.create((observable) => {
             let addingNewPreset = preset.index < 0;
 
-            if(!addingNewPreset && mustBeAddition) {
+            if (!addingNewPreset && mustBeAddition) {
                 observable.error("Asked to add preset, but it has an index of " + preset.index + ". This would result in an overwrite.");
                 return;
             }
@@ -327,31 +329,6 @@ export class iChargerService {
         });
     }
 
-    // toggleChargerTempUnits(): Observable<System> {
-    //     let operationURL = this.getChargerURL("/system");
-    //     return Observable.create((observable) => {
-    //         this.getSystem().subscribe((sysObj) => {
-    //             sysObj.isCelsius = !sysObj.isCelsius;
-    //
-    //             let headers = new Headers({'Content-Type': 'application/json'});
-    //             let options = new RequestOptions({headers: headers});
-    //             this.http.put(operationURL, sysObj.json(), options).subscribe((resp) => {
-    //                 if (!resp.ok) {
-    //                     observable.error(resp);
-    //                 } else {
-    //                     observable.next(sysObj);
-    //                     observable.complete();
-    //                 }
-    //             }, error => {
-    //                 observable.error();
-    //             });
-    //
-    //         }, (error) => {
-    //             observable.error(error);
-    //         });
-    //     });
-    // }
-
     cancelAutoStopForChannel(channel: Channel) {
         if (this.autoStopSubscriptions[channel.index]) {
             console.log("Cancelled auto-stop subscription for channel ", channel.index);
@@ -363,6 +340,10 @@ export class iChargerService {
     autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
         this.cancelAutoStopForChannel(channel);
         let channel_index = channel.index;
+
+        if (this.getConfig().vibrateWhenDone) {
+            this.vibrateTaskDone();
+        }
 
         this.autoStopSubscriptions[channel.index] = Observable.timer(250, 250).takeWhile(() => {
             let ch: Channel = this.getCharger().channels[channel_index];
@@ -381,5 +362,8 @@ export class iChargerService {
         });
     }
 
+    vibrateTaskDone() {
+        this.vibration.vibrate(1000);
+    }
 }
 

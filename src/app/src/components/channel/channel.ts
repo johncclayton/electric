@@ -72,7 +72,7 @@ export class ChannelComponent {
         this.channelMode = ChannelDisplay.ChannelDisplayShowCellVolts;
     }
 
-    showOperationPage(title: string, operation: Operation, showCapacityAndC: boolean, charging: boolean, selectionCallback: (preset: Preset) => void) {
+    showOperationPage(title: string, showCapacityAndC: boolean, charging: boolean, selectionCallback: (preset: Preset) => void) {
         this.navCtrlr.push(ChargeOptionsPage, {
             title: title,
             charging: charging,
@@ -215,7 +215,7 @@ export class ChannelComponent {
                         text: 'Charge',
                         role: 'destructive',
                         handler: () => {
-                            this.showOperationPage("Charge", Operation.Discharge, true, true, (preset => {
+                            this.showOperationPage("Charge", true, true, (preset => {
                                 if (preset) {
                                     this.startCharge(preset);
                                 }
@@ -225,7 +225,7 @@ export class ChannelComponent {
                     {
                         text: 'Store',
                         handler: () => {
-                            this.showOperationPage("Store", Operation.Storage, false, true, (preset => {
+                            this.showOperationPage("Store", false, true, (preset => {
                                 if (preset) {
                                     this.startStore(preset);
                                 }
@@ -235,7 +235,7 @@ export class ChannelComponent {
                     {
                         text: 'Discharge',
                         handler: () => {
-                            this.showOperationPage("Discharge", Operation.Discharge, false, false, (preset => {
+                            this.showOperationPage("Discharge", false, false, (preset => {
                                 if (preset) {
                                     this.startDischarge(preset);
                                 }
@@ -245,7 +245,7 @@ export class ChannelComponent {
                     {
                         text: 'Balance Only',
                         handler: () => {
-                            this.showOperationPage("Balance", Operation.Balance, false, false, (preset => {
+                            this.showOperationPage("Balance", false, false, (preset => {
                                 if (preset) {
                                     this.startBalance(preset);
                                 }

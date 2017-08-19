@@ -179,7 +179,7 @@ export class Channel {
             console.log("maybeClearLastUsedCommand called: force:", force);
         }
         if (force) {
-            if(this._lastUserInitiatedCommand != null) {
+            if (this._lastUserInitiatedCommand != null) {
                 this._lastUserInitiatedCommand = null;
                 this._timeUserSetLastInitiatedCommand = null;
             }
@@ -198,6 +198,13 @@ export class Channel {
 
     get packAndBalanceConnected(): boolean {
         return this.packConnected && this.packBalanceLeadsConnected;
+    }
+
+    get channel_volts(): number {
+        if (!this.packConnected) {
+            return 0.0;
+        }
+        return this._json['curr_out_volts'];
     }
 
     get packConnected(): boolean {

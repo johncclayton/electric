@@ -38,6 +38,7 @@ import {EnvironmentsModule} from "./environment/environment-variables.module";
 import {SystemActions} from "../models/state/actions/system";
 import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
 import {ComponentsModule} from "../components/components.module";
+import {Vibration} from "@ionic-native/vibration";
 
 @NgModule({
     declarations: [
@@ -98,6 +99,7 @@ import {ComponentsModule} from "../components/components.module";
         ConfigurationEpics,
         StatusBar,
         SplashScreen,
+        Vibration,
         {provide: iChargerService, useClass: iChargerService},
         {provide: ErrorHandler, useClass: IonicErrorHandler},
         ConfigStoreProvider

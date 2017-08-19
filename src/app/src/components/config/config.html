@@ -13,12 +13,22 @@
                 (ngModelChange)="change('notificationWhenDone', $event)">
         </ion-toggle>
     </ion-item>
-    <ion-item>
+    <ion-item *ngIf="config.vibrateWhenDone" no-lines>
         <ion-label>Vibrate when done</ion-label>
         <ion-toggle
                 [ngModel]="config.vibrateWhenDone"
                 (ngModelChange)="change('vibrateWhenDone', $event)">
         </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="!config.vibrateWhenDone">
+        <ion-label>Vibrate when done</ion-label>
+        <ion-toggle
+                [ngModel]="config.vibrateWhenDone"
+                (ngModelChange)="change('vibrateWhenDone', $event)">
+        </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="config.vibrateWhenDone" text-center>
+        <ion-badge color="light">Your device must support vibration!</ion-badge>
     </ion-item>
     <ion-item>
         <ion-label>Prevent Dashboard Scrolling</ion-label>
@@ -50,8 +60,7 @@
     </ion-item>
 
     <ion-item *ngIf="mockValueChanged" text-center>
-        <ion-badge class="blinky" color="dark">You must restart the app for this to take effect
-        </ion-badge>
+        <ion-badge class="blinky" color="dark">You must restart the app for this to take effect</ion-badge>
     </ion-item>
 
 </ion-list>

@@ -22,11 +22,12 @@
 </ion-content>
 
 <ion-footer>
-    <ion-list *ngIf="!isProduction">
-        <ion-label *ngFor="let env of environmentStrings()" text-center>{{ env }}</ion-label>
-    </ion-list>
-
-    <ion-list>
-        <ion-label text-center>Platform: {{ platformsString() }}</ion-label>
-    </ion-list>
+    <ion-toolbar>
+        <ion-list *ngIf="!isProduction">
+            <ion-label *ngFor="let env of environmentStrings()" text-center>{{ env }}</ion-label>
+        </ion-list>
+        <ion-list text-center>
+            <ion-label>Platform: {{ platformsString() }}</ion-label>
+        </ion-list>
+    </ion-toolbar>
 </ion-footer>
