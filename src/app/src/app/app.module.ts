@@ -39,6 +39,7 @@ import {SystemActions} from "../models/state/actions/system";
 import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
 import {ComponentsModule} from "../components/components.module";
 import {Vibration} from "@ionic-native/vibration";
+import {LocalNotifications} from "@ionic-native/local-notifications";
 
 @NgModule({
     declarations: [
@@ -100,6 +101,7 @@ import {Vibration} from "@ionic-native/vibration";
         StatusBar,
         SplashScreen,
         Vibration,
+        LocalNotifications,
         {provide: iChargerService, useClass: iChargerService},
         {provide: ErrorHandler, useClass: IonicErrorHandler},
         ConfigStoreProvider

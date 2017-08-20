@@ -119,56 +119,76 @@ export class ChannelComponent {
         }
     }
 
-    startOperation(preset: Preset, operation: Operation, named: string) {
-        console.log("Begin ", named, " on channel ", this.channel.index, " using ", preset.name);
-        let handler = (resp) => {
-        };
+    startOperation(preset: Preset, operation: Operation) {
+        let operationPlan = this.operationPlanFor(preset, operation, this.channel);
+        console.log("Begin ", operationPlan, " on channel ", this.channel.index, " using ", preset.name);
 
         if (this.currentOperationSubscription != null) {
             this.currentOperationSubscription.unsubscribe();
         }
 
-        this.currentOperationSubscription = this.createOperation(preset, operation, name).subscribe((v) => {
-            console.log("Started ", named, " on channel " + this.channel.index + ", using preset: " + preset.name);
+        this.currentOperationSubscription = this.createOperation(preset, operation).subscribe((v) => {
+            console.log("Started ", operationPlan, " on channel " + this.channel.index + ", using preset: " + preset.name);
             console.log("Response: ", v.json());
         }, (error) => {
-            console.error("Error doing " + named + ", " + error);
+            console.error("Error doing " + operationPlan + ", " + error);
         }, () => {
-            console.log("Operation " + named + " completed");
+            console.log("Operation " + operationPlan + " completed");
         });
     }
 
-    createOperation(preset: Preset, operation: Operation, named: string): Observable<any> {
+    createOperation(preset: Preset, operation: Operation): Observable<any> {
+        let operationPlan = this.operationPlanFor(preset, Operation.Charge, this.channel);
+        let named = this.stringForOperation(operation);
         this.channel.lastUserCommand = named;
         switch (operation) {
             case Operation.Charge:
-                return this.chargerService.startCharge(this.channel, preset);
+                return this.chargerService.startCharge(this.channel, preset, operationPlan);
             case Operation.Discharge:
-                return this.chargerService.startDischarge(this.channel, preset);
+                return this.chargerService.startDischarge(this.channel, preset, operationPlan);
             case Operation.Storage:
-                return this.chargerService.startStore(this.channel, preset);
+                return this.chargerService.startStore(this.channel, preset, operationPlan);
             case Operation.Balance:
-                return this.chargerService.startBalance(this.channel, preset);
+                return this.chargerService.startBalance(this.channel, preset, operationPlan);
             default:
                 console.log("Um. Dunno what to do here, with operation ", operation, " named '", named, "'");
         }
         return null;
     }
 
+    private stringForOperation(op: Operation): string {
+        switch (op) {
+            case Operation.Charge:
+                return "Charge";
+            case Operation.Cycle:
+                return "Cycle";
+            case Operation.Storage:
+                return "Storage";
+            case Operation.Discharge:
+                return "Discharge";
+            case Operation.Balance:
+                return "Balance";
+        }
+    }
+
+    private operationPlanFor(preset: Preset, op: Operation, channel: Channel): string {
+        return preset.charge_current + "A " + this.stringForOperation(op) + " on channel " + (channel.index + 1.0);
+    }
+
     startCharge(preset: Preset) {
-        this.startOperation(preset, Operation.Charge, "Charge");
+        this.startOperation(preset, Operation.Charge);
     }
 
     startDischarge(preset: Preset) {
-        this.startOperation(preset, Operation.Discharge, "Discharge");
+        this.startOperation(preset, Operation.Discharge);
     }
 
     startStore(preset: Preset) {
-        this.startOperation(preset, Operation.Storage, "Store");
+        this.startOperation(preset, Operation.Storage);
     }
 
     startBalance(preset: Preset) {
-        this.startOperation(preset, Operation.Balance, "Balance");
+        this.startOperation(preset, Operation.Balance);
     }
 
     stopCurrentTask() {
@@ -192,7 +212,7 @@ export class ChannelComponent {
             return;
         }
 
-        if(this.channel.lastActionResultedInError) {
+        if (this.channel.lastActionResultedInError) {
             this.stopCurrentTask();
             this.channel.clearLastError();
             return;

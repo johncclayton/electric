@@ -5,11 +5,12 @@ import {IAppState} from "../../models/state/configure";
 import {Observable} from "rxjs/Observable";
 import {ISystem} from "../../models/state/reducers/system";
 import {SystemActions} from "../../models/state/actions/system";
-import {objectHasBeenModified} from "../../utils/helpers";
+import {propertiesThatHaveBeenModified} from "../../utils/helpers";
 import {IUIState} from "../../models/state/reducers/ui";
 import {System} from "../../models/system";
 import {UIActions} from "../../models/state/actions/ui";
 import {Subject} from "rxjs/Subject";
+import {LocalNotifications} from "@ionic-native/local-notifications";
 
 @IonicPage()
 @Component({
@@ -30,11 +31,12 @@ export class SystemSettingsPage {
         this.ngUnsubscribe.complete();
     }
 
-    constructor(public navCtrl: NavController,
-                public actions: SystemActions,
-                public uiActions: UIActions,
-                public toastController: ToastController,
-                public alertController: AlertController,
+    constructor(private navCtrl: NavController,
+                private actions: SystemActions,
+                private uiActions: UIActions,
+                private toastController: ToastController,
+                private localNotifications: LocalNotifications,
+                private alertController: AlertController,
                 private ngRedux: NgRedux<IAppState>) {
     }
 
@@ -66,7 +68,12 @@ export class SystemSettingsPage {
             return false;
         }
         let current = this.ngRedux.getState().system.system;
-        return objectHasBeenModified(this.originalUnmodified, current);
+        let modifiedProperties = propertiesThatHaveBeenModified(this.originalUnmodified.data_structure, current.data_structure);
+        let keys = Object.keys(modifiedProperties);
+        if (keys.length > 0) {
+            console.log("Modified: " + JSON.stringify(modifiedProperties));
+        }
+        return keys.length > 0;
     }
 
     ionViewCanLeave() {
@@ -80,14 +87,14 @@ export class SystemSettingsPage {
         this.system$
             .takeUntil(this.ngUnsubscribe)
             .subscribe((v: ISystem) => {
-            if (v.fetching == true) {
+                if (v.fetching == true) {
 
-            }
-            if (v.fetching == false) {
-                console.log("I've made a clone...");
-                this.originalUnmodified = v.system.clone();
-            }
-        });
+                }
+                if (v.fetching == false) {
+                    console.log("I've made a clone...");
+                    this.originalUnmodified = v.system.clone();
+                }
+            });
         this.actions.fetchSystemFromCharger();
     }
 

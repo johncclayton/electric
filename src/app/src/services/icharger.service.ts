@@ -12,6 +12,7 @@ import {IConfig} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
 import {Vibration} from "@ionic-native/vibration";
 import {Subject} from "rxjs/Subject";
+import {LocalNotifications} from "@ionic-native/local-notifications";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -62,6 +63,7 @@ export class iChargerService {
                        public chargerActions: ChargerActions,
                        public vibration: Vibration,
                        public uiActions: UIActions,
+                       private localNotifications: LocalNotifications,
                        private ngRedux: NgRedux<IAppState>) {
 
 
@@ -259,8 +261,8 @@ export class iChargerService {
         });
     }
 
-    startCharge(channel: Channel, preset: Preset): Observable<any> {
-        this.autoStopOnRunStatus([40], channel);
+    startCharge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
+        this.autoStopOnRunStatus([40], channel, operationPlan);
         return Observable.create((observable) => {
             let operationURL = this.getChargerURL("/charge/" + channel.index + "/" + preset.index);
             console.log("Beginning charge on channel ", channel.index, " using preset at slot ", preset.index);
@@ -274,8 +276,8 @@ export class iChargerService {
         });
     }
 
-    startDischarge(channel: Channel, preset: Preset): Observable<any> {
-        this.autoStopOnRunStatus([40], channel);
+    startDischarge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
+        this.autoStopOnRunStatus([40], channel, operationPlan);
         return Observable.create((observable) => {
             let operationURL = this.getChargerURL("/discharge/" + channel.index + "/" + preset.index);
             console.log("Beginning discharge on channel ", channel.index, " using preset at slot ", preset.index);
@@ -289,8 +291,8 @@ export class iChargerService {
         });
     }
 
-    startStore(channel: Channel, preset: Preset) {
-        this.autoStopOnRunStatus([40], channel);
+    startStore(channel: Channel, preset: Preset, operationPlan: string) {
+        this.autoStopOnRunStatus([40], channel, operationPlan);
         return Observable.create((observable) => {
             let operationURL = this.getChargerURL("/store/" + channel.index + "/" + preset.index);
             console.log("Beginning storage on channel ", channel.index, " using preset at slot ", preset.index);
@@ -304,8 +306,8 @@ export class iChargerService {
         });
     }
 
-    startBalance(channel: Channel, preset: Preset) {
-        this.autoStopOnRunStatus([40], channel);
+    startBalance(channel: Channel, preset: Preset, operationPlan: string) {
+        this.autoStopOnRunStatus([40], channel, operationPlan);
         return Observable.create((observable) => {
             let operationURL = this.getChargerURL("/balance/" + channel.index + "/" + preset.index);
             console.log("Beginning balance on channel ", channel.index, " using preset at slot ", preset.index);
@@ -375,8 +377,7 @@ export class iChargerService {
         }
     }
 
-    autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
-
+    autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel, operationPlan: string = null) {
         // 41 seems to be the error state.
         // Always listen for that...
         states_to_stop_on.push(41);
@@ -405,21 +406,32 @@ export class iChargerService {
                 } else {
                     this.stopCurrentTask(ch).subscribe();
                 }
-                this.sendCompletionNotifications(ch);
+                this.sendCompletionNotifications(ch, operationPlan);
                 this.cancelAutoStopForChannel(ch.index);
             });
     }
 
-    private sendCompletionNotifications(channel: Channel) {
-        console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met. Run state = " + channel.runState);
+    private sendCompletionNotifications(channel: Channel, operationName: string) {
+        console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met. Run state = " + channel.runState, "Operation: " + operationName);
 
         if (this.getConfig().vibrateWhenDone) {
             this.vibrateTaskDone();
+        }
+
+        if (this.getConfig().notificationWhenDone) {
+            this.notificationWhenDone(operationName);
         }
     }
 
     vibrateTaskDone() {
         this.vibration.vibrate(1000);
+    }
+
+    notificationWhenDone(operationName: string) {
+        this.localNotifications.schedule({
+            id: 1,
+            text: operationName + ", finished"
+        });
     }
 }
 

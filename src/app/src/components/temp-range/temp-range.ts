@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {System} from "../../models/system";
+import {clamp} from "ionic-angular/util/util";
 
 
 @Component({
@@ -23,9 +24,9 @@ export class TempRangeComponent {
 
     set displayableValue(value: number) {
         if (this.metric) {
-            this.value = value;
+            this.value = clamp(this.min, value, this.max);
         } else {
-            this.value = this.farenheightToC(value);
+            this.value = clamp(this.min, this.farenheightToC(value), this.max);
         }
         this.value = Math.round(this.value);
     }

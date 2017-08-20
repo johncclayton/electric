@@ -4,6 +4,7 @@ import {NavController, Platform} from "ionic-angular";
 import {isUndefined} from "ionic-angular/util/util";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
+import {LocalNotifications} from "@ionic-native/local-notifications";
 
 @Component({
     selector: 'config',
@@ -21,7 +22,9 @@ export class ConfigComponent {
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() testFunc: EventEmitter<any> = new EventEmitter();
 
-    constructor(public navCtrl: NavController, public platform: Platform) {
+    constructor(public navCtrl: NavController,
+                public notifications: LocalNotifications,
+                public platform: Platform) {
     }
 
     ngOnInit() {
@@ -35,6 +38,19 @@ export class ConfigComponent {
     change(keyName, value) {
         if (keyName == "mockCharger") {
             this.mockValueChanged = true;
+        }
+
+        // Check we have permission. If not, request it.
+        if (keyName == 'notificationWhenDone' && value) {
+            this.notifications.hasPermission().then((havePermission: boolean) => {
+                if(!havePermission) {
+                    this.notifications.registerPermission();
+                }
+                this.notifications.schedule({
+                    id: 1,
+                    text: 'Ping ping ping!'
+                });
+            });
         }
 
         let change = [];

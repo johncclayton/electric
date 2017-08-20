@@ -24,6 +24,10 @@ export class System {
         return JSON.stringify(this.data);
     }
 
+    get data_structure() {
+        return this.data;
+    }
+
     get isCelsius(): boolean {
         return this.data['temp_unit'] == 'C';
     }
