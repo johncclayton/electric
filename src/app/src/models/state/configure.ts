@@ -30,13 +30,12 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
                                        configEpic: ConfigurationEpics,
                                        devTools: DevToolsExtension) => {
         let actionsBlacklist: Array<string> = [
-            ChargerActions.UPDATE_STATE_FROM_CHARGER,
+            // ChargerActions.UPDATE_STATE_FROM_CHARGER,
         ];
 
         // Insert the epic middleware first.
         let middleware = [];
         middleware.push(createEpicMiddleware(configEpic.configChanged));
-        // middleware.push(createEpicMiddleware(configEpic.fetchSystem));
 
         // Add logger if in development (web browsers)
 

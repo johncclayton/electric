@@ -51,8 +51,6 @@ export const
                 return {
                     ...state,
                     exception: errorMessage,
-                    disconnected: action.disconnected,
-                    disconnectionErrorCount: 0,
                     details: detail
                 };
 
@@ -62,7 +60,6 @@ export const
                 return {
                     ...state,
                     exception: message,
-                    disconnected: action.disconnected,
                     details: null
                 };
         }

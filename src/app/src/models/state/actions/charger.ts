@@ -6,6 +6,7 @@ import {IConfig} from "../reducers/configuration";
 @Injectable()
 export class ChargerActions {
     static UPDATE_STATE_FROM_CHARGER: string = "UPDATE_STATE_FROM_CHARGER";
+    static SET_LAST_ERROR: string = "SET_LAST_ERROR";
 
     constructor(private ngRedux: NgRedux<IAppState>) {
     }
@@ -27,4 +28,11 @@ export class ChargerActions {
         });
     }
 
+    setErrorOnChannel(channelIndex: number, errorMessage: string) {
+        this.ngRedux.dispatch({
+            type: ChargerActions.SET_LAST_ERROR,
+            payload: errorMessage,
+            index:channelIndex
+        })
+    }
 }

@@ -44,18 +44,22 @@ import {ChargerType, iChargerService} from "../services/icharger.service";
 export class Channel {
     _json = {};
     _index: number = 0;
+    _cellLimit: number = 0;
     _lastUserInitiatedCommand: string = null;
     _timeUserSetLastInitiatedCommand: number;
     _timeUserInitiatedCommandTimeout: number = 5;
 
     private packPluggedIn: boolean;
     private requiresCellStablization: boolean = false;
+    private _lastActionResultedInError: boolean = false;
+    private _lastErrorText: string = "";
     private noCellChangesCount: number = 0;
     private lastActionText: string;
 
     public constructor(index: number, jsonObject, configuredCellLimit: number = 0) {
         this._index = index;
         this._json = jsonObject;
+        this._cellLimit = configuredCellLimit;
         this.limitCellsBasedOnLimit(configuredCellLimit);
 
         /*
@@ -135,6 +139,20 @@ export class Channel {
         return this._lastUserInitiatedCommand;
     }
 
+    setLastActionError(message: string) {
+        this._lastActionResultedInError = true;
+        this._lastErrorText = message;
+    }
+
+    clearLastError() {
+        this._lastActionResultedInError = false;
+        this._lastErrorText = null;
+    }
+
+    get lastActionResultedInError(): boolean {
+        return this._lastActionResultedInError;
+    }
+
     /*
      run_state: shows what the charger is doing: checking, charging, discharging, starting, stopped, etc.
      control_state: not really sure. It might mean "I am controlling something (like volts, current)", but I havn't found a pattern just yet.
@@ -144,6 +162,9 @@ export class Channel {
      if that's a result of us performing an actual Charge operation, or a Storage operation.
      */
     get actionText(): string {
+        if (this._lastActionResultedInError && this._lastErrorText) {
+            return this._lastErrorText;
+        }
         if (this.requiresCellStablization) {
             return this.lastActionText;
         }
@@ -158,10 +179,10 @@ export class Channel {
             this.maybeClearLastUsedCommand(true);
             return "No pack";
         }
-        if (!this.packBalanceLeadsConnected) {
-            this.maybeClearLastUsedCommand(true);
-            return "Balance leads?";
-        }
+        // if (!this.packBalanceLeadsConnected) {
+        //     this.maybeClearLastUsedCommand(true);
+        //     return "Balance leads?";
+        // }
 
         let text: string = "";
 
@@ -217,18 +238,21 @@ export class Channel {
     packPluggedInBasic(device_id): boolean {
         let max_voltage = iChargerService.lookupChargerMetadata(device_id, 'maxVolts', 0);
         if (max_voltage > 0) {
-            if (this.cell_count_with_voltage_values > 0) {
-                return this.curr_out_volts <= max_voltage;
-            }
+            return this.curr_out_volts <= max_voltage;
         }
         return false;
     }
 
-    public recomputePackPluggedIn(device_id, oldChannel: Channel) {
+    public migrateTransientState(oldChannel: Channel) {
+        this._lastActionResultedInError = oldChannel._lastActionResultedInError;
+        this._lastErrorText = oldChannel._lastErrorText;
+
         this.noCellChangesCount = oldChannel.noCellChangesCount;
         this.requiresCellStablization = oldChannel.requiresCellStablization;
         this.lastActionText = oldChannel.lastActionText;
+    }
 
+    public updateTransientState(device_id, oldChannel: Channel) {
         let old_plugged_in: boolean = oldChannel.packPluggedInBasic(device_id);
         let plugged_in: boolean = this.packPluggedInBasic(device_id);
 
@@ -298,8 +322,9 @@ export class Channel {
         // 7 = charging
         // 13 = discharging
         // 17 = balance
+        // 41 = stopped? Or in error?
         console.log("Charge run status is: ", this._json['run_status']);
-        let run_states = [7, 13, 17];
+        let run_states = [7, 13, 17, 41];
         return run_states.indexOf(this.runState) != -1;
     }
 
@@ -377,6 +402,15 @@ export class Channel {
         return 0;
     }
 
+    static newMergeFromOld(ch: Channel) {
+        let state = {};
+        for (let k in ch._json) {
+            state[k] = ch._json[k]
+        }
+        let c = new Channel(ch.index, state, ch._cellLimit);
+        c.migrateTransientState(ch);
+        return c;
+    }
 }
 
 

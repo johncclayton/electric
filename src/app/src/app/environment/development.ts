@@ -1,5 +1,5 @@
 export const devVariables = {
     environmentName: 'Development Environment',
-    logging: true,
+    logging: false,
     ionicEnvName: 'dev'
 };

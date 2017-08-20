@@ -118,6 +118,9 @@ export class PresetListPage implements Chemistry {
         if (preset['discharge_current']) {
             tags.push("- " + preset['discharge_current'] + 'A');
         }
+        if (preset.cells > 0) {
+            tags.push(preset.cells + "s");
+        }
         return tags;
     }
 

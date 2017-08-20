@@ -59,6 +59,9 @@ _dischargeVoltageMinMax[ChemistryType.NiMH] = {'min': 0.1, 'max': 33};
 
 export class Preset {
     constructor(public data: {}) {
+        if (!this.name) {
+            this.name = `${this.type_str}_${this.charge_current}A`;
+        }
     }
 
     json() {
@@ -96,10 +99,7 @@ export class Preset {
     }
 
     get name(): string {
-        if (this.data['name']) {
-            return this.data['name'];
-        }
-        return `${this.type_str}_${this.charge_current}A`;
+        return this.data['name'];
     }
 
     set name(value: string) {
@@ -112,6 +112,10 @@ export class Preset {
 
     get type_str(): string {
         return this.data['type_str'];
+    }
+
+    get isLipo(): boolean {
+        return this.type == ChemistryType.LiPo;
     }
 
     get type(): ChemistryType {
@@ -612,8 +616,13 @@ export class Preset {
         return "ER";
     }
 
-    smallButtonName(showChargeOption = true) {
+    smallButtonName(showChargeOption = true, useName: boolean = true) {
         let name = Preset.chemistryPrefix(this.type);
+        if (useName) {
+            if (this.name.length > 0) {
+                return this.name;
+            }
+        }
         let rate = showChargeOption ? this.charge_current : this.discharge_current;
         return `${name} ${rate}A`;
     }
@@ -623,6 +632,7 @@ export class Preset {
     }
 
     get readonly(): boolean {
-        return this.data['use_flag'] == 0; // fixed
+        return false;
+        // return this.data['use_flag'] == 0; // fixed
     }
 }

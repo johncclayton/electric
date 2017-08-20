@@ -58,7 +58,7 @@ export class ChannelComponent {
     private measureIRObservable: Subscription;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
-    private currentOperationSubscription: Subscription;
+    private currentOperationSubscription: Subscription = null;
 
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
@@ -122,15 +122,20 @@ export class ChannelComponent {
     startOperation(preset: Preset, operation: Operation, named: string) {
         console.log("Begin ", named, " on channel ", this.channel.index, " using ", preset.name);
         let handler = (resp) => {
-            console.log("Started ", named, " on channel " + this.channel.index + ", using preset: " + preset.name);
-            console.log("Response: ", resp);
         };
 
-        if(this.currentOperationSubscription) {
+        if (this.currentOperationSubscription != null) {
             this.currentOperationSubscription.unsubscribe();
         }
 
-        this.currentOperationSubscription = this.createOperation(preset, operation, name).subscribe();
+        this.currentOperationSubscription = this.createOperation(preset, operation, name).subscribe((v) => {
+            console.log("Started ", named, " on channel " + this.channel.index + ", using preset: " + preset.name);
+            console.log("Response: ", v.json());
+        }, (error) => {
+            console.error("Error doing " + named + ", " + error);
+        }, () => {
+            console.log("Operation " + named + " completed");
+        });
     }
 
     createOperation(preset: Preset, operation: Operation, named: string): Observable<any> {
@@ -171,13 +176,12 @@ export class ChannelComponent {
         this.chargerService.stopCurrentTask(this.channel)
             .takeUntil(this.ngUnsubscribe)
             .subscribe((resp) => {
-            console.log("Stopped!")
-        });
+                console.log("Stopped!")
+            });
     }
 
     showChargerActions() {
-        if (!this.channel.packAndBalanceConnected) {
-            // console.debug("Channel json: ", this.channel.json);
+        if (!this.channel.packConnected) {
             let toast = this.toastController.create({
                 'message': "Pack not plugged in.",
                 'cssClass': 'redToast',
@@ -185,6 +189,12 @@ export class ChannelComponent {
                 'duration': 2000,
             });
             toast.present();
+            return;
+        }
+
+        if(this.channel.lastActionResultedInError) {
+            this.stopCurrentTask();
+            this.channel.clearLastError();
             return;
         }
 
@@ -291,7 +301,9 @@ export class ChannelComponent {
     }
 
     ngOnDestroy() {
-        this.currentOperationSubscription.unsubscribe();
+        if (this.currentOperationSubscription != null) {
+            this.currentOperationSubscription.unsubscribe();
+        }
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
     }

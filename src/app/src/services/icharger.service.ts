@@ -376,6 +376,11 @@ export class iChargerService {
     }
 
     autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
+
+        // 41 seems to be the error state.
+        // Always listen for that...
+        states_to_stop_on.push(41);
+
         this.cancelAutoStopForChannel(channel.index);
         let channel_index = channel.index;
 
@@ -391,15 +396,26 @@ export class iChargerService {
             .subscribe((value) => {
             }, (error) => {
                 console.log("Error while waiting for the channel to change state:", error);
-                this.cancelAutoStopForChannel(channel.index);
+                this.cancelAutoStopForChannel(channel_index);
             }, () => {
-                if (this.getConfig().vibrateWhenDone) {
-                    this.vibrateTaskDone();
+                let ch: Channel = this.getCharger().channels[channel_index];
+                if (ch.runState == 41) {
+                    // Error!
+                    this.chargerActions.setErrorOnChannel(ch.index, "Error");
+                } else {
+                    this.stopCurrentTask(ch).subscribe();
                 }
-                console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
-                this.stopCurrentTask(channel).subscribe();
-                this.cancelAutoStopForChannel(channel.index);
+                this.sendCompletionNotifications(ch);
+                this.cancelAutoStopForChannel(ch.index);
             });
+    }
+
+    private sendCompletionNotifications(channel: Channel) {
+        console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met. Run state = " + channel.runState);
+
+        if (this.getConfig().vibrateWhenDone) {
+            this.vibrateTaskDone();
+        }
     }
 
     vibrateTaskDone() {

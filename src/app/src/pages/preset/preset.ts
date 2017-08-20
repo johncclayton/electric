@@ -8,12 +8,18 @@ import {PresetCyclePage} from "../preset-cycle/preset-cycle";
 import {iChargerService} from "../../services/icharger.service";
 import * as _ from "lodash";
 import {Subject} from "rxjs/Subject";
+import {Observable} from "rxjs/Observable";
+import {observable} from "rxjs/symbol/observable";
+
+export interface SavePresetInterface {
+    savePreset(whenDoneCall: (preset: Preset) => void): void;
+}
 
 @Component({
     selector: 'page-preset',
     templateUrl: 'preset.html'
 })
-export class PresetPage {
+export class PresetPage implements SavePresetInterface {
     preset: Preset = null;
     unmodifiedpreset: Preset = null;
     confirmedExit: boolean = false;
@@ -111,21 +117,11 @@ export class PresetPage {
                         {
                             text: 'Save',
                             handler: () => {
-                                this.saving = true;
-                                this.chargerService.savePreset(this.preset)
-                                    .takeUntil(this.ngUnsubscribe)
-                                    .subscribe((preset) => {
+                                this.savePreset((preset) => {
                                     // Pass the result back to the caller.
-                                    // When you save,  you are always given your preset back.
-                                    // This may be a new preset object, with a new memory slot, or it may just the modified preset.
-                                    // Either way, the caller needs it, to update their state.
                                     this.callback(preset);
-                                    this.saving = false;
                                     resolve();
                                 });
-
-                                // If there's an error, the charger service will fire an event.
-                                // It'll be picked up by the charger-status component, and an error shown as a toast
                             }
                         },
                         {
@@ -151,18 +147,34 @@ export class PresetPage {
         });
     }
 
+    // If there's an error, the charger service will fire an event.
+    // It'll be picked up by the charger-status component, and an error shown as a toast
+    savePreset(whenDoneCall: (preset: Preset) => void): void {
+        this.saving = true;
+        this.chargerService.savePreset(this.preset)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((preset) => {
+                // When you save,  you are always given your preset back.
+                this.unmodifiedpreset = _.cloneDeep(preset);
+                this.saving = false;
+                if (whenDoneCall) {
+                    whenDoneCall(preset);
+                }
+            });
+    }
+
     refreshPreset(refresher) {
         // TODO: what if there are unsaved changes?
         // TODO: Causes a bug where the preset list itself isnt refreshed
         this.chargerService.getPresets()
             .takeUntil(this.ngUnsubscribe)
             .subscribe((presetList) => {
-            let wantedPreset = presetList[this.preset.index];
-            if (wantedPreset) {
-                this.preset = wantedPreset;
-            }
-            refresher.complete();
-        });
+                let wantedPreset = presetList[this.preset.index];
+                if (wantedPreset) {
+                    this.preset = wantedPreset;
+                }
+                refresher.complete();
+            });
     }
 
     showCells() {
@@ -201,7 +213,10 @@ export class PresetPage {
     }
 
     switchTo(page) {
-        this.navCtrl.push(page, this.preset);
+        this.navCtrl.push(page, {
+            preset: this.preset,
+            saver: this
+        });
     }
 }
 

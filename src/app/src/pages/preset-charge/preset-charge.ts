@@ -5,13 +5,18 @@ import {FormBuilder} from "@angular/forms";
 import {celciusToF} from '../../utils/helpers'
 import * as _ from "lodash";
 import {System} from "../../models/system";
+import {SavePresetInterface} from "../preset/preset";
+
 
 export class PresetBasePage {
     public preset: Preset;
 
+    private saver: SavePresetInterface;
+
     constructor(public navCtrl: NavController,
                 public navParams: NavParams) {
-        this.preset = navParams.data;
+        this.preset = navParams.get('preset');
+        this.saver = navParams.get('saver');
     }
 
     public safetyTempOptions() {
@@ -34,6 +39,13 @@ export class PresetBasePage {
             list.push({'value': capacity, 'text': capacity.toString() + "%"});
         }
         return list;
+    }
+
+    savePreset() {
+        if (this.saver) {
+            this.saver.savePreset((p) => {
+            });
+        }
     }
 }
 

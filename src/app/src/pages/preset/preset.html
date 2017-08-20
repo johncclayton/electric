@@ -8,6 +8,9 @@
 
     <ion-navbar>
         <ion-title>Edit {{preset.name}}</ion-title>
+        <ion-buttons end>
+            <button ion-button item-right (click)="savePreset()">Save</button>
+        </ion-buttons>
     </ion-navbar>
 
 </ion-header>

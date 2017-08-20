@@ -2,7 +2,6 @@ import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 import {iChargerService} from "../../../services/icharger.service";
-import {UIActions} from "./ui";
 
 
 @Injectable()
@@ -14,7 +13,6 @@ export class ConfigurationActions {
     static SET_FULL_CONFIG: string = 'SET_FULL_CONFIG';
 
     constructor(private ngRedux: NgRedux<IAppState>,
-                private uiActions: UIActions,
                 private chargerService: iChargerService) {
     }
 

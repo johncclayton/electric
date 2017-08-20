@@ -11,6 +11,7 @@ export interface IChargerState {
     device_sn: string;
     memory_len: number;
     software_ver: number;
+
     channels: Array<Channel>;
 
     // Synthetic state, summed from the channels
@@ -43,6 +44,20 @@ export const
             return defaultStatus;
         }
         switch (action.type) {
+            case ChargerActions.SET_LAST_ERROR:
+                return {
+                    ...state,
+                    channels: state.channels.map((ch) => {
+                        if (ch.index == action.index) {
+                            // OK. Modify THIS one.
+                            let newCh: Channel = Channel.newMergeFromOld(ch);
+                            newCh.setLastActionError(action.payload);
+                            return newCh;
+                        }
+                        return ch;
+                    })
+                };
+
             case ChargerActions.UPDATE_STATE_FROM_CHARGER:
                 let unifiedStatus = action.payload;
 
@@ -61,29 +76,37 @@ export const
                 newState.charger_temp = 0;
 
                 let channels = [];
+
                 if ('channels' in unifiedStatus) {
                     unifiedStatus.channels.map((json, index) => {
-                        let ch: Channel = new Channel(index, json, action.cellLimit);
+                        let have_existing_state_for_channel: boolean = state.channels.length > index;
+                        let oldJson = have_existing_state_for_channel ? state.channels[index].json : {};
 
-                        // Get the old channel
-                        if (state.channels.length >= index) {
+                        // Create a new channel that contains old + new state
+                        // Note: transient state from the old channel won't be taken over
+                        let newChannel: Channel = new Channel(index, {...oldJson, ...json}, action.cellLimit);
+
+                        // If we do have an old channel, migrate the transient state
+                        // Mainly because I'm storing state IN The channel object (because I want it to be local for some reason)
+                        // Hmm.
+                        if (have_existing_state_for_channel) {
                             let oldChannel = state.channels[index];
                             if (oldChannel) {
-                                ch.recomputePackPluggedIn(newState.device_id, oldChannel);
+                                newChannel.migrateTransientState(oldChannel);
+                                newChannel.updateTransientState(newState.device_id, oldChannel);
                             }
                         }
 
-                        channels.push(ch);
+                        channels.push(newChannel);
 
-                        newState.total_output_amps += ch.output_amps;
-                        newState.total_capacity += ch.output_capacity;
+                        newState.total_output_amps += newChannel.output_amps;
+                        newState.total_capacity += newChannel.output_capacity;
 
                         // Copy the volts + temp
                         if (index == 0) {
-                            newState.input_volts = ch.input_volts;
-                            newState.charger_temp = ch.charger_internal_temp;
+                            newState.input_volts = newChannel.input_volts;
+                            newState.charger_temp = newChannel.charger_internal_temp;
                         }
-
                     });
                     newState.channel_count = channels.length;
                 }
