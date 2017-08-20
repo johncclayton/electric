@@ -14,6 +14,7 @@ import {IChargeSettings, IConfig} from "../../models/state/reducers/configuratio
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 import {IUIState} from "../../models/state/reducers/ui";
 import {UIActions} from "../../models/state/actions/ui";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     selector: 'page-charge-options',
@@ -31,10 +32,11 @@ export class ChargeOptionsPage implements Chemistry {
     presets: Array<any> = [];
 
     private callback: any;
-    private subscription: any;
     private simpleAlert: Toast;
 
     public static CHARGE_BY_PLAN_PRESET_NAME: string = "Electric Charge Plan";
+
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
@@ -52,25 +54,30 @@ export class ChargeOptionsPage implements Chemistry {
         this.config = null;
         this.chargeSettings = null;
 
-        this.subscription = ngRedux.select<IConfig>('config').subscribe(c => {
-            this.config = c;
-            this.chargeSettings = this.config.charge_settings;
+        ngRedux.select<IConfig>('config')
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(c => {
+                this.config = c;
+                this.chargeSettings = this.config.charge_settings;
 
-            if (!this.showCapacityAndC) {
-                // Force to presets (not computed)
-                this.chargeSettings.chargeMethod = "presets";
-            }
-        });
+                if (!this.showCapacityAndC) {
+                    // Force to presets (not computed)
+                    this.chargeSettings.chargeMethod = "presets";
+                }
+            });
     }
 
     ngOnDestroy() {
-        this.subscription.unsubscribe();
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     ionViewDidLoad() {
-        this.chargerService.getPresets().subscribe((presetList) => {
-            this.presets = presetList;
-        });
+        this.chargerService.getPresets()
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((presetList) => {
+                this.presets = presetList;
+            });
     }
 
     chargeUsingPreset(preset: Preset) {
@@ -112,23 +119,25 @@ export class ChargeOptionsPage implements Chemistry {
         this.simpleAlert.present();
 
         let observable;
-        if(createNewPreset) {
+        if (createNewPreset) {
             observable = this.chargerService.addPreset(chargePlanPreset);
         } else {
             observable = this.chargerService.savePreset(chargePlanPreset);
         }
 
-        observable.subscribe((preset: Preset) => {
-            this.simpleAlert.dismiss();
+        observable
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((preset: Preset) => {
+                this.simpleAlert.dismiss();
 
-            this.navCtrl.pop().then(() => {
-                this.callback(preset);
-            })
-        }, (error) => {
-            this.simpleAlert.dismiss();
-            this.uiActions.setErrorMessage(error);
-        }, () => {
-        });
+                this.navCtrl.pop().then(() => {
+                    this.callback(preset);
+                })
+            }, (error) => {
+                this.simpleAlert.dismiss();
+                this.uiActions.setErrorMessage(error);
+            }, () => {
+            });
     }
 
     get chargeMethod(): string {

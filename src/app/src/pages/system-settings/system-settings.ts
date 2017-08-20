@@ -9,6 +9,7 @@ import {objectHasBeenModified} from "../../utils/helpers";
 import {IUIState} from "../../models/state/reducers/ui";
 import {System} from "../../models/system";
 import {UIActions} from "../../models/state/actions/ui";
+import {Subject} from "rxjs/Subject";
 
 @IonicPage()
 @Component({
@@ -21,6 +22,13 @@ export class SystemSettingsPage {
 
     originalUnmodified: System;
     savingAlert: Toast;
+
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
 
     constructor(public navCtrl: NavController,
                 public actions: SystemActions,
@@ -43,12 +51,14 @@ export class SystemSettingsPage {
         this.createSaveAlert();
         let system = this.ngRedux.getState().system.system;
 
-        this.actions.saveSystemSettings(system).subscribe(sys => {
-        }, err => {
-            this.uiActions.setErrorMessage(err);
-        }, () => {
-            this.savingAlert.dismiss();
-        });
+        this.actions.saveSystemSettings(system)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(sys => {
+            }, err => {
+                this.uiActions.setErrorMessage(err);
+            }, () => {
+                this.savingAlert.dismiss();
+            });
     }
 
     get settingsAreModified(): boolean {
@@ -67,7 +77,9 @@ export class SystemSettingsPage {
     }
 
     ionViewDidLoad() {
-        this.system$.subscribe((v: ISystem) => {
+        this.system$
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((v: ISystem) => {
             if (v.fetching == true) {
 
             }
@@ -89,14 +101,16 @@ export class SystemSettingsPage {
                         text: "Save",
                         handler: () => {
                             this.createSaveAlert();
-                            this.actions.saveSystemSettings(system).subscribe(sys => {
-                                resolve();
-                            }, err => {
-                                this.uiActions.setErrorMessage(err);
-                                reject();
-                            }, () => {
-                                this.savingAlert.dismiss();
-                            });
+                            this.actions.saveSystemSettings(system)
+                                .takeUntil(this.ngUnsubscribe)
+                                .subscribe(sys => {
+                                    resolve();
+                                }, err => {
+                                    this.uiActions.setErrorMessage(err);
+                                    reject();
+                                }, () => {
+                                    this.savingAlert.dismiss();
+                                });
                         }
                     },
                     {

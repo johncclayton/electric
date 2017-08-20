@@ -7,6 +7,7 @@ import {PresetDischargePage} from "../preset-discharge/preset-discharge";
 import {PresetCyclePage} from "../preset-cycle/preset-cycle";
 import {iChargerService} from "../../services/icharger.service";
 import * as _ from "lodash";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     selector: 'page-preset',
@@ -20,6 +21,13 @@ export class PresetPage {
     optionsPages;
 
     private callback: (preset: Preset) => void;
+
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
 
     constructor(public navCtrl: NavController,
                 public alertController: AlertController,
@@ -104,7 +112,9 @@ export class PresetPage {
                             text: 'Save',
                             handler: () => {
                                 this.saving = true;
-                                this.chargerService.savePreset(this.preset).subscribe((preset) => {
+                                this.chargerService.savePreset(this.preset)
+                                    .takeUntil(this.ngUnsubscribe)
+                                    .subscribe((preset) => {
                                     // Pass the result back to the caller.
                                     // When you save,  you are always given your preset back.
                                     // This may be a new preset object, with a new memory slot, or it may just the modified preset.
@@ -144,7 +154,9 @@ export class PresetPage {
     refreshPreset(refresher) {
         // TODO: what if there are unsaved changes?
         // TODO: Causes a bug where the preset list itself isnt refreshed
-        this.chargerService.getPresets().subscribe((presetList) => {
+        this.chargerService.getPresets()
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((presetList) => {
             let wantedPreset = presetList[this.preset.index];
             if (wantedPreset) {
                 this.preset = wantedPreset;

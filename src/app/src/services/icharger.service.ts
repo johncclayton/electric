@@ -11,6 +11,7 @@ import {UIActions} from "../models/state/actions/ui";
 import {IConfig} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
 import {Vibration} from "@ionic-native/vibration";
+import {Subject} from "rxjs/Subject";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -45,18 +46,33 @@ ChargerMetadata[ChargerType.iCharger4010Duo] = {
 export class iChargerService {
     autoStopSubscriptions: any[] = [];
 
-    private chargerStatusSubscription;
+    private static device_id: number;
+
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+
+        this.cancelAutoStopForChannel(0);
+        this.cancelAutoStopForChannel(1);
+    }
 
     public constructor(public http: Http,
                        public chargerActions: ChargerActions,
                        public vibration: Vibration,
                        public uiActions: UIActions,
-                       public ngRedux: NgRedux<IAppState>) {
+                       private ngRedux: NgRedux<IAppState>) {
 
 
-        this.chargerStatusSubscription = this.getChargerStatus().subscribe(status => {
-            // console.log("Refreshed from charger...");
-        });
+        this.getChargerStatus()
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(status => {
+                // console.log("Refreshed from charger...");
+            });
+
+        // NOTE:
+        // do not access ngRedux here. It'll be nil.
     }
 
     getConfig(): IConfig {
@@ -116,9 +132,13 @@ export class iChargerService {
                 let url = this.getChargerURL("/unified");
                 return this.http.get(url);
             }).map(r => {
+                let state = this.ngRedux.getState();
+
+                // Update device ID
+                iChargerService.device_id = state.charger.device_id;
                 this.chargerActions.refreshStateFromCharger(r.json());
 
-                if (this.ngRedux.getState().ui.disconnected) {
+                if (state.ui.disconnected) {
                     this.uiActions.serverReconnected();
                 }
             })
@@ -159,23 +179,23 @@ export class iChargerService {
     }
 
     getMaxAmpsPerChannel() {
-        return iChargerService.lookupChargerMetadata(null, 'maxAmps', 15);
+        return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'maxAmps', 15);
     }
 
     getChargerName() {
-        return iChargerService.lookupChargerMetadata(null, 'name', 'iCharger');
+        return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'name', 'iCharger');
     }
 
     getChargerTag() {
-        return iChargerService.lookupChargerMetadata(null, 'tag', '');
+        return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'tag', '');
     }
 
     getMaxCells() {
-        return iChargerService.lookupChargerMetadata(null, 'cells', 0);
+        return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'cells', 0);
     }
 
     stopCurrentTask(channel: Channel): Observable<any> {
-        this.cancelAutoStopForChannel(channel);
+        this.cancelAutoStopForChannel(channel.index);
         return Observable.create((observable) => {
             console.log("Stopping current task...");
             let url = this.getChargerURL("/stop/" + channel.index);
@@ -342,41 +362,44 @@ export class iChargerService {
                     observable.complete();
                 }
             }, error => {
-                observable.error();
+                observable.error(error);
             });
         });
     }
 
-    cancelAutoStopForChannel(channel: Channel) {
-        if (this.autoStopSubscriptions[channel.index]) {
-            console.log("Cancelled auto-stop subscription for channel ", channel.index);
-            this.autoStopSubscriptions[channel.index].unsubscribe();
-            this.autoStopSubscriptions[channel.index] = null;
+    cancelAutoStopForChannel(index: number) {
+        if (this.autoStopSubscriptions[index]) {
+            console.log("Cancelled auto-stop subscription for channel ", index);
+            this.autoStopSubscriptions[index].unsubscribe();
+            this.autoStopSubscriptions[index] = null;
         }
     }
 
     autoStopOnRunStatus(states_to_stop_on: [number], channel: Channel) {
-        this.cancelAutoStopForChannel(channel);
+        this.cancelAutoStopForChannel(channel.index);
         let channel_index = channel.index;
 
-        this.autoStopSubscriptions[channel.index] = Observable.timer(250, 250).takeWhile(() => {
-            let ch: Channel = this.getCharger().channels[channel_index];
-            // console.log("Channel ", ch.index, ", state: ", ch.runState);
-            return !states_to_stop_on.some((state) => {
-                return ch.runState == state;
+        this.autoStopSubscriptions[channel.index] = Observable.timer(250, 250)
+            .takeUntil(this.ngUnsubscribe)
+            .takeWhile(() => {
+                let ch: Channel = this.getCharger().channels[channel_index];
+                // console.log("Channel ", ch.index, ", state: ", ch.runState);
+                return !states_to_stop_on.some((state) => {
+                    return ch.runState == state;
+                });
+            })
+            .subscribe((value) => {
+            }, (error) => {
+                console.log("Error while waiting for the channel to change state:", error);
+                this.cancelAutoStopForChannel(channel.index);
+            }, () => {
+                if (this.getConfig().vibrateWhenDone) {
+                    this.vibrateTaskDone();
+                }
+                console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
+                this.stopCurrentTask(channel).subscribe();
+                this.cancelAutoStopForChannel(channel.index);
             });
-        }).subscribe((value) => {
-        }, (error) => {
-            console.log("Error while waiting for the channel to change state");
-            this.cancelAutoStopForChannel(channel);
-        }, () => {
-            if (this.getConfig().vibrateWhenDone) {
-                this.vibrateTaskDone();
-            }
-            console.log("Sending stop to channel ", channel.index, " because auto-stop condition was met");
-            this.stopCurrentTask(channel).subscribe();
-            this.cancelAutoStopForChannel(channel);
-        });
     }
 
     vibrateTaskDone() {

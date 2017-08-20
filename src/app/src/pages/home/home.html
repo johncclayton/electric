@@ -1,14 +1,14 @@
 <ion-header>
     <ion-navbar color="primary">
-        <button ion-button menuToggle>
-            <ion-icon name="menu"></ion-icon>
-        </button>
         <ion-title text-center>
             <div class="chargername">
                 {{chargerService.getChargerName()}}
                 <span class="tag">{{chargerService.getChargerTag()}}</span>
             </div>
         </ion-title>
+        <button ion-button icon-only menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
     </ion-navbar>
 </ion-header>
 

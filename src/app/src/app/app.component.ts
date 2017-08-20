@@ -12,6 +12,7 @@ import {ConfigurationActions} from "../models/state/actions/configuration";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {SystemSettingsPage} from "../pages/system-settings/system-settings";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     templateUrl: 'app.html'
@@ -23,11 +24,12 @@ export class MyApp {
     // rootPage = PresetListPage;
     pages: Array<{ title: string, component: any, visible: any }>;
 
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
     constructor(platform: Platform,
                 public chargerService: iChargerService,
                 public statusBar: StatusBar,
                 public config: ConfigStoreProvider,
-                public configActions: ConfigurationActions,
                 public ngRedux: NgRedux<IAppState>,
                 public splashScreen: SplashScreen) {
 
@@ -38,13 +40,15 @@ export class MyApp {
             statusBar.styleDefault();
             splashScreen.hide();
 
-            this.config.loadConfiguration().subscribe(r => {
-                console.log("Configuration loaded, putting into the store...");
-                this.ngRedux.dispatch({
-                    type: ConfigurationActions.SET_FULL_CONFIG,
-                    payload: r
+            this.config.loadConfiguration()
+                .takeUntil(this.ngUnsubscribe)
+                .subscribe(r => {
+                    console.log("Configuration loaded, putting into the store...");
+                    this.ngRedux.dispatch({
+                        type: ConfigurationActions.SET_FULL_CONFIG,
+                        payload: r
+                    });
                 });
-            });
 
         });
 
@@ -67,6 +71,11 @@ export class MyApp {
             systemPage,
             configPage,
         ]
+    }
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     openPage(page) {

@@ -5,6 +5,7 @@ import {PresetPage} from "../preset/preset";
 import {Preset, ChemistryType} from "../../models/preset-class";
 import {Chemistry} from "../../utils/mixins";
 import {applyMixins} from "rxjs/util/applyMixins";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     selector: 'page-preset-list',
@@ -14,6 +15,8 @@ export class PresetListPage implements Chemistry {
     firstLoad: boolean = true;
     public presets: Array<Preset>;
     @ViewChild(List) list: List;
+
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
@@ -25,24 +28,32 @@ export class PresetListPage implements Chemistry {
         this.refreshPresets(null);
     }
 
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
+
     refreshPresets(refresher) {
-        this.chargerService.getPresets().subscribe(presetsList => {
-            this.presets = presetsList;
-            this.firstLoad = false;
-            if (refresher) {
-                refresher.complete();
-            }
-            // Was used during testing, to move to a known preset and edit it.
-            // if (this.presets.length) {
-            //     let old_preset = this.presets[7];
-            //     this.navCtrl.push(PresetPage, {
-            //         preset: old_preset,
-            //         callback: (new_preset) => {
-            //             this.presetCallback(old_preset, new_preset)
-            //         }
-            //     });
-            // }
-        });
+        this.chargerService.getPresets()
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(presetsList => {
+                this.presets = presetsList;
+                this.firstLoad = false;
+                if (refresher) {
+                    refresher.complete();
+                }
+                // Was used during testing, to move to a known preset and edit it.
+                // if (this.presets.length) {
+                //     let old_preset = this.presets[7];
+                //     this.navCtrl.push(PresetPage, {
+                //         preset: old_preset,
+                //         callback: (new_preset) => {
+                //             this.presetCallback(old_preset, new_preset)
+                //         }
+                //     });
+                // }
+            });
     }
 
     addPreset() {

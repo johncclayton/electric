@@ -10,6 +10,7 @@ import {ConfigPage} from "../config/config-page";
 import {UIActions} from "../../models/state/actions/ui";
 import {SystemSettingsPage} from "../system-settings/system-settings";
 import {SystemActions} from "../../models/state/actions/system";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     selector: 'page-home',
@@ -23,6 +24,13 @@ export class HomePage {
     timeoutUp: boolean;
     showConfigureButton: boolean;
 
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
+
     constructor(public readonly navCtrl: NavController,
                 public readonly chargerService: iChargerService,
                 private uiAction: UIActions,
@@ -34,13 +42,17 @@ export class HomePage {
         this.timeoutUp = false;
         this.showConfigureButton = false;
 
-        Observable.timer(timeout).subscribe(r => {
-            this.timeoutUp = true;
-        });
+        Observable.timer(timeout)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(r => {
+                this.timeoutUp = true;
+            });
 
-        Observable.timer(timeout * 2).subscribe(r => {
-            this.showConfigureButton = true;
-        });
+        Observable.timer(timeout * 2)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(r => {
+                this.showConfigureButton = true;
+            });
 
         this.systemActions.fetchSystemFromCharger();
     }

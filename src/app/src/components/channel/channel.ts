@@ -7,6 +7,7 @@ import {Preset} from "../../models/preset-class";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {Observable} from "rxjs/Observable";
 import {Subscription} from "rxjs/Subscription";
+import {Subject} from "rxjs/Subject";
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -56,6 +57,9 @@ export class ChannelComponent {
     private firstTime: boolean;
     private measureIRObservable: Subscription;
 
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private currentOperationSubscription: Subscription;
+
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
                 public toastController: ToastController,
@@ -83,9 +87,11 @@ export class ChannelComponent {
     }
 
     showMeasureIR() {
-        this.chargerService.measureIR(this.channel).subscribe((result) => {
-            console.log("Measure IR done. Result: ", result);
-        });
+        this.chargerService.measureIR(this.channel)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((result) => {
+                console.log("Measure IR done. Result: ", result);
+            });
         this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
 
         // Monitor the IR. When we see some amps for a short period of time, auto stop the operation
@@ -95,8 +101,11 @@ export class ChannelComponent {
             return less_than_one_amp;
         }).subscribe(r => {
         }, e => {
+            this.measureIRObservable.unsubscribe();
+            this.measureIRObservable = null;
         }, () => {
             console.log("Stopping discharge because Measure IR has seen some amps");
+            this.measureIRObservable.unsubscribe();
             this.measureIRObservable = null;
             this.stopCurrentTask();
         });
@@ -110,7 +119,6 @@ export class ChannelComponent {
         }
     }
 
-
     startOperation(preset: Preset, operation: Operation, named: string) {
         console.log("Begin ", named, " on channel ", this.channel.index, " using ", preset.name);
         let handler = (resp) => {
@@ -118,23 +126,28 @@ export class ChannelComponent {
             console.log("Response: ", resp);
         };
 
+        if(this.currentOperationSubscription) {
+            this.currentOperationSubscription.unsubscribe();
+        }
+
+        this.currentOperationSubscription = this.createOperation(preset, operation, name).subscribe();
+    }
+
+    createOperation(preset: Preset, operation: Operation, named: string): Observable<any> {
         this.channel.lastUserCommand = named;
         switch (operation) {
             case Operation.Charge:
-                this.chargerService.startCharge(this.channel, preset).subscribe(handler);
-                break;
+                return this.chargerService.startCharge(this.channel, preset);
             case Operation.Discharge:
-                this.chargerService.startDischarge(this.channel, preset).subscribe(handler);
-                break;
+                return this.chargerService.startDischarge(this.channel, preset);
             case Operation.Storage:
-                this.chargerService.startStore(this.channel, preset).subscribe(handler);
-                break;
+                return this.chargerService.startStore(this.channel, preset);
             case Operation.Balance:
-                this.chargerService.startBalance(this.channel, preset).subscribe(handler);
-                break;
+                return this.chargerService.startBalance(this.channel, preset);
             default:
                 console.log("Um. Dunno what to do here, with operation ", operation, " named '", named, "'");
         }
+        return null;
     }
 
     startCharge(preset: Preset) {
@@ -155,7 +168,9 @@ export class ChannelComponent {
 
     stopCurrentTask() {
         this.channel.maybeClearLastUsedCommand(true);
-        this.chargerService.stopCurrentTask(this.channel).subscribe((resp) => {
+        this.chargerService.stopCurrentTask(this.channel)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((resp) => {
             console.log("Stopped!")
         });
     }
@@ -276,9 +291,9 @@ export class ChannelComponent {
     }
 
     ngOnDestroy() {
-    }
-
-    unsubscribeFromChannel() {
+        this.currentOperationSubscription.unsubscribe();
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     get channel(): Channel {

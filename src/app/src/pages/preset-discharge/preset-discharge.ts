@@ -5,6 +5,7 @@ import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
 import {ChargerValidator} from "../../utils/validators";
 import {ChemistryType, RegenerativeMode, RegenerativeToChannelMethod} from "../../models/preset-class";
 import {iChargerService} from "../../services/icharger.service";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     selector: 'page-preset-discharge',
@@ -22,7 +23,11 @@ export class PresetDischargePage extends PresetBasePage {
         super(navCtrl, navParams);
     }
 
-    ionViewWillLeave() {
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     ngOnInit() {
@@ -56,7 +61,9 @@ export class PresetDischargePage extends PresetBasePage {
                 })],
         });
 
-        this.formGroup.valueChanges.subscribe(v => {
+        this.formGroup.valueChanges
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(v => {
             if (this.formGroup.controls['dischargeVoltage'].errors) {
                 console.log("Have errors", this.formGroup.controls['dischargeVoltage'].errors);
             }

@@ -194,7 +194,7 @@ export class Channel {
 
     public maybeClearLastUsedCommand(force: boolean) {
         if (this.index == 0 && force) {
-            console.log("maybeClearLastUsedCommand called: force:", force);
+            // console.log("maybeClearLastUsedCommand called: force:", force);
         }
         if (force) {
             if (this._lastUserInitiatedCommand != null) {

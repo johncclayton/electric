@@ -4,6 +4,7 @@ import {iChargerService} from "../../services/icharger.service";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {isDefined} from "ionic-angular/util/util";
+import {Subject} from "rxjs/Subject";
 
 @Component({
     selector: 'connection-state',
@@ -21,13 +22,22 @@ export class ConnectionStateComponent {
     private lastConnectionFailureCount: number = 0;
     private haveAlertObject = false;
 
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
+
     constructor(public platform: Platform,
                 public charger: iChargerService,
                 public ngRedux: NgRedux<IAppState>,
                 public toastController: ToastController) {
 
         // Listen for changes to the exception, and do something with the UI
-        this.ngRedux.select(['ui', 'exception']).subscribe((message: string) => {
+        this.ngRedux.select(['ui', 'exception'])
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((message: string) => {
             if (isDefined(message)) {
                 if (message) {
                     this.showGeneralError(message, true);
@@ -35,7 +45,9 @@ export class ConnectionStateComponent {
             }
         });
 
-        this.ngRedux.select(['ui', 'disconnectionErrorCount']).subscribe((thing) => {
+        this.ngRedux.select(['ui', 'disconnectionErrorCount'])
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe((thing) => {
             let uiState = this.ngRedux.getState().ui;
             if (uiState.disconnected) {
                 this.incrementDisconnectionCount();
