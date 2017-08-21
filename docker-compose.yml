@@ -3,6 +3,7 @@ version: '2'
 services:
   ui:
     image: hypriot/rpi-dockerui
+    container_name: docker-ui
     restart: always
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
