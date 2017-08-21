@@ -31,5 +31,12 @@ When that's done, it'll start services. You won't see much.
 Now test the server is OK.
 For this to work you need to have the pi3 on the network, and accessible. Mine at home is called pi3. I have a DNS setup to point to it. I know it's at 192.168.1.30. ymmv.
 
- - Visit the server at 5000/unified, like so: http://192.168.1.30:5000/unified
+ - Visit the server at 5000/unified, like so: http://192.168.1.30:5000/unified.  (you'll need to change the IP, obviously).
 ![Response](/docs/images/unified-response.png)
+If you see something like the above, you've got the server going, congrats!
+
+There's even a colourful flashy dashboard that makes it look like we know what we're doing! This is the same IP, but no port (standard 80). e.g: http://192.168.1.30/
+![Response](/docs/images/dashboard.png)
+
+
+With that done, you should be able to get the app going!
