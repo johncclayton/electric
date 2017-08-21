@@ -13,18 +13,23 @@ Okay, okay - relax. Take a breath. We hear you.
 
 You *must* have a [Hypriot OS image installed](/docs/INSTALL_HYPRIOT.md) onto your Raspberry Pi 3 - then it's as simple as:
 
-       $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/install-on-rpi3.sh | sudo bash -s
+    $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/install-on-rpi3.sh | sudo bash -s
        
 The script will do the following:
 
-    1. Pull down a Docker Compose file to configure/run the services
-    1. Install a set of udev rules into the system that will expose the iCharger to user space programs
-    1. Startup the services
+    - Pull down a Docker Compose file to configure/run the services
+    - Install a set of udev rules into the system that will expose the iCharger to user space programs
+    - Startup the services
 
 Install will begin with downloading of images:
 ![Downloading the images](/docs/images/downloading-docker-images.png)
 
 When that's done, it'll start services. You won't see much.
-
 ![Services being started](/docs/images/docker-compose-up.png)
 
+
+Now test the server is OK.
+For this to work you need to have the pi3 on the network, and accessible. Mine at home is called pi3. I have a DNS setup to point to it. I know it's at 192.168.1.30. ymmv.
+
+ - Visit the server at 5000/unified, like so: http://192.168.1.30:5000/unified
+![Response](/docs/images/unified-response.png)
