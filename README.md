@@ -26,5 +26,5 @@ Install will begin with downloading of images:
 
 When that's done, it'll start services. You won't see much.
 
-
+![Services being started](/docs/images/docker-compose-up.png)
 
