@@ -5,7 +5,7 @@
 This project provides everything you need to get information from your iCharger 308/406/4010 DUO to an application
 running on [your mobile device](/docs/GET_THE_APP.md).
 
-[Demo](/docs/images/teaser.gif)
+![Demo](/docs/images/teaser.gif "Charge Demo!")
 
 # I really want to do all the stuff manually
 Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.
