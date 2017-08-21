@@ -9,7 +9,7 @@ Currently we're using [Ionic View](https://view.ionic.io) to let people play wit
 Caveats
 -------
 - Vibration & NOtification alerts don't work in Ionic View (they will when we release it properly)
-- Ionic View is a little slower than native. Sometimes (I'm looking at you android) much slower.
+- Ionic View is slower than native. Sometimes (I'm looking at you android) much slower. The native version is way better. Dont' freak out that the app runs slowly in Ionic View.
 
 Every now and then
 ==================
