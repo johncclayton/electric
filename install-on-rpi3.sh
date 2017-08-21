@@ -18,4 +18,4 @@ VERSION_NUM=`python get-latest-build-number.py`
 echo "Latest version is: $VERSION_NUM"
 echo Running with DOCKER_TAG=$VERSION_NUM, and execute docker-compose up -d
 
-DOCKER_TAG=$VERSION_NUM docker-compose up
+DOCKER_TAG=$VERSION_NUM docker-compose up -d
