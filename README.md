@@ -11,7 +11,7 @@ Check out the README.md in the src/server/ directory - this tells you how to get
 # I just want to run this Right Now (tm)
 Okay, okay - relax. Take a breath. We hear you.  
 
-You *must* have a Hypriot OS image installed onto your Raspberry Pi 3 - then it's as simple as:
+You *must* have a [Hypriot OS image installed](/docs/INSTALL_HYPRIOT.md) onto your Raspberry Pi 3 - then it's as simple as:
 
        $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/install-on-rpi3.sh | sudo bash -s
        
@@ -19,11 +19,12 @@ The script will do the following:
 
     1. Pull down a Docker Compose file to configure/run the services
     1. Install a set of udev rules into the system that will expose the iCharger to user space programs
-    1. **WARNING** the services WILL NOT be started, that's up to you
-    
-After installation, to start the docker services (which likely will cause docker images to be downloaded):
+    1. Startup the services
 
-       $ DOCKER_TAG=332 docker-compose up -d
-       
-For now you MUST define the DOCKER_TAG, which is simply the Travis build number that succeeded - we're working on turning this into something sane for the future.       
- 
+Install will begin with downloading of images:
+![Downloading the images](/docs/images/downloading-docker-images.png)
+
+When that's done, it'll start services. You won't see much.
+
+
+
