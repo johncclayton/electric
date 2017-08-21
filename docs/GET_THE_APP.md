@@ -6,6 +6,10 @@ Currently we're using [Ionic View](https://view.ionic.io) to let people play wit
 - Create an account, and sign in
 - Use the ID F944CAD8 to load up the app.
 
+Caveats
+-------
+- Vibration & NOtification alerts don't work in Ionic View (they will when we release it properly)
+- Ionic View is a little slower than native. Sometimes (I'm looking at you android) much slower.
 
 Every now and then
 ==================
@@ -15,4 +19,10 @@ You'll want to keep it up to date. For now, just press 'sync to latest' when you
 Here's how to configure it
 ==========================
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/OwXm_IYKCZY" frameborder="0" allowfullscreen></iframe>
+Here's a [video of me configuring the app](https://www.youtube.com/embed/OwXm_IYKCZY).
+- Setting IP address
+- Changing number of packs being show to 6 (I only have 6s packs)
+- Enabling the vibrate and notification options
+
+
+
