@@ -3,7 +3,7 @@
 
 # What is this thing?
 This project provides everything you need to get information from your iCharger 308/406/4010 DUO to an application
-running on your mobile device.  
+running on [your mobile device](/docs/GET_THE_APP.md).
 
 # I really want to do all the stuff manually
 Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.
@@ -39,4 +39,4 @@ There's even a colourful flashy dashboard that makes it look like we know what w
 ![Response](/docs/images/dashboard.png)
 
 
-With that done, you should be able to get the app going!
+With that done, you should be able to [get the app](/docs/GET_THE_APP.md) going!
