@@ -14,5 +14,8 @@ if [ ! -d "/etc/udev/rules.d/10-icharger.rules" ]; then
     mv 10-icharger.rules /etc/udev/rules.d/ && udevadm control --reload
 fi
 
-DOCKER_TAG=`python get-latest-build-number.py`
-echo To run this, set DOCKER_TAG to the version you want to run and execute docker-compose up -d
+VERSION_NUM=`python get-latest-build-number.py`
+echo "Latest version is: $VERSION_NUM"
+echo Running with DOCKER_TAG=$VERSION_NUM, and execute docker-compose up -d
+
+DOCKER_TAG=$VERSION_NUM docker-compose up

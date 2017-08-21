@@ -14,8 +14,12 @@ content = json.load(http_response)
 
 builds = content['builds']
 if builds:
-    print builds[0]['number']
-    exit(0)
+    for build in builds:
+        if build['state'] != 'passed':
+            continue
+
+        print build['number']
+        exit(0)
 else:
     print "Failed to find latest build number at travis"
     exit(-1)
