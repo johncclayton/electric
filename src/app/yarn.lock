@@ -52,6 +52,10 @@
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/@ionic-native/core/-/core-3.14.0.tgz#796ea9fb1ad1188eb30205c7bca982c8271747be"
 
+"@ionic-native/local-notifications@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ionic-native/local-notifications/-/local-notifications-4.1.0.tgz#2c0b102262ba5820cc6cedec84ecff22b5a15323"
+
 "@ionic-native/splash-screen@^3.12.1":
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/@ionic-native/splash-screen/-/splash-screen-3.14.0.tgz#f864bfbd7f8577743a0301e7bec781316febc309"
@@ -1264,11 +1268,15 @@ cordova-ios@^4.4.0:
     xcode "^0.9.0"
     xml-escape "^1.1.0"
 
+cordova-plugin-app-event@>=1.1.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-app-event/-/cordova-plugin-app-event-1.2.0.tgz#ebd3a70bfd8f26300d40e0e6c8249487ec53d5f2"
+
 cordova-plugin-console@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/cordova-plugin-console/-/cordova-plugin-console-1.0.7.tgz#89b7a92ed1c335888dfc00d902dc417201cf3b0b"
 
-cordova-plugin-device@^1.1.6:
+cordova-plugin-device@*, cordova-plugin-device@^1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/cordova-plugin-device/-/cordova-plugin-device-1.1.6.tgz#2d21764cad7c9b801523e4e09a30e024b249334b"
 
@@ -1418,6 +1426,13 @@ dashdash@^1.12.0:
 date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
+
+de.appplant.cordova.plugin.local-notification@^0.8.5:
+  version "0.8.5"
+  resolved "https://registry.yarnpkg.com/de.appplant.cordova.plugin.local-notification/-/de.appplant.cordova.plugin.local-notification-0.8.5.tgz#e0c6a86ea52ac4f41dba67521d91a58a9a42a3bd"
+  dependencies:
+    cordova-plugin-app-event ">=1.1.0"
+    cordova-plugin-device "*"
 
 debug@2.6.7:
   version "2.6.7"
