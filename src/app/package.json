@@ -40,6 +40,7 @@
         "cordova-plugin-statusbar": "^2.2.3",
         "cordova-plugin-vibration": "^2.1.5",
         "cordova-plugin-whitelist": "^1.3.2",
+        "cordova-plugin-wkwebview-engine": "git+https://github.com/driftyco/cordova-plugin-wkwebview-engine.git",
         "cordova-sqlite-storage": "^2.0.4",
         "de.appplant.cordova.plugin.local-notification": "^0.8.5",
         "font-awesome": "^4.7.0",
@@ -98,7 +99,8 @@
             "ionic-plugin-deploy": {},
             "ionic-plugin-keyboard": {},
             "cordova-plugin-vibration": {},
-            "de.appplant.cordova.plugin.local-notification": {}
+            "de.appplant.cordova.plugin.local-notification": {},
+            "cordova-plugin-wkwebview-engine": {}
         }
     }
 }
