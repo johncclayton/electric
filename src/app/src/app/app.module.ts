@@ -40,7 +40,7 @@ import {SystemSettingsPageModule} from "../pages/system-settings/system-settings
 import {ComponentsModule} from "../components/components.module";
 import {Vibration} from "@ionic-native/vibration";
 import {LocalNotifications} from "@ionic-native/local-notifications";
-import {AngularFireModule} from 'angularfire2';
+import {FCM} from '@ionic-native/fcm';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyDDfmaQMyk_8UgQmcTJa8u2Ruv3emGEKAc",
@@ -81,7 +81,7 @@ export const firebaseConfig = {
     ComponentsModule,
     SystemSettingsPageModule,
     IonicModule.forRoot(MyApp),
-    AngularFireModule.initializeApp(firebaseConfig),
+    // AngularFireModule.initializeApp(firebaseConfig),
     IonicStorageModule.forRoot(),
     EnvironmentsModule
   ],
@@ -111,6 +111,7 @@ export const firebaseConfig = {
     StatusBar,
     SplashScreen,
     Vibration,
+    FCM,
     LocalNotifications,
     {provide: iChargerService, useClass: iChargerService},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
