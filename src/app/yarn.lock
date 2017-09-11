@@ -264,6 +264,10 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
+angularfire2@^4.0.0-rc.2:
+  version "4.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/angularfire2/-/angularfire2-4.0.0-rc.2.tgz#4dd22b877d691a37c009b1fa503d5132cd9970ea"
+
 ansi-escapes@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-2.0.0.tgz#5bae52be424878dd9783e8910e3fc2922e83c81b"
@@ -1295,6 +1299,10 @@ cordova-plugin-vibration@^2.1.5:
 cordova-plugin-whitelist@^1.3.2:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/cordova-plugin-whitelist/-/cordova-plugin-whitelist-1.3.2.tgz#5b6335feb9f5301f3c013b9096cb8885bdbd5076"
+
+"cordova-plugin-wkwebview-engine@git+https://github.com/driftyco/cordova-plugin-wkwebview-engine.git":
+  version "1.1.4-dev"
+  resolved "git+https://github.com/driftyco/cordova-plugin-wkwebview-engine.git#3f6be80ecd34ee67a230390f95de8eaf60fdca83"
 
 cordova-registry-mapper@^1.1.8:
   version "1.1.15"
