@@ -40,77 +40,88 @@ import {SystemSettingsPageModule} from "../pages/system-settings/system-settings
 import {ComponentsModule} from "../components/components.module";
 import {Vibration} from "@ionic-native/vibration";
 import {LocalNotifications} from "@ionic-native/local-notifications";
+import {FCM} from '@ionic-native/fcm';
+
+export const firebaseConfig = {
+  apiKey: "AIzaSyDDfmaQMyk_8UgQmcTJa8u2Ruv3emGEKAc",
+  authDomain: "https://electric-app-e4963.firebaseio.com",
+  databaseURL: "https://electric-app-e4963.firebaseio.com",
+  storageBucket: "electric-app-e4963.appspot.com",
+  messagingSenderId: '811177846859'
+};
 
 @NgModule({
-    declarations: [
-        MyApp,
-        ContactPage,
-        ConfigPage,
-        HomePage,
-        KeysPipe, ReversePipe, DurationPipe, TempPipe,
-        DynamicDisable,
-        ChannelComponent,
-        ChannelVoltsComponent,
-        ChannelIRComponent,
-        ConnectionStateComponent,
-        PresetListPage,
-        PresetPage,
-        PresetChargePage,
-        PresetStoragePage,
-        PresetDischargePage,
-        PresetBalancePage,
-        TabsPage,
-        PresetCyclePage,
-        ChargeOptionsPage,
-        ChargerStatusComponent,
-    ],
-    imports: [
-        BrowserModule,
-        HttpModule,
-        NgReduxModule,
-        NgSpinKitModule,
-        ComponentsModule,
-        SystemSettingsPageModule,
-        IonicModule.forRoot(MyApp),
-        IonicStorageModule.forRoot(),
-        EnvironmentsModule
-    ],
-    bootstrap: [IonicApp],
-    entryComponents: [
-        MyApp,
-        HomePage,
-        ConfigPage,
-        PresetListPage,
-        PresetPage,
-        PresetChargePage,
-        PresetStoragePage,
-        PresetDischargePage,
-        PresetCyclePage,
-        ChargeOptionsPage,
-        ChannelVoltsComponent,
-        ChannelIRComponent,
-        ConnectionStateComponent,
-    ],
-    providers: [
-        ChargerActions,
-        UIActions,
-        ConfigStoreProvider,
-        ConfigurationActions,
-        SystemActions,
-        ConfigurationEpics,
-        StatusBar,
-        SplashScreen,
-        Vibration,
-        LocalNotifications,
-        {provide: iChargerService, useClass: iChargerService},
-        {provide: ErrorHandler, useClass: IonicErrorHandler},
-        ConfigStoreProvider
-    ]
+  declarations: [
+    MyApp,
+    ContactPage,
+    ConfigPage,
+    HomePage,
+    KeysPipe, ReversePipe, DurationPipe, TempPipe,
+    DynamicDisable,
+    ChannelComponent,
+    ChannelVoltsComponent,
+    ChannelIRComponent,
+    ConnectionStateComponent,
+    PresetListPage,
+    PresetPage,
+    PresetChargePage,
+    PresetStoragePage,
+    PresetDischargePage,
+    PresetBalancePage,
+    TabsPage,
+    PresetCyclePage,
+    ChargeOptionsPage,
+    ChargerStatusComponent,
+  ],
+  imports: [
+    BrowserModule,
+    HttpModule,
+    NgReduxModule,
+    NgSpinKitModule,
+    ComponentsModule,
+    SystemSettingsPageModule,
+    IonicModule.forRoot(MyApp),
+    // AngularFireModule.initializeApp(firebaseConfig),
+    IonicStorageModule.forRoot(),
+    EnvironmentsModule
+  ],
+  bootstrap: [IonicApp],
+  entryComponents: [
+    MyApp,
+    HomePage,
+    ConfigPage,
+    PresetListPage,
+    PresetPage,
+    PresetChargePage,
+    PresetStoragePage,
+    PresetDischargePage,
+    PresetCyclePage,
+    ChargeOptionsPage,
+    ChannelVoltsComponent,
+    ChannelIRComponent,
+    ConnectionStateComponent,
+  ],
+  providers: [
+    ChargerActions,
+    UIActions,
+    ConfigStoreProvider,
+    ConfigurationActions,
+    SystemActions,
+    ConfigurationEpics,
+    StatusBar,
+    SplashScreen,
+    Vibration,
+    FCM,
+    LocalNotifications,
+    {provide: iChargerService, useClass: iChargerService},
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    ConfigStoreProvider
+  ]
 })
 export class AppModule {
-    constructor(ngRedux: NgRedux<IAppState>,
-                configEpic: ConfigurationEpics,
-                devTools: DevToolsExtension) {
-        configureAppStateStore(ngRedux, configEpic, devTools);
-    }
+  constructor(ngRedux: NgRedux<IAppState>,
+              configEpic: ConfigurationEpics,
+              devTools: DevToolsExtension) {
+    configureAppStateStore(ngRedux, configEpic, devTools);
+  }
 }

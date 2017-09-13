@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string>
+	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
+	<key>CLIENT_ID</key>
+	<string>811177846859-rkr9giv93rbhlmdr2655rc3n4sgtgt9a.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.811177846859-rkr9giv93rbhlmdr2655rc3n4sgtgt9a</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAQi07Q9tUczSz8htJhXuOP9POdIqvRPdY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>811177846859</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.electric.icharger.app</string>
+	<key>PROJECT_ID</key>
+	<string>electric-app-e4963</string>
+	<key>STORAGE_BUCKET</key>
+	<string>electric-app-e4963.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<true/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<false/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:811177846859:ios:e2ad07579f960e3a</string>
+	<key>DATABASE_URL</key>
+	<string>https://electric-app-e4963.firebaseio.com</string>
+</dict>
+</plist>
