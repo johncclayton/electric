@@ -6,7 +6,7 @@ import {chargerStateReducer, IChargerState} from "./reducers/charger";
 import {IUIState, uiReducer} from "./reducers/ui";
 import {ChargerActions} from "./actions/charger";
 import {ConfigurationEpics} from "./epics/configuration";
-import {createEpicMiddleware} from "redux-observable";
+import {combineEpics, createEpicMiddleware} from "redux-observable";
 import {environmentFactory} from "../../app/environment/environment-variables.module";
 import {ISystem, systemReducer} from "./reducers/system";
 
@@ -30,12 +30,17 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
                                        configEpic: ConfigurationEpics,
                                        devTools: DevToolsExtension) => {
         let actionsBlacklist: Array<string> = [
-            // ChargerActions.UPDATE_STATE_FROM_CHARGER,
+            ChargerActions.UPDATE_STATE_FROM_CHARGER,
         ];
 
         // Insert the epic middleware first.
         let middleware = [];
-        middleware.push(createEpicMiddleware(configEpic.configChanged));
+        middleware.push(createEpicMiddleware(
+            combineEpics(
+                configEpic.configChanged,
+            )
+            )
+        );
 
         // Add logger if in development (web browsers)
 

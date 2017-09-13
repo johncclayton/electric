@@ -67,6 +67,7 @@ export const
             case ConfigurationActions.RESET_TO_DEFAULTS:
                 return configurationDefaults;
 
+
             case ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE:
                 if (action.payload) {
                     let maxAmpsPerChannel = action.maxAmpsPerChannel;

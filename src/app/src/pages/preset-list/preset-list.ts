@@ -43,16 +43,23 @@ export class PresetListPage implements Chemistry {
                 if (refresher) {
                     refresher.complete();
                 }
-                // Was used during testing, to move to a known preset and edit it.
-                // if (this.presets.length) {
-                //     let old_preset = this.presets[7];
-                //     this.navCtrl.push(PresetPage, {
-                //         preset: old_preset,
-                //         callback: (new_preset) => {
-                //             this.presetCallback(old_preset, new_preset)
-                //         }
-                //     });
-                // }
+
+
+                /*
+                 * Was used during testing, to move to a known preset and edit it.
+                 */
+                let debugPresets = false;
+                if (debugPresets) {
+                    if (this.presets.length) {
+                        let old_preset = this.presets[7];
+                        this.navCtrl.push(PresetPage, {
+                            preset: old_preset,
+                            callback: (new_preset) => {
+                                this.presetCallback(old_preset, new_preset)
+                            }
+                        });
+                    }
+                }
             });
     }
 

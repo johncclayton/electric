@@ -11,29 +11,41 @@
 
 
 <ion-content>
-    <ion-list [formGroup]="formGroup">
+    <ion-list>
         <ion-list-header color="light">Discharging Options</ion-list-header>
         <ion-item>
-            <ion-label>Discharge Current<p *ngIf="formGroup.controls.dischargeCurrent.errors" color="danger">
-                {{this.formGroup.controls.dischargeCurrent.errors.message}}</p></ion-label>
-            <ion-input type="number" no-right-padding formControlName="dischargeCurrent"></ion-input>
+            <ion-label>Discharge Current -
+                <ion-badge>{{preset.discharge_current}}A</ion-badge>
+            </ion-label>
+            <better-range item-content [(value)]="preset.discharge_current"
+                          min="0.05"
+                          [max]="chargerService.getMaxAmpsPerChannel()"
+                          multiplier="100"
+                          left_label="0.05A"
+                          right_label="{{chargerService.getMaxAmpsPerChannel()}}A"
+            ></better-range>
         </ion-item>
         <ion-item>
-            <ion-label>Discharge Voltage<p *ngIf="formGroup.controls.dischargeVoltage.errors" color="danger">
-                {{this.formGroup.controls.dischargeVoltage.errors.message}}</p></ion-label>
-            <ion-input type="number" no-right-padding formControlName="dischargeVoltage"></ion-input>
+            <ion-label>Discharge Voltage -
+                <ion-badge>{{preset.discharge_voltage}}V</ion-badge>
+            </ion-label>
+            <better-range item-content [(value)]="preset.discharge_voltage"
+                          multiplier="10"
+                          [min]="this.preset.dischargeVoltageMinMax().min"
+                          [max]="this.preset.dischargeVoltageMinMax().max"
+                          left_label="{{this.preset.dischargeVoltageMinMax().min}}V"
+                          right_label="{{this.preset.dischargeVoltageMinMax().max}}V"
+            ></better-range>
         </ion-item>
-        <!--<ion-item>-->
-            <!--<ion-label>End Current %</ion-label>-->
-            <!--<ion-range formControlName="dischargeCurrent" pin=true min="10" max="50">-->
-                <!--<ion-label range-left>10%</ion-label>-->
-                <!--<ion-label range-right>50%</ion-label>-->
-            <!--</ion-range>-->
-        <!--</ion-item>-->
+
         <ion-item>
-            <ion-label>End Current %<p *ngIf="formGroup.controls.dischargeEndCurrent.errors" color="danger">
-                {{this.formGroup.controls.dischargeEndCurrent.errors.message}}</p></ion-label>
-            <ion-input type="number" no-right-padding formControlName="dischargeEndCurrent"></ion-input>
+            <ion-label>End Current -
+                <ion-badge>{{preset.discharge_end_current}}%</ion-badge>
+            </ion-label>
+            <ion-range [(ngModel)]="preset.discharge_end_current" min="1" max="100">
+                <ion-label range-left>1%</ion-label>
+                <ion-label range-right>100%</ion-label>
+            </ion-range>
         </ion-item>
     </ion-list>
     <ion-list>

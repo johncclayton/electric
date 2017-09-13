@@ -80,7 +80,7 @@ export class Preset {
         if (_dischargeVoltageMinMax[this.type]) {
             anOption = _dischargeVoltageMinMax[this.type];
         }
-        console.log("Using ", anOption, " as the volt/min/max");
+        // console.log("Using ", anOption, " as the volt/min/max");
         return anOption;
     }
 
@@ -262,23 +262,24 @@ export class Preset {
     }
 
     get discharge_current(): number {
-        return this.data['discharge_current'];
+        return +this.data['discharge_current'];
     }
 
     set discharge_current(value: number) {
+        console.log("Set discharge to ", value);
         this.data['discharge_current'] = +value;
     }
 
     get discharge_voltage(): number {
         switch (this.type) {
             case ChemistryType.NiMH:
-                return this.data['ni_discharge_voltage'];
+                return +this.data['ni_discharge_voltage'];
 
             case ChemistryType.LiFe:
-                return this.data['life_discharge_cell_voltage'];
+                return +this.data['life_discharge_cell_voltage'];
 
             case ChemistryType.LiPo:
-                return this.data['lipo_discharge_cell_voltage'];
+                return +this.data['lipo_discharge_cell_voltage'];
         }
         return 0;
     }

@@ -13,7 +13,6 @@ import {Subject} from "rxjs/Subject";
 })
 
 export class PresetDischargePage extends PresetBasePage {
-    formGroup: FormGroup = null;
     regenerationGroup: FormGroup = null;
 
     constructor(navCtrl: NavController,
@@ -33,21 +32,6 @@ export class PresetDischargePage extends PresetBasePage {
     ngOnInit() {
         let dischargeVoltageMinMax = this.preset.dischargeVoltageMinMax();
 
-        this.formGroup = this.formBuilder.group({
-            dischargeCurrent: [this.preset.discharge_current,
-                ChargerValidator.number({
-                    min: 0.05,
-                    max: this.chargerService.getMaxAmpsPerChannel()
-                })],
-            dischargeVoltage: [this.preset.discharge_voltage,
-                ChargerValidator.number(dischargeVoltageMinMax)],
-            dischargeEndCurrent: [this.preset.discharge_end_current,
-                ChargerValidator.number({
-                    min: 1,
-                    max: 100
-                })]
-        });
-
         this.regenerationGroup = this.formBuilder.group({
             regenVoltLimit: [this.preset.regeneration_volt_limit,
                 ChargerValidator.number({
@@ -60,14 +44,6 @@ export class PresetDischargePage extends PresetBasePage {
                     max: this.chargerService.getMaxAmpsPerChannel()
                 })],
         });
-
-        this.formGroup.valueChanges
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(v => {
-            if (this.formGroup.controls['dischargeVoltage'].errors) {
-                console.log("Have errors", this.formGroup.controls['dischargeVoltage'].errors);
-            }
-        })
     }
 
     currentChoices() {

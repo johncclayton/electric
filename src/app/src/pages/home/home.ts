@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController} from "ionic-angular";
+import {NavController, Platform} from "ionic-angular";
 import {Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
@@ -11,6 +11,8 @@ import {UIActions} from "../../models/state/actions/ui";
 import {SystemSettingsPage} from "../system-settings/system-settings";
 import {SystemActions} from "../../models/state/actions/system";
 import {Subject} from "rxjs/Subject";
+import {PresetListPage} from "../preset-list/preset-list";
+import {ConfigStoreProvider} from "../../providers/config-store/config-store";
 
 @Component({
     selector: 'page-home',
@@ -33,7 +35,9 @@ export class HomePage {
 
     constructor(public readonly navCtrl: NavController,
                 public readonly chargerService: iChargerService,
+                private configStore: ConfigStoreProvider,
                 private uiAction: UIActions,
+                private platform: Platform,
                 private systemActions: SystemActions,
                 public readonly ngRedux: NgRedux<IAppState>,
                 public readonly http: Http) {
@@ -54,7 +58,22 @@ export class HomePage {
                 this.showConfigureButton = true;
             });
 
-        this.systemActions.fetchSystemFromCharger();
+        // Gotta be a better way than this.
+        // This takes the 2nd notification.
+        // 1st I think is the store initializing.
+        // 2nd is it being loaded.
+        // After THAT it's OK to do stuff.
+        // Pretty messy having to have empty next + error handlers
+        this.ngRedux.select('config').takeUntil(this.ngUnsubscribe).take(2).subscribe(undefined, undefined, () => {
+            console.log("Configuration loaded. Now getting system.");
+
+            // Wait until configuration is loaded before starting things.
+            this.platform.ready().then((r) => {
+                this.systemActions.fetchSystemFromCharger();
+            });
+
+            this.loadFirstPageDoingDebugging();
+        });
     }
 
     anyNetworkOrConnectivityProblems() {
@@ -74,8 +93,16 @@ export class HomePage {
     }
 
     ionViewWillEnter() {
+    }
+
+    loadFirstPageDoingDebugging() {
         // this.showConfigPage();
         // this.showSystemPage();
+        // this.showPresetsPage();
+    }
+
+    showPresetsPage() {
+        this.navCtrl.push(PresetListPage);
     }
 
     showConfigPage() {

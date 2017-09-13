@@ -3,28 +3,13 @@ import {ConfigStoreProvider} from "../../../providers/config-store/config-store"
 import {ConfigurationActions} from "../actions/configuration";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../configure";
-import {SystemActions} from "../actions/system";
-import {iChargerService} from "../../../services/icharger.service";
 
 @Injectable()
 export class ConfigurationEpics {
     constructor(private configStore: ConfigStoreProvider,
-                private systemActions: SystemActions,
-                private chargerService: iChargerService,
                 private ngRedux: NgRedux<IAppState>) {
 
     }
-
-    // fetchSystem = (action$) => {
-    //     return action$.ofType(
-    //         SystemActions.FETCH_SYSTEM
-    //     )
-    //         .mergeMap((payload) => {
-    //             return this.chargerService.getSystem().map(system => {
-    //                 return this.actions.endFetchAction(system);
-    //             })
-    //         });
-    // };
 
     configChanged = (action$) => {
         return action$.ofType(
@@ -41,5 +26,5 @@ export class ConfigurationEpics {
                     }
                 });
             });
-    }
+    };
 }
