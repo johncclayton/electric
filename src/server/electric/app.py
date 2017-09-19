@@ -13,7 +13,7 @@ from rest_interface import \
     PresetListResource, \
     PresetResource, ChargeResource, DischargeResource, \
     BalanceResource, MeasureIRResource, StopResource, \
-    PresetOrderResource, AddNewPresetResource, StoreResource, UnifiedResource
+    PresetOrderResource, AddNewPresetResource, StoreResource, UnifiedResource, PushTokenResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
@@ -43,6 +43,7 @@ api.add_resource(PresetListResource, "/preset")
 api.add_resource(AddNewPresetResource, "/addpreset")
 api.add_resource(PresetOrderResource, "/presetorder")
 api.add_resource(DialogCloseResource, "/closedialog/<channel_id>")
+api.add_resource(PushTokenResource, "/pushtoken/<token>")
 
 # application.config['TRAP_HTTP_EXCEPTIONS']=True
 #

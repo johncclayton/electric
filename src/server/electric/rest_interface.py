@@ -33,6 +33,16 @@ def connection_state_dict(exc=None):
     return value
 
 
+class PushTokenResource(Resource):
+    def put(self, token):
+        # TODO: add the token to the push database
+        pass
+
+    def delete(self, token):
+        # TODO: remove the token from the push database
+        pass
+
+
 class StatusResource(Resource):
     def get(self):
         info = comms.get_device_info()
