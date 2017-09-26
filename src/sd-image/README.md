@@ -27,6 +27,7 @@ The installer can be found here: https://www.dropbox.com/install-linux
 For those of you lazy enough, the command you are looking for to install Dropbox onto your Debian system is: 
 
     cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+    sudo apt-get install python
     
 Run Dropbox
 -----------
