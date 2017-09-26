@@ -9,6 +9,10 @@ PIIMG=`which piimg`
 MNT="/mnt"
 QEMU_ARM="/usr/bin/qemu-arm-static"
 DOCKER_IMAGE="scornflake/electric-pi"
+APNAME="ELECTRIC-PI"
+APPWD="pa55word"
+WIFINAME=""
+WIFIPWD=""
 
 if [ -z "$FROM" -o -z "$TO" ]; then
 	echo "Use create-image.sh <from> <to>"
@@ -50,38 +54,9 @@ if [ ! -f "$QEMU_ARM" ]; then
 	exit 6
 fi
 
-APNAME="ELECTRIC-PI"
-APPWD="pa55word"
-WIFINAME=""
-WIFIPWD=""
-
-while [[ $# -gt 1 ]]
-do
-key="$1"
-
-case $key in
-	-an|--ap-name)
-	APNAME="$2"
-	shift
-	;;
-	-ap|--ap-password)
-	APPWD="$2"
-	shift
-	;;
-	-wn|--wifi-name)
-	WIFINAME="$2"
-	shift
-	;;
-	-wp|--wifi-password)
-	WIFIPWD="$2"
-	shift
-	;;
-	*)
-	# unknown option
-	;;
-esac
-shift
-done
+if [ -f ./.config ]; then
+	. ./.config
+fi
 
 echo "Access Point Name: $APNAME"
 echo "Access Point Pass: $APPWD"
@@ -89,7 +64,7 @@ echo "WiFi Name        : $WIFINAME"
 echo "WiFi Pass        : $WIFIPWD"
 
 if [ -z "$APNAME" -o -z "$APPWD" -o -z "$WIFINAME" -o -z "$WIFIPWD" ]; then
-	echo "Fail - APNAME/APPWD/WIFINAME and WIFIPWD all need to be filled in"
+	echo "Fail - APNAME/APPWD/WIFINAME and WIFIPWD all need to be filled in, put these into the .config file"
 	exit 6
 fi
 
@@ -98,7 +73,7 @@ docker pull "$DOCKER_IMAGE"
 
 # copy source -> dest
 cp "$FROM" "$TO" 
-$PIIMG mount "$TO" "$MNT"
+sudo $PIIMG mount "$TO" "$MNT"
 
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp scripts/* "$MNT/home/pi/"
@@ -125,7 +100,7 @@ sudo sed -i "s/WIFIPWD/$WIFIPWD/g" "$MNT/etc/wpa_supplicant/wpa_supplicant.conf"
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
-$PIIMG umount "$MNT" 
+sudo $PIIMG umount "$MNT" 
 if [ -d "$HOME/Dropbox/Public" -a "$RES" -eq 0 ]; then
 	mv -f "$TO" "$HOME/Dropbox/Public/"
 else
