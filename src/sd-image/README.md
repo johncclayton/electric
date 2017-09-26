@@ -31,10 +31,12 @@ For those of you lazy enough, the command you are looking for to install Dropbox
     
 Run Dropbox
 -----------
-Don't forget to run it (and authenticate):
+Next, run the Dropbox daemon from the newly created .dropbox-dist folder.
 
-    dropbox start
-    
+    ~/.dropbox-dist/dropboxd
+
+If you're running Dropbox on your server for the first time, you'll be asked to copy and paste a link in a working browser to create a new account or add your server to an existing account. Once you do, your Dropbox folder will be created in your home directory. 
+
 Building an SD Image for the Raspberry Pi
 =========================================
 
