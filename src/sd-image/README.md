@@ -16,6 +16,12 @@ Make sure that worked, check the piimg binary is indeed in the /usr/local/bin/ d
 
     ls -l /usr/local/bin
     
+Docker - You Need This
+----------------------
+Don't forget to install Docker on the build machine
+
+    curl -fsSL https://get.docker.com | sh;
+    
 Copy a Raspbian Lite image to the build VM, I already downloaded a Lite .zip file to the Windows machine, and opened it in Explorer.  From there I was able to scp the .img file into the home directory of the builder VM.  The .img should reside in the electric/src/sd-image directory.
 
 Dropbox
