@@ -55,6 +55,13 @@ To create an SD card image, you will need the Raspbian Lite image in the src/sd-
 
 Something like this would do it: 
 
-    ./create-image.sh 2017-09-07-raspbian-stretch-lite.img /tmp/john.img -wn <YOUR SSID/WIFI GOES HERE> -wp <SSID/WIFI PASSWORD>
+    ./create-image.sh 2017-09-07-raspbian-stretch-lite.img /tmp/john.img
 
+That will fail, because you MUST specific WIFI SSID and credentials in a .config file that should be in the src/sd-image directory - you will need to create this file, the contents should be along these lines:
+
+    WIFINAME=<name/SSID of your WIFI access point>
+    WIFIPWD=<password for the above>
+    
+ Now run it again and things should be great.  It WILL prompt you for your password, this is sudo at work on behalf of piimg.
+    
 If the stars are aligned, you end up with a complete SD image at /tmp/john.img and it'll also be copied to the ~/Dropbox/Public/ folder.
