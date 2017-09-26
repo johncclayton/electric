@@ -22,10 +22,18 @@ Don't forget to install Docker on the build machine
 
     curl -fsSL https://get.docker.com | sh;
     
+Important - add a docker user so that its possible to run docker without root/sudo privs, e.g.:
+
+    sudo usermod -aG docker builder
+    
+Note: you'll need to log out and log back in.
+
+Raspbian Lite Image - You Need This
+-----------------------------------
 Copy a Raspbian Lite image to the build VM, I already downloaded a Lite .zip file to the Windows machine, and opened it in Explorer.  From there I was able to scp the .img file into the home directory of the builder VM.  The .img should reside in the electric/src/sd-image directory.
 
-Dropbox
-=======
+Dropbox - Optional
+------------------
 The build process will optionally copy the resulting SD card image to Dropbox for sharing.  If you want this, install Dropbox on the Linux build box. 
 
 The installer can be found here: https://www.dropbox.com/install-linux
@@ -35,8 +43,6 @@ For those of you lazy enough, the command you are looking for to install Dropbox
     cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
     sudo apt-get install python
     
-Run Dropbox
------------
 Next, run the Dropbox daemon from the newly created .dropbox-dist folder.
 
     ~/.dropbox-dist/dropboxd
@@ -45,4 +51,10 @@ If you're running Dropbox on your server for the first time, you'll be asked to 
 
 Building an SD Image for the Raspberry Pi
 =========================================
+To create an SD card image, you will need the Raspbian Lite image in the src/sd-image directory (but you did that already right?), and credentials to an existing WIFI network - because the creation process burns these creds into the SD image setup. 
 
+Something like this would do it: 
+
+    ./create-image.sh 2017-09-07-raspbian-stretch-lite.img /tmp/john.img -wn <YOUR SSID/WIFI GOES HERE> -wp <SSID/WIFI PASSWORD>
+
+If the stars are aligned, you end up with a complete SD image at /tmp/john.img and it'll also be copied to the ~/Dropbox/Public/ folder.
