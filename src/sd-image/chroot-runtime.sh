@@ -1,3 +1,4 @@
+#@IgnoreInspection BashAddShebang
 set -e
 set -u
 

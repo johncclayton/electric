@@ -108,9 +108,14 @@ RES=$?
 
 sudo $PIIMG umount "$MNT" 
 if [ -d "$HOME/Dropbox/Public" -a "$RES" -eq 0 ]; then
-	mv -f "$TO" "$HOME/Dropbox/Public/"
+	cp "$TO" "$HOME/Dropbox/Public/"
 else
 	echo "$TO not moved, there was a problem"
+fi
+
+
+if [ -f "/media/john.img" ]; then
+    cp "$TO" "/media/"
 fi
 
 exit 0
