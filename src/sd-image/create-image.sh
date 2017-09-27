@@ -8,7 +8,8 @@ TO="$2"
 PIIMG=`which piimg`
 MNT="/mnt"
 QEMU_ARM="/usr/bin/qemu-arm-static"
-DOCKER_IMAGE="scornflake/electric-pi"
+DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
+DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
 APNAME="ELECTRIC-PI"
 APPWD="pa55word"
 WIFINAME=""
@@ -69,7 +70,8 @@ if [ -z "$APNAME" -o -z "$APPWD" -o -z "$WIFINAME" -o -z "$WIFIPWD" ]; then
 fi
 
 # pull docker image and save it as a file...
-docker pull "$DOCKER_IMAGE" 
+docker pull "$DOCKER_IMAGE_WEB"
+docker pull "$DOCKER_IMAGE_WORKER"
 
 # copy source -> dest
 cp "$FROM" "$TO" 
@@ -78,8 +80,11 @@ sudo $PIIMG mount "$TO" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp scripts/* "$MNT/home/pi/"
 
-sudo touch "$MNT/home/pi/docker_image.tar.gz" && sudo chmod 777 "$MNT/home/pi/docker_image.tar.gz"
-docker image save "$DOCKER_IMAGE" | gzip > "$MNT/home/pi/docker_image.tar.gz" 
+sudo touch "$MNT/home/pi/docker_image_web.tar.gz" && sudo chmod 777 "$MNT/home/pi/docker_image_web.tar.gz"
+sudo touch "$MNT/home/pi/docker_image_worker.tar.gz" && sudo chmod 777 "$MNT/home/pi/docker_image_worker.tar.gz"
+
+docker image save "$DOCKER_IMAGE_WEB" | gzip > "$MNT/home/pi/docker_image_web.tar.gz"
+docker image save "$DOCKER_IMAGE_WORKER" | gzip > "$MNT/home/pi/docker_image_worker.tar.gz"
 
 sudo cp scripts/rc.local "$MNT/etc/rc.local"
 sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
@@ -90,6 +95,7 @@ sudo cp scripts/hostapdstart "$MNT/usr/local/bin/hostapdstart"
 sudo cp scripts/90-wireless.rules "$MNT/etc/udev/rules.d/"
 
 sudo cp -r ../status "$MNT/home/pi/"
+sudo cp ../../docker-compose.yml "$MNT/home/pi/"
 
 # set up the Access Point name/password defaults.
 sudo sed -i "s/APNAME/$APNAME/g" "$MNT/home/pi/hostapd.conf"

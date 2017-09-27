@@ -39,6 +39,8 @@ sudo chown -R pi:users /home/pi
 
 # ensure SSH is enabled
 touch /boot/ssh
+# make sure we don't have predictable network names enabled - horrible idea.
+echo ' net.ifnames=0 ' >> /boot/cmdline.txt
 
 rm /etc/ld.so.preload
 mv /etc/ld.so.preload-backup /etc/ld.so.preload

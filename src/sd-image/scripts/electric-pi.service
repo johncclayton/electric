@@ -10,6 +10,8 @@ ExecStop=/home/pi/stop_electric.sh
 User=pi
 Restart=on-failure
 RestartSec=8
+WorkingDirectory=/home/pi
+
 
 [Install]
 WantedBy=multi-user.target

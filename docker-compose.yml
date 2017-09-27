@@ -13,7 +13,7 @@ services:
       - 80:9000
 
   web:
-    image: johncclayton/electric-pi-web:${DOCKER_TAG}
+    image: johncclayton/electric-pi-web
 
     container_name: electric-web
     command: sh -x /www/run_gunicorn.sh
@@ -30,7 +30,7 @@ services:
       - worker
 
   worker:
-    image: johncclayton/electric-pi-worker:${DOCKER_TAG}
+    image: johncclayton/electric-pi-worker
 
     container_name: electric-worker
     command: sh -x /www/run_zmq_worker.sh

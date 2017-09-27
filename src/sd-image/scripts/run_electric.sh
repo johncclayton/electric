@@ -2,8 +2,12 @@
 
 set -x 
 
-IMAGE_NAME="scornflake/electric-pi"
-IMAGE_TARFILE="/home/pi/docker_image.tar.gz"
+IMAGE_NAME_WEB="johncclayton/electric-pi-web"
+IMAGE_NAME_WORKER="johncclayton/electric-pi-worker"
+
+IMAGE_TARFILE_WEB="/home/pi/docker_image_web.tar.gz"
+IMAGE_TARFILE_WORKER="/home/pi/docker_image_worker.tar.gz"
+
 IMAGE_EXISTS=5
 
 function have_internet() {
@@ -21,28 +25,40 @@ function have_internet() {
 }
 
 function image_exists() {
-    docker image inspect $IMAGE_NAME
+    docker image inspect $1
     IMAGE_EXISTS=$?
 }
 
-while [ $IMAGE_EXISTS -ne 0 ]; do
-    image_exists
+function unpack_or_fetch() {
+    NAME=$1
+    TARFILE=$2
 
-    if [ $IMAGE_EXISTS -ne 0 ]; then
-        echo "Cannot find $IMAGE_NAME image - checking for it in $IMAGE_TARFILE"
-        if [ -f "$IMAGE_TARFILE" ]; then
-            gunzip -c "$IMAGE_TARFILE" | docker image load && rm "$IMAGE_TARFILE"
-        else 
-            have_internet
+    echo "Cannot find image named $NAME - checking for it in tarfile $TARFILE"
+    if [ -f "$TARFILE" ]; then
+        gunzip -c "$TARFILE" | docker image load && rm "$TARFILE"
+    else
+        have_internet
 
-            if [ $? -eq 0 ]; then
-                echo "Still cannot find $IMAGE_NAME image - will try to pull it now..."
-                docker pull scornflake/electric-pi
-            else
-                echo "But gasp, oh no!  There is no internet so I can't pull it..."
-            fi
+        if [ $? -eq 0 ]; then
+            echo "Still cannot find image called $1 - will try to pull it now..."
+            docker pull $NAME
+        else
+            echo "But gasp, oh no!  There is no internet so I can't pull it..."
         fi
+    fi
+}
+
+while [ $IMAGE_EXISTS -ne 0 ]; do
+    image_exists $IMAGE_NAME_WEB
+    if [ $IMAGE_EXISTS -ne 0 ]; then
+        unpack_or_fetch $IMAGE_NAME_WEB $IMAGE_TARFILE_WEB
+    fi
+
+    image_exists $IMAGE_NAME_WORKER
+    if [ $IMAGE_EXISTS -ne 0 ]; then
+        unpack_or_fetch $IMAGE_NAME_WORKER $IMAGE_TARFILE_WORKER
     fi
 done
 
-docker run --rm --privileged --name electric-pi -v /dev/bus/usb:/dev/bus/usb -p 5000:5000 $IMAGE_NAME
+docker-compose up -d
+

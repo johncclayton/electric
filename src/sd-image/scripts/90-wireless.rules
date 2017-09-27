@@ -1,2 +1,1 @@
-ACTION=="add|change", SUBSYSTEM=="ieee80211", KERNEL=="phy0", \
-    RUN+="/usr/bin/iw phy %k interface add upa0 type __ap"
+ACTION=="add|change", SUBSYSTEM=="ieee80211", KERNEL=="phy0", RUN+="/usr/bin/iw phy %k interface add uap0 type __ap"
