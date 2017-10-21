@@ -4,7 +4,7 @@ pi3 wireless AP + Client on one Wifi interface.
 A phone can connect directly to either the "Electric" network (say, when you're at the field) and also have an IP address on your own internal network (when you're at home). This means you dont have to change anything in the app once it's configured the first time. Ta daa!
  - The server is hard configured to be at 192.168.10.1.
  - The pi3 picks up a new IP address when connected to your Wifi.
- - The app (TODO btw) tries *both* IP addresses when connecting, and picks one that works.
+ - **TODO**: The app tries *both* IP addresses when connecting, and picks one that works.
 
 Semi Automated Install
 --
