@@ -1,29 +1,27 @@
-Setting up a wireless AP + Client on one Wifi interface.
+pi3 wireless AP + Client on one Wifi interface.
+---
 
-A phone can connect directly to the "Electric" network, and it'll be given an IP address. The server is hard configured to be at 192.168.10.1.
+A phone can connect directly to either the "Electric" network (say, when you're at the field) and also have an IP address on your own internal network (when you're at home). This means you dont have to change anything in the app once it's configured the first time. Ta daa!
+ - The server is hard configured to be at 192.168.10.1.
+ - The pi3 picks up a new IP address when connected to your Wifi.
+ - The app (TODO btw) tries *both* IP addresses when connecting, and picks one that works.
 
-At home, you can have the pi3 also connected to a local network via Wifi.
-This means (once done), no more configuration needed. The app will work either from home
-or at the field.
-
-Full example files are included (within the /etc/ folder).
-These were taken from a working AP+Client install.
-
-The parts
+Semi Automated Install
 --
-- wlan0 is configured to be auto, dhcp. 
-- wpa_supplicant is used to auto join wlan0 to a home wifi network. 
+ - $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/get-wlan.sh | sudo bash -s
+ - Configure as needed
+ - cd /opt/wireless
+ - sudo ./install-wlan.sh
+
+So what's happening here?
+--
+- wlan0 is configured to be auto, dhcp.
+- wpa_supplicant is used to auto join wlan0 to a home wifi network.
 - hostapd advertises wlan1 (static, 192.168.1.10) to clients
 - dnsmasq is configured to only handout DHCP answers on wlan1
 - wlan0 is configured as a managed interface (iw dev)
 - rc.local runs a script that brings up wlan1 (iw dev add, adds an AP) on boot
 - rc.local restarts both hostapd and dnsmasq, because at boot time wlan1 doesn't exist and so the services don't start.
-
-Automated Install
---
- - $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/install-wlan.sh | sudo bash -s
- - then answer 'Y' :)
-
 
 Troubleshooting (hopefully in order)
 --
@@ -42,6 +40,7 @@ Troubleshooting (hopefully in order)
 
 Manual Install (don't do this, it's painful)
 ---
+Full configuration files are included (within the /etc/ folder).  They are what is used by the automated install, and were lovingly hand crafted from a working AP+Client install.
 
 - sudo apt-get update
 - sudo apt-get install dnsmasq hostapd
