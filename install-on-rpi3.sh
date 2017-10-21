@@ -20,3 +20,9 @@ echo "Latest version is: $VERSION_NUM"
 echo Running/upgrading with DOCKER_TAG=$VERSION_NUM, and execute docker-compose up -d
 DOCKER_TAG=$VERSION_NUM docker-compose up -d
 echo >LAST_DEPLOY $VERSION_NUM
+
+# get the script to setup the wireless
+#curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/install-wlan.sh
+#chmod +x install-wlan.sh
+#install-wlan.sh
+

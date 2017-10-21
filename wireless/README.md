@@ -19,8 +19,28 @@ The parts
 - rc.local runs a script that brings up wlan1 (iw dev add, adds an AP) on boot
 - rc.local restarts both hostapd and dnsmasq, because at boot time wlan1 doesn't exist and so the services don't start.
 
+Automated Install
+--
+ - $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/install-wlan.sh | sudo bash -s
+ - then answer 'Y' :)
 
-To install
+
+Troubleshooting (hopefully in order)
+--
+- iw
+  - does "iw dev" show both wlan0 and wlan1? If not the later, "good luck with that"
+- ifconfig
+  - Do wlan0 and wlan1 show up?  If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (start-wlan1.sh). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
+  - Does wlan0 have an ip? wpa_supplicant.conf have the right details?
+  - Does wlan1 have an ip? It'd better have! It's static. 192.168.10.1
+- NAT / Masquerading
+  - "sudo iptables -t nat -S" will show the nat table. You want to see:
+    - -A POSTROUTING -o wlan0 -j MASQUERADE
+    - (there should be more, but stuffed if I can get iptables to show me something sensible)
+
+
+
+Manual Install (don't do this, it's painful)
 ---
 
 - sudo apt-get update
@@ -37,23 +57,7 @@ To install
 - Setup default
   - /etc/default/hostapd: DAEMON_CONF="/etc/hostapd/hostapd.conf"
 - Make it run on start
-  - Copy start-wlan1.sh to /opt/wireless.
-  - chown root.root /opt/wireless/start-wlan1.sh
-  - chmod +x /opt/wireless/start-wlan1.sh
-  - rc.local: add /opt/wireless/start-wlan1.sh to the file someplace.
-  
-
-Troubleshooting (hopefully in order)
-- iw
-  - does "iw dev" show both wlan0 and wlan1? If not the later, "good luck with that"
-- ifconfig
-  - Do wlan0 and wlan1 show up?  If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (start-wlan1.sh). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
-  - Does wlan0 have an ip? wpa_supplicant.conf have the right details?
-  - Does wlan1 have an ip? It'd better have! It's static. 192.168.10.1
-- NAT / Masquerading
-  - "sudo iptables -t nat -S" will show the nat table. You want to see:
-    - -A POSTROUTING -o wlan0 -j MASQUERADE
-    - (there should be more, but stuffed if I can get iptables to show me something sensible)
-
-
-
+  - Copy start-wlan1.sh to /opt/wireless/scripts.
+  - chown root.root /opt/wireless/scripts/start-wlan1.sh
+  - chmod +x /opt/wireless/scripts/start-wlan1.sh
+  - rc.local: add /opt/wireless/scripts/start-wlan1.sh to the file someplace.

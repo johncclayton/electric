@@ -2,11 +2,13 @@
 
 set -e
 
-# lets just say we're gonna install EVERYING here
+# lets just say we're gonna install EVERYTHING here
 INSTALL_ROOT=/opt
 
-. wlan.conf
-. scripts/functions.sh
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (or sudo me)"
+  exit -2
+fi
 
 if [ ! -f /proc/device-tree/model ]; then
     echo "You're not running this on a pi3, are you?"
@@ -27,8 +29,14 @@ if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
 fi
 
+apt-get update
+apt-get install dnsmasq hostapd gawk
+
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
 tar xzvf wireless.tar.gz
+
+. ${INSTALL_ROOT}/wireless/scripts/functions.sh
+. ${INSTALL_ROOT}/wireless/config/wlan.conf
 
 if [ "$INSTALL_TO_ETCx" != "x" ]; then
     REPLY=$(ask_question "This will overwrite files in /etc. Sure?")
