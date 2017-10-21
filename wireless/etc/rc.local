@@ -11,7 +11,7 @@
 #
 # By default this script does nothing.
 
-/opt/wireless/start-wlan1.sh
+/opt/wireless/scripts/start-wlan1.sh
 
 exit 0
 
