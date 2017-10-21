@@ -127,8 +127,8 @@ Install Hypriot
     NOTE - hidapi can take 30 minutes to compile / install, make sure you have libusb-dev installed first
 
 ## To run the server
-1. ssh pi3 (pi3 is my SSH alias to the pi that I've just setup)
-
+1. Use whatever IP address / ssh alias, is right for you
+    $ ssh pi3 (pi3 is an ssh alias set in my ~/.ssh/config, not covered here)
     $ workon electric 
     $ ./run_server.sh --unicorns
     

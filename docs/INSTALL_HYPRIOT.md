@@ -20,7 +20,7 @@ Lets get the stuff
 
 Edit and Flash
 ==============
-1. Open device-init.yaml in an editor, and change the SSID and password to something that'll work on your LAN.
+1. Open device-init.yaml in an editor, and change the SSID and password to something valid (ie. to your Wifi router at home)
 1. From terminal:
   - flash -c device-init.yml hypriotos-rpi-v1.4.0.img
 
