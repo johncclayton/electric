@@ -1,4 +1,10 @@
-Setting up a wireless AP + Client on one Wifi interface
+Setting up a wireless AP + Client on one Wifi interface.
+
+A phone can connect directly to the "Electric" network, and it'll be given an IP address. The server is hard configured to be at 192.168.10.1.
+
+At home, you can have the pi3 also connected to a local network via Wifi.
+This means (once done), no more configuration needed. The app will work either from home
+or at the field.
 
 Full example files are included (within the /etc/ folder).
 These were taken from a working AP+Client install.
