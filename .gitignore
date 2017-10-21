@@ -10,3 +10,4 @@ src/server/electric/icharger/cplusplus/DemoJunsiModBusHID/DemoJunsiModBusHID/Deb
 *.ipch
 build.json
 main.js.map
+wireless/temp

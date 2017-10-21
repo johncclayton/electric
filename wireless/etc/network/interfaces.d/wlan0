@@ -2,5 +2,6 @@ allow-hotplug wlan0
 
 auto wlan0 
 iface wlan0 inet dhcp
+    post-up /home/pirate/scripts/after-wlan0-up
 
 wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf

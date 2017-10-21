@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# quit if we're called for the loopback
+if [ "$IFACE" = lo ]; then
+    exit 0
+fi
+
+# Cannot check for the actual channel until its connected.
+# So this script is run in /etc/network
+
+# Make sure the channel number is the same
+WLAN0_CHANNEL=$(iwlist channel 2>/dev/null | grep Current | grep 'Current' | gawk '{print gensub(/\(Channel ([0-9]+)\)/, "\\1", "g");  }' | awk '{print $4}')
+if [ "${WLAN0_CHANNEL}x" == "x" ]; then
+    echo "It doesn't look like wlan0 is connected to anything.... error!"
+    exit -2
+fi
+
+echo "wlan0 is on channel $WLAN0_CHANNEL"
+
+# Check iw wlan0 link, and make sure "Connected to" is there.
+# Only then can we find the channel and adjust hostapd config.
+
+# Find existing channel number in the hostapd.config
+EXISTING=99
+if [ -f /etc/hostapd/hostapd.conf ]; then
+    EXISTING=$(cat /etc/hostapd/hostapd.conf  | grep channel | awk -F= '{print $2}')
+fi
+
+if [ "$EXISTING" != "$WLAN0_CHANNEL" ]; then
+    echo "Changing hostapd channel to $WLAN0_CHANNEL..."
+    hostapd_template_str=$(cat /etc/hostapd/hostapd.conf.template)
+    eval "echo >/etc/hostapd/hostapd.conf \"${hostapd_template_str}\""
+
+    echo "Restarting hostapd..."
+    /etc/init.d/hostapd restart
+else
+    echo "hostapd channel already at $WLAN0_CHANNEL. No need to do anything"
+fi
+
+exit 0
