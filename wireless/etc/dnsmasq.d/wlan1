@@ -1,0 +1,4 @@
+interface=wlan1
+bind-interfaces   
+server=8.8.8.8
+dhcp-range=192.168.10.10,192.168.10.200,24h
