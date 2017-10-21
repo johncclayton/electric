@@ -24,7 +24,7 @@ curl --remote-name --location https://raw.githubusercontent.com/johncclayton/ele
 tar xzf wireless.tar.gz
 
 if [ "$INSTALL_TO_ETCx" != "x" ]; then
-    REPLY= ask_question "This will overwrite files in /etc. Sure? "
+    REPLY=$(ask_question "This will overwrite files in /etc. Sure? ")
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Aborted"
         exit -1
