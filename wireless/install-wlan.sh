@@ -38,7 +38,7 @@ if [ "$INSTALL_TO_ETCx" != "x" ]; then
     fi
 
     echo Installing files into /etc...
-    cp -av ${TEMP}/etc /etc
+    cp -avR ${TEMP}/etc/* /etc
 fi
 
 find ${TEMP}/scripts -type f | xargs chmod +x

@@ -33,6 +33,9 @@ if [ "$EXISTING" != "$WLAN0_CHANNEL" ]; then
 
     echo "Restarting hostapd..."
     /etc/init.d/hostapd restart
+
+    echo "Restarting dnsmasq..."
+    /etc/init.d/dnsmasq restart
 else
     echo "hostapd channel already at $WLAN0_CHANNEL. No need to do anything"
 fi
