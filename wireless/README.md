@@ -37,10 +37,10 @@ To install
 - Setup default
   - /etc/default/hostapd: DAEMON_CONF="/etc/hostapd/hostapd.conf"
 - Make it run on start
-  - Copy start-wlan1.sh to /home/pirate. 
-  - chown root.root /home/pirate/start-wlan1.sh
-  - chmod +x /home/pirate/start-wlan1.sh
-  - rc.local: add /home/pirate/start-wlan1.sh to the file someplace.
+  - Copy start-wlan1.sh to /opt/wireless.
+  - chown root.root /opt/wireless/start-wlan1.sh
+  - chmod +x /opt/wireless/start-wlan1.sh
+  - rc.local: add /opt/wireless/start-wlan1.sh to the file someplace.
   
 
 Troubleshooting (hopefully in order)

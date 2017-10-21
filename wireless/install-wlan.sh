@@ -2,6 +2,9 @@
 
 set -e
 
+# lets just say we're gonna install EVERYING here
+INSTALL_ROOT=/opt
+
 . wlan.conf
 . scripts/functions.sh
 
@@ -20,11 +23,15 @@ TEMP=${INSTALL_ROOT}/wireless
 mkdir -p ${TEMP}
 cd ${TEMP}
 
+if [ -f wireless.tar.gz ]; then
+    rm -f wireless.tar.gz
+fi
+
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
-tar xzf wireless.tar.gz
+tar xzvf wireless.tar.gz
 
 if [ "$INSTALL_TO_ETCx" != "x" ]; then
-    REPLY=$(ask_question "This will overwrite files in /etc. Sure? ")
+    REPLY=$(ask_question "This will overwrite files in /etc. Sure?")
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Aborted"
         exit -1
@@ -32,13 +39,7 @@ if [ "$INSTALL_TO_ETCx" != "x" ]; then
 
     echo Installing files into /etc...
     cp -av ${TEMP}/etc /etc
-else
-    REPLY=y
 fi
-
-# Copy the scripts we need
-mkdir -p ${INSTALL_ROOT}/scripts
-cp -av ${TEMP}/scripts ${INSTALL_ROOT}/scripts
 
 # Fix the WLAN0 ssid/password
 wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
