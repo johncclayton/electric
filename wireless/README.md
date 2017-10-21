@@ -3,6 +3,17 @@ Setting up a wireless AP + Client on one Wifi interface
 Full example files are included (within the /etc/ folder).
 These were taken from a working AP+Client install.
 
+The parts
+--
+- wlan0 is configured to be auto, dhcp. 
+- wpa_supplicant is used to auto join wlan0 to a home wifi network. 
+- hostapd advertises wlan1 (static, 192.168.1.10) to clients
+- dnsmasq is configured to only handout DHCP answers on wlan1
+- wlan0 is configured as a managed interface (iw dev)
+- rc.local runs a script that brings up wlan1 (iw dev add, adds an AP) on boot
+- rc.local restarts both hostapd and dnsmasq, because at boot time wlan1 doesn't exist and so the services don't start.
+
+
 To install
 ---
 
@@ -25,4 +36,18 @@ To install
   - chmod +x /home/pirate/start-wlan1.sh
   - rc.local: add /home/pirate/start-wlan1.sh to the file someplace.
   
+
+Troubleshooting (hopefully in order)
+- iw
+  - does "iw dev" show both wlan0 and wlan1? If not the later, "good luck with that"
+- ifconfig
+  - Do wlan0 and wlan1 show up?  If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (start-wlan1.sh). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
+  - Does wlan0 have an ip? wpa_supplicant.conf have the right details?
+  - Does wlan1 have an ip? It'd better have! It's static. 192.168.10.1
+- NAT / Masquerading
+  - "sudo iptables -t nat -S" will show the nat table. You want to see:
+    - -A POSTROUTING -o wlan0 -j MASQUERADE
+    - (there should be more, but stuffed if I can get iptables to show me something sensible)
+
+
 
