@@ -41,6 +41,8 @@ if [ "$INSTALL_TO_ETCx" != "x" ]; then
     cp -av ${TEMP}/etc /etc
 fi
 
+find ${TEMP}/scripts -type f | xargs chmod +x
+
 # Fix the WLAN0 ssid/password
 wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
 
