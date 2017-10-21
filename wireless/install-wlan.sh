@@ -38,9 +38,14 @@ tar xzvf wireless.tar.gz
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
 
+# Allow override
 if [ -f "~/.wlan.conf" ]; then
+    echo "Using values from ~/.wlan.conf..."
     . "~/.wlan.conf"
 end
 
 echo "Ready to configure."
 echo "Please modify /opt/wireless/wlan.conf to your liking"
+
+exit 0;
+
