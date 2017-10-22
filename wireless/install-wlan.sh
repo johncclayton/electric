@@ -29,8 +29,8 @@ if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
 fi
 
-apt-get update
-apt-get install dnsmasq hostapd gawk
+#apt-get update
+#apt-get install dnsmasq hostapd gawk
 
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
 tar xzvf wireless.tar.gz
