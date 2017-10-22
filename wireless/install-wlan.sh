@@ -27,17 +27,24 @@ TEMP=${INSTALL_ROOT}/wireless
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
 
 # Allow override
-if [ -f "~/.wlan.conf" ]; then
-    echo "Using values from ~/.wlan.conf..."
-    . "~/.wlan.conf"
-end
+if [ -f "${HOME}/.wlan.conf" ]; then
+    echo "Using values from ${HOME}/.wlan.conf..."
+    . "${HOME}/.wlan.conf"
+fi
 
 echo Installing files into /etc...
 cp -avR ${TEMP}/etc/* /etc
 
-# TODO: do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
+#TODO: do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
+
+HAVE_WLAN1=$(iw dev | grep 'wlan1')
+if [ "${HAVE_WLAN1}" == "" ]; then
+    echo "Adding wlan1 AP interface..."
+    /opt/wireless/scripts/start-wlan1.sh
+fi
 
 # Fix the WLAN0 ssid/password
+echo "Configuring wlan0 to use $WLAN0_SSID"
 wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
 
 # Bounce the interface to get wpa_supplicant to do its thing
