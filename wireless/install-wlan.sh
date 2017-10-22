@@ -35,8 +35,7 @@ fi
 echo Installing files into /etc...
 cp -avR ${TEMP}/etc/* /etc
 
-#TODO: do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
-
+# do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
 HAVE_WLAN1=$(iw dev | grep 'wlan1')
 if [ "${HAVE_WLAN1}" == "" ]; then
     echo "Adding wlan1 AP interface..."
