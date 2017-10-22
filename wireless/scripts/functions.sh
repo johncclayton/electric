@@ -2,7 +2,7 @@
 
 
 ask_question() {
-    read -p "$1 [y/N]  "  -n 1 -r
+    read -p "$1 [y/N]  " -n 1 -r
     echo $REPLY
 }
 
