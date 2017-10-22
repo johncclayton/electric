@@ -19,16 +19,21 @@ So what's happening here?
 --
 - wlan0 is configured to be auto, dhcp.
 - wpa_supplicant is used to auto join wlan0 to a home wifi network.
-- hostapd advertises wlan1 (static, 192.168.1.10) to clients
-- dnsmasq is configured to only handout DHCP answers on wlan1
+- hostapd advertises wlan1 (static, 192.168.10.1) to clients
+- dnsmasq is configured to handout DHCP answers on wlan1 only
 - wlan0 is configured as a managed interface (iw dev)
-- rc.local runs a script that brings up wlan1 (iw dev add, adds an AP) on boot
+- rc.local runs a script that brings up wlan1 (as an AP) on boot
 - rc.local restarts both hostapd and dnsmasq, because at boot time wlan1 doesn't exist and so the services don't start.
 
 Troubleshooting (hopefully in order)
 --
 - iw
-  - does "iw dev" show both wlan0 and wlan1? If not the later, "good luck with that"
+  - does "iw dev" show wlan0 as being in "managed" mode?
+    - if not, you need to change it to managed (TODO). You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
+  - does "iw dev" show both wlan0 and wlan1?
+    - If you do a **iw dev wlan0 interface add wlan1 type __ap**, does an "iw dev" now show wlan1?
+    - If not, erm. damn. "Good luck with that".
+    - You are using a pi3, right?
 - ifconfig
   - Do wlan0 and wlan1 show up?  If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (start-wlan1.sh). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
   - Does wlan0 have an ip? wpa_supplicant.conf have the right details?
