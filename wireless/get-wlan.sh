@@ -35,31 +35,18 @@ fi
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
 tar xzvf wireless.tar.gz
 
+find ${TEMP}/scripts -type f | xargs chmod +x
+
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
 
-if [ "$INSTALL_TO_ETCx" != "x" ]; then
-    REPLY=$(ask_question "This will overwrite files in /etc. Sure?")
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Aborted"
-        exit -1
-    fi
+echo "Ready to configure."
+echo "Please modify /opt/wireless/wlan.conf, to specify a WLAN SSID and password"
+echo "Then run /opt/wireless/scripts/install-wlan.sh"
 
-    echo Installing files into /etc...
-    cp -avR ${TEMP}/etc/* /etc
+if [ -f wireless.tar.gz ]; then
+    rm -f wireless.tar.gz
 fi
 
-find ${TEMP}/scripts -type f | xargs chmod +x
-
-# TODO: do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
-
-# Fix the WLAN0 ssid/password
-wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
-
-# Bounce the interface to get wpa_supplicant to do its thing
-ifdown wlan0
-ifup wlan0
-
-# Cannot check for the actual channel until its connected.
-# This is done in a post-up script of wlan0 (see after-wlan0-up)
+exit 0;
 

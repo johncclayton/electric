@@ -22,18 +22,6 @@ if [ ${PI_MODEL} != 'RaspberryPi3' ]; then
 fi
 
 TEMP=${INSTALL_ROOT}/wireless
-mkdir -p ${TEMP}
-cd ${TEMP}
-
-if [ -f wireless.tar.gz ]; then
-    rm -f wireless.tar.gz
-fi
-
-#apt-get update
-#apt-get install dnsmasq hostapd gawk
-
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
-tar xzvf wireless.tar.gz
 
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
@@ -44,8 +32,17 @@ if [ -f "~/.wlan.conf" ]; then
     . "~/.wlan.conf"
 end
 
-echo "Ready to configure."
-echo "Please modify /opt/wireless/wlan.conf to your liking"
+echo Installing files into /etc...
+cp -avR ${TEMP}/etc/* /etc
 
-exit 0;
+# TODO: do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
 
+# Fix the WLAN0 ssid/password
+wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
+
+# Bounce the interface to get wpa_supplicant to do its thing
+ifdown wlan0
+ifup wlan0
+
+# Cannot check for the actual channel until its connected.
+# This is done in a post-up script of wlan0 (see after-wlan0-up)
