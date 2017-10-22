@@ -33,7 +33,7 @@ fi
 #apt-get install dnsmasq hostapd gawk
 
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
-tar xzvf wireless.tar.gz
+tar xzf wireless.tar.gz
 
 find ${TEMP}/scripts -type f | xargs chmod +x
 
