@@ -90,13 +90,13 @@ Install Hypriot
     $ sudo apt-get upgrade
     $ sudo apt-get install gcc python-dev
     
-4. pull down pip
+4. pull down + install pip
 
     $ wget https://bootstrap.pypa.io/get-pip.py
     $ sudo python get-pip.py
     $ sudo pip install virtualenv virtualenvwrapper
     
-5. adjust your term to run virtualenvwrapper on login
+5. adjust your terminal to run virtualenvwrapper on login
 
     $ echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc 
     
@@ -105,7 +105,10 @@ Install Hypriot
 
     $ mkvirtualenv electric
     
-8. nano ~/.virtualenvs/electric/bin/postactivate, and add "cd ~/electric/src/server"
+8. auto cd into the electric folder when running 'workon'
+
+    $ nano ~/.virtualenvs/electric/bin/postactivate, and add "cd ~/electric/src/server"
+
 9. git clone https://github.com/johncclayton/electric.git
 10. If you are setting up PyCharm, remember to use 'workon electric' to get the right python path.  
     1. The 'run configuration' will need a source mapping from your dev system to the remote destination 
@@ -124,7 +127,8 @@ Install Hypriot
     $ pip install hidapi
     $ pip install -r requirements.txt
     
-    NOTE - hidapi can take 30 minutes to compile / install, make sure you have libusb-dev installed first
+    NOTE - hidapi takes about 30 minutes to compile + install
+    (make sure you have libusb-dev installed first, this is normally taken care of above, step 11)
 
 ## To run the server
 1. Use whatever IP address / ssh alias, is right for you
