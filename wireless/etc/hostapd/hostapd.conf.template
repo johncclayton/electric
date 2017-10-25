@@ -1,6 +1,6 @@
 interface=wlan1
 driver=nl80211
-ssid=Electric
+ssid=${WLAN1_NAME}
 hw_mode=g
 channel=${WLAN0_CHANNEL}
 wmm_enabled=0
