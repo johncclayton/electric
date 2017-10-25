@@ -36,10 +36,13 @@ echo Installing files into /etc...
 cp -avR ${TEMP}/etc/* /etc
 
 # do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
+# TODO: I don't think this condition fires. needs more work.
+# TODO: idea is that if wlan1 isn't present, we add it. Seems to get skipped?
 HAVE_WLAN1=$(iw dev | grep 'wlan1')
+echo "Check value: ${HAVE_WLAN1}x"
 if [ "${HAVE_WLAN1}x" == "x" ]; then
     echo "Adding wlan1 AP interface..."
-    /opt/wireless/scripts/start-wlan1.sh
+        /opt/wireless/scripts/start-wlan1.sh
 fi
 
 # Fix the WLAN0 ssid/password
