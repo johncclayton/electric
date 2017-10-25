@@ -15,9 +15,13 @@ Semi Automated Install
  - cd /opt/wireless/scripts
  - sudo ./install-wlan.sh
  - If it fails with:
+
+      ```
       wpa_supplicant: /sbin/wpa_supplicant daemon failed to start
       run-parts: /etc/network/if-pre-up.d/wpasupplicant exited with return code 1
       Failed to bring up wlan0.
+      ```
+
    Just run the installer again.
 
 So what's happening here?
