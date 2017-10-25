@@ -26,7 +26,7 @@ building the package and distributing it to the live PyPi repository.
 ### Steps to publish to PyPi 
 
 #### Prepare setup.py and decide on a version
-PyPi doesn't allow overwrites - if you want to publish, you need to do so to a new version number.  Check the current
+PyPi doesn't allow overwrites. You cannot publish 1.0.0 and then re-publish 1.0.0. If you want to publish, you need to do so to a new version number.  Check the current
 PyPi repo for the current version first and then increment based on your change.
 
 The distribute.py script uses the current requirements files and configuration to regenerate a suitable setup.py
@@ -65,6 +65,16 @@ connection; one for the worker to use when it binds to its interface.
 
 Note that on the worker the default is to listen on all interfaces.  
 
+# setting up a Raspberry Pi for dev using Hypriot OS (the easy way)
+
+    1. https://github.com/hypriot/flash
+    1. log into the pi
+    1. curl --location https://raw.githubusercontent.com/johncclayton/electric/master/development_part_1.sh
+    1. curl --location https://raw.githubusercontent.com/johncclayton/electric/master/development_part_2.sh
+    1. run development_part_1.sh
+    1. relogin to the pi
+    1. run development_part_2.sh
+
 # setting up a Raspberry Pi for dev using Hypriot OS
 
 Read these instructions all the way through - to the bottom of the file BEFORE beginning - there is useful info everywhere.  
@@ -76,19 +86,12 @@ Remember to do the following, so that a user-space program can access the iCharg
 Install Hypriot
 
 1. https://github.com/hypriot/flash
-1. enable WIFI, log in and edit /boot/device-init.yaml
 
-    wifi:
-    interfaces:
-      wlan0:
-        ssid: "MyNetwork"
-        password: "secret_password"
-
-3. get the system updated
+1. get the system updated (this isn't optional btw)
 
     $ sudo apt-get update 
     $ sudo apt-get upgrade
-    $ sudo apt-get install gcc python-dev
+    $ sudo apt-get install gcc python-dev g++
     
 4. pull down + install pip
 
@@ -105,9 +108,9 @@ Install Hypriot
 
     $ mkvirtualenv electric
     
-8. auto cd into the electric folder when running 'workon'
+8. auto cd into the electric folder when running 'workon electric'
 
-    $ nano ~/.virtualenvs/electric/bin/postactivate, and add "cd ~/electric/src/server"
+    $ echo 'cd ~/electric/src/server' >> ~/.virtualenvs/electric/bin/postactivate
 
 9. git clone https://github.com/johncclayton/electric.git
 10. If you are setting up PyCharm, remember to use 'workon electric' to get the right python path.  
@@ -122,24 +125,17 @@ Install Hypriot
     1. **noobs**: sudo apt-get install libudev-dev libusb-1.0-0.dev gcc cython cython-dev
    
 12. the pull in the required python modules
-
-    $ workon electric
-    $ pip install hidapi
-    $ pip install -r requirements.txt
-    
-    NOTE - hidapi takes about 30 minutes to compile + install
-    (make sure you have libusb-dev installed first, this is normally taken care of above, step 11)
+    1. workon electric
+    1. pip install hidapi (**NOTE: hidapi takes about 30 minutes to compile + install**. Make sure you have libusb-dev installed first, this is normally taken care of above, step 11)
+    1. pip install -r requirements-worker.txt
+    1. pip install -r requirements-web.txt
 
 ## To run the server
 1. Use whatever IP address / ssh alias, is right for you
-    $ ssh pi3 (pi3 is an ssh alias set in my ~/.ssh/config, not covered here)
-    $ workon electric 
-    $ ./run_server.sh --unicorns
+    1. ssh pi3 (pi3 is an ssh alias set in my ~/.ssh/config, not covered here)
+    1. workon electric
+    1. sudo ./run_zmq_worker
+    1. Then, in another shell: ./run_flask.sh
     
-    or
-    
-    $ workon electric 
-    $ cd ~/electric/src/server 
-    $ PYTHONPATH=. sh ./run_server.sh
-
-
+run_zmq_worker: starts the process that talks directly to the charger.
+run_flask: starts the web server that provides a REST API to the charger.

@@ -42,7 +42,7 @@ HAVE_WLAN1=$(iw dev | grep 'wlan1')
 echo "Check value: ${HAVE_WLAN1}x"
 if [ "${HAVE_WLAN1}x" == "x" ]; then
     echo "Adding wlan1 AP interface..."
-        /opt/wireless/scripts/start-wlan1.sh
+    /opt/wireless/scripts/start-wlan1.sh
 fi
 
 # Fix the WLAN0 ssid/password
