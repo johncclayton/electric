@@ -27,7 +27,8 @@ TEMP=${INSTALL_ROOT}/wireless
 # Allow override
 if [ -f "${HOME}/.wlan.conf" ]; then
     echo "Using values from ${HOME}/.wlan.conf..."
-    . "${HOME}/.wlan.conf"
+    source "${HOME}/.wlan.conf"
+    echo "WLAN1 name is ${WLAN1_NAME}"
 fi
 
 echo Installing files into /etc...

@@ -2,6 +2,12 @@
 
 . /opt/wireless/config/wlan.conf
 
+# Allow override
+if [ -f "${HOME}/.wlan.conf" ]; then
+    echo "Using values from ${HOME}/.wlan.conf..."
+    source "${HOME}/.wlan.conf"
+fi
+
 # quit if we're called for the loopback
 if [ "$IFACE" = lo ]; then
     exit 0
@@ -30,6 +36,8 @@ fi
 
 if [ "$EXISTING" != "$WLAN0_CHANNEL" ]; then
     echo "Changing hostapd channel to $WLAN0_CHANNEL..."
+    echo "WLAN1 name will be: ${WLAN1_NAME}"
+
     hostapd_template_str=$(cat /etc/hostapd/hostapd.conf.template)
     eval "echo >/etc/hostapd/hostapd.conf \"${hostapd_template_str}\""
 
