@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. /opt/wireless/conf/wlan.conf
+. /opt/wireless/config/wlan.conf
 
 # quit if we're called for the loopback
 if [ "$IFACE" = lo ]; then
