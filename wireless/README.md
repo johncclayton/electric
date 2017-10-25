@@ -8,11 +8,11 @@ A phone can connect directly to either the "Electric" network (say, when you're 
 
 Semi Automated Install
 --
- - apt-get update
- - apt-get install dnsmasq hostapd gawk
- - $ curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/get-wlan.sh | sudo bash -s
- - Configure as needed
- - cd /opt/wireless
+ - sudo apt-get update
+ - sudo apt-get install dnsmasq hostapd gawk
+ - curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/get-wlan.sh | sudo bash -s
+ - Configure as needed, i.e: edit the wlan.conf file in /opt/wireless/conf
+ - cd /opt/wireless/scripts
  - sudo ./install-wlan.sh
 
 So what's happening here?
