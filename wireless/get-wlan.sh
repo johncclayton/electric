@@ -41,8 +41,9 @@ find ${TEMP}/scripts -type f | xargs chmod +x
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
 
 echo "Ready to configure."
-echo "Please modify /opt/wireless/wlan.conf, to specify a WLAN SSID and password"
-echo "Then run /opt/wireless/scripts/install-wlan.sh"
+echo "Please modify the wlan.conf, to specify a WLAN SSID and password. Suitable command follows..."
+echo "sudo nano /opt/wireless/config/wlan.conf"
+echo "Then run sudo /opt/wireless/scripts/install-wlan.sh"
 
 if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
