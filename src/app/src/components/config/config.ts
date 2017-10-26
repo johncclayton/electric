@@ -34,13 +34,15 @@ export class ConfigComponent {
     }
 
     autoDetect() {
-        console.log("Have: ", this.config.discoveredServers.join(","));
-        if (this.config.discoveredServers.length > 0) {
-            if (this.lastUsedDiscoveryIndex > this.config.discoveredServers.length - 1) {
-                this.lastUsedDiscoveryIndex = 0;
+        if (this.config.discoveredServers != null) {
+            console.log("Have: ", this.config.discoveredServers.join(","));
+            if (this.config.discoveredServers.length > 0) {
+                if (this.lastUsedDiscoveryIndex > this.config.discoveredServers.length - 1) {
+                    this.lastUsedDiscoveryIndex = 0;
+                }
+                this.config.ipAddress = this.config.discoveredServers[this.lastUsedDiscoveryIndex];
+                this.lastUsedDiscoveryIndex++;
             }
-            this.config.ipAddress = this.config.discoveredServers[this.lastUsedDiscoveryIndex];
-            this.lastUsedDiscoveryIndex++;
         }
     }
 

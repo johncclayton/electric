@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 import {iChargerService} from "../../../services/icharger.service";
+import * as _ from "lodash";
 
 
 @Injectable()
@@ -24,13 +25,18 @@ export class ConfigurationActions {
     }
 
     addDiscoveredServer(ipAddress: string) {
-        let existing = this.ngRedux.getState().config;
+        let config = this.ngRedux.getState().config;
         let newState = {
-            discoveredServers: [
-                ...existing.discoveredServers,
+            // discoveredServers: _.uniq([
+            //     ...config.discoveredServers,
+            //     ipAddress
+            // ])
+            discoveredServers:[
+                ...config.discoveredServers,
                 ipAddress
             ]
         };
+
         this.updateConfiguration(newState);
     }
 
