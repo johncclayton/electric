@@ -51,9 +51,8 @@ export class ConfigPage {
     }
 
     canUseZeroconf(): boolean {
-        // return false;
-        return this.platform.is('cordova');
-        // return this.platform.is('ios') || this.platform.is('android');
+        let has_cordova = this.platform.is('cordova');
+        return has_cordova && this.isProduction;
     }
 
     canUseDeploy(): boolean {
