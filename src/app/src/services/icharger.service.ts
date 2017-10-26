@@ -139,7 +139,7 @@ export class iChargerService {
                 let state = this.ngRedux.getState();
                 if (state.ui.disconnected) {
                     config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2;
-                    console.log("Switch to connection index: ", config.lastConnectionIndex);
+                    // console.log("Switch to connection index: ", config.lastConnectionIndex);
                 }
 
                 let url = this.getChargerURL("/unified");
