@@ -7,8 +7,10 @@ running on [your mobile device](/docs/GET_THE_APP.md).
 
 ![Demo](/docs/images/teaser.gif "Charge Demo!")
 
-# I really want to do all the stuff manually
-Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.
+# Supported Platforms
+At this time we will only support the Pi3. Nothing else. It's purely so we can focus on dev with a known platform. Supporting other stuff takes time, testing, time... and more time :)  Something we don't have enough of as it is!
+
+Having said that, if you want to add it (and maintain it!) this is all open source and available to contribute to. Go ahead!
 
 # I just want to run this Right Now (tm)
 Okay, okay - relax. Take a breath. We hear you.  
@@ -42,3 +44,6 @@ There's even a colourful flashy dashboard that makes it look like we know what w
 
 
 With that done, you should be able to [get the app](/docs/GET_THE_APP.md) going!
+
+# I really want to do all the stuff manually
+Check out the README.md in the src/server/ directory - this tells you how to get started as a beta tester.
