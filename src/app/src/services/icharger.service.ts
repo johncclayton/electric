@@ -13,6 +13,7 @@ import {IChargerState} from "../models/state/reducers/charger";
 import {Vibration} from "@ionic-native/vibration";
 import {Subject} from "rxjs/Subject";
 import {LocalNotifications} from "@ionic-native/local-notifications";
+import {IUIState} from "../models/state/reducers/ui";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -51,6 +52,8 @@ export class iChargerService {
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
+    private lastUsedIPAddressIndex = 0;
+
     ngOnDestroy() {
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
@@ -66,7 +69,7 @@ export class iChargerService {
                        private localNotifications: LocalNotifications,
                        private ngRedux: NgRedux<IAppState>) {
 
-
+        this.lastUsedIPAddressIndex = 0;
         this.getChargerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
@@ -131,6 +134,14 @@ export class iChargerService {
 
         return Observable.timer(interval, interval)
             .flatMap(v => {
+                // If disconnected, do a round robbin between various known IP addresses
+                let config = this.getConfig();
+                let state = this.ngRedux.getState();
+                if (state.ui.disconnected) {
+                    config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2;
+                    console.log("Switch to connection index: ", config.lastConnectionIndex);
+                }
+
                 let url = this.getChargerURL("/unified");
                 return this.http.get(url);
             }).map(r => {
@@ -154,9 +165,20 @@ export class iChargerService {
             .retry();
     }
 
+    public static getHostNameUsingConfigAndState(config: IConfig, ui: IUIState) {
+        // If on index 0, use private WLAN address
+        if (config.lastConnectionIndex == 0) {
+            return "192.168.10.1:" + config.port;
+        }
+
+        // If disconnected, do a round robbin between various known IP addresses
+        return config.ipAddress + ":" + config.port;
+    }
+
     getHostName(): string {
         let config = this.getConfig();
-        return config.ipAddress + ":" + config.port;
+        let state = this.ngRedux.getState();
+        return iChargerService.getHostNameUsingConfigAndState(config, state.ui);
     }
 
     // Gets the status of the charger

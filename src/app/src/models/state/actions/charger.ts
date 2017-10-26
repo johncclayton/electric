@@ -15,10 +15,6 @@ export class ChargerActions {
         return this.ngRedux.getState()['config'];
     }
 
-    getHostName(): string {
-        return this.config.ipAddress + ":" + this.config.port;
-    }
-
     refreshStateFromCharger(unifiedState) {
         let cellLimit = this.ngRedux.getState().config.cellLimit;
         this.ngRedux.dispatch({

@@ -24,6 +24,11 @@ export interface IConfig {
     vibrateWhenDone: boolean,
     notificationWhenDone: boolean,
 
+    // Used to understand what our IP address is. either 192.168.10.1 or self.ipAddress.
+    connectedToPrivateWLAN: boolean,
+    // 0 = 192.168.10.1,   1 = ipAddress
+    lastConnectionIndex: number,
+
     charge_settings: IChargeSettings;
 }
 
@@ -49,6 +54,9 @@ export const configurationDefaults: IConfig = {
     mockCharger: false,
     vibrateWhenDone: false,
     notificationWhenDone: false,
+
+    connectedToPrivateWLAN: false,
+    lastConnectionIndex: 0,
 
     charge_settings: chargerDefaults
 };
