@@ -35,8 +35,10 @@ So what's happening here?
 - rc.local restarts both hostapd and dnsmasq, because at boot time wlan1 doesn't exist and so the services don't start.
 
 Troubleshooting (hopefully in order)
---
-- You did remove /boot/device-init.yaml right? Check it's not there.
+------------------------------------
+- Check /opt/wireless/config/wlan.conf. Are you **sure** **sure** **sure** that the SSID and password are correct? If not, wlan0 won't connect.
+- You did remove /boot/device-init.yaml right? Check it's not there. If it is preset, wlan0 won't connect because the default hypriot "device-init" will overwrite wlan0, ruining all my hard work :-(
+- /etc/rc.local **should not call a script**, /opt/wireless/scripts/... (it did in a past version. it should not now)
 - Check /etc/network/interfaces.d/wlan0. If should look like this:
 
     ```
@@ -49,7 +51,7 @@ Troubleshooting (hopefully in order)
 
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
     ```
-
+- Check the 'after wlan0 is up' script: https://github.com/johncclayton/electric/blob/master/wireless/scripts/after-wlan0-up. Check that your local copy in /opt/wireless/scripts is identical.  This is important because this script is responsible for bringing up wlan1 (static 192.168.10.1) and also for ensuring the channel number of hostapd is the same as what the wlan0 network is using.
 - Linux Wirelss (aka: iw)
   - does "iw dev" show wlan0 as being in "managed" mode?
     - if not, you need to change it to managed. You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
