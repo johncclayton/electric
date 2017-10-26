@@ -9,7 +9,7 @@ A phone can connect directly to either the "Electric" network (say, when you're 
 Semi Automated Install
 --
  - sudo apt-get update
- - sudo apt-get install dnsmasq hostapd gawk
+ - sudo apt-get install dnsmasq hostapd gawk avahi-daemon
  - curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/get-wlan.sh | sudo bash -s
  - Configure as needed, i.e: edit the wlan.conf file in /opt/wireless/conf
  - cd /opt/wireless/scripts
