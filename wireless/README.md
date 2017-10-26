@@ -40,7 +40,6 @@ Troubleshooting (hopefully in order)
 - You did remove /boot/device-init.yaml right? Check it's not there. If it is preset, wlan0 won't connect because the default hypriot "device-init" will overwrite wlan0, ruining all my hard work :-(
 - /etc/rc.local **should not call a script**, /opt/wireless/scripts/... (it did in a past version. it should not now)
 - Check /etc/network/interfaces.d/wlan0. If should look like this:
-
     ```
     allow-hotplug wlan0
 
@@ -51,12 +50,12 @@ Troubleshooting (hopefully in order)
 
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
     ```
-- Check the 'after wlan0 is up' script: https://github.com/johncclayton/electric/blob/master/wireless/scripts/after-wlan0-up. Check that your local copy in /opt/wireless/scripts is identical.  This is important because this script is responsible for bringing up wlan1 (static 192.168.10.1) and also for ensuring the channel number of hostapd is the same as what the wlan0 network is using.
-- Linux Wirelss (aka: iw)
-  - does "iw dev" show wlan0 as being in "managed" mode?
-    - if not, you need to change it to managed. You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
+- Check the 'after wlan0 is up' script: https://github.com/johncclayton/electric/blob/master/wireless/scripts/after-wlan0-up.
+    - Check that your local copy in /opt/wireless/scripts is identical.
+    - This is important because this script is responsible for bringing up wlan1 (static 192.168.10.1) and also for ensuring the channel number of hostapd is the same as what the wlan0 network is using.
+- Linux Wireless (aka: iw)
+  - does "iw dev" show wlan0 as being in "managed" mode? if not, you need to change it to "managed". You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
   - does "iw dev" show both wlan0 and wlan1?
-
     ```
     phy#0
     	Interface wlan1
@@ -76,6 +75,17 @@ Troubleshooting (hopefully in order)
         - Do a **iw dev wlan0 interface add wlan1 type __ap**, does an "iw dev" now show wlan1?
         - If not, erm. damn. "Good luck with that".
         - You are using a pi3, right?
+    - Do a "iwlist channel" from terminal. Here's what mine is like:
+     ```
+     $ iwlist channel
+     vethe2c4787  no frequency information.
+     wlan0     11 channels in total; available frequencies :
+               Channel 01 : 2.412 GHz
+               ...
+               Channel 11 : 2.462 GHz
+               Current Frequency:2.422 GHz (Channel 3)  <---- THIS BIT IS IMPORTANT
+       ```
+       Make sure /etc/hostapd/hostapd.conf **channel** is the same (otherwise none of this will work, it'll hang, look like a dns problem, your eth0 will also stop working, dragons will spawn and the sun will explode)
 - ifconfig
   - Do wlan0 and wlan1 show up?
     ```
