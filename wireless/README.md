@@ -36,16 +36,79 @@ So what's happening here?
 
 Troubleshooting (hopefully in order)
 --
-- iw
+- You did remove /boot/device-init.yaml right? Check it's not there.
+- Check /etc/network/interfaces.d/wlan0. If should look like this:
+
+    ```
+    allow-hotplug wlan0
+
+    auto wlan0
+    iface wlan0 inet dhcp
+        post-up /opt/wireless/scripts/after-wlan0-up
+        post-down /opt/wireless/scripts/after-wlan0-down
+
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+    ```
+
+- Linux Wirelss (aka: iw)
   - does "iw dev" show wlan0 as being in "managed" mode?
-    - if not, you need to change it to managed (TODO). You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
+    - if not, you need to change it to managed. You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
   - does "iw dev" show both wlan0 and wlan1?
-    - If you do a **iw dev wlan0 interface add wlan1 type __ap**, does an "iw dev" now show wlan1?
-    - If not, erm. damn. "Good luck with that".
-    - You are using a pi3, right?
+
+    ```
+    phy#0
+    	Interface wlan1
+    		ifindex 4
+    		wdev 0x2
+    		addr b8:27:eb:dd:d1:77
+    		ssid Electric Clear
+    		type AP
+    	Interface wlan0
+    		ifindex 3
+    		wdev 0x1
+    		addr b8:27:eb:dd:d1:77
+    		ssid Land of Meat
+    		type managed
+    ```
+    - If no wlan1:
+        - Do a **iw dev wlan0 interface add wlan1 type __ap**, does an "iw dev" now show wlan1?
+        - If not, erm. damn. "Good luck with that".
+        - You are using a pi3, right?
 - ifconfig
-  - Do wlan0 and wlan1 show up?  If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (start-wlan1.sh). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
-  - Does wlan0 have an ip? wpa_supplicant.conf have the right details?
+  - Do wlan0 and wlan1 show up?
+    ```
+    wlan0     Link encap:Ethernet  HWaddr b8:27:eb:dd:d1:77
+              inet addr:192.168.1.30  Bcast:192.168.1.255  Mask:255.255.255.0
+              inet6 addr: 2002:cb56:cef0:0:ba27:ebff:fedd:d177/64 Scope:Global
+              inet6 addr: fe80::ba27:ebff:fedd:d177/64 Scope:Link
+              UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+              RX packets:553 errors:0 dropped:12 overruns:0 frame:0
+              TX packets:157 errors:0 dropped:0 overruns:0 carrier:0
+              collisions:0 txqueuelen:1000
+              RX bytes:97540 (95.2 KiB)  TX bytes:24817 (24.2 KiB)
+
+    wlan1     Link encap:Ethernet  HWaddr b8:27:eb:dd:d1:77
+              inet addr:192.168.10.1  Bcast:192.168.10.255  Mask:255.255.255.0
+              inet6 addr: fe80::ba27:ebff:fedd:d177/64 Scope:Link
+              UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+              RX packets:2 errors:0 dropped:2 overruns:0 frame:0
+              TX packets:32 errors:0 dropped:0 overruns:0 carrier:0
+              collisions:0 txqueuelen:1000
+              RX bytes:120 (120.0 B)  TX bytes:5578 (5.4 KiB)
+
+    ```
+  - If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (see /opt/wireless/scripts/after-wlan0-up). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
+  - Does wlan0 have an ip?
+  - Does /etc/wpa_supplicant/wpa_supplicant.conf have the right details? i.e: an ssid and psk?
+
+    ```
+    network={
+            ssid="Land of Meat"
+            #psk="blah blah blah"
+            psk=4510ad5bdbee70922cc907bb9f7c3504d29ffedf31afb2c60d80774925e3215c
+    }
+    /etc/wpa_supplicant/wpa_supplicant.conf (END)
+    ```
   - Does wlan1 have an ip? It'd better have! It's static. 192.168.10.1
 - NAT / Masquerading
   - "sudo iptables -t nat -S" will show the nat table. You want to see:
