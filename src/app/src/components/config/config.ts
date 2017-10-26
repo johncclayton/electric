@@ -17,14 +17,31 @@ export class ConfigComponent {
     @Input() ui?: IUIState;
     @Input() config?: IConfig;
     @Input() charger?: IChargerState;
+    @Input() showAutoButton: boolean;
 
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() testFunc: EventEmitter<any> = new EventEmitter();
 
+    private lastUsedDiscoveryIndex = 0;
+
     constructor(public navCtrl: NavController,
                 public notifications: LocalNotifications,
                 public platform: Platform) {
+    }
+
+    ngOnDestroy() {
+    }
+
+    autoDetect() {
+        console.log("Have: ", this.config.discoveredServers.join(","));
+        if (this.config.discoveredServers.length > 0) {
+            if (this.lastUsedDiscoveryIndex > this.config.discoveredServers.length - 1) {
+                this.lastUsedDiscoveryIndex = 0;
+            }
+            this.config.ipAddress = this.config.discoveredServers[this.lastUsedDiscoveryIndex];
+            this.lastUsedDiscoveryIndex++;
+        }
     }
 
     ngOnInit() {
@@ -43,7 +60,7 @@ export class ConfigComponent {
         // Check we have permission. If not, request it.
         if (keyName == 'notificationWhenDone' && value) {
             this.notifications.hasPermission().then((havePermission: boolean) => {
-                if(!havePermission) {
+                if (!havePermission) {
                     this.notifications.registerPermission();
                 }
                 this.notifications.schedule({

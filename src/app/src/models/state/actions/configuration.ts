@@ -23,6 +23,25 @@ export class ConfigurationActions {
         });
     }
 
+    addDiscoveredServer(ipAddress: string) {
+        let existing = this.ngRedux.getState().config;
+        let newState = {
+            discoveredServers: [
+                ...existing.discoveredServers,
+                ipAddress
+            ]
+        };
+        this.updateConfiguration(newState);
+    }
+
+    removeDiscoveredServer(ipAddress: string) {
+        let existing = this.ngRedux.getState().config;
+        let newState = existing.discoveredServers.filter((s) => {
+            return s != ipAddress;
+        });
+        this.setConfiguration('discoveredServers', newState);
+    }
+
     setConfiguration(key: string, value: any) {
         let change = [];
         change[key] = value;

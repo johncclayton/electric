@@ -4,6 +4,8 @@ import {enableProdMode} from "@angular/core";
 import {AppModule} from './app.module';
 import {environmentFactory} from "./environment/environment-variables.module";
 
+// import 'web-animations-js/web-animations.min';
+
 // this is the magic wand of speed
 let envVars = environmentFactory();
 console.log("Running in " + envVars.ionicEnvName + " mode");

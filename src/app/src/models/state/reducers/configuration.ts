@@ -26,8 +26,10 @@ export interface IConfig {
 
     // Used to understand what our IP address is. either 192.168.10.1 or self.ipAddress.
     connectedToPrivateWLAN: boolean,
+
     // 0 = 192.168.10.1,   1 = ipAddress
     lastConnectionIndex: number,
+    discoveredServers: string[],
 
     charge_settings: IChargeSettings;
 }
@@ -57,6 +59,7 @@ export const configurationDefaults: IConfig = {
 
     connectedToPrivateWLAN: false,
     lastConnectionIndex: 0,
+    discoveredServers: [],
 
     charge_settings: chargerDefaults
 };

@@ -16,49 +16,56 @@
 
 <ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
     <div *ngIf="anyNetworkOrConnectivityProblems()">
-
         <p text-center>Looking for your charger...</p>
         <div class="searching">
             <sk-folding-cube class="searching"></sk-folding-cube>
         </div>
 
-        <ion-grid class="errors" *ngIf="timeoutUp">
-            <ion-row align-items-start>
-                <ion-col col-12 [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
-                    <span>{{serverText()}}</span>
-                </ion-col>
-                <ion-col col-12 [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
-                    <span>{{chargerText()}}</span>
-                </ion-col>
-            </ion-row>
-        </ion-grid>
-
-        <ion-grid *ngIf="timeoutUp">
+        <ion-grid>
             <ion-row>
-                <ion-col col-12>
-                    <ion-list-header>Tips</ion-list-header>
-                </ion-col>
-                <ion-col col-12 *ngFor="let tip of tips()">
-                    <ion-icon name="bulb"></ion-icon>
-                    {{tip}}
+                <ion-col col-6 offset-3>
+                    <div class="configButton">
+                        <!--[@buttonState]="timeoutUp"-->
+                        <button ion-button block
+                                color="secondary" (click)="showConfigPage()" *ngIf="showConfigureButton">
+                            <ion-icon name="tools"></ion-icon>
+                            Configure
+                        </button>
+                    </div>
                 </ion-col>
             </ion-row>
         </ion-grid>
 
-        <div *ngIf="exception$|async" class="tryme">
-            <ion-list>
-                <ion-list-header>The Server Said:</ion-list-header>
-                <h4 padding color="danger">{{exception$|async}}</h4>
-            </ion-list>
-        </div>
+        <div class="cannot-connect">
+            <ion-grid class="errors" *ngIf="timeoutUp">
+                <ion-row align-items-start>
+                    <ion-col col-12 [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
+                        <span>{{serverText()}}</span>
+                    </ion-col>
+                    <ion-col col-12 [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
+                        <span>{{chargerText()}}</span>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
 
+            <ion-grid *ngIf="timeoutUp">
+                <ion-row>
+                    <ion-col col-12>
+                        <ion-list-header>Tips</ion-list-header>
+                    </ion-col>
+                    <ion-col col-12 *ngFor="let tip of tips()">
+                        <ion-icon name="bulb"></ion-icon>
+                        {{tip}}
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
 
-        <div class="configButton" block>
-            <button ion-button block large color="secondary" *ngIf="showConfigureButton"
-                    (click)="showConfigPage()">
-                <ion-icon name="tools"></ion-icon>
-                Configure
-            </button>
+            <div *ngIf="exception$|async" class="tryme">
+                <ion-list>
+                    <ion-list-header>The Server Said:</ion-list-header>
+                    <h4 padding color="danger">{{exception$|async}}</h4>
+                </ion-list>
+            </div>
         </div>
     </div>
 

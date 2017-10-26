@@ -44,6 +44,7 @@ export class MyApp {
                 .takeUntil(this.ngUnsubscribe)
                 .subscribe(r => {
                     console.log("Configuration loaded, putting into the store...");
+                    r.discoveredServers = [];
                     this.ngRedux.dispatch({
                         type: ConfigurationActions.SET_FULL_CONFIG,
                         payload: r

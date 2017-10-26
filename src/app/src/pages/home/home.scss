@@ -4,15 +4,14 @@
 }
 
 .searching {
-  padding-top: 10px;
-  padding-bottom: 25px;
-
+  padding-top: 0px;
+  padding-bottom: 15px;
   opacity: 0.6;
 }
 
 .folding-cube-spinner {
-  width: 100px !important;
-  height: 100px !important;
+  width: 50px !important;
+  height: 50px !important;
 }
 
 // This is the CSS for the charger, as a whole.
@@ -21,9 +20,11 @@
   // The main amps, volts area...
 
   div.configButton {
-    position: absolute;
-    bottom: 70px;
-    width: 100%;
+    //position: absolute;
+    //bottom: 70px;
+    //width: 100%;
+    //padding-left: 10px;
+    //padding-right: 10px;
     alignment: center;
   }
 
@@ -46,11 +47,14 @@
     }
   }
 
-  .errors {
+  .cannot-connect {
+    font-size: 2.0rem;
+  }
 
+  .errors {
     ion-col {
       border-radius: 5px;
-      padding: 15px;
+      padding: 8px;
       text-align: center;
       color: white;
       font-weight: bold;

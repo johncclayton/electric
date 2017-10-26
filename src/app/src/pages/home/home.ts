@@ -13,10 +13,19 @@ import {SystemActions} from "../../models/state/actions/system";
 import {Subject} from "rxjs/Subject";
 import {PresetListPage} from "../preset-list/preset-list";
 import {ConfigStoreProvider} from "../../providers/config-store/config-store";
+// import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
     selector: 'page-home',
-    templateUrl: 'home.html'
+    templateUrl: 'home.html',
+    animations: [
+        // trigger('buttonState', [
+        //     transition('void => *', [
+        //         style({scale: 1.0}),
+        //         animate('500ms linear')
+        //     ])
+        // ])
+    ]
 })
 export class HomePage {
     @select('ui.exception') exception$: Observable<any>;
@@ -52,7 +61,7 @@ export class HomePage {
                 this.timeoutUp = true;
             });
 
-        Observable.timer(timeout * 2)
+        Observable.timer(timeout * 1.2)
             .takeUntil(this.ngUnsubscribe)
             .subscribe(r => {
                 this.showConfigureButton = true;
