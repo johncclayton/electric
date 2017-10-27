@@ -84,7 +84,6 @@
     <allow-navigation href="http://192.168.1.168:8101" />
     <engine name="android" spec="^6.2.3" />
     <engine name="browser" spec="^4.1.0" />
-    <engine name="ios" spec="^4.4.0" />
     <plugin name="cordova-plugin-console" spec="^1.0.7" />
     <plugin name="cordova-plugin-device" spec="^1.1.6" />
     <plugin name="cordova-plugin-fcm" spec="^2.1.2" />
@@ -102,4 +101,5 @@
         <variable name="SENDER_ID" value="811177846859" />
     </plugin>
     <preference name="SplashShowOnlyFirstTime" value="false" />
+    <engine name="ios" spec="~4.4.0" />
 </widget>
