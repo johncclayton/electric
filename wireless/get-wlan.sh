@@ -10,15 +10,18 @@ if [ "$EUID" -ne 0 ]; then
   exit -2
 fi
 
-if [ ! -f /proc/device-tree/model ]; then
-    echo "You're not running this on a pi3, are you?"
-    exit -1
-fi
+# the image builder scripts don't need this so it sets SKIP_PI3_CHECK
+if [ ! -z ${SKIP_PI3_CHECK+x} ]; then
+    if [ ! -f /proc/device-tree/model ]; then
+        echo "You're not running this on a pi3, are you?"
+        exit -1
+    fi
 
-PI_MODEL=$(cat /proc/device-tree/model | awk '{print $1 $2 $3}')
-if [ ${PI_MODEL} != 'RaspberryPi3' ]; then
-    echo "This computer doesn't appear to be a pi3"
-    exit -1
+    PI_MODEL=$(cat /proc/device-tree/model | awk '{print $1 $2 $3}')
+    if [ ${PI_MODEL} != 'RaspberryPi3' ]; then
+        echo "This computer doesn't appear to be a pi3"
+        exit -1
+    fi
 fi
 
 TEMP=${INSTALL_ROOT}/wireless
@@ -28,9 +31,6 @@ cd ${TEMP}
 if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
 fi
-
-#apt-get update
-#apt-get install dnsmasq hostapd gawk
 
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
 tar xzf wireless.tar.gz
@@ -50,4 +50,3 @@ if [ -f wireless.tar.gz ]; then
 fi
 
 exit 0;
-

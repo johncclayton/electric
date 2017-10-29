@@ -25,6 +25,7 @@ pushd . && cd /home/pirate/status && gcc -o enumerate_interfaces enumerate_inter
 sudo chown -R pirate:users /home/pirate
 
 cd /home/pirate 
+export SKIP_PI3_CHECKS=1
 sudo ./get-wlan.sh
 
 # ensure SSH is enabled
