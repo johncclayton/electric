@@ -42,7 +42,7 @@ cp -avR ${TEMP}/etc/* /etc
 
 # do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
 HAVE_WLAN1=$(iw dev | grep 'wlan1')
-if [ "${HAVE_WLAN1}x" == "x" ]; then
+if [ "${HAVE_WLAN1}x" = "x" ]; then
     echo "Adding wlan1 AP interface..."
 
     # Add the wlan1 interface
