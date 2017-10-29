@@ -27,6 +27,7 @@ sudo chown -R pirate:users /home/pirate
 cd /home/pirate 
 export SKIP_PI3_CHECKS=1
 sudo ./get-wlan.sh
+sudo scripts/install-wlan.sh
 
 # ensure SSH is enabled
 touch /boot/ssh
