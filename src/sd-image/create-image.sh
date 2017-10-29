@@ -6,6 +6,7 @@ set -x
 FROM="$1"
 TO="$2"
 
+ACCOUNT="pirate"
 PIIMG=`which piimg`
 MNT="/mnt"
 QEMU_ARM="/usr/bin/qemu-arm-static"
@@ -73,35 +74,35 @@ cp "$FROM" "$TO"
 sudo $PIIMG mount "$TO" "$MNT"
 
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
-sudo cp -r ../../wireless/* "$MNT/home/pi/"
+sudo cp -r ../../wireless/* "$MNT/home/$ACCOUNT/"
 
 # fetch the iCharger rules
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/src/server/scripts/10-icharger.rules
-mv 10-icharger.rules "$MNT/home/pi/"
+mv 10-icharger.rules "$MNT/home/$ACCOUNT/"
 
-sudo touch "$MNT/home/pi/docker_image_web.tar.gz" && sudo chmod 777 "$MNT/home/pi/docker_image_web.tar.gz"
-sudo touch "$MNT/home/pi/docker_image_worker.tar.gz" && sudo chmod 777 "$MNT/home/pi/docker_image_worker.tar.gz"
-docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$MNT/home/pi/docker_image_web.tar.gz"
-docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$MNT/home/pi/docker_image_worker.tar.gz"
+sudo touch "$MNT/home/$ACCOUNT/docker_image_web.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
+sudo touch "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
+docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
+docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
 
 # sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 
-sudo cp -r ../status "$MNT/home/pi/"
-sudo cp ../../docker-compose.yml "$MNT/home/pi/"
+sudo cp -r ../status "$MNT/home/$ACCOUNT/"
+sudo cp ../../docker-compose.yml "$MNT/home/$ACCOUNT/"
 
 # make up a script that contains the version number in it, but its done
 # in a way that'll make upgrades later easier - the script knows to pull the 
 # version number from a file - so upgrade process can simply keep this file up to date
 
-echo > "$MNT/home/pi/compose-command.sh" <<--MYDOCKERSCRIPT--
+echo > "$MNT/home/$ACCOUNT/compose-command.sh" <<--MYDOCKERSCRIPT--
 #!/usr/bin/env bash
 export DOCKER_TAG=`cat LAST_DEPLOY`
 docker-compose up -d
  --MYDOCKERSCRIPT--
 
-chmod 777 "$MNT/home/pi/compose-command.sh" 
+chmod 777 "$MNT/home/$ACCOUNT/compose-command.sh" 
 
-find "${MNT}/home/pi/*.sh" -type f | xargs chmod +x
+find "${MNT}/home/$ACCOUNT/*.sh" -type f | xargs chmod +x
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
