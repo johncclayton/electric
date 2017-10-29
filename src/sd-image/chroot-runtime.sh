@@ -7,13 +7,14 @@ mv /home/pirate/10-icharger.rules /etc/udev/rules.d/10-icharger.rules
 
 # DO NOT do apt-get upgrade - this causes the sd-card to NOT BOOT
 apt-get -y update
-apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq gawk avahi-daemon libbluetooth-dev bluez
+apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq gawk avahi-daemon 
 
-/usr/bin/pip install -r /home/pirate/status/requirements.txt
+apt-get -y remove python-pip && easy_install pip 
+/usr/local/bin/pip install -r /home/pirate/status/requirements.txt
 
 # curl -sSL https://get.docker.com | sh
 
-usermod -aG docker pi
+usermod -aG docker pirate
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /home/pirate/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
@@ -21,7 +22,7 @@ pushd . && cd /home/pirate/status && gcc -o enumerate_interfaces enumerate_inter
 # systemctl enable electric-pi-status.service
 
 # owned by the right user
-sudo chown -R pi:users /home/pirate
+sudo chown -R pirate:users /home/pirate
 
 # ensure SSH is enabled
 touch /boot/ssh
