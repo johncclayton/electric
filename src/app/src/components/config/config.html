@@ -41,24 +41,25 @@
 <ion-list>
     <ion-list-header color="light">Connection</ion-list-header>
     <ion-item>
-        <ion-label stacked>IP Address of Pi (on home network)</ion-label>
+        <ion-label stacked>IP Address of Pi (on home network!!!)</ion-label>
         <ion-input type="text" [ngModel]="config.ipAddress"
                    (ngModelChange)="change('ipAddress', $event)"></ion-input>
-        <button item-end outline icon-left ion-button (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton" [class.button-disabled]="config.discoveredServers.length == 0">
+        <button item-end outline icon-left ion-button (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton"
+                [class.button-disabled]="config.discoveredServers.length == 0">
             <ion-icon name="radio-outline"></ion-icon>
             Auto Detect
         </button>
-        <ion-item>
-            <ion-label stacked>Port of Pi</ion-label>
-            <ion-input type="text" [ngModel]="config.port"
-                       (ngModelChange)="change('port', num($event))">
+    </ion-item>
+    <ion-item>
+        <ion-label stacked>Port of Pi (on home network)</ion-label>
+        <ion-input type="text" [ngModel]="config.port"
+                   (ngModelChange)="change('port', num($event))">
 
-            </ion-input>
-        </ion-item>
+        </ion-input>
     </ion-item>
 </ion-list>
 
-<ion-list>
+<ion-list *ngIf="!showAutoButton">
     <ion-list-header color="light">Debug</ion-list-header>
     <ion-item>
         <ion-label>Mock Charger</ion-label>
