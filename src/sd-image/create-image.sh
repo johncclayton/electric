@@ -72,13 +72,12 @@ docker pull "$DOCKER_IMAGE_WORKER:$VERSION_NUM"
 cp "$FROM" "$TO" 
 
 sudo $PIIMG mount "$TO" "$MNT"
-
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 sudo cp -r ../../wireless/* "$MNT/home/$ACCOUNT/"
 
 # fetch the iCharger rules
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/src/server/scripts/10-icharger.rules
-mv 10-icharger.rules "$MNT/home/$ACCOUNT/"
+sudo mv 10-icharger.rules "$MNT/home/$ACCOUNT/"
 
 sudo touch "$MNT/home/$ACCOUNT/docker_image_web.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
 sudo touch "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
@@ -89,20 +88,9 @@ docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$MNT/home/$ACCOU
 
 sudo cp -r ../status "$MNT/home/$ACCOUNT/"
 sudo cp ../../docker-compose.yml "$MNT/home/$ACCOUNT/"
+sudo cp compose-command.sh "$MNT/home/$ACCOUNT/"
 
-# make up a script that contains the version number in it, but its done
-# in a way that'll make upgrades later easier - the script knows to pull the 
-# version number from a file - so upgrade process can simply keep this file up to date
-
-echo > "$MNT/home/$ACCOUNT/compose-command.sh" <<--MYDOCKERSCRIPT--
-#!/usr/bin/env bash
-export DOCKER_TAG=`cat LAST_DEPLOY`
-docker-compose up -d
- --MYDOCKERSCRIPT--
-
-chmod 777 "$MNT/home/$ACCOUNT/compose-command.sh" 
-
-find "${MNT}/home/$ACCOUNT/*.sh" -type f | xargs chmod +x
+sudo find "${MNT}/home/$ACCOUNT/" -name "*.sh" -type f | sudo xargs chmod +x
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
