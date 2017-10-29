@@ -24,6 +24,9 @@ pushd . && cd /home/pirate/status && gcc -o enumerate_interfaces enumerate_inter
 # owned by the right user
 sudo chown -R pirate:users /home/pirate
 
+cd /home/pirate 
+sudo ./get-wlan.sh
+
 # ensure SSH is enabled
 touch /boot/ssh
 
