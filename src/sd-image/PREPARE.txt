@@ -1,0 +1,9 @@
+How I prepared:
+
+1. take the hypriot image
+
+2. copy it to /tmp/john.img
+
+read all of https://raspberrypi.stackexchange.com/questions/4943/resize-image-file-before-writing-to-sd-card?noredirect=1&lq=1
+
+and then copy /tmp/john.img back to the hypriot inmage :-)
