@@ -5,6 +5,7 @@ import {isUndefined} from "ionic-angular/util/util";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
 import {LocalNotifications} from "@ionic-native/local-notifications";
+import {System} from "../../models/system";
 
 @Component({
     selector: 'config',
@@ -102,4 +103,7 @@ export class ConfigComponent {
         return choices;
     }
 
+    get isProduction(): boolean {
+        return System.isProduction;
+    }
 }

@@ -7,8 +7,8 @@ import {IUIState, uiReducer} from "./reducers/ui";
 import {ChargerActions} from "./actions/charger";
 import {ConfigurationEpics} from "./epics/configuration";
 import {combineEpics, createEpicMiddleware} from "redux-observable";
-import {environmentFactory} from "../../app/environment/environment-variables.module";
 import {ISystem, systemReducer} from "./reducers/system";
+import {System} from "../system";
 
 export interface IAppState {
     config: IConfig;
@@ -44,8 +44,7 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
 
         // Add logger if in development (web browsers)
 
-        let environment = environmentFactory();
-        if (environment.logging) {
+        if (System.environment.logging) {
             console.log("Adding in state logging...");
             middleware.push(createLogger({
                 predicate: (getState, action) => {
@@ -55,7 +54,7 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
             }));
         }
 
-        if (environment.ionicEnvName == "dev") {
+        if (System.environment.ionicEnvName == "dev") {
             if (window.navigator.userAgent.includes('Chrome')) {
                 console.log("Adding in chrome redux devtools ...");
                 if (devTools.isEnabled()) {

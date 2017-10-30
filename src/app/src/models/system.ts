@@ -1,3 +1,5 @@
+import {ENV} from '@app/env'
+
 export class System {
     public static CELSIUS: string = "°C";
     public static FARENHEIGHT: string = "°F";
@@ -10,6 +12,23 @@ export class System {
     }
 
     constructor(private data: {}) {
+        console.log("System object created");
+        console.log("Env is: " + ENV.ionicEnvName);
+    }
+
+    static get environment(): any {
+        return ENV;
+    }
+
+    static get isProduction(): boolean {
+        return System.environment.ionicEnvName == 'prod';
+    }
+
+    static environmentStrings(): string[] {
+        let callbackfn = (value): string => {
+            return value + " = " + System.environment[value];
+        };
+        return Object.keys(System.environment).map(callbackfn);
     }
 
     clone(): System {

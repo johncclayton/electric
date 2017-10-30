@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "allowSyntheticDefaultImports": true,
     "declaration": false,
     "emitDecoratorMetadata": true,
@@ -8,6 +9,11 @@
       "dom",
       "es2015"
     ],
+    "paths": {
+      "@app/env": [
+        "environments/environment"
+      ]
+    },
     "module": "es2015",
     "moduleResolution": "node",
     "sourceMap": true,

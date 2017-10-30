@@ -1,13 +1,14 @@
 import {Component, Inject} from "@angular/core";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 import {IConfig} from "../../models/state/reducers/configuration";
-import {select} from "@angular-redux/store";
+import {NgRedux, select} from "@angular-redux/store";
 import {Observable} from "rxjs/Observable";
 import {Platform} from "ionic-angular";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
-import {environmentFactory} from "../../app/environment/environment-variables.module";
 import {Zeroconf} from "@ionic-native/zeroconf";
+import {System} from "../../models/system";
+import {IAppState} from "../../models/state/configure";
 
 @Component({
     selector: 'page-config',
@@ -21,6 +22,7 @@ export class ConfigPage {
 
     constructor(private platform: Platform,
                 private zeroConf: Zeroconf,
+                private ngRedux: NgRedux<IAppState>,
                 private actions: ConfigurationActions) {
 
         if (this.canUseZeroconf()) {
@@ -50,6 +52,11 @@ export class ConfigPage {
         }
     }
 
+    haveZeroConfAddresses(): boolean {
+        let config = this.ngRedux.getState().config;
+        return config.discoveredServers.length > 0;
+    }
+
     canUseZeroconf(): boolean {
         let has_cordova = this.platform.is('cordova');
         return has_cordova && this.isProduction;
@@ -64,15 +71,10 @@ export class ConfigPage {
     }
 
     get isProduction(): boolean {
-        let environment = environmentFactory();
-        return environment.ionicEnvName == 'prod';
+        return System.isProduction;
     }
 
     environmentStrings(): string[] {
-        let environment = environmentFactory();
-        let callbackfn = (value): string => {
-            return value + " = " + environment[value];
-        };
-        return Object.keys(environment).map(callbackfn);
+        return System.environmentStrings();
     }
 }
