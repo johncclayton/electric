@@ -1,14 +1,17 @@
+// This comes from
+// https://github.com/gshigeto/ionic-environment-variables
+
 var chalk = require("chalk");
 var fs = require('fs');
 var path = require('path');
 var useDefaultConfig = require('@ionic/app-scripts/config/webpack.config.js');
 
 var env = process.env.IONIC_ENV;
-console.log("env is", env);
+// console.log("env is", env);
 
 if (env === 'prod' || env === 'dev') {
     var resolved_path = path.resolve(environmentPath());
-    console.log("Using environment: " + resolved_path);
+    // console.log("Using environment: " + resolved_path);
     useDefaultConfig[env].resolve.alias = {
         "@app/env": resolved_path
     };
