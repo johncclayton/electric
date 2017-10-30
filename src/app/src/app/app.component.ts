@@ -38,6 +38,10 @@ export class MyApp {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
             statusBar.styleDefault();
+
+            // Style is currently borked with a status bar that is being shown.
+            // statusBar.show();
+            statusBar.hide();
             splashScreen.hide();
 
             this.config.loadConfiguration()

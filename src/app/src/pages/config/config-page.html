@@ -13,7 +13,7 @@
             [config]="config$|async"
             [charger]="charger$|async"
             [ui]="ui$|async"
-            [showAutoButton]="canUseZeroconf()"
+            [showAutoButton]="canUseZeroconf() && haveZeroConfAddresses()"
             (updateConfiguration)="actions.updateConfiguration($event)"
             (resetToDefaults)="actions.resetToDefaults()"
             (testFunc)="testFunc()"
@@ -23,8 +23,8 @@
 </ion-content>
 
 <ion-footer>
-    <ion-toolbar>
-        <ion-list *ngIf="!isProduction">
+    <ion-toolbar *ngIf="!isProduction">
+        <ion-list>
             <ion-label *ngFor="let env of environmentStrings()" text-center>{{ env }}</ion-label>
         </ion-list>
         <ion-list text-center>

@@ -34,7 +34,6 @@ import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {NgSpinKitModule} from "ng-spin-kit";
-import {EnvironmentsModule} from "./environment/environment-variables.module";
 import {SystemActions} from "../models/state/actions/system";
 import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
 import {ComponentsModule} from "../components/components.module";
@@ -50,6 +49,16 @@ export const firebaseConfig = {
     databaseURL: "https://electric-app-e4963.firebaseio.com",
     storageBucket: "electric-app-e4963.appspot.com",
     messagingSenderId: '811177846859'
+};
+
+let config = {
+    platforms: {
+        ios: {
+            // These are SUPPOSED To fix the borked toolbar on iOS. They don't on os11, that's for sure.
+            statusbarPadding: true,
+            tabsHideOnSubPages: true,
+        }
+    }
 };
 
 @NgModule({
@@ -83,10 +92,9 @@ export const firebaseConfig = {
         NgSpinKitModule,
         ComponentsModule,
         SystemSettingsPageModule,
-        IonicModule.forRoot(MyApp),
+        IonicModule.forRoot(MyApp, config),
         // AngularFireModule.initializeApp(firebaseConfig),
         IonicStorageModule.forRoot(),
-        EnvironmentsModule
     ],
     bootstrap: [IonicApp],
     entryComponents: [

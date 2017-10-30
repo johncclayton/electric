@@ -7,14 +7,15 @@
         "clean": "ionic-app-scripts clean",
         "build": "ionic-app-scripts build",
         "ionic:build": "ionic-app-scripts build",
-        "ionic:serve": "ionic-app-scripts serve --no-open -c",
-        "ionic:serve prod": "ionic-app-scripts serve --prod --no-open -c",
-        "builddev:ios": "ionic-app-scripts build",
-        "build:ios": "ionic-app-scripts build --prod --release"
+        "ionic:serve": "ionic-app-scripts serve --no-open --nobrowser -c",
+        "ionic:serve prod": "ionic-app-scripts serve --prod --no-open -c --nobrowser ",
+        "ionic:run:ios:reload": "ionic cordova run ios -lc",
+        "builddev:ios": "ionic-app-scripts build ios",
+        "build:ios": "ionic-app-scripts build --prod --release ios"
     },
     "config": {
         "ionic_copy": "./config/copy.config.js",
-        "ionic_webpack": "./webpack.config.js"
+        "ionic_webpack": "./config/webpack.config.js"
     },
     "dependencies": {
         "@angular-redux/store": "6.5.7",
