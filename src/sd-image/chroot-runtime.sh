@@ -26,6 +26,7 @@ sudo chown -R pirate:users /home/pirate
 
 INSTALL_ROOT=/opt
 TEMP=${INSTALL_ROOT}/wireless
+mkdir -p "$TEMP"
 cd ${TEMP}
 
 mv /home/pirate/wireless/* .
