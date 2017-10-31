@@ -73,18 +73,22 @@ cp "$FROM" "$TO"
 
 sudo $PIIMG mount "$TO" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
-sudo cp -r ../../wireless/* "$MNT/home/$ACCOUNT/"
 
 # fetch the iCharger rules
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/src/server/scripts/10-icharger.rules
-sudo mv 10-icharger.rules "$MNT/home/$ACCOUNT/"
+sudo cp ../server/scripts/10-icharger.rules "$MNT/home/$ACCOUNT/"
+
+sudo mkdir -p "$MNT/home/$ACCOUNT/wireless"
+sudo cp -r ../../wireless/etc "$MNT/home/$ACCOUNT/wireless/"
+sudo cp -r ../../wireless/config "$MNT/home/$ACCOUNT/wireless/"
+sudo cp -r ../../wireless/scripts "$MNT/home/$ACCOUNT/wireless/"
 
 sudo touch "$MNT/home/$ACCOUNT/docker_image_web.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
 sudo touch "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
+
 docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
 docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
 
-# sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
+sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 
 sudo cp -r ../status "$MNT/home/$ACCOUNT/"
 sudo cp ../../docker-compose.yml "$MNT/home/$ACCOUNT/"
