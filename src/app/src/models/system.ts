@@ -12,8 +12,8 @@ export class System {
     }
 
     constructor(private data: {}) {
-        console.log("System object created");
-        console.log("Env is: " + ENV.ionicEnvName);
+        console.error("System object created");
+        console.error("Env is: " + ENV.ionicEnvName);
     }
 
     static get environment(): any {
