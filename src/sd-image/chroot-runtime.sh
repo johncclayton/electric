@@ -9,7 +9,6 @@ mv /home/pirate/10-icharger.rules /etc/udev/rules.d/10-icharger.rules
 # DO NOT do apt-get upgrade - this causes the sd-card to NOT BOOT
 apt-get -y update
 apt-get -y install python-dev python-setuptools python-pip hostapd dnsmasq gawk avahi-daemon 
-
 apt-get -y remove python-pip && easy_install pip 
 /usr/local/bin/pip install -r /home/pirate/status/requirements.txt
 
@@ -19,8 +18,6 @@ usermod -aG docker pirate
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /home/pirate/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
 
-systemctl enable electric-pi-status.service
-
 # owned by the right user
 sudo chown -R pirate:users /home/pirate
 
@@ -29,6 +26,8 @@ TEMP=${INSTALL_ROOT}/wireless
 cd ${TEMP}
 
 mv /home/pirate/wireless/* .
+mv /home/pirate/status /opt/
+
 find ${TEMP}/scripts -type f | xargs chmod +x
 
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh
@@ -36,6 +35,8 @@ find ${TEMP}/scripts -type f | xargs chmod +x
 
 # ensure SSH is enabled
 touch /boot/ssh
+
+systemctl enable electric-pi-status.service
 
 # Remove /boot/device-init.yaml. It interferes with wpa supplicant
 # and prevents wlan1 from coming up properly.
