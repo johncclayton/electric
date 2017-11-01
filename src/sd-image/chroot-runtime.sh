@@ -26,6 +26,9 @@ sudo chown -R root:users /opt
 . /opt/wireless/scripts/functions.sh
 . /opt/wireless/config/wlan.conf
 
+# ensure scripts are executable
+sudo chmod +x /opt/wireless/scripts/*
+
 # ensure SSH is enabled
 touch /boot/ssh
 

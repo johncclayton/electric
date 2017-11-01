@@ -6,7 +6,7 @@ Requires=multi-user.target
 [Service]
 Type=simple
 ExecStart=/opt/status/run_server.sh
-User=pi
+User=pirate
 Restart=on-failure
 RestartSec=8
 WorkingDirectory=/opt/status
