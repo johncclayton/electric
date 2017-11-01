@@ -6,6 +6,7 @@ set -u
 # DO NOT do apt-get upgrade - this causes the sd-card to NOT BOOT
 apt-get -y update
 apt-get -y install g++ python-dev python-setuptools python-pip hostapd dnsmasq gawk avahi-daemon 
+
 apt-get -y remove python-pip && easy_install pip 
 
 /usr/local/bin/pip install -r /opt/status/requirements.txt
@@ -16,13 +17,14 @@ usermod -aG docker pirate
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
 
+# install the wireless /etc config to the right directory in the dest image
+sudo cp -avR /opt/wireless/etc/* /etc/
+
 # owned by the right user
 sudo chown -R root:users /opt
 
-INSTALL_ROOT=/opt
-
-. ${INSTALL_ROOT}/wireless/scripts/functions.sh
-. ${INSTALL_ROOT}/wireless/config/wlan.conf
+. /opt/wireless/scripts/functions.sh
+. /opt/wireless/config/wlan.conf
 
 # ensure SSH is enabled
 touch /boot/ssh
@@ -38,6 +40,3 @@ fi
 # and lastly, lets not have everything owned by builder.
 find /etc -user builder -type f -exec chown root:root {} \;
 find /etc -user builder -type d -exec chown root:root {} \;
-
-# make sure we don't have predictable network names enabled - horrible idea.
-# echo ' net.ifnames=0 ' >> /boot/cmdline.txt
