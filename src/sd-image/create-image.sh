@@ -78,7 +78,7 @@ sudo cp ../server/scripts/10-icharger.rules "$MNT/etc/udev/rules.d/"
 
 sudo mkdir -p "$OPT"
 sudo mkdir -p "$OPT/wireless"
-echo > "$OPT/LAST_DEPLOY" $VERSION_NUM
+sudo echo "$OPT/LAST_DEPLOY" > $VERSION_NUM
 
 sudo cp -r ../../wireless/etc "$OPT/wireless/"
 sudo cp -r ../../wireless/config "$OPT/wireless/"
