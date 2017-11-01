@@ -38,5 +38,7 @@ if [ -f "/boot/device-init.yaml" ]; then
 fi
 
 # and lastly, lets not have everything owned by builder.
-find /etc -user builder -type f -exec chown root:root {} \;
-find /etc -user builder -type d -exec chown root:root {} \;
+#find /etc -user builder -type f -exec chown root:root {} \;
+#find /etc -user builder -type d -exec chown root:root {} \;
+
+exit 0
