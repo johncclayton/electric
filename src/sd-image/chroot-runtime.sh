@@ -17,7 +17,7 @@ usermod -aG docker pirate
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
 
 # owned by the right user
-sudo chown -R pirate:users /opt
+sudo chown -R root:users /opt
 
 INSTALL_ROOT=/opt
 
