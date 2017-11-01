@@ -13,7 +13,7 @@ WORKER_IMAGE_NAME = "johncclayton/electric-pi-worker"
 WEB_CONTAINER_NAME = "electric-pi-web"
 WORKER_CONTAINER_NAME = "electric-pi-worker"
 
-def script_path(name)
+def script_path(name):
     return os.path.join("/opt/status/scripts", name)
 
 def read_output_for(args):
@@ -87,7 +87,7 @@ class StatusResource(Resource):
     def _get_image_version(self, name):
         out, err, rtn = read_output_for([script_path("")])
 
-    def check_docker_image_exists(name):
+    def check_docker_image_exists(self, name):
         """Check if the docker images have been downloaded already"""
         try:
             self.docker_cli.images.get(name)
