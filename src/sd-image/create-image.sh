@@ -63,7 +63,7 @@ fi
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/get-latest-build-number.py
 VERSION_NUM=`python get-latest-build-number.py`
 echo "Latest version is: $VERSION_NUM"
-echo >LAST_DEPLOY $VERSION_NUM
+echo > "$OPT/LAST_DEPLOY" $VERSION_NUM
 
 # pull docker image and save it as a file...
 docker pull "$DOCKER_IMAGE_WEB:$VERSION_NUM"
