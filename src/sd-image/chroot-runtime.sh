@@ -35,5 +35,8 @@ if [ -f "/boot/device-init.yaml" ]; then
     mv "/boot/device-init.yaml" "/boot/device-init.yaml.no-longer-needed"
 fi
 
+# and lastly, lets not have everything owner by builder.
+find /etc -user builder -exec chown root:root {} \;
+
 # make sure we don't have predictable network names enabled - horrible idea.
 # echo ' net.ifnames=0 ' >> /boot/cmdline.txt

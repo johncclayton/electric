@@ -79,6 +79,8 @@ sudo cp ../server/scripts/10-icharger.rules "$MNT/etc/udev/rules.d/"
 sudo mkdir -p "$OPT"
 sudo mkdir -p "$OPT/wireless"
 
+# you would think you can echo this directly into the $OPT area - you can't, perm. denied
+# so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY
 sudo mv ./LAST_DEPLOY "$OPT"
 
