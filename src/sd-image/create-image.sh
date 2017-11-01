@@ -85,7 +85,7 @@ sudo cp -r ../../wireless/config "$OPT/wireless/"
 sudo cp -r ../../wireless/scripts "$OPT/wireless/"
 
 # install the wireless /etc config to the right directory in the dest image
-cp -avR ../../wireless/etc/* "$MNT/etc/"
+sudo cp -avR ../../wireless/etc/* "$MNT/etc/"
 
 sudo touch "$OPT/docker_image_web.tar.gz" && sudo chmod 777 "$OPT/docker_image_web.tar.gz"
 sudo touch "$OPT/docker_image_worker.tar.gz" && sudo chmod 777 "$OPT/docker_image_worker.tar.gz"
