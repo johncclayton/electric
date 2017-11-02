@@ -18,6 +18,14 @@ WORKER_CONTAINER_NAME = "electric-worker"
 def image_name(name, tag):
     return str(name) + ":" + str(tag)
 
+def read_wpa_ssid_name(self):
+    """Read contents of the wpa supplicant file to see what we are connected to"""
+    return read_output_for([script_path("sudo_get_ssid_name.sh")])
+
+def read_wpa_ssid_psk(self):
+    """Read contents of the wpa supplicant file to see what we are connected to"""
+    return read_output_for([script_path("sudo_get_ssid_psk.sh")])
+
 def get_last_deployed_version():
     (last_deploy, err, last_deploy_ret) = read_output_for(
         [script_path("get_last_deploy_version.sh")])
@@ -39,24 +47,16 @@ def read_output_for(args, default_on_error=None):
 
 
 class WiFiConnectionResource(Resource):
-    def read_wpa_ssid_name(self):
-        """Read contents of the wpa supplicant file to see what we are connected to"""
-        return read_output_for([script_path("sudo_get_ssid_name.sh")])
-
-    def read_wpa_ssid_psk(self):
-        """Read contents of the wpa supplicant file to see what we are connected to"""
-        return read_output_for([script_path("sudo_get_ssid_psk.sh")])
-
     def read_wifi_ipaddr(self):
         return read_output_for([script_path("get_ip_address.sh"), "wlan0"])
 
     def get(self):
-        ssid_out, ssid_err, ssid_rtn = self.read_wpa_ssid_name()
+        ssid_out, ssid_err, ssid_rtn = read_wpa_ssid_name()
 
         return {
-            "SSID": ssid_out.strip("\n"),
+            "SSID": ssid_out.strip(),
             "EXIT_CODE": ssid_rtn,
-            "EXIT_MSG": ssid_err.strip()
+            "EXIT_MSG": ssid_err.strip() if ssid_err else None
         }
 
     def put(self):
@@ -69,7 +69,6 @@ class WiFiConnectionResource(Resource):
 
             return {
                 "SSID": ssid_value,
-                "PSK": "********",
                 "output": out,
                 "error": err,
                 "returncode": rtn
@@ -159,10 +158,21 @@ class StatusResource(Resource):
             "electric-pi-status.service": self._systemctl_running("electric-pi-status"),
             "docker": self._systemctl_running("docker"),
         }
-
+    
         res["interfaces"] = {
             "wlan0": wlan0.strip(),
             "wlan1": wlan1.strip()
+        }
+
+        (ap_name, err, ap_name_ret) = read_output_for([script_path("sudo_get_ap_name.sh")], "not set")
+        (ap_channel, err, ap_channel_ret) = read_output_for([script_path("sudo_get_ap_channel.sh")], "not set")
+
+        ssid_out, ssid_err, ssid_rtn = read_wpa_ssid_name()
+
+        res["access_point"] = {
+            "name": ap_name.strip(),
+            "channel": ap_channel.strip(),
+            "wifi_ssid": ssid_out
         }
 
         web_image_running = self.check_docker_container_running(WEB_CONTAINER_NAME)
