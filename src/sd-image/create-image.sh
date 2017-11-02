@@ -95,6 +95,7 @@ docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$OPT/docker_image_w
 docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$OPT/docker_image_worker.tar.gz"
 
 sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
+sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"

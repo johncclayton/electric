@@ -5,13 +5,12 @@ Requires=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/home/pi/run_electric.sh
-ExecStop=/home/pi/stop_electric.sh
-User=pi
+ExecStart=/opt/run_electric.sh
+ExecStop=/opt/stop_electric.sh
+User=pirate
 Restart=on-failure
 RestartSec=8
-WorkingDirectory=/home/pi
-
+WorkingDirectory=/opt
 
 [Install]
 WantedBy=multi-user.target

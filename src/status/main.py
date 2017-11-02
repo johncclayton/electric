@@ -11,6 +11,7 @@ application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
 
 debug_mode = os.environ.get("DEBUG_MODE", None)
+
 if not debug_mode:
     handler = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

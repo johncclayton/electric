@@ -2,11 +2,16 @@
 
 set -x 
 
-IMAGE_NAME_WEB="johncclayton/electric-pi-web"
-IMAGE_NAME_WORKER="johncclayton/electric-pi-worker"
+# note, no colon before cat output - the version in 
+# /opt/compose-command.sh is every so slightly different.
+VERSION_TAG=`cat /opt/LAST_DEPLOY`
 
-IMAGE_TARFILE_WEB="/home/pi/docker_image_web.tar.gz"
-IMAGE_TARFILE_WORKER="/home/pi/docker_image_worker.tar.gz"
+IMAGE_NAME_WEB="johncclayton/electric-pi-web:${VERSION_TAG}"
+IMAGE_NAME_WORKER="johncclayton/electric-pi-worker:${VERSION_TAG}"
+
+# these only exist during first boot up of the Pi
+IMAGE_TARFILE_WEB="/opt/docker_image_web.tar.gz"
+IMAGE_TARFILE_WORKER="/opt/docker_image_worker.tar.gz"
 
 IMAGE_EXISTS=5
 
@@ -36,15 +41,6 @@ function unpack_or_fetch() {
     echo "Cannot find image named $NAME - checking for it in tarfile $TARFILE"
     if [ -f "$TARFILE" ]; then
         gunzip -c "$TARFILE" | docker image load && rm "$TARFILE"
-    else
-        have_internet
-
-        if [ $? -eq 0 ]; then
-            echo "Still cannot find image called $1 - will try to pull it now..."
-            docker pull $NAME
-        else
-            echo "But gasp, oh no!  There is no internet so I can't pull it..."
-        fi
     fi
 }
 
@@ -60,5 +56,4 @@ while [ $IMAGE_EXISTS -ne 0 ]; do
     fi
 done
 
-docker-compose up -d
-
+exit 0
