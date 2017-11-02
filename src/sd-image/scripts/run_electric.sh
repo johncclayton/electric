@@ -8,10 +8,12 @@ VERSION_TAG=`cat /opt/LAST_DEPLOY`
 
 IMAGE_NAME_WEB="johncclayton/electric-pi-web:${VERSION_TAG}"
 IMAGE_NAME_WORKER="johncclayton/electric-pi-worker:${VERSION_TAG}"
+IMAGE_NAME_UI="hypriot/rpi-dockerui"
 
 # these only exist during first boot up of the Pi
 IMAGE_TARFILE_WEB="/opt/docker_image_web.tar.gz"
 IMAGE_TARFILE_WORKER="/opt/docker_image_worker.tar.gz"
+IMAGE_TARFILE_UI="/opt/docker_image_ui.tar.gz"
 
 IMAGE_EXISTS=5
 
@@ -54,6 +56,12 @@ while [ $IMAGE_EXISTS -ne 0 ]; do
     if [ $IMAGE_EXISTS -ne 0 ]; then
         unpack_or_fetch $IMAGE_NAME_WORKER $IMAGE_TARFILE_WORKER
     fi
+
+    image_exists $IMAGE_NAME_UI
+    if [ $IMAGE_EXISTS -ne 0 ]; then
+        unpack_or_fetch $IMAGE_NAME_UI $IMAGE_TARFILE_UI
+    fi
+
 done
 
 exit 0

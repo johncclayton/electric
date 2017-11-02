@@ -14,6 +14,7 @@ OPT="$MNT/opt"
 
 DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
+DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
 if [ -z "$FROM" -o -z "$TO" ]; then
 	echo "Use create-image.sh <from> <to>"
@@ -67,6 +68,7 @@ echo "Latest version is: $VERSION_NUM"
 # pull docker image and save it as a file...
 docker pull "$DOCKER_IMAGE_WEB:$VERSION_NUM"
 docker pull "$DOCKER_IMAGE_WORKER:$VERSION_NUM"
+docker pull "$DOCKER_IMAGE_UI"
 
 # copy source -> dest so we don't change the original image
 cp "$FROM" "$TO" 
@@ -90,9 +92,11 @@ sudo cp -r ../../wireless/scripts "$OPT/wireless/"
 
 sudo touch "$OPT/docker_image_web.tar.gz" && sudo chmod 777 "$OPT/docker_image_web.tar.gz"
 sudo touch "$OPT/docker_image_worker.tar.gz" && sudo chmod 777 "$OPT/docker_image_worker.tar.gz"
+sudo touch "$OPT/docker_image_ui.tar.gz" && sudo chmod 777 "$OPT/docker_image_ui.tar.gz"
 
 docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$OPT/docker_image_web.tar.gz"
 docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$OPT/docker_image_worker.tar.gz"
+docker image save "$DOCKER_IMAGE_UI" | gzip > "$OPT/docker_image_ui.tar.gz"
 
 sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
