@@ -18,13 +18,9 @@ WORKER_CONTAINER_NAME = "electric-worker"
 def image_name(name, tag):
     return str(name) + ":" + str(tag)
 
-def read_wpa_ssid_name(self):
+def read_wpa_ssid_name():
     """Read contents of the wpa supplicant file to see what we are connected to"""
     return read_output_for([script_path("sudo_get_ssid_name.sh")])
-
-def read_wpa_ssid_psk(self):
-    """Read contents of the wpa supplicant file to see what we are connected to"""
-    return read_output_for([script_path("sudo_get_ssid_psk.sh")])
 
 def get_last_deployed_version():
     (last_deploy, err, last_deploy_ret) = read_output_for(
@@ -172,7 +168,7 @@ class StatusResource(Resource):
         res["access_point"] = {
             "name": ap_name.strip(),
             "channel": ap_channel.strip(),
-            "wifi_ssid": ssid_out
+            "wifi_ssid": ssid_out.strip()
         }
 
         web_image_running = self.check_docker_container_running(WEB_CONTAINER_NAME)
