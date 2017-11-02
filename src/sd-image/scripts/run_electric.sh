@@ -15,7 +15,7 @@ IMAGE_TARFILE_WORKER="/opt/docker_image_worker.tar.gz"
 
 IMAGE_EXISTS=5
 
-function have_internet() {
+have_internet() {
     RES=1
     while [ $RES -ne 0 ]; do
             ping -c 2 google.com 2>&1 > /dev/null
@@ -29,12 +29,12 @@ function have_internet() {
     return 0;
 }
 
-function image_exists() {
+image_exists() {
     docker image inspect $1
     IMAGE_EXISTS=$?
 }
 
-function unpack_or_fetch() {
+unpack_or_fetch() {
     NAME=$1
     TARFILE=$2
 

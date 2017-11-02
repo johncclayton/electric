@@ -12,11 +12,11 @@ logger = logging.getLogger('electric.status.{0}'.format(__name__))
 
 WEB_IMAGE_NAME = "johncclayton/electric-pi-web"
 WORKER_IMAGE_NAME = "johncclayton/electric-pi-worker"
-WEB_CONTAINER_NAME = "electric-pi-web"
-WORKER_CONTAINER_NAME = "electric-pi-worker"
+WEB_CONTAINER_NAME = "electric-web"
+WORKER_CONTAINER_NAME = "electric-worker"
 
 def image_name(name, tag):
-    return name + ":" + tag
+    return str(name) + ":" + str(tag)
 
 def get_last_deployed_version():
     (last_deploy, err, last_deploy_ret) = read_output_for(
@@ -165,20 +165,22 @@ class StatusResource(Resource):
             "wlan1": wlan1.strip()
         }
 
-        web_image_running = self.check_docker_container_running(
-            "electric-pi-web")
-        worker_image_running = self.check_docker_container_running(
-            "electric-pi-worker")
+        web_image_running = self.check_docker_container_running(WEB_CONTAINER_NAME)
+        worker_image_running = self.check_docker_container_running(WORKER_CONTAINER_NAME)
 
         res["docker"] = {
             "last_deploy": ver,
             "web": {
-                "image_exists": self.check_docker_image_exists(image_name(WEB_IMAGE_NAME, ver),
+                "image_name": image_name(WEB_IMAGE_NAME, ver),
+                "container_name": WEB_CONTAINER_NAME,
+                "image_exists": self.check_docker_image_exists(image_name(WEB_IMAGE_NAME, ver)),
                 "container_created": self.check_docker_container_created(WEB_CONTAINER_NAME),
                 "container_running": web_image_running
             },
             "worker": {
-                "image_exists": self.check_docker_image_exists(image_name(WORKER_IMAGE_NAME, ver),
+                "image_name": image_name(WORKER_IMAGE_NAME, ver),
+                "container_name": WORKER_CONTAINER_NAME,
+                "image_exists": self.check_docker_image_exists(image_name(WORKER_IMAGE_NAME, ver)),
                 "container_created": self.check_docker_container_created(WORKER_CONTAINER_NAME),
                 "container_running": worker_image_running
             }
