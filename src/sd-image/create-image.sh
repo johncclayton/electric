@@ -99,6 +99,9 @@ sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"
+
+sudo cp scripts/run_electric.sh "$OPT"
+sudo cp scripts/stop_electric.sh "$OPT"
 sudo cp compose-command.sh "$OPT"
 
 sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
