@@ -46,27 +46,38 @@ unpack_or_fetch() {
     fi
 }
 
-while [ $IMAGE_EXISTS -ne 0 ]; do
+WEB_READY=0
+WORKER_READY=0
+UI_READY=0
+
+while [ $WORKER_READY -eq 0 -o $WEB_READY -eq 0 -o $UI_READY -eq 0 ]; do
     image_exists $IMAGE_NAME_WEB
+
+    WEB_READY=0
     if [ $IMAGE_EXISTS -ne 0 ]; then
         unpack_or_fetch $IMAGE_NAME_WEB $IMAGE_TARFILE_WEB
+    else
+        WEB_READY=1
     fi
 
+    WORKER_READY=0
     image_exists $IMAGE_NAME_WORKER
     if [ $IMAGE_EXISTS -ne 0 ]; then
         unpack_or_fetch $IMAGE_NAME_WORKER $IMAGE_TARFILE_WORKER
+    else
+        WORKER_READY=1
     fi
 
+    UI_READY=0
     image_exists $IMAGE_NAME_UI
     if [ $IMAGE_EXISTS -ne 0 ]; then
         unpack_or_fetch $IMAGE_NAME_UI $IMAGE_TARFILE_UI
+    else    
+        UI_READY=1
     fi
+
+    sleep 5
 done
 
-cd /opt
-# if the compose-command script is around, run it.
-if [ -f "compose-command.sh" ]; then
-    ./compose-command.sh
-fi
-
-exit 0
+# does not exit
+cd /opt && ./compose-command.sh

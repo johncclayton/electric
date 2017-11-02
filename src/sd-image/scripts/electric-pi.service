@@ -1,12 +1,11 @@
 [Unit]
-Description=iCharger RESTful API Service
+Description=Bootstraps the Docker Containers for the iCharger services on first run
 After=multi-user.target
 Requires=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/run_electric.sh
-ExecStop=/opt/stop_electric.sh
+ExecStart=/opt/bootstrap_docker_images.sh
 User=pirate
 Restart=on-failure
 RestartSec=8

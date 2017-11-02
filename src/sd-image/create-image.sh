@@ -80,6 +80,8 @@ sudo cp ../server/scripts/10-icharger.rules "$MNT/etc/udev/rules.d/"
 
 sudo mkdir -p "$OPT"
 sudo mkdir -p "$OPT/wireless"
+sudo chmod 777 "$OPT"
+sudo chmod 777 "$OPT/wireless"
 
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
@@ -104,8 +106,7 @@ sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"
 
-sudo cp scripts/run_electric.sh "$OPT"
-sudo cp scripts/stop_electric.sh "$OPT"
+sudo cp scripts/bootstrap_docker_images.sh "$OPT"
 sudo cp compose-command.sh "$OPT"
 
 sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
