@@ -28,5 +28,5 @@ Ok - we have that too!
 At this time we will only support the Pi3. Nothing else. It's purely so we can focus on dev with a known platform. Supporting other stuff takes time, testing, time... and more time :)  Something we don't have enough of as it is!
 
 # Instructions to Install
-![We have a nice set of instructions and steps to follow in Google Docs.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
+[We have a nice set of instructions and steps to follow in Google Docs.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
 
