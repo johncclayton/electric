@@ -39,7 +39,7 @@ echo 1 >/proc/sys/net/ipv4/ip_forward
 # Make sure the channel number is the same
 WLAN0_CHANNEL=$(iwlist channel 2>/dev/null | grep Current | grep 'Current' | gawk '{print gensub(/\(Channel ([0-9]+)\)/, "\\1", "g");  }' | awk '{print $4}')
 if [ "${WLAN0_CHANNEL}x" = "x" ]; then
-    echo "It doesn't look like wlan0 is connected to anything.... lets assume channel 11"
+    echo "It doesn't look like wlan0 is connected to anything... default to a sane default (11)"
     WLAN0_CHANNEL=11
 else
     echo "found wlan0, its on channel $WLAN0_CHANNEL"
