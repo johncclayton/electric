@@ -61,7 +61,12 @@ while [ $IMAGE_EXISTS -ne 0 ]; do
     if [ $IMAGE_EXISTS -ne 0 ]; then
         unpack_or_fetch $IMAGE_NAME_UI $IMAGE_TARFILE_UI
     fi
-
 done
+
+cd /opt
+# if the compose-command script is around, run it.
+if [ -f "compose-command.sh" ]; then
+    ./compose-command.sh
+fi
 
 exit 0
