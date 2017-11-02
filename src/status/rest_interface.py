@@ -13,12 +13,17 @@ WORKER_IMAGE_NAME = "johncclayton/electric-pi-worker"
 WEB_CONTAINER_NAME = "electric-pi-web"
 WORKER_CONTAINER_NAME = "electric-pi-worker"
 
+def get_last_deployed_version():
+    return read_output_for([script_path("get_last_deploy_version.sh")])
+
 def script_path(name):
     return os.path.join("/opt/status/scripts", name)
 
-def read_output_for(args):
+def read_output_for(args, default_on_error=None):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     out, err = proc.communicate()
+    if err != 0:
+        out = default_on_error
     return out, err, proc.returncode
 
 
@@ -84,9 +89,6 @@ class StatusResource(Resource):
         out, err, rtn = read_output_for([script_path("sudo_systemctl_stop.sh"), name])
         return rtn == 0
 
-    def _get_image_version(self, name):
-        out, err, rtn = read_output_for([script_path("")])
-
     def check_docker_image_exists(self, name):
         """Check if the docker images have been downloaded already"""
         try:
@@ -136,27 +138,24 @@ class StatusResource(Resource):
         # in a dict
         res = dict()
 
-        res["dnsmasq"] = {
-            "running": self._systemctl_running("dnsmasq")
+        res["services"] = {
+           "dnsmasq": self._systemctl_running("dnsmasq"),
+           "hostapd": self._systemctl_running("hostapd"),
+           "electric-pi.service": self._systemctl_running("electric-pi"),
+           "electric-pi-status.service": self._systemctl_running("electric-pi-status"),
+           "docker": self._systemctl_running("docker"),
         }
 
-        res["hostapd"] = {
-            "running": self._systemctl_running("hostapd")
-        }
-
-        res["electric-pi.service"] = {
-            "running": self._systemctl_running("electric-pi")
-        }
-
-        res["electric-pi-status.service"] = {
-            "running": self._systemctl_running("electric-pi-status")
+        res["interfaces"] = {
+            "wlan0": self.read_output_for([script_path("get_ip_address.sh"), "wlan0"], "wlan0 device not found"),
+            "wlan1": self.read_output_for([script_path("get_ip_address.sh"), "wlan1"], "wlan1 device not found"),    
         }
 
         web_image_running = self.check_docker_image_running("electric-pi-web")
         worker_image_running = self.check_docker_image_running("electric-pi-worker")
 
         res["docker"] = {
-            "running": self._systemctl_running("docker"),
+            "last_deploy": get_last_deployed_version(),
             "web": {
                 "image_exists": self.check_docker_image_exists(WEB_IMAGE_NAME),
                 "container_created": self.check_docker_container_created(WEB_CONTAINER_NAME),
