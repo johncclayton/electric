@@ -17,8 +17,6 @@ Well, that's pretty easy to explain - here's our list of unique selling points:
 [We have a nice set of instructions and steps to follow in Google Docs.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
 
 ## Pictures or it never happened!
-Ok - we have that too!
-
 ![Demo](/docs/images/teaser.gif "Charge Demo!")
 
 
