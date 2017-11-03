@@ -1,0 +1,1 @@
+"%JAVA_HOME%\bin\keytool" -genkey -v -keystore electric-release.keystore -alias electric-charger -keyalg RSA -keysize 2048 -validity 10000
