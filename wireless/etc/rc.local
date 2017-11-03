@@ -5,11 +5,16 @@
 # This script is executed at the end of each multiuser runlevel.
 # Make sure that the script will "exit 0" on success or any other
 # value on error.
+
 #
-# In order to enable or disable this script just change the execution
-# bits.
+# Ensure that wlan1 is always up.
+# It it normally bought up by wlan0 coming up... but if that fails, we *always* want it around, working.
+# wlan1 provides the static 192.168.10.1 IP
 #
-# By default this script does nothing.
+echo "Checking that wlan1 is always here..."
+
+. /opt/wireless/scripts/functions.sh
+add_wlan1_if_not_there
 
 exit 0
 
