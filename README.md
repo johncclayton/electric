@@ -13,20 +13,11 @@ Well, that's pretty easy to explain - here's our list of unique selling points:
   1. Set up new / existing presets, charge, discharge and store your packs - all from said deck chair.
   1. Use the app at the field as well as on your home WIFI network.
 
-## How do I make it all work?
-There are three steps to getting this working: 
-  1. Install the software on a Raspberry Pi 3 (this guide).
-  1. Set up the networking for the field and your home network.
-  1. Download the app and enjoy!
+# Installation
+[We have a nice set of instructions and steps to follow in Google Docs.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
 
 ## Pictures or it never happened!
-Ok - we have that too!
-
 ![Demo](/docs/images/teaser.gif "Charge Demo!")
 
-# Supported Platforms
-At this time we will only support the Pi3. Nothing else. It's purely so we can focus on dev with a known platform. Supporting other stuff takes time, testing, time... and more time :)  Something we don't have enough of as it is!
 
-# Instructions to Install
-[We have a nice set of instructions and steps to follow in Google Docs.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
 
