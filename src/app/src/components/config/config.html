@@ -39,7 +39,37 @@
     </ion-item>
 </ion-list>
 <ion-list>
-    <ion-list-header color="light">Connection</ion-list-header>
+    <ion-list-header color="light">
+        <ion-label>
+            Wifi Network
+        </ion-label>
+    </ion-list-header>
+    <ion-item>
+        <ion-label stacked>SSID (of your home network)</ion-label>
+        <ion-input type="text" [ngModel]="config.homeLanSSID"
+                   (ngModelChange)="change('homeLanSSID', $event)"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label stacked>Password (of above Wifi router)</ion-label>
+        <ion-input type="text" [ngModel]="config.homeLanPassword"
+                   (ngModelChange)="change('homeLanPassword', $event)">
+
+        </ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label class="wifi">
+            <ion-icon item-end name="wifi"
+                      [class.connecting]="config.homeWifiConnecting"
+                      [class.connected]="config.homeWifiConnected">
+            </ion-icon>
+            {{wifiConnectionStatus()}}
+        </ion-label>
+        <button item-end [disabled]="!wifiSettingsValid" ion-button (tap)="sendWifiSettings.emit()">Connect</button>
+    </ion-item>
+</ion-list>
+
+<ion-list>
+    <ion-list-header color="light">Connection to the Pi3</ion-list-header>
     <ion-item>
         <ion-label stacked>IP Address of Pi (on home network)</ion-label>
         <ion-input type="text" [ngModel]="config.ipAddress"

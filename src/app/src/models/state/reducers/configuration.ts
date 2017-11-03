@@ -24,6 +24,17 @@ export interface IConfig {
     vibrateWhenDone: boolean,
     notificationWhenDone: boolean,
 
+    // Home network configuration
+    homeLanSSID: string;
+    homeLanPassword: string;
+    homeLanConnecting: boolean;
+    homeLanIPAddress: string;
+    homeLanChannelNumber: number;
+    homeLanConnected: boolean;
+
+    dockerContainerTag:string;
+    serverStatus:string;
+
     // Used to understand what our IP address is. either 192.168.10.1 or self.ipAddress.
     connectedToPrivateWLAN: boolean,
 
@@ -56,6 +67,16 @@ export const configurationDefaults: IConfig = {
     mockCharger: false,
     vibrateWhenDone: false,
     notificationWhenDone: false,
+
+    homeLanSSID: "",
+    homeLanPassword: "",
+    homeLanIPAddress: "",
+    homeLanChannelNumber: 0,
+    homeLanConnected: false,
+    homeLanConnecting: false,
+
+    dockerContainerTag: "",
+    serverStatus:"",
 
     connectedToPrivateWLAN: false,
     lastConnectionIndex: 0,

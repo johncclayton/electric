@@ -14,6 +14,7 @@ import {Vibration} from "@ionic-native/vibration";
 import {Subject} from "rxjs/Subject";
 import {LocalNotifications} from "@ionic-native/local-notifications";
 import {IUIState} from "../models/state/reducers/ui";
+import {ConfigurationActions} from "../models/state/actions/configuration";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -63,11 +64,12 @@ export class iChargerService {
     }
 
     public constructor(public http: Http,
-                       public chargerActions: ChargerActions,
                        public vibration: Vibration,
                        public uiActions: UIActions,
-                       private localNotifications: LocalNotifications,
-                       private ngRedux: NgRedux<IAppState>) {
+                       private ngRedux: NgRedux<IAppState>,
+                       private chargerActions: ChargerActions,
+                       private configActions: ConfigurationActions,
+                       private localNotifications: LocalNotifications,) {
 
         this.lastUsedIPAddressIndex = 0;
         this.getChargerStatus()
@@ -165,25 +167,35 @@ export class iChargerService {
             .retry();
     }
 
-    public static getHostNameUsingConfigAndState(config: IConfig, ui: IUIState) {
+    public static getHostNameUsingConfigAndState(config: IConfig, ui: IUIState, port: number) {
         // If on index 0, use private WLAN address
         if (config.lastConnectionIndex == 0) {
-            return "192.168.10.1:" + config.port;
+            return "192.168.10.1:" + port;
         }
 
         // If disconnected, do a round robbin between various known IP addresses
-        return config.ipAddress + ":" + config.port;
+        return config.ipAddress + ":" + port;
     }
 
     getHostName(): string {
         let config = this.getConfig();
         let state = this.ngRedux.getState();
-        return iChargerService.getHostNameUsingConfigAndState(config, state.ui);
+        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, config.port);
+    }
+
+    getManagementHostName(): string {
+        let config = this.getConfig();
+        let state = this.ngRedux.getState();
+        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, 4999);
     }
 
     // Gets the status of the charger
     private getChargerURL(path) {
         return "http://" + this.getHostName() + path;
+    }
+
+    private getManagementURL(path) {
+        return "http://" + this.getManagementHostName() + path;
     }
 
     static lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
@@ -454,6 +466,83 @@ export class iChargerService {
             id: 1,
             text: operationName + ", finished"
         });
+    }
+
+    /*
+    This has to be here, because it uses some built in state
+     */
+    setChargeConfiguration(key: string, value: any) {
+        let change = [];
+        change[key] = value;
+        this.ngRedux.dispatch({
+            type: ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE,
+            payload: change,
+            maxAmpsPerChannel: this.getMaxAmpsPerChannel()
+        });
+    }
+
+
+    public updateWifi(ssid: string, password: string) {
+        this.configActions.setConfiguration("homeLanConnecting", true);
+
+        Observable.create((observable) => {
+            let wifiURL = this.getManagementURL("/wifi");
+            let payload = {
+                "SSID": ssid,
+                "PWD": password
+            };
+            console.log("Sending: ", payload, "to", wifiURL);
+            this.http.put(wifiURL, JSON.stringify(payload)).subscribe((resp) => {
+                    if (resp.ok) {
+                        console.log("Yay. It worked");
+                    }
+                }, (e) => {
+
+                }, () => {
+                    this.configActions.setConfiguration("homeLanConnecting", false);
+                    this.detectWifiConnectionStatus();
+                }
+            );
+        }).subscribe()
+    }
+
+    public detectWifiConnectionStatus() {
+        Observable.create((observable) => {
+            let wifiURL = this.getManagementURL("/status");
+            this.http.get(wifiURL).subscribe((resp) => {
+                let json = resp.json();
+                let access_point = json["access_point"];
+                let interfaces = json["interfaces"];
+                let docker = json["docker"];
+                let server = json["server_status"];
+                let services = json["services"];
+
+                let new_values = {
+                    homeLanChannelNumber: access_point.channel,
+                    dockerContainerTag: docker.last_deploy,
+                    services: services
+                };
+
+                if (docker.hasOwnProperty('last_deploy')) {
+                    new_values['dockerContainerTag'] = docker['last_deploy'];
+                }
+
+                if (server.hasOwnProperty('exception')) {
+                    new_values['serverStatus'] = server.exception;
+                } else if (server.hasOwnProperty('charger_presence')) {
+                    new_values['serverStatus'] = "Connected";
+                }
+
+                if (interfaces.hasOwnProperty("wlan0")) {
+                    new_values['homeLanIPAddress'] = interfaces['wlan0'];
+                    new_values['homeLanConnected'] = interfaces['wlan0'].length > 0;
+                } else {
+                    new_values['homeLanConnected'] = false;
+                }
+
+                this.configActions.updateConfiguration(new_values);
+            });
+        }).subscribe();
     }
 }
 

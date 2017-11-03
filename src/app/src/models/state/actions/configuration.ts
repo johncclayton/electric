@@ -1,8 +1,7 @@
 import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
-import {iChargerService} from "../../../services/icharger.service";
-import * as _ from "lodash";
+import {validateAnimationSequence} from "@angular/animations/browser/src/dsl/animation_validator_visitor";
 
 
 @Injectable()
@@ -13,8 +12,7 @@ export class ConfigurationActions {
     static CONFIG_SAVED_TO_STORE: string = 'CONFIG_SAVED_TO_STORE';
     static SET_FULL_CONFIG: string = 'SET_FULL_CONFIG';
 
-    constructor(private ngRedux: NgRedux<IAppState>,
-                private chargerService: iChargerService) {
+    constructor(private ngRedux: NgRedux<IAppState>) {
     }
 
     resetToDefaults() {
@@ -31,7 +29,7 @@ export class ConfigurationActions {
             //     ...config.discoveredServers,
             //     ipAddress
             // ])
-            discoveredServers:[
+            discoveredServers: [
                 ...config.discoveredServers,
                 ipAddress
             ]
@@ -54,28 +52,38 @@ export class ConfigurationActions {
         this.updateConfiguration(change);
     }
 
-    setChargeConfiguration(key: string, value: any) {
-        let change = [];
-        change[key] = value;
-        this.ngRedux.dispatch({
-            type: ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE,
-            payload: change,
-            maxAmpsPerChannel: this.chargerService.getMaxAmpsPerChannel()
-        });
-    }
-
     updateConfiguration(change) {
         // Check the change type, coerce values
-        if (change) {
+        if (change != null) {
             let config = this.ngRedux.getState().config;
-            let key = Object.keys(change)[0];
-            if (config[key] != change[key]) {
+
+            // Check to see if any values have changed
+            let has_changes: boolean = false;
+            for (let in_key in change) {
+                let value_changed = true;
+                if (config.hasOwnProperty(in_key)) {
+                    let existing_value = config[in_key];
+                    value_changed = change[in_key] != existing_value;
+                }
+
+                if (value_changed) {
+                    console.log("CHANGE:", change);
+                    has_changes = true;
+                    break;
+                }
+            }
+
+            if (has_changes) {
                 this.ngRedux.dispatch({
                     type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
                     payload: change
                 });
             }
         }
+    }
+
+    setNotConnecting() {
+        this.setConfiguration('homeLanConnecting', false);
     }
 }
 

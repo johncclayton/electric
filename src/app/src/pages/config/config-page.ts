@@ -9,6 +9,7 @@ import {IUIState} from "../../models/state/reducers/ui";
 import {Zeroconf} from "@ionic-native/zeroconf";
 import {System} from "../../models/system";
 import {IAppState} from "../../models/state/configure";
+import {iChargerService} from "../../services/icharger.service";
 
 @Component({
     selector: 'page-config',
@@ -22,6 +23,7 @@ export class ConfigPage {
 
     constructor(private platform: Platform,
                 private zeroConf: Zeroconf,
+                private iChargerService: iChargerService,
                 private ngRedux: NgRedux<IAppState>,
                 private actions: ConfigurationActions) {
 
@@ -60,6 +62,12 @@ export class ConfigPage {
     canUseZeroconf(): boolean {
         let has_cordova = this.platform.is('cordova');
         return has_cordova && this.isProduction;
+    }
+
+    sendWifiSettings() {
+        let config = this.ngRedux.getState().config;
+        console.log("Sending settings...");
+        this.iChargerService.updateWifi(config.homeLanSSID, config.homeLanPassword);
     }
 
     canUseDeploy(): boolean {

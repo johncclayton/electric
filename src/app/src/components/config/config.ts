@@ -6,6 +6,7 @@ import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
 import {LocalNotifications} from "@ionic-native/local-notifications";
 import {System} from "../../models/system";
+import {iChargerService} from "../../services/icharger.service";
 
 @Component({
     selector: 'config',
@@ -23,20 +24,20 @@ export class ConfigComponent {
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() testFunc: EventEmitter<any> = new EventEmitter();
+    @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
 
     private lastUsedDiscoveryIndex = 0;
 
     constructor(public navCtrl: NavController,
+                public chargerService: iChargerService,
                 public notifications: LocalNotifications,
                 public platform: Platform) {
-    }
-
-    ngOnDestroy() {
+        this.chargerService.detectWifiConnectionStatus();
     }
 
     autoDetect() {
         if (this.config.discoveredServers != null) {
-            console.log("Have: ", this.config.discoveredServers.join(","));
+            // console.log("Have: ", this.config.discoveredServers.join(","));
             if (this.config.discoveredServers.length > 0) {
                 if (this.lastUsedDiscoveryIndex > this.config.discoveredServers.length - 1) {
                     this.lastUsedDiscoveryIndex = 0;
@@ -53,6 +54,17 @@ export class ConfigComponent {
 
     num(value) {
         return parseInt(value);
+    }
+
+    wifiConnectionStatus() {
+        if (this.config.homeLanConnecting) {
+            return "Connecting...";
+        }
+        if (this.config.homeLanConnected) {
+            return "Connected. IP:" + this.config.homeLanIPAddress
+                + ", channel: " + this.config.homeLanChannelNumber;
+        }
+        return "Not connected";
     }
 
     change(keyName, value) {
@@ -105,5 +117,18 @@ export class ConfigComponent {
 
     get isProduction(): boolean {
         return System.isProduction;
+    }
+
+    get wifiSettingsValid():boolean {
+        if(isUndefined(this.config.homeLanPassword)) {
+            return false;
+        }
+        if(isUndefined(this.config.homeLanSSID)) {
+            return false;
+        }
+        let passLength = this.config.homeLanPassword.length;
+        let ssidLength = this.config.homeLanSSID.length;
+        // console.log("SSID Len:", ssidLength, "P Len:", passLength);
+        return ssidLength > 0 && passLength >= 8 && passLength <= 63;
     }
 }

@@ -62,17 +62,14 @@ if [ "$EXISTING_CHANNEL" != "$WLAN0_CHANNEL" ] || [ "$EXISTING_NAME" != "${WLAN1
 
     hostapd_template_str=$(cat /etc/hostapd/hostapd.conf.template)
     eval "echo >/etc/hostapd/hostapd.conf \"${hostapd_template_str}\""
-
-    check_firewall_forwarding_rules
-
-    echo "Restarting hostapd..."
-    /etc/init.d/hostapd restart
-
-    echo "Restarting dnsmasq..."
-    /etc/init.d/dnsmasq restart
-else
-    echo "hostapd channel already at $WLAN0_CHANNEL.  Only checking firewall rules"
-    check_firewall_forwarding_rules
 fi
+
+echo "Restarting hostapd..."
+/etc/init.d/hostapd restart
+
+echo "Restarting dnsmasq..."
+/etc/init.d/dnsmasq restart
+
+check_firewall_forwarding_rules
 
 exit 0

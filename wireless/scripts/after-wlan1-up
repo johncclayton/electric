@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# quit if we're called for the loopback
+if [ "$IFACE" = lo ]; then
+    exit 0
+fi
+
+echo "Restarting hostapd (due to wlan1) ..."
+/etc/init.d/hostapd restart
+
+echo "Restarting dnsmasq (due to wlan1)..."
+/etc/init.d/dnsmasq restart
+
+exit 0

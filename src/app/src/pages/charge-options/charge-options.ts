@@ -40,7 +40,6 @@ export class ChargeOptionsPage implements Chemistry {
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
-                public actions: ConfigurationActions,
                 public uiActions: UIActions,
                 public toastController: ToastController,
                 public ngRedux: NgRedux<IAppState>,
@@ -145,7 +144,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     set chargeMethod(value) {
-        this.actions.setChargeConfiguration('chargeMethod', value);
+        this.chargerService.setChargeConfiguration('chargeMethod', value);
     }
 
     get chemistryFilter(): string {
@@ -153,7 +152,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     set chemistryFilter(value) {
-        this.actions.setChargeConfiguration('chemistryFilter', value);
+        this.chargerService.setChargeConfiguration('chemistryFilter', value);
     }
 
     get capacity() {
@@ -161,7 +160,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     set capacity(value) {
-        this.actions.setChargeConfiguration('capacity', value);
+        this.chargerService.setChargeConfiguration('capacity', value);
     }
 
     get chargeRate() {
@@ -177,7 +176,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     set chargeRate(value) {
-        this.actions.setChargeConfiguration('wantedChargeRateInC', value);
+        this.chargerService.setChargeConfiguration('wantedChargeRateInC', value);
     }
 
     get numPacks() {
@@ -185,7 +184,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     set numPacks(value) {
-        this.actions.setChargeConfiguration('numPacks', value);
+        this.chargerService.setChargeConfiguration('numPacks', value);
     }
 
     showFlame() {

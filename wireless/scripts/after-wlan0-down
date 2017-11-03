@@ -5,12 +5,15 @@ if [ "$IFACE" = lo ]; then
     exit 0
 fi
 
-echo "Stopping services we no longer need"
+#
+# Taking out for now.
+# If we find that refreshing wlan0 requires that these services restart, we can do that here
+#
 
-echo "Restarting hostapd..."
-/etc/init.d/hostapd stop
-
-echo "Restarting dnsmasq..."
-/etc/init.d/dnsmasq stop
+#echo "Restarting hostapd..."
+#/etc/init.d/hostapd restart
+#
+#echo "Restarting dnsmasq..."
+#/etc/init.d/dnsmasq restart
 
 exit 0

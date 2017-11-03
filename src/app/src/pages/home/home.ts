@@ -13,6 +13,7 @@ import {SystemActions} from "../../models/state/actions/system";
 import {Subject} from "rxjs/Subject";
 import {PresetListPage} from "../preset-list/preset-list";
 import {ConfigStoreProvider} from "../../providers/config-store/config-store";
+import {ConfigurationActions} from "../../models/state/actions/configuration";
 // import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
@@ -44,8 +45,8 @@ export class HomePage {
 
     constructor(public readonly navCtrl: NavController,
                 public readonly chargerService: iChargerService,
-                private configStore: ConfigStoreProvider,
                 private uiAction: UIActions,
+                private configActions : ConfigurationActions,
                 private platform: Platform,
                 private systemActions: SystemActions,
                 public readonly ngRedux: NgRedux<IAppState>,
@@ -59,11 +60,6 @@ export class HomePage {
             .takeUntil(this.ngUnsubscribe)
             .subscribe(r => {
                 this.timeoutUp = true;
-            });
-
-        Observable.timer(timeout * 1.2)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(r => {
                 this.showConfigureButton = true;
             });
 
@@ -79,6 +75,8 @@ export class HomePage {
             // Wait until configuration is loaded before starting things.
             this.platform.ready().then((r) => {
                 this.systemActions.fetchSystemFromCharger();
+
+                this.configActions.setNotConnecting();
             });
 
             this.loadFirstPageDoingDebugging();
@@ -105,7 +103,7 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
-        // this.showConfigPage();
+        this.showConfigPage();
         // this.showSystemPage();
         // this.showPresetsPage();
     }

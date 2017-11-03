@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# quit if we're called for the loopback
+if [ "$IFACE" = lo ]; then
+    exit 0
+fi
+
+echo "Stopping hostapd..."
+/etc/init.d/hostapd stop
+
+echo "Stopping dnsmasq..."
+/etc/init.d/dnsmasq stop
+
+exit 0
