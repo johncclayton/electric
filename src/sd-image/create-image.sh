@@ -116,8 +116,8 @@ sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT" 
-if [ -d "$HOME/Dropbox/Electric\ Storage" -a "$RES" -eq 0 ]; then
-	cp "$TO" "$HOME/Dropbox/Electric\ Storage/"
+if [ -d "$HOME/Dropbox/Electric Storage" -a "$RES" -eq 0 ]; then
+	cp "$TO" "$HOME/Dropbox/Electric Storage/"
 else
 	echo "$TO not moved, there was a problem"
 fi
