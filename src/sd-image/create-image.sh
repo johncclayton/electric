@@ -6,13 +6,15 @@ set -x
 FROM="$1"
 TO="$2"
 
-ACCOUNT="pirate"
 PIIMG=`which piimg`
-MNT="/mnt"
 QEMU_ARM="/usr/bin/qemu-arm-static"
+
+MNT="/mnt"
+OPT="$MNT/opt"
 
 DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
+DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
 if [ -z "$FROM" -o -z "$TO" ]; then
 	echo "Use create-image.sh <from> <to>"
@@ -62,39 +64,52 @@ fi
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/get-latest-build-number.py
 VERSION_NUM=`python get-latest-build-number.py`
 echo "Latest version is: $VERSION_NUM"
-echo >LAST_DEPLOY $VERSION_NUM
 
 # pull docker image and save it as a file...
 docker pull "$DOCKER_IMAGE_WEB:$VERSION_NUM"
 docker pull "$DOCKER_IMAGE_WORKER:$VERSION_NUM"
+docker pull "$DOCKER_IMAGE_UI"
 
-# copy source -> dest
+# copy source -> dest so we don't change the original image
 cp "$FROM" "$TO" 
-
 sudo $PIIMG mount "$TO" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 
-# fetch the iCharger rules
-sudo cp ../server/scripts/10-icharger.rules "$MNT/home/$ACCOUNT/"
+# this ensures that udev will recognize the iCharger for non-root users when plugged in.
+sudo cp ../server/scripts/10-icharger.rules "$MNT/etc/udev/rules.d/"
 
-sudo mkdir -p "$MNT/home/$ACCOUNT/wireless"
-sudo cp -r ../../wireless/etc "$MNT/home/$ACCOUNT/wireless/"
-sudo cp -r ../../wireless/config "$MNT/home/$ACCOUNT/wireless/"
-sudo cp -r ../../wireless/scripts "$MNT/home/$ACCOUNT/wireless/"
+sudo mkdir -p "$OPT"
+sudo mkdir -p "$OPT/wireless"
+sudo chmod 777 "$OPT"
+sudo chmod 777 "$OPT/wireless"
 
-sudo touch "$MNT/home/$ACCOUNT/docker_image_web.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
-sudo touch "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz" && sudo chmod 777 "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
+# you would think you can echo this directly into the $OPT area - you can't, perm. denied
+# so I create the file here and move it across - worth a groan or two.
+echo "$VERSION_NUM" > ./LAST_DEPLOY
+sudo mv ./LAST_DEPLOY "$OPT"
 
-docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$MNT/home/$ACCOUNT/docker_image_web.tar.gz"
-docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$MNT/home/$ACCOUNT/docker_image_worker.tar.gz"
+sudo cp -r ../../wireless/etc "$OPT/wireless/"
+sudo cp -r ../../wireless/config "$OPT/wireless/"
+sudo cp -r ../../wireless/scripts "$OPT/wireless/"
+
+sudo touch "$OPT/docker_image_web.tar.gz" && sudo chmod 777 "$OPT/docker_image_web.tar.gz"
+sudo touch "$OPT/docker_image_worker.tar.gz" && sudo chmod 777 "$OPT/docker_image_worker.tar.gz"
+sudo touch "$OPT/docker_image_ui.tar.gz" && sudo chmod 777 "$OPT/docker_image_ui.tar.gz"
+
+docker image save "$DOCKER_IMAGE_WEB:$VERSION_NUM" | gzip > "$OPT/docker_image_web.tar.gz"
+docker image save "$DOCKER_IMAGE_WORKER:$VERSION_NUM" | gzip > "$OPT/docker_image_worker.tar.gz"
+docker image save "$DOCKER_IMAGE_UI" | gzip > "$OPT/docker_image_ui.tar.gz"
 
 sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
+sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 
-sudo cp -r ../status "$MNT/home/$ACCOUNT/"
-sudo cp ../../docker-compose.yml "$MNT/home/$ACCOUNT/"
-sudo cp compose-command.sh "$MNT/home/$ACCOUNT/"
+sudo cp -r ../status "$OPT"
+sudo cp ../../docker-compose.yml "$OPT"
 
-sudo find "${MNT}/home/$ACCOUNT/" -name "*.sh" -type f | sudo xargs chmod +x
+sudo cp scripts/bootstrap_docker_images.sh "$OPT"
+sudo cp compose-command.sh "$OPT"
+
+sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
 
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?

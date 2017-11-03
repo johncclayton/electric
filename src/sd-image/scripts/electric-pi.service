@@ -1,15 +1,15 @@
 [Unit]
-Description=Electric Pi Status Service
+Description=Bootstraps the Docker Containers for the iCharger services on first run
 After=multi-user.target
 Requires=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/status/run_server.sh
+ExecStart=/opt/bootstrap_docker_images.sh
 User=pirate
 Restart=on-failure
 RestartSec=8
-WorkingDirectory=/opt/status
+WorkingDirectory=/opt
 
 [Install]
 WantedBy=multi-user.target

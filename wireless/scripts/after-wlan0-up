@@ -39,11 +39,11 @@ echo 1 >/proc/sys/net/ipv4/ip_forward
 # Make sure the channel number is the same
 WLAN0_CHANNEL=$(iwlist channel 2>/dev/null | grep Current | grep 'Current' | gawk '{print gensub(/\(Channel ([0-9]+)\)/, "\\1", "g");  }' | awk '{print $4}')
 if [ "${WLAN0_CHANNEL}x" = "x" ]; then
-    echo "It doesn't look like wlan0 is connected to anything.... error!"
-    exit -2
+    echo "It doesn't look like wlan0 is connected to anything... default to a sane default (11)"
+    WLAN0_CHANNEL=11
+else
+    echo "found wlan0, its on channel $WLAN0_CHANNEL"
 fi
-
-echo "wlan0 is on channel $WLAN0_CHANNEL"
 
 # Check iw wlan0 link, and make sure "Connected to" is there.
 # Only then can we find the channel and adjust hostapd config.
@@ -64,12 +64,12 @@ if [ "$EXISTING_CHANNEL" != "$WLAN0_CHANNEL" ] || [ "$EXISTING_NAME" != "${WLAN1
     eval "echo >/etc/hostapd/hostapd.conf \"${hostapd_template_str}\""
 fi
 
+check_firewall_forwarding_rules
+
 echo "Restarting hostapd..."
 /etc/init.d/hostapd restart
 
 echo "Restarting dnsmasq..."
 /etc/init.d/dnsmasq restart
-
-check_firewall_forwarding_rules
 
 exit 0
