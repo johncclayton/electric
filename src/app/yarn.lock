@@ -66,16 +66,16 @@
   resolved "https://registry.yarnpkg.com/@ionic-native/core/-/core-3.14.0.tgz#796ea9fb1ad1188eb30205c7bca982c8271747be"
 
 "@ionic-native/fcm@^4.2.1":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@ionic-native/fcm/-/fcm-4.3.2.tgz#3c61cc1d5f692a872c340327bfebc72e8018508a"
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@ionic-native/fcm/-/fcm-4.3.3.tgz#8808fec0e0b9c418b365de4e1846385a275c060c"
 
 "@ionic-native/local-notifications@^4.1.0":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@ionic-native/local-notifications/-/local-notifications-4.3.2.tgz#4e490d30fbfb3368b36a4e76e17dc8b3c067c3ac"
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@ionic-native/local-notifications/-/local-notifications-4.3.3.tgz#3c4c759e0e38466eba2062bf15523b8a0931c15a"
 
 "@ionic-native/push@^4.2.1":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@ionic-native/push/-/push-4.3.2.tgz#00f7de3105b79bcda52b19d454f78f8c04e864eb"
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@ionic-native/push/-/push-4.3.3.tgz#3fc792c986801c20e2899d9f394db179fcd604be"
 
 "@ionic-native/splash-screen@^3.12.1":
   version "3.14.0"
@@ -86,12 +86,12 @@
   resolved "https://registry.yarnpkg.com/@ionic-native/status-bar/-/status-bar-3.14.0.tgz#30ee1bc8a34895fb261b1e3d58fa30fb188857df"
 
 "@ionic-native/vibration@^4.1.0":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@ionic-native/vibration/-/vibration-4.3.2.tgz#c00a260872ccfe163e8ffa37987a08fb4742b2f2"
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@ionic-native/vibration/-/vibration-4.3.3.tgz#6b7c0b6bab5efae13291f6576ccf5a80904768a4"
 
 "@ionic-native/zeroconf@^4.3.2":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@ionic-native/zeroconf/-/zeroconf-4.3.2.tgz#06c3de986eb6a941012eb3b1dc6f584ba1781e92"
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@ionic-native/zeroconf/-/zeroconf-4.3.3.tgz#696097ebcc62ed85fdd63a4497aaee9b444031d1"
 
 "@ionic/app-scripts@^3.0.1":
   version "3.0.1"
@@ -128,24 +128,26 @@
     ws "1.1.4"
     xml2js "0.4.17"
 
-"@ionic/cli-framework@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@ionic/cli-framework/-/cli-framework-0.0.1.tgz#5db6b75a3d04414d85899bdf00b85bbcd8a1c698"
+"@ionic/cli-framework@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@ionic/cli-framework/-/cli-framework-0.0.2.tgz#b3425cbf9e47cbca3b0f759f72e8cb67d0eefd9d"
   dependencies:
-    chalk "^2.2.0"
+    chalk "^2.3.0"
     ncp "^2.0.0"
     strip-ansi "^4.0.0"
-    superagent "^3.7.0"
+    superagent "^3.8.0"
     tslib "^1.8.0"
 
-"@ionic/cli-utils@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@ionic/cli-utils/-/cli-utils-1.15.1.tgz#6b5edd17670794bc067da08f0208f9ca71b813cf"
+"@ionic/cli-utils@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@ionic/cli-utils/-/cli-utils-1.16.0.tgz#289e744716bdb8e43a371384420e84af5e8792f4"
   dependencies:
+    "@ionic/cli-framework" "0.0.2"
+    "@ionic/discover" "0.4.0"
     archiver "^2.1.0"
     basic-auth "^1.1.0"
     body-parser "^1.18.1"
-    chalk "2.2.0"
+    chalk "^2.3.0"
     chokidar "^1.7.0"
     ci-info "^1.1.1"
     cross-spawn "^5.1.0"
@@ -163,7 +165,7 @@
     slice-ansi "^1.0.0"
     ssh-config "^1.1.1"
     string-width "^2.1.1"
-    superagent "^3.6.3"
+    superagent "^3.8.0"
     tar "^2.2.1"
     tiny-lr "^1.0.5"
     tslib "^1.8.0"
@@ -171,9 +173,9 @@
     wrap-ansi "^3.0.1"
     ws "^3.2.0"
 
-"@ionic/discover@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@ionic/discover/-/discover-0.3.3.tgz#fcdb1e933a39c6e16b2eb5edf3dff06c284bd24d"
+"@ionic/discover@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@ionic/discover/-/discover-0.4.0.tgz#1229538e6b27b3175df4fe09dfd23f709440bfdd"
   dependencies:
     netmask "^1.0.6"
 
@@ -755,15 +757,7 @@ chalk@1.1.3, chalk@^1.1.1, chalk@^1.1.3:
     strip-ansi "^3.0.0"
     supports-color "^2.0.0"
 
-chalk@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.2.0.tgz#477b3bf2f9b8fd5ca9e429747e37f724ee7af240"
-  dependencies:
-    ansi-styles "^3.1.0"
-    escape-string-regexp "^1.0.5"
-    supports-color "^4.0.0"
-
-chalk@^2.0.0, chalk@^2.1.0, chalk@^2.2.0:
+chalk@^2.0.0, chalk@^2.1.0, chalk@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.3.0.tgz#b5ea48efc9c1793dccc9b4767c93914d3f2d52ba"
   dependencies:
@@ -1001,8 +995,8 @@ cordova-common@^2.1.0:
     unorm "^1.3.3"
 
 cordova-ios@^4.4.0:
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/cordova-ios/-/cordova-ios-4.5.2.tgz#46b410fe2d14b449547c1d617e988aa6d80da37c"
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/cordova-ios/-/cordova-ios-4.5.3.tgz#5d3c2dbe89a6d92e6282d1721c1fdda4bf806a1d"
   dependencies:
     cordova-common "2.1.0"
     ios-sim "^6.1.2"
@@ -2121,14 +2115,13 @@ ionic-plugin-keyboard@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ionic-plugin-keyboard/-/ionic-plugin-keyboard-2.2.1.tgz#f2a9e169bbe9b5522400347c9fd6d3467ee3fa12"
 
-ionic@^3.7.0:
-  version "3.15.1"
-  resolved "https://registry.yarnpkg.com/ionic/-/ionic-3.15.1.tgz#21e33c37242e1ea3d06300e2550b44b5b8875ce0"
+ionic@3.16.0:
+  version "3.16.0"
+  resolved "https://registry.yarnpkg.com/ionic/-/ionic-3.16.0.tgz#a8035f3ee61cae895435bb0d7a9689daf22d9af2"
   dependencies:
-    "@ionic/cli-framework" "0.0.1"
-    "@ionic/cli-utils" "1.15.1"
-    "@ionic/discover" "^0.3.3"
-    chalk "2.2.0"
+    "@ionic/cli-framework" "0.0.2"
+    "@ionic/cli-utils" "1.16.0"
+    chalk "^2.3.0"
     opn "^5.1.0"
     os-name "^2.0.1"
     rimraf "^2.6.2"
@@ -4079,7 +4072,7 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-superagent@^3.6.3, superagent@^3.7.0:
+superagent@^3.8.0:
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/superagent/-/superagent-3.8.0.tgz#87e3ed536c8860c08c7c7d1225da9a80cab064c6"
   dependencies:
@@ -4682,8 +4675,8 @@ yargs@~3.10.0:
     window-size "0.1.0"
 
 yarn@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.2.1.tgz#0d628dc01438881a1663a6f83cbf7ac5db7a75fc"
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.3.2.tgz#5939762581b5b4ddcd3418c0f6be42df3aee195f"
 
 zip-stream@^1.2.0:
   version "1.2.0"

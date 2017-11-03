@@ -75,7 +75,7 @@
     "devDependencies": {
         "@ionic/app-scripts": "^3.0.1",
         "@types/redux-logger": "^3.0.0",
-        "ionic": "^3.7.0",
+        "ionic": "3.16.0",
         "typescript": "2.5.0"
     },
     "cordovaPlugins": [
