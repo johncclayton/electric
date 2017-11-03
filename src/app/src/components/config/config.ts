@@ -56,13 +56,13 @@ export class ConfigComponent {
         return parseInt(value);
     }
 
-    wifiConnectionStatus() {
+    wifiConnectionStatusString(): string {
         if (this.config.homeLanConnecting) {
             return "Connecting...";
         }
         if (this.config.homeLanConnected) {
-            return "Connected. IP:" + this.config.homeLanIPAddress
-                + ", channel: " + this.config.homeLanChannelNumber;
+            return "Connected: " + this.config.homeLanIPAddress;
+
         }
         return "Not connected";
     }
@@ -119,16 +119,17 @@ export class ConfigComponent {
         return System.isProduction;
     }
 
-    get wifiSettingsValid():boolean {
-        if(isUndefined(this.config.homeLanPassword)) {
+    get wifiSettingsValid(): boolean {
+        if (isUndefined(this.config.homeLanPassword)) {
             return false;
         }
-        if(isUndefined(this.config.homeLanSSID)) {
+        if (isUndefined(this.config.homeLanSSID)) {
             return false;
         }
+
         let passLength = this.config.homeLanPassword.length;
         let ssidLength = this.config.homeLanSSID.length;
         // console.log("SSID Len:", ssidLength, "P Len:", passLength);
-        return ssidLength > 0 && passLength >= 8 && passLength <= 63;
+        return ssidLength > 0 && (passLength >= 8 && passLength <= 63);
     }
 }

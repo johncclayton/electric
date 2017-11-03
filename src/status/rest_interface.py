@@ -1,11 +1,13 @@
 import logging
 import os
-import json
-import docker
-import requests
 import subprocess
 
+import docker
+import requests
 from flask import jsonify
+from flask import request, redirect, url_for
+from flask_restful import Resource
+
 
 class InvalidUsage(Exception):
     status_code = 400
@@ -22,15 +24,6 @@ class InvalidUsage(Exception):
         rv['message'] = self.message
         return rv
 
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
-
-
-from flask import request, redirect, url_for
-from flask_restful import Resource
 
 logger = logging.getLogger('electric.status.{0}'.format(__name__))
 
@@ -39,12 +32,15 @@ WORKER_IMAGE_NAME = "johncclayton/electric-pi-worker"
 WEB_CONTAINER_NAME = "electric-web"
 WORKER_CONTAINER_NAME = "electric-worker"
 
+
 def image_name(name, tag):
     return str(name) + ":" + str(tag)
+
 
 def read_wpa_ssid_name():
     """Read contents of the wpa supplicant file to see what we are connected to"""
     return read_output_for([script_path("sudo_get_ssid_name.sh")])
+
 
 def get_last_deployed_version():
     (last_deploy, err, last_deploy_ret) = read_output_for(
@@ -80,11 +76,14 @@ class WiFiConnectionResource(Resource):
         }
 
     def put(self):
-        if not "SSID" in request.json:
+        if not request.json:
+            raise InvalidUsage("No JSON payload")
+
+        if "SSID" not in request.json:
             raise InvalidUsage("No SSID in payload")
 
-        if not "PSK" in request.json:
-            raise InvalidUsage("No PSK in payload")
+        if "PWD" not in request.json:
+            raise InvalidUsage("No PWD in payload")
 
         ssid_value = request.json["SSID"]
         ssid_pwd = request.json["PWD"]
@@ -184,7 +183,7 @@ class StatusResource(Resource):
             "electric-pi-status.service": self._systemctl_running("electric-pi-status"),
             "docker": self._systemctl_running("docker"),
         }
-    
+
         res["interfaces"] = {
             "wlan0": wlan0.strip(),
             "wlan1": wlan1.strip()
@@ -232,3 +231,16 @@ class StatusResource(Resource):
         res["server_status"] = server_status
 
         return res
+
+
+#
+# This is here so as to not cause a recursive module import
+#
+from main import application
+
+
+@application.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response

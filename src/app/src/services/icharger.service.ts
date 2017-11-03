@@ -491,8 +491,13 @@ export class iChargerService {
                 "SSID": ssid,
                 "PWD": password
             };
-            console.log("Sending: ", payload, "to", wifiURL);
-            this.http.put(wifiURL, JSON.stringify(payload)).subscribe((resp) => {
+
+            let headers = new Headers({'Content-Type': 'application/json'});
+            let options = new RequestOptions({headers: headers});
+
+            let body = JSON.stringify(payload);
+            console.log("Sending: ", body, "to", wifiURL);
+            this.http.put(wifiURL, body, options).subscribe((resp) => {
                     if (resp.ok) {
                         console.log("Yay. It worked");
                     }

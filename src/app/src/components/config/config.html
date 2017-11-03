@@ -58,11 +58,17 @@
     </ion-item>
     <ion-item>
         <ion-label class="wifi">
-            <ion-icon item-end name="wifi"
-                      [class.connecting]="config.homeWifiConnecting"
-                      [class.connected]="config.homeWifiConnected">
-            </ion-icon>
-            {{wifiConnectionStatus()}}
+            <p [class.connecting]="config.homeLanConnecting"
+               [class.connected]="config.homeLanConnected"
+            >
+                <ion-icon item-end name="wifi"
+                          [class.connecting]="config.homeLanConnecting"
+                          [class.connected]="config.homeLanConnected"
+                          *ngIf="i == 0"
+                ></ion-icon>
+
+                {{wifiConnectionStatusString()}}
+            </p>
         </ion-label>
         <button item-end [disabled]="!wifiSettingsValid" ion-button (tap)="sendWifiSettings.emit()">Connect</button>
     </ion-item>
