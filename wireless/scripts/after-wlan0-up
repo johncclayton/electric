@@ -66,6 +66,10 @@ fi
 
 check_firewall_forwarding_rules
 
+# this has to happen.
+# The startup of wlan0 may change the channel of wlan0...
+# This affects hostapd, which won't "come back" unless it is restarted
+
 echo "Restarting hostapd..."
 /etc/init.d/hostapd restart
 

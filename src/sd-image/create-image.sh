@@ -16,6 +16,11 @@ DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
 DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
+# Let the user specify defaults in a .config if they are brave
+if [ -f ./.config ]; then
+	. ./.config
+fi
+
 if [ -z "$FROM" ]; then
 	echo "Use create-image.sh <from>"
 	exit 1
@@ -54,10 +59,6 @@ fi
 if [ ! -f "$QEMU_ARM" ]; then
 	echo "Whoa - expected to find $QEMU_ARM binary... didn't, have you done: sudo apt-get install binfmt-support qemu qemu-user-static"
 	exit 6
-fi
-
-if [ -f ./.config ]; then
-	. ./.config
 fi
 
 # get the script to fetch the latest build # from travis
