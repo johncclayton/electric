@@ -4,7 +4,7 @@ set -e
 set -x
 
 FROM="$1"
-TO="$2"
+TO="/tmp/electric-sd-card.img"
 
 PIIMG=`which piimg`
 QEMU_ARM="/usr/bin/qemu-arm-static"
@@ -16,8 +16,8 @@ DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
 DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
-if [ -z "$FROM" -o -z "$TO" ]; then
-	echo "Use create-image.sh <from> <to>"
+if [ -z "$FROM" ]; then
+	echo "Use create-image.sh <from>"
 	exit 1
 fi
 
@@ -115,8 +115,8 @@ sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT" 
-if [ -d "$HOME/Dropbox/Public" -a "$RES" -eq 0 ]; then
-	cp "$TO" "$HOME/Dropbox/Public/"
+if [ -d "$HOME/Dropbox/Electric\ Storage" -a "$RES" -eq 0 ]; then
+	cp "$TO" "$HOME/Dropbox/Electric\ Storage/"
 else
 	echo "$TO not moved, there was a problem"
 fi
