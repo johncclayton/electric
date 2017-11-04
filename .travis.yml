@@ -23,6 +23,6 @@ script:
 jobs:
   include: 
     - stage: build SD image
-        env:
-          - YAY=amazeballs
-        script: ./travis_webhook_to_build_sd_image.sh
+      env:
+        - YAY=amazeballs
+      script: ./travis_webhook_to_build_sd_image.sh
