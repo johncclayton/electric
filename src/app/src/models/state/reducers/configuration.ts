@@ -59,7 +59,7 @@ const chargerDefaults: IChargeSettings = {
 };
 
 export const configurationDefaults: IConfig = {
-    ipAddress: "localhost",
+    ipAddress: "192.168.10.1",
     port: 5000,
     isnew: true,
     cellLimit: -1,

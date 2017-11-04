@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+. /opt/wireless/scripts/functions.sh
+
+# quit if we're called for the loopback
+if [ "$IFACE" = lo ]; then
+    exit 0
+fi
+
+#
+# Ensure that wlan1 is always up.
+# It it normally bought up by wlan0 coming up... but if that fails, we *always* want it around, working.
+# wlan1 provides the static 192.168.10.1 IP
+#
+add_wlan1_if_not_there
+

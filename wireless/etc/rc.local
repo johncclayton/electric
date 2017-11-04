@@ -6,15 +6,5 @@
 # Make sure that the script will "exit 0" on success or any other
 # value on error.
 
-#
-# Ensure that wlan1 is always up.
-# It it normally bought up by wlan0 coming up... but if that fails, we *always* want it around, working.
-# wlan1 provides the static 192.168.10.1 IP
-#
-echo "Checking that wlan1 is always here..."
-
-. /opt/wireless/scripts/functions.sh
-add_wlan1_if_not_there
-
 exit 0
 

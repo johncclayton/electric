@@ -11,6 +11,7 @@ QEMU_ARM="/usr/bin/qemu-arm-static"
 
 MNT="/mnt"
 OPT="$MNT/opt"
+DESTINATION_AFTER_BUILD="$HOME/Dropbox/Electric\ Storage/"
 
 DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
@@ -115,9 +116,10 @@ sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
-sudo $PIIMG umount "$MNT" 
-if [ -d "$HOME/Dropbox/Electric Storage" -a "$RES" -eq 0 ]; then
-	cp "$TO" "$HOME/Dropbox/Electric Storage/"
+sudo $PIIMG umount "$MNT"
+
+if [ -d "$DESTINATION_AFTER_BUILD" -a "$RES" -eq 0 ]; then
+	cp "$TO" "$DESTINATION_AFTER_BUILD"
 else
 	echo "$TO not moved, there was a problem"
 fi
