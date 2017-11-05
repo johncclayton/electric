@@ -77,7 +77,7 @@ export class HomePage {
             // Wait until configuration is loaded before starting things.
             this.platform.ready().then((r) => {
                 this.systemActions.fetchSystemFromCharger();
-                this.configActions.setNotConnecting();
+                this.configActions.resetNetworkAtrributes();
             });
 
             this.loadFirstPageDoingDebugging();
@@ -104,11 +104,11 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
-        // this.showNetworkPage();
+        this.showNetworkPage();
         // this.showConfigPage();
         // this.showSystemPage();
         // this.showPresetsPage();
-        this.menuController.open();
+        // this.menuController.open();
     }
 
     showPresetsPage() {

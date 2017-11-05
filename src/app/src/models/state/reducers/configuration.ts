@@ -14,6 +14,33 @@ export interface IChargeSettings {
     safeAmpsForWantedChargeRate: number;
 }
 
+export const INetworkKeyNames = {
+    "ap_name": "AP Name",
+    "ap_channel": "AP Channel",
+
+    "wifi_ssid": "SSID",
+    "wifi_password": "Password",
+
+    "docker_last_deploy": "Server Version"
+};
+
+export interface INetwork {
+    ap_associated: boolean, // synthetic, ip from wlan0, and channel + name
+    ap_channel: number,
+    ap_name: string,
+
+    wifi_ssid: string,
+    wifi_password: string,
+
+    docker_last_deploy: number,
+    web_running: boolean,
+    worker_running: boolean,
+
+    interfaces: Map<string, string>,
+    services: Map<string, boolean>
+    discoveredServers: string[],
+}
+
 export interface IConfig {
     ipAddress: string,
     port: number,
@@ -24,25 +51,14 @@ export interface IConfig {
     vibrateWhenDone: boolean,
     notificationWhenDone: boolean,
 
-    // Home network configuration
-    homeLanSSID: string;
-    homeLanPassword: string;
-    homeLanConnecting: boolean;
-    homeLanIPAddress: string;
-    homeLanChannelNumber: number;
-    homeLanConnected: boolean;
-
-    dockerContainerTag:string;
-    serverStatus:string;
-
     // Used to understand what our IP address is. either 192.168.10.1 or self.ipAddress.
     connectedToPrivateWLAN: boolean,
 
     // 0 = 192.168.10.1,   1 = ipAddress
     lastConnectionIndex: number,
-    discoveredServers: string[],
 
     charge_settings: IChargeSettings;
+    network: INetwork;
 }
 
 const chargerDefaults: IChargeSettings = {
@@ -58,6 +74,23 @@ const chargerDefaults: IChargeSettings = {
     safeAmpsForWantedChargeRate: 0
 };
 
+let defaultNetworkState: INetwork = {
+    ap_associated: false,
+    ap_channel: 0,
+    ap_name: "",
+
+    wifi_ssid: "",
+    wifi_password: "",
+
+    docker_last_deploy: 0,
+    web_running: false,
+    worker_running: false,
+
+    discoveredServers: [],
+    interfaces: new Map<string, string>(),
+    services: new Map<string, boolean>()
+};
+
 export const configurationDefaults: IConfig = {
     ipAddress: "192.168.10.1",
     port: 5000,
@@ -68,21 +101,11 @@ export const configurationDefaults: IConfig = {
     vibrateWhenDone: false,
     notificationWhenDone: false,
 
-    homeLanSSID: "",
-    homeLanPassword: "",
-    homeLanIPAddress: "",
-    homeLanChannelNumber: 0,
-    homeLanConnected: false,
-    homeLanConnecting: false,
-
-    dockerContainerTag: "",
-    serverStatus:"",
-
     connectedToPrivateWLAN: false,
     lastConnectionIndex: 0,
-    discoveredServers: [],
 
-    charge_settings: chargerDefaults
+    charge_settings: chargerDefaults,
+    network: defaultNetworkState
 };
 
 

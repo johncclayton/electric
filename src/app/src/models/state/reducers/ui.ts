@@ -22,6 +22,8 @@ export const
             return defaultUIState;
         }
 
+        let nextErrorCount = state.disconnectionErrorCount + 1;
+
         switch (action.type) {
             case UIActions.SERVER_RECONNECTED:
                 return {
@@ -30,8 +32,13 @@ export const
                     disconnectionErrorCount: 0
                 };
 
+            case UIActions.SERVER_TRY_NEXT_INTERFACE:
+                return {
+                    ...defaultUIState,
+                    disconnectionErrorCount: nextErrorCount
+                };
+
             case UIActions.SERVER_DISCONNECTED:
-                let nextErrorCount = state.disconnectionErrorCount + 1;
                 return {
                     ...defaultUIState,
                     disconnected: true,

@@ -8,7 +8,7 @@ import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
-import {IConfig} from "../models/state/reducers/configuration";
+import {IConfig, INetwork} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
 import {Vibration} from "@ionic-native/vibration";
 import {Subject} from "rxjs/Subject";
@@ -78,7 +78,8 @@ export class iChargerService {
         // do not access ngRedux here. It'll be nil.
     }
 
-    public stopPollingCharger() {
+    public stopAllPolling() {
+        console.log("Stopping all polling....");
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
         this.ngUnsubscribe = new Subject<void>();
@@ -94,6 +95,18 @@ export class iChargerService {
                 console.log("Stopped polling for charger state")
             });
     }
+
+    public startPollingStatusServer() {
+        console.log("Starting polling for network status....");
+        this.getServerStatus()
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(status => {
+                // console.log("Network update from server...");
+            }, null, () => {
+                console.log("Stopped polling for network/server status")
+            });
+    }
+
 
     getConfig(): IConfig {
         return this.ngRedux.getState().config;
@@ -147,15 +160,10 @@ export class iChargerService {
     getChargerStatus(): Observable<any> {
         let interval = 1000;
 
-        return Observable.timer(interval, interval)
+        return Observable.timer(10, interval)
             .flatMap(v => {
                 // If disconnected, do a round robbin between various known IP addresses
-                let config = this.getConfig();
-                let state = this.ngRedux.getState();
-                if (state.ui.disconnected) {
-                    config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2;
-                    // console.log("Switch to connection index: ", config.lastConnectionIndex);
-                }
+                this.tryNextInterfaceIfDisconnected();
 
                 let url = this.getChargerURL("/unified");
                 return this.http.get(url);
@@ -496,38 +504,45 @@ export class iChargerService {
 
 
     public updateWifi(ssid: string, password: string) {
-        this.configActions.setConfiguration("homeLanConnecting", true);
-
-        Observable.create((observable) => {
-            let wifiURL = this.getManagementURL("/wifi");
-            let payload = {
-                "SSID": ssid,
-                "PWD": password
-            };
-
-            let headers = new Headers({'Content-Type': 'application/json'});
-            let options = new RequestOptions({headers: headers});
-
-            let body = JSON.stringify(payload);
-            console.log("Sending: ", body, "to", wifiURL);
-            this.http.put(wifiURL, body, options).subscribe((resp) => {
-                    if (resp.ok) {
-                        console.log("Yay. It worked");
-                    }
-                }, (e) => {
-
-                }, () => {
-                    this.configActions.setConfiguration("homeLanConnecting", false);
-                    this.detectWifiConnectionStatus();
-                }
-            );
-        }).subscribe()
+        // this.configActions.setConfiguration("homeLanConnecting", true);
+        //
+        // Observable.create((observable) => {
+        //     let wifiURL = this.getManagementURL("/wifi");
+        //     let payload = {
+        //         "SSID": ssid,
+        //         "PWD": password
+        //     };
+        //
+        //     let headers = new Headers({'Content-Type': 'application/json'});
+        //     let options = new RequestOptions({headers: headers});
+        //
+        //     let body = JSON.stringify(payload);
+        //     console.log("Sending: ", body, "to", wifiURL);
+        //     this.http.put(wifiURL, body, options).subscribe((resp) => {
+        //             if (resp.ok) {
+        //                 console.log("Yay. It worked");
+        //             }
+        //         }, (e) => {
+        //
+        //         }, () => {
+        //             this.configActions.setConfiguration("homeLanConnecting", false);
+        //             this.detectWifiConnectionStatus();
+        //         }
+        //     );
+        // }).subscribe()
     }
 
-    public detectWifiConnectionStatus() {
-        Observable.create((observable) => {
+    private getServerStatus(): Observable<any> {
+        let interval = 1500;
+        return Observable.timer(10, interval).flatMap(v => {
+            // If disconnected, do a round robbin between various known IP addresses
+            this.tryNextInterfaceIfDisconnected();
+
             let wifiURL = this.getManagementURL("/status");
-            this.http.get(wifiURL).subscribe((resp) => {
+            // console.log("Get status from " + wifiURL);
+            return this.http.get(wifiURL);
+        }).map(resp => {
+            if (resp.ok) {
                 let json = resp.json();
                 let access_point = json["access_point"];
                 let interfaces = json["interfaces"];
@@ -536,31 +551,66 @@ export class iChargerService {
                 let services = json["services"];
 
                 let new_values = {
-                    homeLanChannelNumber: access_point.channel,
-                    dockerContainerTag: docker.last_deploy,
-                    services: services
+                    ap_associated: false,
+                    ap_channel: access_point.channel,
+                    ap_name: access_point.name,
+                    wifi_ssid: access_point.wifi_ssid,
                 };
 
                 if (docker.hasOwnProperty('last_deploy')) {
-                    new_values['dockerContainerTag'] = docker['last_deploy'];
+                    new_values['docker_last_deploy'] = docker['last_deploy'];
+                }
+                if (docker.hasOwnProperty('web')) {
+                    new_values['web_running'] = docker['web'].container_running;
+                }
+                if (docker.hasOwnProperty('worker')) {
+                    new_values['worker_running'] = docker['worker'].container_running;
                 }
 
                 if (server.hasOwnProperty('exception')) {
-                    new_values['serverStatus'] = server.exception;
+                    // SERVER ISNT RUNNING?
                 } else if (server.hasOwnProperty('charger_presence')) {
-                    new_values['serverStatus'] = "Connected";
+                    // SERVER IS RUNNING OK
                 }
 
-                if (interfaces.hasOwnProperty("wlan0")) {
-                    new_values['homeLanIPAddress'] = interfaces['wlan0'];
-                    new_values['homeLanConnected'] = interfaces['wlan0'].length > 0;
-                } else {
-                    new_values['homeLanConnected'] = false;
+                let ssid_length = new_values.ap_name.length;
+
+                for (let interface_name of Object.keys(interfaces)) {
+                    let interface_ip: string = interfaces[interface_name];
+                    if (interface_name == "wlan0") {
+                        if (interface_ip.length > 0) {
+                            new_values.ap_associated = ssid_length > 0;
+                        }
+                    }
+                    new_values['interfaces'] = interfaces;
+                    new_values['services'] = services;
                 }
 
-                this.configActions.updateConfiguration(new_values);
-            });
-        }).subscribe();
+                this.configActions.updateConfiguration({
+                    network: new_values,
+                });
+
+                let state = this.ngRedux.getState();
+                if (state.ui.disconnected) {
+                    this.uiActions.serverReconnected();
+                }
+            } else {
+                this.uiActions.setDisconnected();
+            }
+        }).catch(e => {
+            console.error("Error getting /status: " + e);
+            this.uiActions.setDisconnected();
+            return Observable.throw(e);
+        }).retry();
+    }
+
+    private tryNextInterfaceIfDisconnected() {
+        let state = this.ngRedux.getState();
+        if (state.ui.disconnected) {
+            let config = this.getConfig();
+            config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2;
+            console.log("Switch to connection index: ", config.lastConnectionIndex);
+        }
     }
 }
 

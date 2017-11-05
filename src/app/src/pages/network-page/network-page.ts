@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, Platform} from 'ionic-angular';
+import {IonicPage, NavController, Platform} from 'ionic-angular';
 import {Zeroconf} from "@ionic-native/zeroconf";
 import {System} from "../../models/system";
 import {NgRedux, select} from "@angular-redux/store";
@@ -49,7 +49,8 @@ export class NetworkPage {
 
         // Disable standard polling, so we can change the network without standard retry
         // logging happening
-        this.iChargerService.stopPollingCharger();
+        this.iChargerService.stopAllPolling();
+        this.iChargerService.startPollingStatusServer();
     }
 
     ngOnDestroy() {
@@ -57,12 +58,13 @@ export class NetworkPage {
             this.zeroConf.close();
         }
 
+        this.iChargerService.stopAllPolling();
         this.iChargerService.startPollingCharger();
     }
 
     haveZeroConfAddresses(): boolean {
         let config = this.ngRedux.getState().config;
-        return config.discoveredServers.length > 0;
+        return config.network.discoveredServers.length > 0;
     }
 
     canUseZeroconf(): boolean {
@@ -71,9 +73,9 @@ export class NetworkPage {
     }
 
     sendWifiSettings() {
-        let config = this.ngRedux.getState().config;
+        let network = this.ngRedux.getState().config.network;
         console.log("Sending settings...");
-        this.iChargerService.updateWifi(config.homeLanSSID, config.homeLanPassword);
+        this.iChargerService.updateWifi(network.wifi_ssid, network.wifi_password);
     }
 
 
