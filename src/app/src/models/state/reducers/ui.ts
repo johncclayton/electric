@@ -32,12 +32,6 @@ export const
                     disconnectionErrorCount: 0
                 };
 
-            case UIActions.SERVER_TRY_NEXT_INTERFACE:
-                return {
-                    ...defaultUIState,
-                    disconnectionErrorCount: nextErrorCount
-                };
-
             case UIActions.SERVER_DISCONNECTED:
                 return {
                     ...defaultUIState,

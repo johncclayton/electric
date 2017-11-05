@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {IConfig, INetwork, INetworkKeyNames} from "../../models/state/reducers/configuration";
+import {IConfig, INetworkKeyNames} from "../../models/state/reducers/configuration";
 import {iChargerService} from "../../services/icharger.service";
 import {isUndefined} from "ionic-angular/util/util";
 import * as _ from "lodash";
-import {ConfigurationActions} from "../../models/state/actions/configuration";
+import {Network} from "@ionic-native/network";
 
 @Component({
     selector: 'network-config',
@@ -19,7 +19,8 @@ export class NetworkConfigComponent {
 
     private lastUsedDiscoveryIndex = 0;
 
-    constructor(public chargerService: iChargerService) {
+    constructor(public chargerService: iChargerService,
+                public network: Network) {
     }
 
     autoDetect() {
@@ -55,12 +56,6 @@ export class NetworkConfigComponent {
         this.updateConfiguration.emit(change);
     }
 
-    change_network(keyName, value) {
-        let change = [];
-        change[keyName] = value;
-        this.updateConfiguration.emit(change);
-    }
-
     wifiStateFor(key: string) {
         return this.wifiState()[key];
     }
@@ -76,12 +71,12 @@ export class NetworkConfigComponent {
         let network = this.config.network;
         if (network) {
             let state = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid', 'docker_last_deploy']);
-            if(network.interfaces) {
+            if (network.interfaces) {
                 if (network.interfaces.hasOwnProperty("wlan0")) {
                     state["Wifi IP"] = network.interfaces["wlan0"];
                 }
             }
-            if(network.services) {
+            if (network.services) {
                 state["DNS Masq"] = network.services['dnsmasq'];
                 state["Hostapd"] = network.services['hostapd'];
                 state["Docker"] = network.services['docker'];

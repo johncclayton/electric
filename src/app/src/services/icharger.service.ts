@@ -598,7 +598,7 @@ export class iChargerService {
                 this.uiActions.setDisconnected();
             }
         }).catch(e => {
-            console.error("Error getting /status: " + e);
+            console.error("Error getting server status: " + e);
             this.uiActions.setDisconnected();
             return Observable.throw(e);
         }).retry();

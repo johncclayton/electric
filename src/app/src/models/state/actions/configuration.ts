@@ -91,10 +91,18 @@ export class ConfigurationActions {
         }, result);
     }
 
+    updateConfigurationFromEmit(change) {
+        let map_change = {};
+        let key = Object.keys(change)[0];
+        map_change[key] = change[key];
+        this.updateConfiguration(map_change);
+    }
+
     updateConfiguration(change) {
         // Check the change type, coerce values
         if (change != null) {
             let config = this.ngRedux.getState().config;
+
 
             // Check to see if any values have changed
             let comparison_result = this.compareTwoMaps(change, config);

@@ -13,7 +13,7 @@
             [config]="config$|async"
             [charger]="charger$|async"
             [ui]="ui$|async"
-            (updateConfiguration)="actions.updateConfiguration($event)"
+            (updateConfiguration)="actions.updateConfigurationFromEmit($event)"
             (resetToDefaults)="actions.resetToDefaults()"
             (testFunc)="testFunc()"
     >
