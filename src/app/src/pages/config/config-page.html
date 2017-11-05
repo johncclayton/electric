@@ -13,24 +13,11 @@
             [config]="config$|async"
             [charger]="charger$|async"
             [ui]="ui$|async"
-            [showAutoButton]="canUseZeroconf() && haveZeroConfAddresses()"
             (updateConfiguration)="actions.updateConfiguration($event)"
             (resetToDefaults)="actions.resetToDefaults()"
             (testFunc)="testFunc()"
-            (sendWifiSettings)="sendWifiSettings()"
     >
     </config>
 
 </ion-content>
 
-<ion-footer>
-    <ion-toolbar *ngIf="!isProduction">
-        <ion-list>
-            <ion-label *ngFor="let env of environmentStrings()" text-center>{{ env }}</ion-label>
-        </ion-list>
-        <ion-list text-center>
-            <ion-label text-center *ngIf="isProduction">Production Build</ion-label>
-            <ion-label>Platform: {{ platformsString() }}</ion-label>
-        </ion-list>
-    </ion-toolbar>
-</ion-footer>

@@ -14,6 +14,8 @@ import {Subject} from "rxjs/Subject";
 import {PresetListPage} from "../preset-list/preset-list";
 import {ConfigStoreProvider} from "../../providers/config-store/config-store";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
+import {NetworkPage} from "../network/network";
+
 // import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
@@ -46,7 +48,7 @@ export class HomePage {
     constructor(public readonly navCtrl: NavController,
                 public readonly chargerService: iChargerService,
                 private uiAction: UIActions,
-                private configActions : ConfigurationActions,
+                private configActions: ConfigurationActions,
                 private platform: Platform,
                 private systemActions: SystemActions,
                 public readonly ngRedux: NgRedux<IAppState>,
@@ -102,6 +104,7 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
+        this.showNetworkPage();
         // this.showConfigPage();
         // this.showSystemPage();
         // this.showPresetsPage();
@@ -109,6 +112,10 @@ export class HomePage {
 
     showPresetsPage() {
         this.navCtrl.push(PresetListPage);
+    }
+
+    showNetworkPage() {
+        this.navCtrl.push(NetworkPage);
     }
 
     showConfigPage() {

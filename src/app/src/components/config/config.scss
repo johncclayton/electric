@@ -6,16 +6,6 @@ config {
     animation-direction: alternate;
   }
 
-  .wifi {
-    color: red;
-    .connecting {
-      color: orange;
-    }
-    .connected {
-      color: green;
-    }
-  }
-
   @keyframes blink {
     from {
       opacity: 1;

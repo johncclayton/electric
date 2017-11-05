@@ -1,11 +1,10 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {IConfig} from "../../models/state/reducers/configuration";
-import {NavController, Platform} from "ionic-angular";
+import {NavController} from "ionic-angular";
 import {isUndefined} from "ionic-angular/util/util";
 import {IChargerState} from "../../models/state/reducers/charger";
 import {IUIState} from "../../models/state/reducers/ui";
 import {LocalNotifications} from "@ionic-native/local-notifications";
-import {System} from "../../models/system";
 import {iChargerService} from "../../services/icharger.service";
 
 @Component({
@@ -13,65 +12,28 @@ import {iChargerService} from "../../services/icharger.service";
     templateUrl: 'config.html'
 })
 export class ConfigComponent {
-    mockValueChanged: boolean;
-
-    // huh. should probably refactor this to simply take the entire ngRedux IAppState
     @Input() ui?: IUIState;
     @Input() config?: IConfig;
     @Input() charger?: IChargerState;
-    @Input() showAutoButton: boolean;
 
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() testFunc: EventEmitter<any> = new EventEmitter();
-    @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
-
-    private lastUsedDiscoveryIndex = 0;
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
-                public notifications: LocalNotifications,
-                public platform: Platform) {
-        this.chargerService.detectWifiConnectionStatus();
+                public notifications: LocalNotifications) {
     }
 
-    autoDetect() {
-        if (this.config.discoveredServers != null) {
-            // console.log("Have: ", this.config.discoveredServers.join(","));
-            if (this.config.discoveredServers.length > 0) {
-                if (this.lastUsedDiscoveryIndex > this.config.discoveredServers.length - 1) {
-                    this.lastUsedDiscoveryIndex = 0;
-                }
-                this.config.ipAddress = this.config.discoveredServers[this.lastUsedDiscoveryIndex];
-                this.lastUsedDiscoveryIndex++;
-            }
-        }
-    }
 
     ngOnInit() {
-        this.mockValueChanged = false;
     }
 
     num(value) {
         return parseInt(value);
     }
 
-    wifiConnectionStatusString(): string {
-        if (this.config.homeLanConnecting) {
-            return "Connecting...";
-        }
-        if (this.config.homeLanConnected) {
-            return "Connected: " + this.config.homeLanIPAddress;
-
-        }
-        return "Not connected";
-    }
-
     change(keyName, value) {
-        if (keyName == "mockCharger") {
-            this.mockValueChanged = true;
-        }
-
         // Check we have permission. If not, request it.
         if (keyName == 'notificationWhenDone' && value) {
             this.notifications.hasPermission().then((havePermission: boolean) => {
@@ -115,21 +77,4 @@ export class ConfigComponent {
         return choices;
     }
 
-    get isProduction(): boolean {
-        return System.isProduction;
-    }
-
-    get wifiSettingsValid(): boolean {
-        if (isUndefined(this.config.homeLanPassword)) {
-            return false;
-        }
-        if (isUndefined(this.config.homeLanSSID)) {
-            return false;
-        }
-
-        let passLength = this.config.homeLanPassword.length;
-        let ssidLength = this.config.homeLanSSID.length;
-        // console.log("SSID Len:", ssidLength, "P Len:", passLength);
-        return ssidLength > 0 && (passLength >= 8 && passLength <= 63);
-    }
 }

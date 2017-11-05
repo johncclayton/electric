@@ -4,6 +4,7 @@ import {ConfigComponent} from "./config/config";
 import {IonicPageModule} from "ionic-angular";
 import {TempRangeComponent} from './temp-range/temp-range';
 import {BetterRangeComponent} from './better-range/better-range';
+import {NetworkConfigComponent} from './network-config/network-config';
 
 @NgModule({
     declarations: [
@@ -11,6 +12,7 @@ import {BetterRangeComponent} from './better-range/better-range';
         ConfigComponent,
         TempRangeComponent,
         BetterRangeComponent,
+        NetworkConfigComponent,
     ],
     imports: [
         IonicPageModule.forChild(ConfigComponent),
@@ -20,6 +22,7 @@ import {BetterRangeComponent} from './better-range/better-range';
         ConfigComponent,
         TempRangeComponent,
         BetterRangeComponent,
+        NetworkConfigComponent,
     ]
 })
 export class ComponentsModule {

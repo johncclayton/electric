@@ -72,14 +72,27 @@ export class iChargerService {
                        private localNotifications: LocalNotifications,) {
 
         this.lastUsedIPAddressIndex = 0;
+        this.startPollingCharger();
+
+        // NOTE:
+        // do not access ngRedux here. It'll be nil.
+    }
+
+    public stopPollingCharger() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+        this.ngUnsubscribe = new Subject<void>();
+    }
+
+    public startPollingCharger() {
+        console.log("Start polling for charger state...");
         this.getChargerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
                 // console.log("Refreshed from charger...");
+            }, null, () => {
+                console.log("Stopped polling for charger state")
             });
-
-        // NOTE:
-        // do not access ngRedux here. It'll be nil.
     }
 
     getConfig(): IConfig {
