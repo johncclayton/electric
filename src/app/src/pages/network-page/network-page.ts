@@ -12,7 +12,7 @@ import {IConfig} from "../../models/state/reducers/configuration";
 @IonicPage()
 @Component({
     selector: 'page-network',
-    templateUrl: 'network.html',
+    templateUrl: 'network-page.html',
 })
 export class NetworkPage {
     @select() config$: Observable<IConfig>;

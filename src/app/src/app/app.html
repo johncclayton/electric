@@ -19,14 +19,19 @@
     </ion-content>
 
     <ion-footer>
-        <ion-toolbar *ngIf="!isProduction">
-            <ion-list>
-                <ion-label *ngFor="let env of environmentStrings()" text-center>{{ env }}</ion-label>
-            </ion-list>
-            <ion-list text-center>
-                <ion-label text-center *ngIf="isProduction">Production Build</ion-label>
-                <ion-label>Platform: {{ platformsString() }}</ion-label>
-            </ion-list>
+        <ion-toolbar class="env">
+            <ion-grid>
+                <ion-row>
+                    <ion-col col-4 align-self-start>Platform</ion-col>
+                    <ion-col col-8 align-self-end>{{ platformsString() }}</ion-col>
+                </ion-row>
+                <div *ngIf="!isProduction">
+                    <ion-row *ngFor="let key of environmentKeys()">
+                        <ion-col col-4 align-self-end>{{key}}</ion-col>
+                        <ion-col col-8 align-self-start>{{environmentValue(key)}}</ion-col>
+                    </ion-row>
+                </div>
+            </ion-grid>
         </ion-toolbar>
     </ion-footer>
 </ion-menu>

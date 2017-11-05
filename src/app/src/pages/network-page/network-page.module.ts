@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { NetworkPage } from './network';
+import { NetworkPage } from './network-page';
 
 @NgModule({
   declarations: [

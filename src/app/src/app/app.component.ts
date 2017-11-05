@@ -13,7 +13,7 @@ import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {SystemSettingsPage} from "../pages/system-settings/system-settings";
 import {Subject} from "rxjs/Subject";
-import {NetworkPage} from "../pages/network/network";
+import {NetworkPage} from "../pages/network-page/network-page";
 import {System} from "../models/system";
 
 @Component({
@@ -96,8 +96,12 @@ export class MyApp {
         return this.platform.platforms().toString();
     }
 
-    environmentStrings(): string[] {
-        return System.environmentStrings();
+    environmentKeys(): any {
+        return Object.keys(System.environment);
+    }
+
+    environmentValue(key: string) {
+        return System.environment[key];
     }
 
     ngOnDestroy() {
