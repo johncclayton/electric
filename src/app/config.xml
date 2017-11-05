@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.electric.icharger.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.electric.icharger.app" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Electric</name>
     <description>Remote control for your charging setup</description>
     <author email="electric@we.dont.have.a.domain.yet.org" href="https://github.com/johncclayton/electric">Electric at GitHub</author>
