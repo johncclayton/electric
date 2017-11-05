@@ -1,0 +1,75 @@
+<div>
+    <ion-list>
+        <ion-list-header color="light">
+            <ion-label>
+                Wifi Network
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-label stacked>SSID (of your home network)</ion-label>
+            <ion-input type="text" [ngModel]="config?.network?.wifi_ssid"
+                       (ngModelChange)="change('network.wifi_ssid', $event)"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label stacked>Password (of above Wifi router)</ion-label>
+            <ion-input type="text" [ngModel]="config?.network?.wifi_password"
+                       (ngModelChange)="change('network.wifi_password', $event)">
+
+            </ion-input>
+        </ion-item>
+
+        <!--<ion-item>-->
+        <!--<ion-label class="wifi">-->
+        <!--<p [class.connecting]="config.homeLanConnecting"-->
+        <!--[class.connected]="config.homeLanConnected"-->
+        <!--&gt;-->
+        <!--<ion-icon item-end name="wifi"-->
+        <!--[class.connecting]="config.homeLanConnecting"-->
+        <!--[class.connected]="config.homeLanConnected"-->
+        <!--&gt;</ion-icon>-->
+        <!--{{wifiConnectionStatusString()}}-->
+        <!--</p>-->
+        <!--</ion-label>-->
+        <!--<button item-end [disabled]="!wifiSettingsValid" ion-button (tap)="sendWifiSettings.emit()">Apply</button>-->
+        <!--</ion-item>-->
+
+    </ion-list>
+
+    <ion-list>
+        <ion-list-header color="light">Connection to the Pi3</ion-list-header>
+        <ion-item>
+            <ion-label stacked>IP Address of Pi (on home network)</ion-label>
+            <ion-input type="text" [ngModel]="config.ipAddress"
+                       (ngModelChange)="change('ipAddress', $event)"></ion-input>
+            <button item-end outline icon-left ion-button (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton"
+                    [class.button-disabled]="config.discoveredServers.length == 0">
+                <ion-icon name="radio-outline"></ion-icon>
+                Auto Detect
+            </button>
+        </ion-item>
+        <ion-item>
+            <ion-label stacked>Port of Pi (on home network)</ion-label>
+            <ion-input type="text" [ngModel]="config.port"
+                       (ngModelChange)="change('port', num($event))">
+
+            </ion-input>
+        </ion-item>
+    </ion-list>
+
+    <ion-list>
+        <ion-list-header color="light">
+            <ion-label>
+                Wifi Status
+            </ion-label>
+        </ion-list-header>
+
+        <ion-grid>
+            <ion-row *ngFor="let zoot of wifiState()|keys">
+                <ion-col col-4 item-start>{{wifiStateKeyFor(zoot)}}</ion-col>
+                <ion-col col-auto item-end>{{wifiStateFor(zoot)}}</ion-col>
+            </ion-row>
+        </ion-grid>
+
+    </ion-list>
+
+</div>

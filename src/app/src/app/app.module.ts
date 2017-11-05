@@ -5,7 +5,6 @@ import {IonicStorageModule} from "@ionic/storage";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
-import {DurationPipe, KeysPipe, ReversePipe, TempPipe} from "../utils/pipes";
 import {iChargerService} from "../services/icharger.service";
 import {ConfigPage} from "../pages/config/config-page";
 import {ChannelComponent} from "../components/channel/channel";
@@ -41,6 +40,8 @@ import {Vibration} from "@ionic-native/vibration";
 import {LocalNotifications} from "@ionic-native/local-notifications";
 import {FCM} from '@ionic-native/fcm';
 import {Zeroconf} from "@ionic-native/zeroconf";
+import {NetworkPage} from "../pages/network-page/network-page";
+import {UtilsModule} from "../utils/utils.module";
 // import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 export const firebaseConfig = {
@@ -67,7 +68,6 @@ let config = {
         ContactPage,
         ConfigPage,
         HomePage,
-        KeysPipe, ReversePipe, DurationPipe, TempPipe,
         DynamicDisable,
         ChannelComponent,
         ChannelVoltsComponent,
@@ -82,12 +82,14 @@ let config = {
         TabsPage,
         PresetCyclePage,
         ChargeOptionsPage,
+        NetworkPage,
         ChargerStatusComponent,
     ],
     imports: [
         BrowserModule,
         HttpModule,
         // BrowserAnimationsModule,
+        UtilsModule,
         NgReduxModule,
         NgSpinKitModule,
         ComponentsModule,
@@ -101,6 +103,7 @@ let config = {
         MyApp,
         HomePage,
         ConfigPage,
+        NetworkPage,
         PresetListPage,
         PresetPage,
         PresetChargePage,

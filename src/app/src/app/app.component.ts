@@ -13,6 +13,8 @@ import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {SystemSettingsPage} from "../pages/system-settings/system-settings";
 import {Subject} from "rxjs/Subject";
+import {NetworkPage} from "../pages/network-page/network-page";
+import {System} from "../models/system";
 
 @Component({
     templateUrl: 'app.html'
@@ -26,10 +28,10 @@ export class MyApp {
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
-    constructor(platform: Platform,
-                public chargerService: iChargerService,
+    constructor(public chargerService: iChargerService,
                 public statusBar: StatusBar,
                 public config: ConfigStoreProvider,
+                public platform: Platform,
                 public ngRedux: NgRedux<IAppState>,
                 public splashScreen: SplashScreen) {
 
@@ -66,18 +68,40 @@ export class MyApp {
             title: 'Presets', component: PresetListPage, visible: connectedToCharger,
         };
         let configPage = {
-            title: 'Config', component: ConfigPage, visible: () => {
+            title: 'App Settings', component: ConfigPage, visible: () => {
                 return true;
             }
         };
+        let networkPage = {
+            title: 'Network Settings', component: NetworkPage, visible: () => {
+                return true
+            }
+        };
         let systemPage = {
-            title: 'Settings', component: SystemSettingsPage, visible: connectedToCharger
+            title: 'iCharger Settings', component: SystemSettingsPage, visible: connectedToCharger
         };
         this.pages = [
             presetsPage,
             systemPage,
             configPage,
+            networkPage,
         ]
+    }
+
+    get isProduction(): boolean {
+        return System.isProduction;
+    }
+
+    platformsString(): string {
+        return this.platform.platforms().toString();
+    }
+
+    environmentKeys(): any {
+        return Object.keys(System.environment);
+    }
+
+    environmentValue(key: string) {
+        return System.environment[key];
     }
 
     ngOnDestroy() {

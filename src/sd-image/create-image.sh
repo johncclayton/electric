@@ -11,7 +11,9 @@ QEMU_ARM="/usr/bin/qemu-arm-static"
 
 MNT="/mnt"
 OPT="$MNT/opt"
-DESTINATION_AFTER_BUILD="$HOME/Dropbox/Electric\ Storage/"
+
+DESTINATION_NAME="electric-sd-card"
+DESTINATION_AFTER_BUILD="$HOME/Dropbox/Electric Storage"
 
 DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
@@ -119,7 +121,7 @@ RES=$?
 sudo $PIIMG umount "$MNT"
 
 if [ -d "$DESTINATION_AFTER_BUILD" -a "$RES" -eq 0 ]; then
-	cp "$TO" "$DESTINATION_AFTER_BUILD"
+	cp "$TO" "$DESTINATION_AFTER_BUILD/${DESTINATION_NAME}_${VERSION_NUM}.img"
 else
 	echo "$TO not moved, there was a problem"
 fi

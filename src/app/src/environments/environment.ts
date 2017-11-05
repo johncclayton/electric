@@ -1,5 +1,5 @@
 export const ENV = {
-    environmentName: 'Production Environment',
+    name: 'Production',
     logging: false,
     ionicEnvName: 'prod'
 };

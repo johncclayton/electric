@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
-import {validateAnimationSequence} from "@angular/animations/browser/src/dsl/animation_validator_visitor";
+import * as _ from "lodash";
 
 
 @Injectable()
@@ -25,25 +25,23 @@ export class ConfigurationActions {
     addDiscoveredServer(ipAddress: string) {
         let config = this.ngRedux.getState().config;
         let newState = {
-            // discoveredServers: _.uniq([
-            //     ...config.discoveredServers,
-            //     ipAddress
-            // ])
-            discoveredServers: [
-                ...config.discoveredServers,
-                ipAddress
-            ]
+            network: {
+                discoveredServers: [
+                    ...config.network.discoveredServers,
+                    ipAddress
+                ]
+            }
         };
 
         this.updateConfiguration(newState);
     }
 
     removeDiscoveredServer(ipAddress: string) {
-        let existing = this.ngRedux.getState().config;
+        let existing = this.ngRedux.getState().config.network;
         let newState = existing.discoveredServers.filter((s) => {
             return s != ipAddress;
         });
-        this.setConfiguration('discoveredServers', newState);
+        this.setConfiguration('network', {'discoveredServers': newState});
     }
 
     setConfiguration(key: string, value: any) {
@@ -52,28 +50,56 @@ export class ConfigurationActions {
         this.updateConfiguration(change);
     }
 
+    // isValueDifferent(left: Object, right: Object) {
+    //     for (let in_key in left) {
+    //         let value_changed = false;
+    //         if (right.hasOwnProperty(in_key)) {
+    //             let existing_value = right[in_key];
+    //             value_changed = left[in_key] != existing_value;
+    //             if (value_changed) {
+    //                 console.log("CHANGE: " + in_key + " from " + left[in_key] + " to " + existing_value);
+    //                 return true;
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // }
+    //
+    compareTwoMaps(new_data, old_data) {
+        let result = [];
+
+        return _.reduce(new_data, (result, value, key) => {
+            if (old_data.hasOwnProperty(key)) {
+                if (_.isEqual(value, old_data[key])) {
+                    return result;
+                } else {
+                    if (typeof (new_data[key]) != typeof ({}) || typeof (old_data[key]) != typeof ({})) {
+                        //dead end.
+                        result.push(key);
+                        return result;
+                    } else {
+                        let deeper = this.compareTwoMaps(new_data[key], old_data[key]);
+                        return result.concat(_.map(deeper, (sub_path) => {
+                            return key + "." + sub_path;
+                        }));
+                    }
+                }
+            } else {
+                result.push(key);
+                return result;
+            }
+        }, result);
+    }
+
     updateConfiguration(change) {
         // Check the change type, coerce values
         if (change != null) {
             let config = this.ngRedux.getState().config;
 
             // Check to see if any values have changed
-            let has_changes: boolean = false;
-            for (let in_key in change) {
-                let value_changed = true;
-                if (config.hasOwnProperty(in_key)) {
-                    let existing_value = config[in_key];
-                    value_changed = change[in_key] != existing_value;
-                }
-
-                if (value_changed) {
-                    console.log("CHANGE:", change);
-                    has_changes = true;
-                    break;
-                }
-            }
-
-            if (has_changes) {
+            let comparison_result = this.compareTwoMaps(change, config);
+            if (comparison_result.length > 0) {
+                console.log("Keys differ: " + comparison_result.join(", "));
                 this.ngRedux.dispatch({
                     type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
                     payload: change
@@ -82,8 +108,15 @@ export class ConfigurationActions {
         }
     }
 
-    setNotConnecting() {
-        this.setConfiguration('homeLanConnecting', false);
+    resetNetworkAtrributes() {
+        this.updateConfiguration({
+            network: {
+                ap_channel: 0,
+                docker_last_deploy: 0,
+                web_running: false,
+                worker_running: false,
+            }
+        });
     }
 }
 

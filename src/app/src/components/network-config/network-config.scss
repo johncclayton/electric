@@ -1,0 +1,13 @@
+network-config {
+
+  .wifi {
+    color: red;
+    .connecting {
+      color: orange;
+    }
+    .connected {
+      color: green;
+    }
+  }
+
+}

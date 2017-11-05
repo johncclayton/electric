@@ -1,0 +1,18 @@
+<ion-header>
+
+    <ion-navbar>
+        <ion-title>Network Settings</ion-title>
+    </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+    <network-config
+            [config]="config$|async"
+            [showAutoButton]="canUseZeroconf() && haveZeroConfAddresses()"
+            (updateConfiguration)="actions.updateConfiguration($event)"
+            (sendWifiSettings)="sendWifiSettings()"
+    >
+    </network-config>
+</ion-content>

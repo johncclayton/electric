@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, Platform} from "ionic-angular";
+import {MenuController, NavController, Platform} from "ionic-angular";
 import {Observable} from "rxjs";
 import {Http} from "@angular/http";
 import {iChargerService} from "../../services/icharger.service";
@@ -12,8 +12,9 @@ import {SystemSettingsPage} from "../system-settings/system-settings";
 import {SystemActions} from "../../models/state/actions/system";
 import {Subject} from "rxjs/Subject";
 import {PresetListPage} from "../preset-list/preset-list";
-import {ConfigStoreProvider} from "../../providers/config-store/config-store";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
+import {NetworkPage} from "../network-page/network-page";
+
 // import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
@@ -46,8 +47,9 @@ export class HomePage {
     constructor(public readonly navCtrl: NavController,
                 public readonly chargerService: iChargerService,
                 private uiAction: UIActions,
-                private configActions : ConfigurationActions,
+                private configActions: ConfigurationActions,
                 private platform: Platform,
+                private menuController: MenuController,
                 private systemActions: SystemActions,
                 public readonly ngRedux: NgRedux<IAppState>,
                 public readonly http: Http) {
@@ -75,7 +77,7 @@ export class HomePage {
             // Wait until configuration is loaded before starting things.
             this.platform.ready().then((r) => {
                 this.systemActions.fetchSystemFromCharger();
-                this.configActions.setNotConnecting();
+                this.configActions.resetNetworkAtrributes();
             });
 
             this.loadFirstPageDoingDebugging();
@@ -102,13 +104,19 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
+        this.showNetworkPage();
         // this.showConfigPage();
         // this.showSystemPage();
         // this.showPresetsPage();
+        // this.menuController.open();
     }
 
     showPresetsPage() {
         this.navCtrl.push(PresetListPage);
+    }
+
+    showNetworkPage() {
+        this.navCtrl.push(NetworkPage);
     }
 
     showConfigPage() {

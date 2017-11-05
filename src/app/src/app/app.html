@@ -18,5 +18,22 @@
         </ion-list>
     </ion-content>
 
+    <ion-footer>
+        <ion-toolbar class="env">
+            <ion-grid>
+                <ion-row>
+                    <ion-col col-4 align-self-start>Platform</ion-col>
+                    <ion-col col-8 align-self-end>{{ platformsString() }}</ion-col>
+                </ion-row>
+                <div *ngIf="!isProduction">
+                    <ion-row *ngFor="let key of environmentKeys()">
+                        <ion-col col-4 align-self-end>{{key}}</ion-col>
+                        <ion-col col-8 align-self-start>{{environmentValue(key)}}</ion-col>
+                    </ion-row>
+                </div>
+            </ion-grid>
+        </ion-toolbar>
+    </ion-footer>
 </ion-menu>
 <ion-nav [root]="rootPage" #content></ion-nav>
+
