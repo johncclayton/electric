@@ -122,6 +122,7 @@ sudo $PIIMG umount "$MNT"
 
 if [ -d "$DESTINATION_AFTER_BUILD" -a "$RES" -eq 0 ]; then
 	cp "$TO" "$DESTINATION_AFTER_BUILD/${DESTINATION_NAME}_${VERSION_NUM}.img"
+	cd "$DESTINATION_AFTER_BUILD" && ls -1 -tp | grep -v '/$' | tail -n +2 | xargs -I {} rm {}
 else
 	echo "$TO not moved, there was a problem"
 fi
