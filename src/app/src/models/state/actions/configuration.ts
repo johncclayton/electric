@@ -24,10 +24,14 @@ export class ConfigurationActions {
 
     addDiscoveredServer(ipAddress: string) {
         let config = this.ngRedux.getState().config;
+        let existing = config.network.discoveredServers;
+        if(existing == null) {
+            existing = [];
+        }
         let newState = {
             network: {
                 discoveredServers: [
-                    ...config.network.discoveredServers,
+                    ...existing,
                     ipAddress
                 ]
             }

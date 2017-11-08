@@ -42,7 +42,6 @@ import {FCM} from '@ionic-native/fcm';
 import {Zeroconf} from "@ionic-native/zeroconf";
 import {NetworkPage} from "../pages/network-page/network-page";
 import {UtilsModule} from "../utils/utils.module";
-import {Network} from "@ionic-native/network";
 // import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 export const firebaseConfig = {
@@ -127,7 +126,6 @@ let config = {
         SplashScreen,
         Vibration,
         FCM,
-        Network,
         Zeroconf,
         LocalNotifications,
         {provide: iChargerService, useClass: iChargerService},

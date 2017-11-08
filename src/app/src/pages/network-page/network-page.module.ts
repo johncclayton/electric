@@ -5,7 +5,6 @@ import {UtilsModule} from "../../utils/utils.module";
 
 @NgModule({
     declarations: [
-        NetworkPage,
     ],
     imports: [
         IonicPageModule.forChild(NetworkPage),

@@ -1,5 +1,15 @@
 <div>
     <ion-list>
+        <ion-list-header class="current" color="secondary" no-lines>
+            <ion-label>
+                Device IP Address: {{currentIPAddress}}
+            </ion-label>
+        </ion-list-header>
+        <ion-item class="current" color="secondary">
+            <button ion-button>
+                Network Wizard
+            </button>
+        </ion-item>
         <ion-list-header color="light">
             <ion-label>
                 Wifi Network
@@ -42,7 +52,7 @@
             <ion-input type="text" [ngModel]="config.ipAddress"
                        (ngModelChange)="change('ipAddress', $event)"></ion-input>
             <button item-end outline icon-left ion-button (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton"
-                    [class.button-disabled]="config.discoveredServers.length == 0">
+                    [class.button-disabled]="config.network.discoveredServers?.length == 0">
                 <ion-icon name="radio-outline"></ion-icon>
                 Auto Detect
             </button>

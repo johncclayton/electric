@@ -27,6 +27,7 @@ export class NetworkPage {
 
     ionViewDidLoad() {
         if (this.canUseZeroconf()) {
+            console.log("Watching for servers...");
             this.zeroConf.watch("_http._tcp", "local.").subscribe(r => {
                 if (r.service.ipv4Addresses.length > 0) {
                     let ipAddress = r.service.ipv4Addresses[0];
@@ -35,15 +36,17 @@ export class NetworkPage {
                     if (name.indexOf("Electric REST API") >= 0) {
                         // console.log("Action: ", r.action, ", ", name, ", ", ipAddress);
                         if (r.action == "resolved") {
-                            // console.log("I see: ", name);
+                            console.log("I see: ", name);
                             this.actions.addDiscoveredServer(ipAddress);
                         } else {
-                            // console.log(name, "removed");
+                            console.log(name, "removed");
                             this.actions.removeDiscoveredServer(ipAddress);
                         }
                     }
                 }
             });
+        } else {
+            console.log("Cant use ZeroConf, so won't watch for servers");
         }
 
 
@@ -64,12 +67,17 @@ export class NetworkPage {
 
     haveZeroConfAddresses(): boolean {
         let config = this.ngRedux.getState().config;
-        return config.network.discoveredServers.length > 0;
+        let discoveredServers = config.network.discoveredServers;
+        if (discoveredServers != null) {
+            return discoveredServers.length > 0;
+        }
+        return false;
     }
 
     canUseZeroconf(): boolean {
         let has_cordova = this.platform.is('cordova');
-        return has_cordova && System.isProduction;
+        // return has_cordova && System.isProduction;
+        return has_cordova ;
     }
 
     sendWifiSettings() {

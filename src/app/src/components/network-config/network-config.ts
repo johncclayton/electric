@@ -3,7 +3,10 @@ import {IConfig, INetworkKeyNames} from "../../models/state/reducers/configurati
 import {iChargerService} from "../../services/icharger.service";
 import {isUndefined} from "ionic-angular/util/util";
 import * as _ from "lodash";
-import {Network} from "@ionic-native/network";
+import {NetworkActions} from "../../models/state/actions/network";
+import {ConfigurationActions} from "../../models/state/actions/configuration";
+
+declare const networkinterface;
 
 @Component({
     selector: 'network-config',
@@ -17,17 +20,18 @@ export class NetworkConfigComponent {
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
 
+    public currentIPAddress: string = "...";
     private lastUsedDiscoveryIndex = 0;
 
     constructor(public chargerService: iChargerService,
-                public network: Network) {
+                public configActions: ConfigurationActions) {
     }
 
     autoDetect() {
         if (this.config) {
             let network = this.config.network;
             if (network.discoveredServers != null) {
-                // console.log("Have: ", this.config.discoveredServers.join(","));
+                console.log("Have: ", network.discoveredServers.join(","));
                 if (network.discoveredServers.length > 0) {
                     if (this.lastUsedDiscoveryIndex > network.discoveredServers.length - 1) {
                         this.lastUsedDiscoveryIndex = 0;
@@ -39,21 +43,32 @@ export class NetworkConfigComponent {
         }
     }
 
-    // wifiConnectionStatusString(): string {
-    //     if (this.config.homeLanConnecting) {
-    //         return "Connecting...";
-    //     }
-    //     if (this.config.homeLanConnected) {
-    //         return "Connected: " + this.config.homeLanIPAddress;
-    //
-    //     }
-    //     return "Not connected";
-    // }
+    fetchCurrentIPAddress() {
+        try {
+            // console.log("Detecting network interface...");
+            networkinterface.getWiFiIPAddress((ip) => {
+                if (ip != this.currentIPAddress) {
+                    console.log("Detected network interface: " + ip);
+                    this.currentIPAddress = ip;
+                }
+            });
+
+        } catch (ReferenceError) {
+            this.currentIPAddress = "<in browser>";
+        }
+    }
 
     change(keyName, value) {
         let change = [];
         change[keyName] = value;
         this.updateConfiguration.emit(change);
+    }
+
+    num(value) {
+        if(value == "") {
+            return 0;
+        }
+        return parseInt(value);
     }
 
     wifiStateFor(key: string) {
@@ -68,6 +83,7 @@ export class NetworkConfigComponent {
     }
 
     wifiState() {
+        this.fetchCurrentIPAddress();
         let network = this.config.network;
         if (network) {
             let state = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid', 'docker_last_deploy']);
