@@ -29,14 +29,14 @@ export class NetworkConfigComponent {
 
     autoDetect() {
         if (this.config) {
-            let network = this.config.network;
-            if (network.discoveredServers != null) {
-                console.log("Have: ", network.discoveredServers.join(","));
-                if (network.discoveredServers.length > 0) {
-                    if (this.lastUsedDiscoveryIndex > network.discoveredServers.length - 1) {
+            let discoveredServers = this.config.network.discoveredServers;
+            if (discoveredServers != null) {
+                console.log("Have: ", discoveredServers.join(","));
+                if (discoveredServers.length > 0) {
+                    if (this.lastUsedDiscoveryIndex > discoveredServers.length - 1) {
                         this.lastUsedDiscoveryIndex = 0;
                     }
-                    this.config.ipAddress = network.discoveredServers[this.lastUsedDiscoveryIndex];
+                    this.config.ipAddress = discoveredServers[this.lastUsedDiscoveryIndex];
                     this.lastUsedDiscoveryIndex++;
                 }
             }
