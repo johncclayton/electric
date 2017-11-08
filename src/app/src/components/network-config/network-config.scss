@@ -4,14 +4,27 @@ network-config {
     text-align: center;
   }
 
-  .wifi {
-    color: red;
-    .connecting {
-      color: orange;
+  .network {
+    .wifi {
+      p {
+        font-size: 0.7em;
+        //padding: 20px !important;
+      }
     }
-    .connected {
-      color: green;
+
+    ion-list-header p:first-child {
+      padding-top: 15px;
     }
   }
 
+  //.wifi {
+  //  color: red;
+  //  .connecting {
+  //    color: orange;
+  //  }
+  //  .connected {
+  //    color: green;
+  //  }
+  //}
+  //
 }
