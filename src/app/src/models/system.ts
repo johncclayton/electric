@@ -13,7 +13,7 @@ export class System {
 
     constructor(private data: {}) {
         console.error("System object created");
-        console.error("Env is: " + ENV.ionicEnvName);
+        console.error("Env is: " + ENV.ionicEnvName + ", NODE_ENV is: ");
     }
 
     static get environment(): any {

@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 import * as _ from "lodash";
+import {isArray} from "ionic-angular/util/util";
 
 
 @Injectable()
@@ -23,24 +24,36 @@ export class ConfigurationActions {
     }
 
     addDiscoveredServer(ipAddress: string) {
+        if (!ipAddress || ipAddress == "") {
+            return;
+        }
+
+        // Filter our any discovery on the private subnet
+        if(ipAddress.startsWith("192.168.10")) {
+            return;
+        }
+
         let config = this.ngRedux.getState().config;
         let existing = config.network.discoveredServers;
-        if(existing == null) {
-            existing = [];
-        }
+        let new_set = _.uniq([
+            ...existing,
+            ...[ipAddress]
+        ]);
+
+        // console.log("Existing: " + existing + " type: " + typeof (existing) + ". Is Array: " + isArray(existing) + ", len: " + existing.length);
+
         let newState = {
             network: {
-                discoveredServers: [
-                    ...existing,
-                    ipAddress
-                ]
+                discoveredServers: new_set
             }
         };
+        // console.log("Added discovered server: " + ipAddress + " for: " + newState.network.discoveredServers.join(","));
 
         this.updateConfiguration(newState);
     }
 
     removeDiscoveredServer(ipAddress: string) {
+        console.log("Removing " + ipAddress + " from discovery list");
         let existing = this.ngRedux.getState().config.network;
         let newState = existing.discoveredServers.filter((s) => {
             return s != ipAddress;
@@ -106,7 +119,6 @@ export class ConfigurationActions {
         // Check the change type, coerce values
         if (change != null) {
             let config = this.ngRedux.getState().config;
-
 
             // Check to see if any values have changed
             let comparison_result = this.compareTwoMaps(change, config);

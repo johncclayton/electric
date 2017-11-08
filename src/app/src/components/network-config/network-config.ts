@@ -3,7 +3,6 @@ import {IConfig, INetworkKeyNames} from "../../models/state/reducers/configurati
 import {iChargerService} from "../../services/icharger.service";
 import {isUndefined} from "ionic-angular/util/util";
 import * as _ from "lodash";
-import {NetworkActions} from "../../models/state/actions/network";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 
 declare const networkinterface;
@@ -31,7 +30,7 @@ export class NetworkConfigComponent {
         if (this.config) {
             let discoveredServers = this.config.network.discoveredServers;
             if (discoveredServers != null) {
-                console.log("Have: ", discoveredServers.join(","));
+                // console.log("Have: ", discoveredServers.join(","));
                 if (discoveredServers.length > 0) {
                     if (this.lastUsedDiscoveryIndex > discoveredServers.length - 1) {
                         this.lastUsedDiscoveryIndex = 0;
@@ -48,7 +47,7 @@ export class NetworkConfigComponent {
             // console.log("Detecting network interface...");
             networkinterface.getWiFiIPAddress((ip) => {
                 if (ip != this.currentIPAddress) {
-                    console.log("Detected network interface: " + ip);
+                    // console.log("Detected network interface: " + ip);
                     this.currentIPAddress = ip;
                 }
             });
@@ -65,7 +64,7 @@ export class NetworkConfigComponent {
     }
 
     num(value) {
-        if(value == "") {
+        if (value == "") {
             return 0;
         }
         return parseInt(value);
@@ -89,7 +88,21 @@ export class NetworkConfigComponent {
             let state = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid', 'docker_last_deploy']);
             if (network.interfaces) {
                 if (network.interfaces.hasOwnProperty("wlan0")) {
-                    state["Wifi IP"] = network.interfaces["wlan0"];
+                    let wlan0interface = network.interfaces["wlan0"];
+                    if (wlan0interface) {
+                        state["Wifi IP"] = wlan0interface;
+                        this.configActions.addDiscoveredServer(wlan0interface);
+                    }
+                }
+                if (network.interfaces.hasOwnProperty("wlan1")) {
+                    state["LAN IP"] = network.interfaces["wlan1"];
+                }
+            }
+            if (network.discoveredServers != null) {
+                let i = 1;
+                for (let srv in network.discoveredServers) {
+                    state["Discovery #" + i] = network.discoveredServers[srv];
+                    i++;
                 }
             }
             if (network.services) {

@@ -26,8 +26,9 @@ export class NetworkPage {
     }
 
     ionViewDidLoad() {
+
         if (this.canUseZeroconf()) {
-            console.log("Watching for servers...");
+            // console.log("Watching for servers...");
             this.zeroConf.watch("_http._tcp", "local.").subscribe(r => {
                 if (r.service.ipv4Addresses.length > 0) {
                     let ipAddress = r.service.ipv4Addresses[0];
@@ -36,10 +37,10 @@ export class NetworkPage {
                     if (name.indexOf("Electric REST API") >= 0) {
                         // console.log("Action: ", r.action, ", ", name, ", ", ipAddress);
                         if (r.action == "resolved") {
-                            console.log("I see: ", name);
+                            // console.log("I see: ", name);
                             this.actions.addDiscoveredServer(ipAddress);
                         } else {
-                            console.log(name, "removed");
+                            // console.log(name, "removed");
                             this.actions.removeDiscoveredServer(ipAddress);
                         }
                     }

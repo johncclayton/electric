@@ -38,7 +38,7 @@ export interface INetwork {
 
     interfaces: Map<string, string>,
     services: Map<string, boolean>
-    discoveredServers: string[],
+    discoveredServers: Array<string>,
 }
 
 export interface IConfig {
@@ -114,6 +114,7 @@ export const
         switch (action.type) {
             case ConfigurationActions.SET_FULL_CONFIG:
                 if (action.payload) {
+                    // console.log("We're using the payload..." + JSON.stringify(action.payload));
                     return action.payload;
                 } else {
                     return state;
@@ -144,9 +145,22 @@ export const
 
             case ConfigurationActions.UPDATE_CONFIG_KEYVALUE:
                 if (action.payload) {
+
+                    // if have a network subtree, merge this first
+                    // otherwise setting anything on the root tree clobbers 'network'
+                    let new_network_tree = state.network;
+                    if (action.payload.hasOwnProperty('network')) {
+                        new_network_tree = {
+                            ...state.network,
+                            ...action.payload.network
+                        }
+                    }
+
                     return {
                         ...state,
-                        ...action.payload
+                        ...action.payload,
+                        network: new_network_tree
+
                     }
                 }
                 return state;

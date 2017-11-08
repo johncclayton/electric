@@ -43,7 +43,6 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
         );
 
         // Add logger if in development (web browsers)
-
         if (System.environment.logging) {
             console.log("Adding in state logging...");
             middleware.push(createLogger({
@@ -54,15 +53,19 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
             }));
         }
 
-        if (System.environment.ionicEnvName == "dev") {
-            if (window.navigator.userAgent.includes('Chrome')) {
-                console.log("Adding in chrome redux devtools ...");
+        if (System.environment.redux_devtools) {
+            let isChrome = window.navigator.userAgent.includes('Chrome');
+            if (isChrome || 1) {
+
                 if (devTools.isEnabled()) {
+                    console.log("Adding in redux devtools ...");
                     // Don't show certain charger actions
                     let options = {
-                        actionsBlacklist: actionsBlacklist
+                        actionsBlacklist: actionsBlacklist,
                     };
                     enhancers.push(devTools.enhancer(options));
+                } else {
+                    console.log("Redux devtools wanted, but nothing loaded. No redux devtools :(");
                 }
             }
         }
