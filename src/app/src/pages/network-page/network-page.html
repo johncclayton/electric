@@ -12,6 +12,7 @@
             [config]="config$|async"
             [showAutoButton]="canUseZeroconf() && haveZeroConfAddresses()"
             (updateConfiguration)="actions.updateConfigurationFromEmit($event)"
+            (networkWizard)="showWizard()"
             (sendWifiSettings)="sendWifiSettings()"
     >
     </network-config>

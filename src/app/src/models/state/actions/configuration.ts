@@ -2,7 +2,6 @@ import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 import * as _ from "lodash";
-import {isArray} from "ionic-angular/util/util";
 
 
 @Injectable()
@@ -29,7 +28,7 @@ export class ConfigurationActions {
         }
 
         // Filter our any discovery on the private subnet
-        if(ipAddress.startsWith("192.168.10")) {
+        if (ipAddress.startsWith("192.168.10")) {
             return;
         }
 
@@ -113,6 +112,20 @@ export class ConfigurationActions {
         let key = Object.keys(change)[0];
         map_change[key] = change[key];
         this.updateConfiguration(map_change);
+    }
+
+    updateNetworkFromEmit(change) {
+        let map_change = {};
+        let key = Object.keys(change)[0];
+        map_change[key] = change[key];
+        this.updateNetwork(map_change);
+    }
+
+    updateNetwork(change) {
+        let actual = {
+            network: change
+        };
+        this.updateConfiguration(actual)
     }
 
     updateConfiguration(change) {

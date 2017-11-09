@@ -15,6 +15,7 @@ import {Subject} from "rxjs/Subject";
 import {LocalNotifications} from "@ionic-native/local-notifications";
 import {IUIState} from "../models/state/reducers/ui";
 import {ConfigurationActions} from "../models/state/actions/configuration";
+import {ElectricNetworkService} from "./network.service";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -67,6 +68,7 @@ export class iChargerService {
                        public vibration: Vibration,
                        public uiActions: UIActions,
                        private ngRedux: NgRedux<IAppState>,
+                       private networkService: ElectricNetworkService,
                        private chargerActions: ChargerActions,
                        private configActions: ConfigurationActions,
                        private localNotifications: LocalNotifications,) {
@@ -87,6 +89,7 @@ export class iChargerService {
 
     public startPollingCharger() {
         console.log("Start polling for charger state...");
+        this.uiActions.setConfiguringNetwork(false);
         this.getChargerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
@@ -98,6 +101,7 @@ export class iChargerService {
 
     public startPollingStatusServer() {
         console.log("Starting polling for network status....");
+        this.uiActions.setConfiguringNetwork(true);
         this.getServerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
@@ -504,32 +508,28 @@ export class iChargerService {
 
 
     public updateWifi(ssid: string, password: string) {
-        // this.configActions.setConfiguration("homeLanConnecting", true);
-        //
-        // Observable.create((observable) => {
-        //     let wifiURL = this.getManagementURL("/wifi");
-        //     let payload = {
-        //         "SSID": ssid,
-        //         "PWD": password
-        //     };
-        //
-        //     let headers = new Headers({'Content-Type': 'application/json'});
-        //     let options = new RequestOptions({headers: headers});
-        //
-        //     let body = JSON.stringify(payload);
-        //     console.log("Sending: ", body, "to", wifiURL);
-        //     this.http.put(wifiURL, body, options).subscribe((resp) => {
-        //             if (resp.ok) {
-        //                 console.log("Yay. It worked");
-        //             }
-        //         }, (e) => {
-        //
-        //         }, () => {
-        //             this.configActions.setConfiguration("homeLanConnecting", false);
-        //             this.detectWifiConnectionStatus();
-        //         }
-        //     );
-        // }).subscribe()
+        Observable.create((observable) => {
+            let wifiURL = this.getManagementURL("/wifi");
+            let payload = {
+                "SSID": ssid,
+                "PWD": password
+            };
+
+            let headers = new Headers({'Content-Type': 'application/json'});
+            let options = new RequestOptions({headers: headers});
+
+            let body = JSON.stringify(payload);
+            console.log("Sending: ", body, "to", wifiURL);
+            this.http.put(wifiURL, body, options).subscribe((resp) => {
+                    if (resp.ok) {
+                        console.log("Yay. It worked");
+                    }
+                }, (e) => {
+
+                }, () => {
+                }
+            );
+        }).subscribe()
     }
 
     private getServerStatus(): Observable<any> {
@@ -537,6 +537,7 @@ export class iChargerService {
         return Observable.timer(10, interval).flatMap(v => {
             // If disconnected, do a round robbin between various known IP addresses
             this.tryNextInterfaceIfDisconnected();
+            this.networkService.fetchCurrentIPAddress();
 
             let wifiURL = this.getManagementURL("/status");
             // console.log("Get status from " + wifiURL);
@@ -608,7 +609,7 @@ export class iChargerService {
         let state = this.ngRedux.getState();
         if (state.ui.disconnected) {
             let config = this.getConfig();
-            config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2;
+            config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
             console.log("Switch to connection index: ", config.lastConnectionIndex);
         }
     }

@@ -5,8 +5,6 @@ import {isUndefined} from "ionic-angular/util/util";
 import * as _ from "lodash";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 
-declare const networkinterface;
-
 @Component({
     selector: 'network-config',
     templateUrl: 'network-config.html',
@@ -16,10 +14,10 @@ export class NetworkConfigComponent {
     @Input() config?: IConfig;
     @Input() showAutoButton: boolean;
 
+    @Output() networkWizard: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
 
-    public currentIPAddress: string = "...";
     private lastUsedDiscoveryIndex = 0;
 
     constructor(public chargerService: iChargerService,
@@ -42,21 +40,6 @@ export class NetworkConfigComponent {
         }
     }
 
-    fetchCurrentIPAddress() {
-        try {
-            // console.log("Detecting network interface...");
-            networkinterface.getWiFiIPAddress((ip) => {
-                if (ip != this.currentIPAddress) {
-                    // console.log("Detected network interface: " + ip);
-                    this.currentIPAddress = ip;
-                }
-            });
-
-        } catch (ReferenceError) {
-            this.currentIPAddress = "<in browser>";
-        }
-    }
-
     change(keyName, value) {
         let change = [];
         change[keyName] = value;
@@ -70,67 +53,70 @@ export class NetworkConfigComponent {
         return parseInt(value);
     }
 
-    wifiStateFor(key: string) {
-        return this.wifiState()[key];
+    wifiStateFor(heading: string, key: string) {
+        return this.sectionState(heading)[key];
     }
 
-    wifiStateKeyFor(key: string) {
+    wifiStateKeyFor(heading: string, key: string) {
         if (INetworkKeyNames.hasOwnProperty(key)) {
             return INetworkKeyNames[key];
         }
         return key;
     }
 
+    sectionNames() {
+        return Object.keys(this.wifiState());
+    }
+
+    sectionName(key: string) {
+        return this.wifiState()[key].name;
+    }
+
+    sectionState(key: string) {
+        return this.wifiState()[key].items;
+    }
+
     wifiState() {
-        this.fetchCurrentIPAddress();
+        let sections = {
+            'wifi': {name: 'Wifi Association', items: {}},
+            'network': {name: 'Network / IPs', items: {}},
+            'server': {name: 'Server Status', items: {}}
+        };
+
         let network = this.config.network;
         if (network) {
-            let state = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid', 'docker_last_deploy']);
+            sections['wifi'].items = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid']);
+
             if (network.interfaces) {
                 if (network.interfaces.hasOwnProperty("wlan0")) {
                     let wlan0interface = network.interfaces["wlan0"];
                     if (wlan0interface) {
-                        state["Wifi IP"] = wlan0interface;
+                        sections['network'].items["Home Wifi IP"] = wlan0interface;
                         this.configActions.addDiscoveredServer(wlan0interface);
                     }
                 }
                 if (network.interfaces.hasOwnProperty("wlan1")) {
-                    state["LAN IP"] = network.interfaces["wlan1"];
+                    sections['network'].items["Static IP"] = network.interfaces["wlan1"];
                 }
             }
             if (network.discoveredServers != null) {
                 let i = 1;
                 for (let srv in network.discoveredServers) {
-                    state["Discovery #" + i] = network.discoveredServers[srv];
+                    sections['server'].items["Discovery #" + i] = network.discoveredServers[srv];
                     i++;
                 }
             }
             if (network.services) {
-                state["DNS Masq"] = network.services['dnsmasq'];
-                state["Hostapd"] = network.services['hostapd'];
-                state["Docker"] = network.services['docker'];
-                state["Electric PI"] = network.services['electric-pi.service'];
+                sections['server'].items["Server Version"] = network['docker_last_deploy'];
+                sections['server'].items["DNS Masq"] = network.services['dnsmasq'];
+                sections['server'].items["Hostapd"] = network.services['hostapd'];
+                sections['server'].items["Docker"] = network.services['docker'];
+                sections['server'].items["Electric PI"] = network.services['electric-pi.service'];
             }
-            return state;
+            return sections;
         }
         return {"Fetching": "..."};
     }
 
-    get wifiSettingsValid(): boolean {
-        if (this.config) {
-            let network = this.config.network;
-            if (isUndefined(network.wifi_password)) {
-                return false;
-            }
-            if (isUndefined(network.wifi_ssid)) {
-                return false;
-            }
-
-            let passLength = network.wifi_password.length;
-            let ssidLength = network.wifi_ssid.length;
-            return ssidLength > 0 && (passLength >= 8 && passLength <= 63);
-        }
-        return false;
-    }
 
 }

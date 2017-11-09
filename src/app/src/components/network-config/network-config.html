@@ -1,55 +1,9 @@
 <div>
     <ion-list class="network">
-        <ion-list-header class="current" color="secondary" no-lines>
-            <ion-label>
-                Device IP Address: {{currentIPAddress}}
-            </ion-label>
-        </ion-list-header>
-        <ion-item class="current" color="secondary">
-            <button ion-button>
-                Network Wizard
-            </button>
-        </ion-item>
-        <!--<ion-list-header color="light">-->
-        <!--<ion-label>-->
-        <!--Wifi Network-->
-        <!--</ion-label>-->
-        <!--</ion-list-header>-->
-        <!--<ion-item no-lines>-->
-        <!--<ion-label stacked>SSID (of your home network) (read only)</ion-label>-->
-        <!--<ion-input type="text" disabled="true"-->
-        <!--[ngModel]="config?.network?.wifi_ssid"-->
-        <!--&gt;-->
-        <!--</ion-input>-->
-        <!--</ion-item>-->
-        <!--<ion-item>-->
-        <!--<ion-label stacked>Password (of above Wifi router)</ion-label>-->
-        <!--<ion-input type="text"-->
-        <!--[ngModel]="config?.network?.wifi_password"-->
-        <!--(ngModelChange)="change('network.wifi_password', $event)"-->
-        <!--&gt;-->
-        <!--</ion-input>-->
-        <!--</ion-item>-->
-
-        <!--<ion-item>-->
-        <!--<ion-label class="wifi">-->
-        <!--<p [class.connecting]="config.homeLanConnecting"-->
-        <!--[class.connected]="config.homeLanConnected"-->
-        <!--&gt;-->
-        <!--<ion-icon item-end name="wifi"-->
-        <!--[class.connecting]="config.homeLanConnecting"-->
-        <!--[class.connected]="config.homeLanConnected"-->
-        <!--&gt;</ion-icon>-->
-        <!--{{wifiConnectionStatusString()}}-->
-        <!--</p>-->
-        <!--</ion-label>-->
-        <!--<button item-end [disabled]="!wifiSettingsValid" ion-button (tap)="sendWifiSettings.emit()">Apply</button>-->
-        <!--</ion-item>-->
-
-        <ion-list-header class="wifi" color="light">
+        <ion-list-header class="note" color="light">
             Home WiFi
-            <p>These settings are used when you're at home.</p>
-            <p>They are <u><b>NOT</b></u> used when you're at the field.</p>
+            <p class="below">These settings are used when you're at home.<br/>
+                They are <b>not</b> used when you're at the field.</p>
         </ion-list-header>
         <ion-item>
             <ion-label stacked>IP Address of Pi (on home wifi)</ion-label>
@@ -68,20 +22,25 @@
 
             </ion-input>
         </ion-item>
-
-        <ion-list-header color="light">
-            <ion-label>
-                Wifi Status
-            </ion-label>
-        </ion-list-header>
-
-        <ion-grid>
-            <ion-row *ngFor="let zoot of wifiState()|keys">
-                <ion-col col-4 item-start>{{wifiStateKeyFor(zoot)}}</ion-col>
-                <ion-col col-auto item-end>{{wifiStateFor(zoot)}}</ion-col>
-            </ion-row>
-        </ion-grid>
-
+        <ion-item detail-push (click)="networkWizard.emit()">
+            Network settings wizard
+        </ion-item>
+        <div class="sections">
+            <div *ngFor="let heading of sectionNames()">
+                <ion-list-header color="light">
+                    {{sectionName(heading)}}
+                </ion-list-header>
+                <ion-grid class="sections">
+                    <ion-row *ngFor="let key of sectionState(heading)|keys">
+                        <ion-col col-4 item-start>{{wifiStateKeyFor(heading, key)}}</ion-col>
+                        <ion-col col-auto item-end>{{wifiStateFor(heading, key)}}</ion-col>
+                    </ion-row>
+                </ion-grid>
+                <br/>
+            </div>
+        </div>
     </ion-list>
 
 </div>
+
+

@@ -1,13 +1,13 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, Platform} from 'ionic-angular';
 import {Zeroconf} from "@ionic-native/zeroconf";
-import {System} from "../../models/system";
 import {NgRedux, select} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
 import {iChargerService} from "../../services/icharger.service";
 import {Observable} from "rxjs/Observable";
 import {IConfig} from "../../models/state/reducers/configuration";
+import {NetworkWizHomePage} from "../network-wiz-home/network-wiz-home";
 
 @IonicPage()
 @Component({
@@ -26,7 +26,6 @@ export class NetworkPage {
     }
 
     ionViewDidLoad() {
-
         if (this.canUseZeroconf()) {
             // console.log("Watching for servers...");
             this.zeroConf.watch("_http._tcp", "local.").subscribe(r => {
@@ -55,6 +54,8 @@ export class NetworkPage {
         // logging happening
         this.iChargerService.stopAllPolling();
         this.iChargerService.startPollingStatusServer();
+
+        this.showWizard();
     }
 
     ngOnDestroy() {
@@ -78,7 +79,7 @@ export class NetworkPage {
     canUseZeroconf(): boolean {
         let has_cordova = this.platform.is('cordova');
         // return has_cordova && System.isProduction;
-        return has_cordova ;
+        return has_cordova;
     }
 
     sendWifiSettings() {
@@ -87,5 +88,7 @@ export class NetworkPage {
         this.iChargerService.updateWifi(network.wifi_ssid, network.wifi_password);
     }
 
-
+    showWizard() {
+        this.navCtrl.push(NetworkWizHomePage);
+    }
 }

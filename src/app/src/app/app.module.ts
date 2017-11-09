@@ -42,7 +42,8 @@ import {FCM} from '@ionic-native/fcm';
 import {Zeroconf} from "@ionic-native/zeroconf";
 import {NetworkPage} from "../pages/network-page/network-page";
 import {UtilsModule} from "../utils/utils.module";
-// import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ElectricNetworkService} from "../services/network.service";
+import {NetworkWizHomePage} from "../pages/network-wiz-home/network-wiz-home";
 
 export const firebaseConfig = {
     apiKey: "AIzaSyDDfmaQMyk_8UgQmcTJa8u2Ruv3emGEKAc",
@@ -83,6 +84,7 @@ let config = {
         PresetCyclePage,
         ChargeOptionsPage,
         NetworkPage,
+        NetworkWizHomePage,
         ChargerStatusComponent,
     ],
     imports: [
@@ -104,6 +106,7 @@ let config = {
         HomePage,
         ConfigPage,
         NetworkPage,
+        NetworkWizHomePage,
         PresetListPage,
         PresetPage,
         PresetChargePage,
@@ -128,6 +131,7 @@ let config = {
         FCM,
         Zeroconf,
         LocalNotifications,
+        ElectricNetworkService,
         {provide: iChargerService, useClass: iChargerService},
         {provide: ErrorHandler, useClass: IonicErrorHandler},
         ConfigStoreProvider

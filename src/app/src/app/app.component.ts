@@ -51,7 +51,12 @@ export class MyApp {
                 .subscribe(r => {
                     console.log("Configuration loaded, putting into the store...");
                     if (r != null) {
-                        r.network.discoveredServers = [];
+                        if (r.network) {
+                            console.log("Clearing network transient state...");
+                            r.network.discoveredServers = [];
+                            r.network.interfaces = [];
+                            r.network.services = [];
+                        }
                         this.ngRedux.dispatch({
                             type: ConfigurationActions.SET_FULL_CONFIG,
                             payload: r

@@ -118,6 +118,10 @@ export class ConnectionStateComponent {
     private incrementDisconnectionCount() {
         this.lastConnectionFailureCount = this.connectionFailureCount;
 
+        if(this.ngRedux.getState().ui.isConfiguringNetwork) {
+            return;
+        }
+
         // If we get to three, begin showing the dialog.
         let message = 'Reconnecting (' + this.connectionFailureCount + ')';
         let numberOfWarningsToSkip = 2;

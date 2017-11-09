@@ -5,7 +5,7 @@
     <author email="electric@we.dont.have.a.domain.yet.org" href="https://github.com/johncclayton/electric">Electric at
         GitHub
     </author>
-    <content original-src="index.html" src="http://192.168.1.168:8100" />
+    <content original-src="index.html" src="http://192.168.1.168:8101" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />

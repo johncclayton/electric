@@ -15,10 +15,10 @@ export interface IChargeSettings {
 }
 
 export const INetworkKeyNames = {
-    "ap_name": "AP Name",
-    "ap_channel": "AP Channel",
+    "ap_name": "Pi3 AP Name",
+    "ap_channel": "Pi3 Wifi Channel",
 
-    "wifi_ssid": "SSID",
+    "wifi_ssid": "Home Wifi SSID",
     "wifi_password": "Password",
 
     "docker_last_deploy": "Server Version"
@@ -36,6 +36,7 @@ export interface INetwork {
     web_running: boolean,
     worker_running: boolean,
 
+    current_ip_address:string,
     interfaces: Map<string, string>,
     services: Map<string, boolean>
     discoveredServers: Array<string>,
@@ -86,6 +87,7 @@ let defaultNetworkState: INetwork = {
     web_running: false,
     worker_running: false,
 
+    current_ip_address: "",
     discoveredServers: [],
     interfaces: new Map<string, string>(),
     services: new Map<string, boolean>()

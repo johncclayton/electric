@@ -5,26 +5,37 @@ network-config {
   }
 
   .network {
-    .wifi {
-      p {
-        font-size: 0.7em;
-        //padding: 20px !important;
-      }
+    .heading {
     }
 
-    ion-list-header p:first-child {
+  }
+
+  ion-list-header.note {
+    p {
+      font-size: 0.8em;
+    }
+    .below {
       padding-top: 15px;
+    }
+
+    .above {
+      padding-top: 8px;
+      padding-bottom: 15px;
     }
   }
 
-  //.wifi {
-  //  color: red;
-  //  .connecting {
-  //    color: orange;
-  //  }
-  //  .connected {
-  //    color: green;
-  //  }
-  //}
-  //
+  .sections {
+    color: black;
+    .wifi {
+      background-color: rgba(purple, 0.1);
+    }
+
+    .network {
+      background-color: rgba(cyan, 0.1);
+    }
+
+    .server {
+      background-color: rgba(yellow, 0.1);
+    }
+  }
 }

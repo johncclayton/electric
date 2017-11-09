@@ -1,0 +1,42 @@
+<ion-list>
+    <ion-list-header color="light" *ngIf="showHeader">
+        <ion-label>
+            Home Wifi Network
+        </ion-label>
+    </ion-list-header>
+
+    <ion-item>
+        <ion-label stacked>SSID / Name</ion-label>
+        <ion-input type="text"
+                   [ngModel]="network?.wifi_ssid"
+                   (ngModelChange)="change('wifi_ssid', $event)"
+        >
+        </ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label stacked>Password (of above Wifi router)</ion-label>
+        <ion-input type="text"
+                   [ngModel]="network?.wifi_password"
+                   (ngModelChange)="change('wifi_password', $event)"
+        >
+        </ion-input>
+    </ion-item>
+
+    <button item-end [disabled]="!networkService.wifiSettingsValid" ion-button (tap)="sendWifiSettings.emit()">Apply
+    </button>
+
+    <!--<ion-item>-->
+    <!--<ion-label class="wifi">-->
+    <!--<p [class.connecting]="config.homeLanConnecting"-->
+    <!--[class.connected]="config.homeLanConnected"-->
+    <!--&gt;-->
+    <!--<ion-icon item-end name="wifi"-->
+    <!--[class.connecting]="config.homeLanConnecting"-->
+    <!--[class.connected]="config.homeLanConnected"-->
+    <!--&gt;</ion-icon>-->
+    <!--{{wifiConnectionStatusString()}}-->
+    <!--</p>-->
+    <!--</ion-label>-->
+    <!--</ion-item>-->
+</ion-list>
