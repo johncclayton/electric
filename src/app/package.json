@@ -40,7 +40,7 @@
         "@types/ionic": "^0.0.34",
         "cordova-android": "^6.2.3",
         "cordova-browser": "4.3.3",
-        "cordova-ios": "4.3.3",
+        "cordova-ios": "^4.4.0",
         "cordova-plugin-add-swift-support": "^1.7.0",
         "cordova-plugin-device": "^1.1.6",
         "cordova-plugin-networkinterface": "^1.2.0",
