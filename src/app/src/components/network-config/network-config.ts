@@ -16,7 +16,6 @@ export class NetworkConfigComponent {
 
     @Output() networkWizard: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
-    @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
 
     private lastUsedDiscoveryIndex = 0;
 

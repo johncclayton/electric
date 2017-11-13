@@ -16,6 +16,7 @@ import {LocalNotifications} from "@ionic-native/local-notifications";
 import {IUIState} from "../models/state/reducers/ui";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {ElectricNetworkService} from "./network.service";
+import {observable} from "rxjs/symbol/observable";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -507,8 +508,8 @@ export class iChargerService {
     }
 
 
-    public updateWifi(ssid: string, password: string) {
-        Observable.create((observable) => {
+    public updateWifi(ssid: string, password: string): Observable<any> {
+        return Observable.create((observable) => {
             let wifiURL = this.getManagementURL("/wifi");
             let payload = {
                 "SSID": ssid,
@@ -519,17 +520,19 @@ export class iChargerService {
             let options = new RequestOptions({headers: headers});
 
             let body = JSON.stringify(payload);
-            console.log("Sending: ", body, "to", wifiURL);
+            // console.log("Sending: ", body, "to", wifiURL);
             this.http.put(wifiURL, body, options).subscribe((resp) => {
                     if (resp.ok) {
                         console.log("Yay. It worked");
                     }
+                    observable.next();
                 }, (e) => {
-
+                    observable.error();
                 }, () => {
+                    observable.complete();
                 }
             );
-        }).subscribe()
+        });
     }
 
     private getServerStatus(): Observable<any> {
@@ -555,8 +558,19 @@ export class iChargerService {
                     ap_associated: false,
                     ap_channel: access_point.channel,
                     ap_name: access_point.name,
-                    wifi_ssid: access_point.wifi_ssid,
                 };
+
+                let current_network = this.ngRedux.getState().config.network;
+                let havnt_had_update_yet = current_network.last_status_update == null;
+                let update_is_old = false;
+                if (havnt_had_update_yet == false) {
+                    let right_now: Date = new Date();
+                    let diff_in_ms = right_now.getTime() - current_network.last_status_update.getTime();
+                    update_is_old = diff_in_ms > 10000;
+                }
+                if (havnt_had_update_yet || update_is_old) {
+                    new_values['wifi_ssid'] = access_point.wifi_ssid;
+                }
 
                 if (docker.hasOwnProperty('last_deploy')) {
                     new_values['docker_last_deploy'] = docker['last_deploy'];

@@ -43,9 +43,10 @@
             <div *ngIf="tip.content != ''">
                 {{tip.content}}
             </div>
-            <div *ngIf="currentState == 1">
+            <div *ngIf="currentState >= 1">
                 <wifi-settings
                         [network]="network$|async"
+                        [disabled]="!nextStepIsEnabled()"
                         (updateConfiguration)="actions.updateNetworkFromEmit($event)"
                         (sendWifiSettings)="updateWifi()">
                 </wifi-settings>

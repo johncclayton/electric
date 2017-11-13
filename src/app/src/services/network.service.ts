@@ -97,4 +97,20 @@ export class ElectricNetworkService {
         let ssidLength = network.wifi_ssid.length;
         return ssidLength > 0 && (passLength >= 8 && passLength <= 63);
     }
+
+    haveSeenStatusRecently() {
+        return this.ngRedux.getState().config.network.docker_last_deploy > 0;
+    }
+
+    isVerified() {
+        return this.haveSeenStatusRecently() && this.haveWLAN0IPAddress();
+    }
+
+    isApplyingNetworkChange() {
+        let network = this.getNetwork();
+        if (!network) {
+            return false;
+        }
+        return network.is_applying_change;
+    }
 }

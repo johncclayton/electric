@@ -8,6 +8,7 @@ import {iChargerService} from "../../services/icharger.service";
 import {Observable} from "rxjs/Observable";
 import {IConfig} from "../../models/state/reducers/configuration";
 import {NetworkWizHomePage} from "../network-wiz-home/network-wiz-home";
+import {Subject} from "rxjs/Subject";
 
 @IonicPage()
 @Component({
@@ -55,7 +56,7 @@ export class NetworkPage {
         this.iChargerService.stopAllPolling();
         this.iChargerService.startPollingStatusServer();
 
-        this.showWizard();
+        // this.showWizard();
     }
 
     ngOnDestroy() {
@@ -80,12 +81,6 @@ export class NetworkPage {
         let has_cordova = this.platform.is('cordova');
         // return has_cordova && System.isProduction;
         return has_cordova;
-    }
-
-    sendWifiSettings() {
-        let network = this.ngRedux.getState().config.network;
-        console.log("Sending settings...");
-        this.iChargerService.updateWifi(network.wifi_ssid, network.wifi_password);
     }
 
     showWizard() {

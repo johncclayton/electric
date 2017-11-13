@@ -25,6 +25,9 @@ export const INetworkKeyNames = {
 };
 
 export interface INetwork {
+    last_status_update: Date,
+    is_applying_change:boolean;
+
     ap_associated: boolean, // synthetic, ip from wlan0, and channel + name
     ap_channel: number,
     ap_name: string,
@@ -36,7 +39,7 @@ export interface INetwork {
     web_running: boolean,
     worker_running: boolean,
 
-    current_ip_address:string,
+    current_ip_address: string,
     interfaces: Map<string, string>,
     services: Map<string, boolean>
     discoveredServers: Array<string>,
@@ -76,6 +79,9 @@ const chargerDefaults: IChargeSettings = {
 };
 
 let defaultNetworkState: INetwork = {
+    last_status_update: null,
+    is_applying_change:false,
+
     ap_associated: false,
     ap_channel: 0,
     ap_name: "",
@@ -154,7 +160,8 @@ export const
                     if (action.payload.hasOwnProperty('network')) {
                         new_network_tree = {
                             ...state.network,
-                            ...action.payload.network
+                            ...action.payload.network,
+                            last_status_update: new Date()
                         }
                     }
 

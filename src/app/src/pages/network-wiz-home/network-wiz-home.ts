@@ -7,6 +7,7 @@ import {Observable} from "rxjs/Observable";
 import {ElectricNetworkService} from "../../services/network.service";
 import {iChargerService} from "../../services/icharger.service";
 import {ConfigurationActions} from "../../models/state/actions/configuration";
+import {Subject} from "rxjs/Subject";
 
 
 @Component({
@@ -22,6 +23,7 @@ export class NetworkWizHomePage {
     private state: {};
     private tip: {};
     private currentState: number;
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public navCtrl: NavController,
                 public ngRedux: NgRedux<IAppState>,
@@ -37,12 +39,17 @@ export class NetworkWizHomePage {
         this.moveToNextState();
     }
 
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
+
     /*
     * If we're not up to a state, it's unknown
     * For the current state, it's either red or green
      */
     stateFor(step: number) {
-        if(step == 0) {
+        if (step == 0) {
             this.moveToNextState();
         }
         if (this.state.hasOwnProperty(step)) {
@@ -97,7 +104,15 @@ export class NetworkWizHomePage {
         this.setTip("You can change Wifi settings here...");
         this.state[1] = 'good';
 
-        // this.currentState = 2;
+        this.currentState = 2;
+        this.state[2] = 'bad';
+        if (this.networkService.isVerified()) {
+            this.state[2] = 'good';
+        }
+    }
+
+    nextStepIsEnabled(): boolean {
+        return this.networkService.haveSeenStatusRecently();
     }
 
     private setTip(tip: string) {
@@ -113,7 +128,23 @@ export class NetworkWizHomePage {
             return;
         }
         let network = config.network;
-        this.chargerService.updateWifi(network.wifi_ssid, network.wifi_password);
+
+        if (network == null) {
+            console.error("What? No network state!");
+            return;
+        }
+
+        console.log("Sending WiFi settings...");
+        this.actions.startWifiChange();
+        this.chargerService.updateWifi(network.wifi_ssid, network.wifi_password)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(v => {
+                console.log("We're done with Wifi change");
+            }, (e) => {
+
+            }, () => {
+                this.actions.endWifiChange();
+            });
     }
 
     private onStaticNetwork() {

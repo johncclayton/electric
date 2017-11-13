@@ -104,7 +104,7 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
-        this.showNetworkPage();
+        // this.showNetworkPage();
         // this.showConfigPage();
         // this.showSystemPage();
         // this.showPresetsPage();

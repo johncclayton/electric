@@ -148,12 +148,29 @@ export class ConfigurationActions {
     resetNetworkAtrributes() {
         this.updateConfiguration({
             network: {
+                is_applying_change: false,
                 ap_channel: 0,
                 docker_last_deploy: 0,
                 web_running: false,
                 worker_running: false,
             }
         });
+    }
+
+    endWifiChange() {
+        this.updateConfiguration({
+            network: {
+                is_applying_change: false
+            }
+        })
+    }
+
+    startWifiChange() {
+        this.updateConfiguration({
+            network: {
+                is_applying_change: true
+            }
+        })
     }
 }
 

@@ -7,9 +7,9 @@ import {ElectricNetworkService} from "../../services/network.service";
     templateUrl: 'wifi-settings.html'
 })
 export class WifiSettingsComponent {
-
     @Input() network: INetwork;
     @Input() showHeader: boolean = false;
+    @Input() disabled: boolean = false;
 
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
