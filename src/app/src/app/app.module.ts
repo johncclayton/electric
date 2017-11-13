@@ -38,7 +38,6 @@ import {SystemSettingsPageModule} from "../pages/system-settings/system-settings
 import {ComponentsModule} from "../components/components.module";
 import {Vibration} from "@ionic-native/vibration";
 import {LocalNotifications} from "@ionic-native/local-notifications";
-import {FCM} from '@ionic-native/fcm';
 import {Zeroconf} from "@ionic-native/zeroconf";
 import {NetworkPage} from "../pages/network-page/network-page";
 import {UtilsModule} from "../utils/utils.module";
@@ -128,7 +127,6 @@ let config = {
         StatusBar,
         SplashScreen,
         Vibration,
-        FCM,
         Zeroconf,
         LocalNotifications,
         ElectricNetworkService,
