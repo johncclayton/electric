@@ -1,6 +1,8 @@
+import json
 import logging
 import os
 import subprocess
+import urllib2
 
 import docker
 import requests
@@ -25,7 +27,8 @@ class InvalidUsage(Exception):
         return rv
 
 
-logger = logging.getLogger('electric.status.{0}'.format(__name__))
+# logger = logging.getLogger('electric.status.{0}'.format(__name__))
+logger = logging.getLogger('flask.app'.format(__name__))
 
 WEB_IMAGE_NAME = "johncclayton/electric-pi-web"
 WORKER_IMAGE_NAME = "johncclayton/electric-pi-worker"
@@ -102,6 +105,42 @@ class WiFiConnectionResource(Resource):
         return redirect(url_for("wifi"))
 
 
+class TravisResource(Resource):
+    def get(self):
+        url = "https://api.travis-ci.org/repos/johncclayton/electric/builds"
+        request_headers = {
+            'User-Agent': 'electric',
+            'Accept': 'application/vnd.travis-ci.2+json'
+        }
+
+        try:
+            logger.info("Getting status from {}".format(url))
+            the_request = urllib2.Request(url, headers=request_headers)
+            http_response = urllib2.urlopen(the_request)
+            content = json.load(http_response)
+            logger.info("Got content: {0}".format(content))
+
+            builds = content['builds']
+            if builds:
+                for build in builds:
+                    if build['state'] != 'passed':
+                        continue
+
+                    return {
+                        'latest_build_at_travis': int(build['number'])
+                    }
+            else:
+                return {
+                    'error': 'No builds from travis'
+                }
+
+        except Exception, ex:
+            logger.error("Failed to talk to travis to get version: {}".format(ex.message))
+            return {
+                'error': "{}".format(ex)
+            }
+
+
 class StatusResource(Resource):
     def __init__(self):
         self.docker_cli = docker.from_env()
@@ -174,7 +213,7 @@ class StatusResource(Resource):
         (wlan1, err, wlan1_ret) = read_output_for(
             [script_path("get_ip_address.sh"), "wlan1"], "wlan1 device not found")
 
-        ver = get_last_deployed_version()
+        last_deployed_version = get_last_deployed_version()
 
         res["services"] = {
             "dnsmasq": self._systemctl_running("dnsmasq"),
@@ -204,18 +243,18 @@ class StatusResource(Resource):
         worker_image_running = self.check_docker_container_running(WORKER_CONTAINER_NAME)
 
         res["docker"] = {
-            "last_deploy": ver,
+            "last_deploy": last_deployed_version,
             "web": {
-                "image_name": image_name(WEB_IMAGE_NAME, ver),
+                "image_name": image_name(WEB_IMAGE_NAME, last_deployed_version),
                 "container_name": WEB_CONTAINER_NAME,
-                "image_exists": self.check_docker_image_exists(image_name(WEB_IMAGE_NAME, ver)),
+                "image_exists": self.check_docker_image_exists(image_name(WEB_IMAGE_NAME, last_deployed_version)),
                 "container_created": self.check_docker_container_created(WEB_CONTAINER_NAME),
                 "container_running": web_image_running
             },
             "worker": {
-                "image_name": image_name(WORKER_IMAGE_NAME, ver),
+                "image_name": image_name(WORKER_IMAGE_NAME, last_deployed_version),
                 "container_name": WORKER_CONTAINER_NAME,
-                "image_exists": self.check_docker_image_exists(image_name(WORKER_IMAGE_NAME, ver)),
+                "image_exists": self.check_docker_image_exists(image_name(WORKER_IMAGE_NAME, last_deployed_version)),
                 "container_created": self.check_docker_container_created(WORKER_CONTAINER_NAME),
                 "container_running": worker_image_running
             }
