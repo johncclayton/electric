@@ -6,29 +6,12 @@ import urllib2
 
 import docker
 import requests
-from flask import jsonify
+
 from flask import request, redirect, url_for
 from flask_restful import Resource
+from werkzeug.exceptions import BadRequest
 
-
-class InvalidUsage(Exception):
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
-
-# logger = logging.getLogger('electric.status.{0}'.format(__name__))
-logger = logging.getLogger('flask.app'.format(__name__))
+logger = logging.getLogger('electric.status.{0}'.format(__name__))
 
 WEB_IMAGE_NAME = "johncclayton/electric-pi-web"
 WORKER_IMAGE_NAME = "johncclayton/electric-pi-worker"
@@ -80,13 +63,13 @@ class WiFiConnectionResource(Resource):
 
     def put(self):
         if not request.json:
-            raise InvalidUsage("No JSON payload")
+            raise BadRequest("No JSON payload")
 
         if "SSID" not in request.json:
-            raise InvalidUsage("No SSID in payload")
+            raise BadRequest("No SSID in payload")
 
         if "PWD" not in request.json:
-            raise InvalidUsage("No PWD in payload")
+            raise BadRequest("No PWD in payload")
 
         ssid_value = request.json["SSID"]
         ssid_pwd = request.json["PWD"]
@@ -105,7 +88,22 @@ class WiFiConnectionResource(Resource):
         return redirect(url_for("wifi"))
 
 
-class TravisResource(Resource):
+class DeploymentResource(Resource):
+    def put(self):
+        if "version" not in request.json:
+            raise BadRequest("No version in payload")
+
+        version = request.json['version']
+
+        (deploy_output, err, deploy_ret) = read_output_for(
+            [script_path("upgrade_deployed_containers.sh"), version], "Redeployment failed")
+
+        return {
+            'result': deploy_output,
+            'err': err,
+            'code': deploy_ret
+        }
+
     def get(self):
         url = "https://api.travis-ci.org/repos/johncclayton/electric/builds"
         request_headers = {
@@ -275,11 +273,4 @@ class StatusResource(Resource):
 #
 # This is here so as to not cause a recursive module import
 #
-from main import application
 
-
-@application.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response

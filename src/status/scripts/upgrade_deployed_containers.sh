@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ "root" != "$USER" ] && exec sudo $0 "$@"
+
 shutdown_existing() {
     # Is it running?
     if [ "$(docker ps -q -f name=$1)" ]; then
@@ -20,7 +22,8 @@ shutdown_existing electric-web
 shutdown_existing electric-worker
 
 echo Running with VERSION_TAG=$1, and execute docker-compose up
-export VERSION_TAG=":$1" && docker-compose up -d
+export VERSION_TAG=":$1"
+docker-compose up -d
 
 # TODO: fix this so that update of last deploy only happens if the docker-compose succeeds
 echo >/opt/LAST_DEPLOY $1

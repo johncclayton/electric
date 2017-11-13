@@ -5,7 +5,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
 
-from rest_interface import StatusResource, WiFiConnectionResource, TravisResource
+from rest_interface import StatusResource, WiFiConnectionResource, DeploymentResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
@@ -22,7 +22,7 @@ if not debug_mode:
 
 api = Api(application)
 api.add_resource(StatusResource, "/status", endpoint="status")
-api.add_resource(TravisResource, "/builds", endpoint="builds")
+api.add_resource(DeploymentResource, "/deploy", endpoint="deploy")
 api.add_resource(WiFiConnectionResource, "/wifi", endpoint="wifi")
 
 if __name__ == "__main__":
