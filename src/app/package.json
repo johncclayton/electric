@@ -44,7 +44,6 @@
         "cordova-ios": "^4.4.0",
         "cordova-plugin-add-swift-support": "^1.7.0",
         "cordova-plugin-device": "^1.1.6",
-        "cordova-plugin-fcm": "^2.1.2",
         "cordova-plugin-networkinterface": "^1.2.0",
         "cordova-plugin-splashscreen": "^4.0.3",
         "cordova-plugin-statusbar": "^2.2.3",
@@ -76,7 +75,7 @@
     "devDependencies": {
         "@ionic/app-scripts": "^3.0.1",
         "@types/redux-logger": "^3.0.0",
-        "ionic": "3.17.0",
+        "ionic": "3.18.0",
         "typescript": "2.5.0"
     },
     "cordovaPlugins": [
@@ -117,7 +116,6 @@
                 "SENDER_ID": "811177846859"
             },
             "cordova-plugin-zeroconf": {},
-            "cordova-plugin-fcm": {},
             "cordova-plugin-networkinterface": {}
         }
     }
