@@ -212,7 +212,7 @@ export class iChargerService {
     getManagementHostName(): string {
         let config = this.getConfig();
         let state = this.ngRedux.getState();
-        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, 4999);
+        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, config.port - 1);
     }
 
     // Gets the status of the charger

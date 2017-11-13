@@ -149,6 +149,7 @@ export class ConfigurationActions {
         this.updateConfiguration({
             network: {
                 is_applying_change: false,
+                last_status_update: null,
                 ap_channel: 0,
                 docker_last_deploy: 0,
                 web_running: false,

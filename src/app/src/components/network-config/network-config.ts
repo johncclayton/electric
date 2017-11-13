@@ -13,6 +13,7 @@ export class NetworkConfigComponent {
 
     @Input() config?: IConfig;
     @Input() showAutoButton: boolean;
+    @Input() current_ip_address: string;
 
     @Output() networkWizard: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();

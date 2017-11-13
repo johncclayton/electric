@@ -23,9 +23,13 @@
             </ion-input>
         </ion-item>
         <ion-item detail-push (click)="networkWizard.emit()">
-            Network settings wizard
+            Network Settings Wizard
         </ion-item>
+
         <div class="sections">
+            <ion-list-header class="current" color="secondary" no-lines *ngIf="current_ip_address">
+                Current IP Address: {{current_ip_address}}
+            </ion-list-header>
             <div *ngFor="let heading of sectionNames()">
                 <ion-list-header color="light">
                     {{sectionName(heading)}}

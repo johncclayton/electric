@@ -32,7 +32,6 @@ import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
-import {NgSpinKitModule} from "ng-spin-kit";
 import {SystemActions} from "../models/state/actions/system";
 import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
 import {ComponentsModule} from "../components/components.module";
@@ -92,7 +91,6 @@ let config = {
         // BrowserAnimationsModule,
         UtilsModule,
         NgReduxModule,
-        NgSpinKitModule,
         ComponentsModule,
         SystemSettingsPageModule,
         IonicModule.forRoot(MyApp, config),
