@@ -81,15 +81,15 @@ export class NetworkWizHomePage {
             this.currentState = 0;
             this.state[0] = 'bad';
 
-            this.setTip("Go to your WiFi settings and join the Electric network. The default password is 'electric'");
+            this.setTip("Go to your WiFi settings and join the Electric network. The default password is 'electric'.");
 
             return;
         }
 
         this.state[0] = 'good';
+        this.currentState = 1;
 
         if (!this.connectedToWifi()) {
-            this.currentState = 1;
             this.state[1] = 'bad';
             this.setTip("Enter your home WiFi SSID and password, and press the Apply button");
             return;
