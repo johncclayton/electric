@@ -17,7 +17,8 @@ export class ConfigPage {
     @select() charger$: Observable<IChargerState>;
     @select() ui$: Observable<IUIState>;
 
-    constructor(private platform: Platform,) {
+    constructor(private platform: Platform,
+                private actions: ConfigurationActions) {
 
     }
 
