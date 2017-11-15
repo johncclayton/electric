@@ -165,7 +165,7 @@ export class iChargerService {
     getChargerStatus(): Observable<any> {
         let interval = 1000;
 
-        return Observable.timer(10, interval)
+        return Observable.timer(interval, interval)
             .flatMap(v => {
                 // If disconnected, do a round robbin between various known IP addresses
                 this.tryNextInterfaceIfDisconnected();

@@ -17,6 +17,7 @@ import {Subject} from "rxjs/Subject";
 })
 export class NetworkPage {
     @select() config$: Observable<IConfig>;
+    @select(['config', 'network', 'current_ip_address']) current_ip_address$: Observable<IConfig>;
 
     constructor(public navCtrl: NavController,
                 private ngRedux: NgRedux<IAppState>,

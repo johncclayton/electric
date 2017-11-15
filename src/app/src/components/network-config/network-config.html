@@ -27,7 +27,7 @@
         </ion-item>
 
         <div class="sections">
-            <ion-list-header class="current" color="secondary" no-lines *ngIf="current_ip_address">
+            <ion-list-header class="current" color="secondary" no-lines *ngIf="current_ip_address != null">
                 Current IP Address: {{current_ip_address}}
             </ion-list-header>
             <div *ngFor="let heading of sectionNames()">

@@ -12,11 +12,11 @@
     <!--Follow the yellow brick road-->
 
     <ion-list class="steps">
-        <!--<ion-list-header class="current" color="secondary" no-lines>-->
-            <!--<ion-label>-->
-                <!--IP Address: {{current_ip_address$|async}}-->
-            <!--</ion-label>-->
-        <!--</ion-list-header>-->
+        <ion-list-header class="current" color="secondary" no-lines>
+            <ion-label>
+                IP Address: {{current_ip_address$|async}}
+            </ion-label>
+        </ion-list-header>
 
         <!--<ion-item>{{current_ip_address$|async}}</ion-item>-->
         <ion-item [stepState]="stateFor(0)">
