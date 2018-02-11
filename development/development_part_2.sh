@@ -3,6 +3,14 @@
 source /usr/local/bin/virtualenvwrapper.sh
 cd ~/
 
+ELEC_INSTALL="/home/pirate/electric"
+SRV_CODE="$ELEC_INSTALL/src/server"
+
+echo
+echo "electric will be installed to : $ELEC_INSTALL"
+echo "The server will reside at     : $SRV_CODE"
+echo
+
 PY=".virtualenvs/electric/bin/python"
 if [ ! -e "$PY" ]; then
     echo "$PY does not exist"
@@ -23,7 +31,6 @@ fi
 echo
 echo "Checking for server folder ..."
 
-SRV_CODE="electric/src/server"
 if [ ! -d "$SRV_CODE" ]; then
     echo "Something is wrong. There's no '$SRV_CODE' folder. "
     echo "- Did something break with the git checkout?"
@@ -36,10 +43,11 @@ echo 'cd ~/electric/src/server' >> ~/.virtualenvs/electric/bin/postactivate
 echo
 echo "Checking for requirements files ..."
 
-if [ ! -f "electric/src/server/requirements-worker.txt" ]; then
-    echo "Something is wrong. There's no requirements-worker.txt. This should exist at ~/electric/src/server"
-    echo "You need to run this from the server folder. e.g: cd ~/electric/src/server"
-    echo "Try: cd ~/electric/src/server, and then sh ~/electric/development/development_part_2.sh"
+if [ ! -f "$SRV_CODE/requirements-worker.txt" ]; then
+    echo "Something is wrong. There's no requirements-worker.txt. This should exist at $SRV_CODE"
+    echo "- Did something break with the git checkout?"
+    echo "- Are you on the right branch?"
+    echo "- Is the earth still round?"
     exit
 fi
 
@@ -57,8 +65,8 @@ pip install hidapi
 
 echo
 echo "Installing worker and web packages..."
-pip install -r "~/electric/src/server/requirements-worker.txt"
-pip install -r "~/electric/src/server/requirements-web.txt"
+pip install -r "$SRV_CODE/requirements-worker.txt"
+pip install -r "$SRV_CODE/requirements-web.txt"
 
 echo "***************************************************************"
 echo "Part 2 done, ready to run!"
