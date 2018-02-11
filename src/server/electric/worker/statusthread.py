@@ -4,7 +4,7 @@ import time
 import logging
 
 from electric.worker import cache as cache
-from electric.worker import casefancomntrol
+from electric.worker import casefancontrol
 logger = logging.getLogger('electric.worker.statusthread')
 
 
