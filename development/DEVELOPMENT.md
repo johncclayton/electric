@@ -1,8 +1,10 @@
 # Development
-The development environment can be anything you like, however unit tests can only be run on a Raspberry PI 3 with
+* Useful if you want *really* fast debugging because you can setup remote debugging directly to a connected charger. That means you can code + set breakpoints. Whew! 
+* __Warning__: takes a bit of time to setup, but if you're serious about development, it's so so worth it. Rebuilding and re-deploying docker containers (the alternative) is no fun at all.
+* Unit tests can only be run on a Raspberry PI 3 with
 a charger connected to it.
 
-# The easy way
+# The easy(ish) way
 
 ## Install
 
@@ -67,8 +69,11 @@ That should get you some JSON output.
 
 # The Manual (Hard(er)) Way
 
-Read these instructions all the way through - to the bottom of the file BEFORE beginning - there is useful info everywhere.  I don't recomment this unless you want to experience EVERY single step of the setup.  
+Read these instructions all the way through - to the bottom of the file BEFORE beginning - there is useful info everywhere.  
 
+*I don't recommend this unless you want to experience EVERY single step of the setup.*  
+
+### Privs for device access
 Remember to do the following, so that a user-space program can access the iCharger:
  
     echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"' > /etc/udev/rules.d/10-icharger.rules

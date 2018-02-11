@@ -1,9 +1,8 @@
 #!/bin/bash
 
 source /usr/local/bin/virtualenvwrapper.sh
-mkvirtualenv electric
 
-if [ ! -d "~/.virtualenvs/electric/bin" ]; then
+if [ ! -f "~/.virtualenvs/electric/bin/python" ]; then
     mkvirtualenv electric
 fi
 
@@ -12,7 +11,7 @@ echo "Checking for code ..."
 
 if [ ! -d '~/electric' ]; then
     echo
-    echo "Getting the code... this'll take a bit..."
+    echo "Getting the code... this'll take a bit of time. Go make some tea."
     echo
     cd ~/
     git clone https://github.com/johncclayton/electric.git
@@ -22,8 +21,9 @@ echo
 echo "Checking for server folder ..."
 
 if [ ! -d "~/electric/server" ]; then
-    echo "Something is wrong. There's no '~/electric/server folder. Did something break with the git checkout?"
-    echo "Do you have ~/electric at all?"
+    echo "Something is wrong. There's no '~/electric/server folder. "
+    echo "- Did something break with the git checkout?"
+    echo "- Do you have an '~/electric' folder at all?"
     exit
 fi
 
