@@ -1,8 +1,10 @@
 import RPi.GPIO as GPIO
 import json
+from comms_layer import ChargerCommsManager
 
 class CaseFanControl:
     prefs = { 'control':'off', 'threshold':100, 'C':3, 'F':5, 'gpio':23 }
+    charger = ChargerCommsManager()
 
     def __init__(self):
         self.load_prefs()
@@ -14,7 +16,7 @@ class CaseFanControl:
     def set_fan_state(self, channel_status):
         if prefs['control'] == 'off':
             return
-        system_storage = get_system_storage()
+        system_storage = charger.get_system_storage()
         temp = channel_status.curr_int_temp
         unit = system_storage.temp_unit
         thresh = prefs['threshold']
