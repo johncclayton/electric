@@ -18,7 +18,10 @@ First, you need to install the code and Python packages into their own virtualen
   1. relogin to the pi
   1. run development_part_2.sh
 
-## Docker 
+
+# To run the server
+
+## Docker  
 
 Then, you need to ensure docker isn't running the code at the same time, else you won't be able to start your own apps on the pi (the ports will already be in use)
 
@@ -45,9 +48,6 @@ Note how I did another 'docker ps' above, and nothing is running? That's what yo
 
 *REMEMBER*: Docker will auto-start the containers. So if you reboot, you need to make sure the containers are stopped again.
 
-
-# To run the server
-
 ## Start worker and the webserver
 1. Use whatever IP address / ssh alias, is right for you
     1. ssh pi3 (pi3 is an ssh alias set in my ~/.ssh/config, not covered here)
@@ -62,7 +62,7 @@ Notes:
 You need to have both running.
 
 You should now be able to connect to the pi3 and see some output!
-Try:  http://pi3:5000/status
+Try:  http://pi3:5000/unified
 
 That should get you some JSON output.
 
