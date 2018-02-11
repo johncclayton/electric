@@ -46,7 +46,9 @@ Note how I did another 'docker ps' above, and nothing is running? That's what yo
 *REMEMBER*: Docker will auto-start the containers. So if you reboot, you need to make sure the containers are stopped again.
 
 
-## To run the server
+# To run the server
+
+## Start worker and the webserver
 1. Use whatever IP address / ssh alias, is right for you
     1. ssh pi3 (pi3 is an ssh alias set in my ~/.ssh/config, not covered here)
     1. workon electric
@@ -63,6 +65,17 @@ You should now be able to connect to the pi3 and see some output!
 Try:  http://pi3:5000/status
 
 That should get you some JSON output.
+
+## Auto deploy code from PyCharm -> your pi
+
+- TODO
+- Mention you need to restart the appropriate services 
+
+## Remote Debugging
+
+- TODO
+- SSH setup
+- Pycharm configuration
 
 
 
