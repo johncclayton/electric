@@ -54,8 +54,10 @@ def route_message(charger, method, args):
         return charger.turn_off_logging()
     elif method == "set_beep_properties":
         return charger.set_beep_properties(args["beep_index"], args["enabled"], args["volume"])
-    elif method == "get_case_fan_prefs":
-        return fan_control.prefs
+    elif method == "get_case_fan_info":
+        info = fan_control.prefs;
+        info["running"] = cache.values.get_case_fan_run_state()
+        return info
     elif method == "set_case_fan_prefs":
         fan_control.set_control_onoff(args["control"])
         fan_control.set_temp_threshold(args["threshold"])
