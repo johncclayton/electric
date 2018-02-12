@@ -276,14 +276,8 @@ class PresetOrderResource(Resource):
 
 class CaseFanResource(Resource):
     def get(self):
-        return fan_control.prefs
+        return comms.get_case_fan_prefs()
     
     def put(self, prefs):
-        try:
-            fan_control.set_control_onoff(prefs['control'])
-            fan_control.set_temp_threshold(prefs['threshold'])
-            fan_control.set_temp_tolerance(prefs['tolerance'])
-            fan_control.set_gpio_pin(prefs['gpio'])
-        except ValueError:
-            pass
+        return comms.set_case_fan_prefs(prefs)
         
