@@ -278,6 +278,6 @@ class CaseFanResource(Resource):
     def get(self):
         return comms.get_case_fan_prefs()
     
-    def put(self, prefs):
-        return comms.set_case_fan_prefs(prefs)
-        
+    def put(self):
+        json_dict = request.json
+        return comms.set_case_fan_prefs(json_dict)
