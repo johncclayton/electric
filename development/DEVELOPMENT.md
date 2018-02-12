@@ -108,9 +108,28 @@ I figure you can prob set it up with user/pass as well, I've just never done tha
 
 ## Remote Debugging
 
-- TODO
-- SSH setup
-- Pycharm configuration
+OK. Now __this is the awesome part__.
+
+Here, we get to run the webserver locally, and the worker remotely, but __all from pycharm on your development machine__.  Woo hoo.
+
+You *must* have successfully setup the previous "deployment" part. This is needed to setup a 'Remote SSH Python'.
+
+### Setup the Remote SSH python interpreter
+__This assumes that you have a virtual env setup__
+
+- Add a new Remote
+![New Remote](/docs/images/dev/Add_Remote_VM.png)
+- Choose 'Deployment'
+- Create a Copy
+![Settings](/docs/images/dev/Use_Deploy_Config.png)
+- Change the python interpreter to _/home/pirate/.virtualenvs/electric/bin/python_
+- Click OK
+- Click Apply to return the interpreter screen
+![New VM](/docs/images/dev/New_Remote_VM.png)
+- OK again to confirm and choose this as the VM.
+- Now go BACK into preferences (now that the remote VM is saved), and reselect the default local virtualenv as the default for the project.
+
+
 
 
 
