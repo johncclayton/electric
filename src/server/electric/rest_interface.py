@@ -6,11 +6,9 @@ from flask_restful import Resource
 from zmq_marshall import ZMQCommsManager
 from electric.models import Operation
 from electric.models import ObjectNotFoundException, SystemStorage, Preset, PresetIndex
-from electric.worker.casefancontrol import CaseFanControl
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 comms = ZMQCommsManager()
-fan_control = CaseFanControl()
 
 RETRY_LIMIT = 1
 
