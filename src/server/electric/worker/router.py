@@ -61,6 +61,7 @@ def route_message(charger, method, args):
         fan_control.set_temp_threshold(args["threshold"])
         fan_control.set_temp_tolerance(args["tolerance"])
         fan_control.set_gpio_pin(args["gpio"])
+        return fan_control.save_prefs()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))
 
