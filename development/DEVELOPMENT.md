@@ -130,6 +130,15 @@ __This assumes that you have a virtual env setup__
 - Now go BACK into preferences (now that the remote VM is saved), and reselect the default local virtualenv as the default for the project.
 
 
+# Pycharm Run Configurations
+
+## Worker
+![Worker](/docs/images/dev/Worker.png)
+
+
+## Webserver
+![Webserver](/docs/images/dev/Webserver.png)
+
 
 
 
