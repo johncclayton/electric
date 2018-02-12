@@ -235,3 +235,14 @@ class ZMQCommsManager(object):
         return self._send_message_get_response("measure_ir", {
             "channel": channel_number
         })
+
+    def get_case_fan_prefs(self):
+        return self._send_message_get_response("get_case_fan_prefs")
+    
+    def set_case_fan_prefs(self, control_enable, temp_threshold, temp_tolerance, gpio_pin):
+        return self._send_message_get_response("set_case_fan_prefs", {
+            "control"  : control_enable,
+            "threshold": temp_threshold,
+            "tolerance": temp_tolerance,
+            "gpio"     : gpio_pin
+        })
