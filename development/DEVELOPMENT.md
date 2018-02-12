@@ -134,12 +134,22 @@ __This assumes that you have a virtual env setup__
 
 ## Worker
 ![Worker](/docs/images/dev/Worker.png)
+
+Make sure you also have the env vars set:
+
+   - PYTHONPATH
+
 ![Worker Environment Vars](/docs/images/dev/Worker_Env_Vars.png)
 
 
 ## Webserver
 ![Webserver](/docs/images/dev/Webserver.png)
 
+Make sure you also have the env vars set:
+
+   - ELECTRIC_WORKER (it should be tcp://<some ip>:5001)
+
+![Webserver](/docs/images/dev/Webserver_Env_Vars.png)
 
 
 
