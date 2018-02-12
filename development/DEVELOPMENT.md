@@ -134,6 +134,7 @@ __This assumes that you have a virtual env setup__
 
 ## Worker
 ![Worker](/docs/images/dev/Worker.png)
+![Worker Environment Vars](/docs/images/dev/Worker_Env_Vars.png)
 
 
 ## Webserver
