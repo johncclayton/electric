@@ -1,8 +1,10 @@
 import logging
 import electric.worker.cache as cache
 import electric.testing_control as testing_control
+from electric.worker.casefancontrol import CaseFanControl
 
 logger = logging.getLogger('electric.worker.router')
+fan_control = CaseFanControl()
 
 
 #
