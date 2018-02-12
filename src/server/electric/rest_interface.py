@@ -274,7 +274,7 @@ class PresetOrderResource(Resource):
 
 class CaseFanResource(Resource):
     def get(self):
-        return comms.get_case_fan_prefs()
+        return comms.get_case_fan_info()
     
     def put(self):
         json_dict = request.json
