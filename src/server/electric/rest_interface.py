@@ -6,9 +6,11 @@ from flask_restful import Resource
 from zmq_marshall import ZMQCommsManager
 from electric.models import Operation
 from electric.models import ObjectNotFoundException, SystemStorage, Preset, PresetIndex
+from electric.worker.casefancontrol import CaseFanControl
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 comms = ZMQCommsManager()
+fan_control = CaseFanControl()
 
 RETRY_LIMIT = 1
 
@@ -271,3 +273,17 @@ class PresetOrderResource(Resource):
         json_dict = request.json
         preset_list = PresetIndex(json_dict)
         return comms.save_full_preset_list(preset_list)
+
+class CaseFanResource(Resource):
+    def get(self):
+        return fan_control.prefs
+    
+    def put(self, prefs):
+        try:
+            fan_control.set_control_onoff(prefs['control'])
+            fan_control.set_temp_threshold(prefs['threshold'])
+            fan_control.set_temp_tolerance(prefs['tolerance'])
+            fan_control.set_gpio_pin(prefs['gpio'])
+        except ValueError:
+            pass
+        
