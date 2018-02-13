@@ -87,6 +87,12 @@ sudo mkdir -p "$OPT/wireless"
 sudo chmod 777 "$OPT"
 sudo chmod 777 "$OPT/wireless"
 
+# So that we can access GPIO of the pi3
+sudo groupadd gpio
+sudo adduser pirate gpio
+sudo chown root.gpio /dev/gpiomem
+sudo chmod g+rw /dev/gpiomem
+
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY

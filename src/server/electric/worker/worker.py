@@ -100,7 +100,7 @@ def run_worker():
             logger.warn("Ctrl-C interrupted worker...")
 
 
-if __name__ == "__main__":
+def run_the_worker():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 
     testing_control.values.reset()
@@ -110,3 +110,7 @@ if __name__ == "__main__":
     start_fetcher_thread()
     run_worker()
     stop_fetcher_thread()
+
+
+if __name__ == "__main__":
+    run_the_worker()

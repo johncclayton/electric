@@ -66,4 +66,3 @@ def route_message(charger, method, args):
         return fan_control.save_prefs()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))
-

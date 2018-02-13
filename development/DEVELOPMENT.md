@@ -1,141 +1,155 @@
-***WARNING*** OUT OF DATE AND NEEDS TO BE UPDATED
-
-# development
-The development environment can be anything you like, however unit tests can only be run on a Raspberry PI 3 with
+# Development
+* Useful if you want *really* fast debugging because you can setup remote debugging directly to a connected charger. That means you can code + set breakpoints. Whew! 
+* __Warning__: takes a bit of time to setup, but if you're serious about development, it's so so worth it. Rebuilding and re-deploying docker containers (the alternative) is no fun at all.
+* Unit tests can only be run on a Raspberry PI 3 with
 a charger connected to it.
 
-# coding, debugging - tools
+# The easy(ish) way
 
-## Publishing the electric project the PyPi way
+## Install
 
-Here's the steps - assuming you already have a virtualenv or some Python 2.7 environment ready to go.  You will be
-building the package and distributing it to the live PyPi repository. 
+First, you need to install the code and Python packages into their own virtualenv. This is done for you with some scripts.
 
-    $ sudo apt-get install gcc python-dev cython
-    $ pip install twine
-    $ cd $HOME
-    $ git clone https://github.com/johncclayton/electric.git
-    $ cd electric/src/server
- 
-  
-### Configure publish access to the PyPi repo
-
-    $ cp pypirc_template ~/.pypirc
-    $ <edit the file in your home directory to reflect your account details / pwd>
-  
-### Steps to publish to PyPi 
-
-#### Prepare setup.py and decide on a version
-PyPi doesn't allow overwrites. You cannot publish 1.0.0 and then re-publish 1.0.0. If you want to publish, you need to do so to a new version number.  Check the current
-PyPi repo for the current version first and then increment based on your change.
-
-The distribute.py script uses the current requirements files and configuration to regenerate a suitable setup.py
-which is then run for you.  Twine is assumed as the upload tool; so this must be installed first - which of
-course you have already installed, because you absolutely, definately followed the instructions above.  'Course you did! 
-
-The PyPi repo being published to is: https://pypi.python.org/pypi/electric/
-
-Assuming you want to publish to version 0.7.5 - do this:
-
-    $ cd electric/src/server
-    $ python scripts/distribute -v 0.7.5 -p
-    
-Done.  Now anyone can simply run this to install electric:
-
-    $ (sudo) pip install electric 
-    
-If you are upgrading an existing installation, do the same but add '--upgrade':
-    
-    $ (sudo) pip install electric --upgrade
-
-## How to run the servers 
-When you install electric via PyPi, there are two commands available after installation.
-
-electric-server: this is the web service
-electric-worker: this is the zeromq based worker that connects to the charger
-
-You can start them in any order; by default electric-worker listens on 127.0.0.1:5001 for 
-instructions.  You can change this by setting environment variables; one for the server to use for its outgoing
-connection; one for the worker to use when it binds to its interface.
+  1. Flash with Hypriot OS. https://github.com/hypriot/flash
+  1. log into the pi
+  1. curl -O --location https://raw.githubusercontent.com/johncclayton/electric/master/development/development_part_1.sh
+  1. curl -O --location https://raw.githubusercontent.com/johncclayton/electric/master/development/development_part_2.sh
+  1. run development_part_1.sh
+  1. relogin to the pi
+  1. run development_part_2.sh
 
 
-| Environment Variable | Default Value | Where |
-| ---------------------| :------------ | ------
-| **ELECTRIC_WORKER** | tcp://127.0.0.1:5001 | electric-server  
+# To run the server
 
-Note that on the worker the default is to listen on all interfaces.  
+## Docker  
 
-# setting up a Raspberry Pi for dev using Hypriot OS (the easy way)
+Then, you need to ensure docker isn't running the code at the same time, else you won't be able to start your own apps on the pi (the ports will already be in use)
 
-    1. https://github.com/hypriot/flash
-    1. log into the pi
-    1. curl --location https://raw.githubusercontent.com/johncclayton/electric/master/development_part_1.sh
-    1. curl --location https://raw.githubusercontent.com/johncclayton/electric/master/development_part_2.sh
-    1. run development_part_1.sh
-    1. relogin to the pi
-    1. run development_part_2.sh
 
-# setting up a Raspberry Pi for dev using Hypriot OS
+    $ docker ps
+    CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                          PORTS                    NAMES
+    416c575e29d1        johncclayton/electric-pi-worker:524   "sh -x /www/run_zm..."   6 weeks ago         Restarting (0) 22 seconds ago                            electric-worker
+    b6c6cabb6157        hypriot/rpi-dockerui                  "/dockerui"              6 weeks ago         Up 36 minutes                   0.0.0.0:80->9000/tcp     docker-ui
+    42a4eb18bd74        johncclayton/electric-pi-web:524      "sh -x /www/run_gu..."   6 weeks ago   
 
-Read these instructions all the way through - to the bottom of the file BEFORE beginning - there is useful info everywhere.  
+You need the first part of the container ID's
+So, in my case that's 41 b6 42 ... the first 2 chars of each container ID. Then, it's simple!
 
-Remember to do the following, so that a user-space program can access the iCharger:
- 
-    echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5751", MODE:="0666"' > /etc/udev/rules.d/10-icharger.rules
+    $ $ docker stop 41 b6 42
+      41
+      b6
+      42
+      HypriotOS/armv7: pirate@black-pearl in /opt
+      $ docker ps
+      CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 
-Install Hypriot
 
-1. https://github.com/hypriot/flash
+Note how I did another 'docker ps' above, and nothing is running? That's what you want.
 
-1. get the system updated (this isn't optional btw)
+*REMEMBER*: Docker will auto-start the containers. So if you reboot, you need to make sure the containers are stopped again.
 
-    $ sudo apt-get update 
-    $ sudo apt-get upgrade
-    $ sudo apt-get install gcc python-dev g++
-    
-4. pull down + install pip
-
-    $ wget https://bootstrap.pypa.io/get-pip.py
-    $ sudo python get-pip.py
-    $ sudo pip install virtualenv virtualenvwrapper
-    
-5. adjust your terminal to run virtualenvwrapper on login
-
-    $ echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc 
-    
-6. logout / log back in (so the shell gets the new virtualenvwrapper stuff)
-7. make up a new virtual environment for python
-
-    $ mkvirtualenv electric
-    
-8. auto cd into the electric folder when running 'workon electric'
-
-    $ echo 'cd ~/electric/src/server' >> ~/.virtualenvs/electric/bin/postactivate
-
-9. git clone https://github.com/johncclayton/electric.git
-10. If you are setting up PyCharm, remember to use 'workon electric' to get the right python path.  
-    1. The 'run configuration' will need a source mapping from your dev system to the remote destination 
-   path, for example on my Windows machine this is from d:\src\electric => /home/pirate/electric 
-    1. In the case above I used hypriot, so double-check the Raspberry Pi path when setting up the Remote Python Interpreter
-   and Deployment and Run Configurations.
-   
-11. Then do the dependency installs - very important to get libusb-dev :
-    1. sudo apt-get update
-    1. **hypriot**: sudo apt-get install libudev-dev libusb-1.0-0-dev gcc cython cython-dbg
-    1. **noobs**: sudo apt-get install libudev-dev libusb-1.0-0.dev gcc cython cython-dev
-   
-12. the pull in the required python modules
-    1. workon electric
-    1. pip install hidapi (**NOTE: hidapi takes about 30 minutes to compile + install**. Make sure you have libusb-dev installed first, this is normally taken care of above, step 11)
-    1. pip install -r requirements-worker.txt
-    1. pip install -r requirements-web.txt
-
-## To run the server
+## Start worker and the webserver
 1. Use whatever IP address / ssh alias, is right for you
     1. ssh pi3 (pi3 is an ssh alias set in my ~/.ssh/config, not covered here)
     1. workon electric
     1. sudo ./run_zmq_worker
-    1. Then, in another shell: ./run_flask.sh
+    1. Then, login again in another shell, and: ./run_flask.sh
     
-run_zmq_worker: starts the process that talks directly to the charger.
-run_flask: starts the web server that provides a REST API to the charger.
+Notes:    
+   * run_zmq_worker: starts the process that talks directly to the charger.
+   * run_flask: starts the web server that provides a REST API to the charger.  
+
+You need to have both running.
+
+You should now be able to connect to the pi3 and see some output!
+Try:  http://pi3:5000/unified
+
+That should get you some JSON output.
+
+## Auto deploy code from PyCharm -> your pi
+
+This requires the setup of SSH from your development machine to your Pi3.
+
+Assumptions:
+- This document assumes the use of a Mac with existing SSH keys.
+- After all, you've SSHed into the pi3 already right? You have keys setup? (er, I hope so!)
+
+What you'll need:
+
+- 10m
+- Some patience
+- The SSH keys
+
+Here goes!
+
+We're going to setup what in Pycharm is known as a "Deployment".
+
+  1. Go to 'Deployment'
+  1. Add a new one using the '+' symbol in the lists toolbar
+  1. Select SFTP as the type
+  1. Host is whatever your pi3 IP address is (mine has a DNS entry, pi3. Yours might be .... 192.168.1.10, for example)
+  1. Port is 22
+  1. Root path is __the full path to the server code__, /home/pirate/electric/src/server
+  1. Username: pirate
+  1. Auth type is OpenSSH/Putty
+  1. Private key file: Point to your private key file here
+  1. __TEST THE CONNECTION__ (hit the button). It should work.
+
+![Pycharm Deployment](/docs/images/dev/Pycharm_Deployment.png)
+
+Go to Mappings (next tab)
+
+  1. Just enter the full path of the source
+  1. And the the next two fields are just /
+
+![Mappings](/docs/images/dev/Pycharm_Mappings.png)
+
+I figure you can prob set it up with user/pass as well, I've just never done that... I've always used the pub/private key method.
+
+## Remote Debugging
+
+OK. Now __this is the awesome part__.
+
+Here, we get to run the webserver locally, and the worker remotely, but __all from pycharm on your development machine__.  Woo hoo.
+
+You *must* have successfully setup the previous "deployment" part. This is needed to setup a 'Remote SSH Python'.
+
+### Setup the Remote SSH python interpreter
+__This assumes that you have a virtual env setup__
+
+- Add a new Remote
+![New Remote](/docs/images/dev/Add_Remote_VM.png)
+- Choose 'Deployment'
+- Create a Copy
+![Settings](/docs/images/dev/Use_Deploy_Config.png)
+- Change the python interpreter to _/home/pirate/.virtualenvs/electric/bin/python_
+- Click OK
+- Click Apply to return the interpreter screen
+![New VM](/docs/images/dev/New_Remote_VM.png)
+- OK again to confirm and choose this as the VM.
+- Now go BACK into preferences (now that the remote VM is saved), and reselect the default local virtualenv as the default for the project.
+
+
+# Pycharm Run Configurations
+
+## Worker
+![Worker](/docs/images/dev/Worker.png)
+
+Make sure you also have the env vars set:
+
+   - PYTHONPATH
+
+![Worker Environment Vars](/docs/images/dev/Worker_Env_Vars.png)
+
+
+## Webserver
+![Webserver](/docs/images/dev/Webserver.png)
+
+Make sure you also have the env vars set:
+
+   - ELECTRIC_WORKER (it should be tcp://<some ip>:5001)
+
+![Webserver](/docs/images/dev/Webserver_Env_Vars.png)
+
+
+
