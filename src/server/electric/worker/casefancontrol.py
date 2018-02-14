@@ -33,7 +33,6 @@ class CaseFanControl:
 
     def set_control_onoff(self, onoff):
         self.prefs['control'] = 'on' if onoff == 'on' else 'off'
-        self.save_prefs()
 
     def get_control_onoff(self):
         return self.prefs['control']
@@ -41,7 +40,6 @@ class CaseFanControl:
     def set_temp_threshold(self, temp):
         try:
             self.prefs['threshold'] = int(temp)
-            self.save_prefs()
         except ValueError:
             pass
 
@@ -51,7 +49,6 @@ class CaseFanControl:
     def set_temp_tolerance(self, tolerance):
         try:
             self.prefs['tolerance'] = int(tolerance)
-            self.save_prefs()
         except ValueError:
             pass
 
@@ -61,7 +58,6 @@ class CaseFanControl:
     def set_gpio_pin(self, pin):
         try:
             self.prefs['gpio'] = int(pin)
-            self.save_prefs()
         except ValueError:
             pass
 
@@ -71,6 +67,7 @@ class CaseFanControl:
     def save_prefs(self):
         with open('/opt/prefs/fan_control.json', 'w') as f:
             json.dump(self.prefs, f);
+        return self.prefs
 
     def load_prefs(self):
         try:
