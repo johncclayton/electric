@@ -4,7 +4,7 @@ import time
 import logging
 
 from electric.worker import cache as cache
-from electric.worker import casefancontrol
+from casefancontrol import CaseFanControl
 logger = logging.getLogger('electric.worker.statusthread')
 
 
@@ -31,8 +31,8 @@ class StatusThread(threading.Thread):
 
                     for channel in range(0, device_info.channel_count):
                         channel_status = self.comms.get_channel_status(channel, device_info.device_id)
-                        fan_control.set_fan_state(channel_status)
                         if channel == 0 or channel == 1:
+                            self.fan_control.set_fan_state(channel_status, cache)
                             cache.values.set_channel_status(channel, channel_status)
                         if not self.keep_going:
                             return

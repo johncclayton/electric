@@ -16,7 +16,7 @@ class Cache(object):
         self.channels = [
             ChannelStatus(), ChannelStatus()
         ]
-        self.case_fan_running = False
+        self.case_fan_running = False
         logger.info("cache values have been reset")
 
     def get_device_info(self):
