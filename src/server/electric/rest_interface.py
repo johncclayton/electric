@@ -56,10 +56,12 @@ class StatusResource(Resource):
 class UnifiedResource(Resource):
     def get(self):
         device_info = comms.get_device_info()
+        case_fan_info = comms.get_case_fan_info()
 
         obj = {}
         obj.update(connection_state_dict())
         obj['status'] = device_info.to_primitive()
+        obj['case_fan_info'] = case_fan_info
 
         # Yeh, very meh. These are currently serialized by DeviceInfo.
         # I want to (for now) keep them for /status, but I don't want them in my /unified response.
