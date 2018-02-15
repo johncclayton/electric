@@ -23,23 +23,23 @@ class CaseFanControl:
         tolerance = self.prefs['tolerance']
         running = cache.values.get_case_fan_run_state()
         if not running and temp >= thresh:
-            logger.info('Turning case fan on')
+            logger.info('Threshold: {0}, Tolerance: {1}, Charger Temp: {2}, Turning case fan on'.format(thresh, tolerance, temp))
             GPIO.output(self.fan_pin, GPIO.HIGH)
             cache.values.set_case_fan_run_state(True)
         elif running and temp <= thresh - tolerance:
-            logger.info('Turning case fan off')
+            logger.info('Threshold: {0}, Tolerance: {1}, Charger Temp: {2}, Turning case fan off'.format(thresh, tolerance, temp))
             GPIO.output(self.fan_pin, GPIO.LOW)
             cache.values.set_case_fan_run_state(False)
 
     def set_control_onoff(self, onoff):
-        self.prefs['control'] = 'on' if onoff == 'on' else 'off'
+        CaseFanControl.prefs['control'] = 'on' if onoff == 'on' else 'off'
 
     def get_control_onoff(self):
         return self.prefs['control']
 
     def set_temp_threshold(self, temp):
         try:
-            self.prefs['threshold'] = int(temp)
+            CaseFanControl.prefs['threshold'] = int(temp)
         except ValueError:
             pass
 
@@ -48,7 +48,7 @@ class CaseFanControl:
 
     def set_temp_tolerance(self, tolerance):
         try:
-            self.prefs['tolerance'] = int(tolerance)
+            CaseFanControl.prefs['tolerance'] = int(tolerance)
         except ValueError:
             pass
 
@@ -57,7 +57,7 @@ class CaseFanControl:
 
     def set_gpio_pin(self, pin):
         try:
-            self.prefs['gpio'] = int(pin)
+            CaseFanControl.prefs['gpio'] = int(pin)
         except ValueError:
             pass
 
@@ -72,6 +72,6 @@ class CaseFanControl:
     def load_prefs(self):
         try:
             with open('/opt/prefs/fan_control.json', 'r') as f:
-                self.prefs = json.load(f)
+                CaseFanControl.prefs = json.load(f)
         except EnvironmentError:
             pass
