@@ -59,10 +59,15 @@ def route_message(charger, method, args):
         info["running"] = cache.values.get_case_fan_run_state()
         return info
     elif method == "set_case_fan_prefs":
-        fan_control.set_control_onoff(args["control"])
-        fan_control.set_temp_threshold(args["threshold"])
-        fan_control.set_temp_tolerance(args["tolerance"])
-        fan_control.set_gpio_pin(args["gpio"])
+        for k in args:
+            if k == "control":
+                fan_control.set_control_onoff(args["control"])
+            if k == "threshold":
+                fan_control.set_temp_threshold(args["threshold"])
+            if k == "tolerance":
+                fan_control.set_temp_tolerance(args["tolerance"])
+            if k == "gpio":
+                fan_control.set_gpio_pin(args["gpio"])
         return fan_control.save_prefs()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))
