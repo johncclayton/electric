@@ -64,8 +64,8 @@ def route_message(charger, method, args):
                 fan_control.set_control_onoff(args["control"])
             if k == "threshold":
                 fan_control.set_temp_threshold(args["threshold"])
-            if k == "tolerance":
-                fan_control.set_temp_tolerance(args["tolerance"])
+            if k == "hysteresis":
+                fan_control.set_temp_hysteresis(args["hysteresis"])
             if k == "gpio":
                 fan_control.set_gpio_pin(args["gpio"])
         return fan_control.save_prefs()
