@@ -280,8 +280,5 @@ class CaseFanResource(Resource):
     
     def put(self):
         json_dict = request.json
-        try:
-            return comms.set_case_fan_prefs(json_dict["control"], json_dict["threshold"], json_dict["tolerance"], json_dict["gpio"])
-        except:
-            raise
+        return comms.set_case_fan_prefs(json_dict)
     
