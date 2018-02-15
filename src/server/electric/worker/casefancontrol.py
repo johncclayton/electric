@@ -52,7 +52,7 @@ class CaseFanControl:
         except ValueError:
             pass
 
-    def get_temp_ hysteresis(self):
+    def get_temp_hysteresis(self):
         return self.prefs['hysteresis']
 
     def set_gpio_pin(self, pin):
