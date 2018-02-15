@@ -6,7 +6,7 @@ from cache import Cache
 logger = logging.getLogger('electric.worker.casefancontrol')
 
 class CaseFanControl:
-    prefs = { 'control':'on', 'threshold':37, 'tolerance':3, 'gpio':23 }
+    prefs = { 'control':'on', 'threshold':37, 'hysteresis':3, 'gpio':23 }
 
     def __init__(self):
         self.load_prefs()
@@ -20,14 +20,14 @@ class CaseFanControl:
             return
         temp = channel_status.curr_int_temp
         thresh = self.prefs['threshold']
-        tolerance = self.prefs['tolerance']
+        hyst = self.prefs['hysteresis']
         running = cache.values.get_case_fan_run_state()
         if not running and temp >= thresh:
-            logger.info('Threshold: {0}, Tolerance: {1}, Charger Temp: {2}, Turning case fan on'.format(thresh, tolerance, temp))
+            logger.info('Threshold: {0}, Hysteresis: {1}, Charger Temp: {2}, Turning case fan on'.format(thresh, hyst, temp))
             GPIO.output(self.fan_pin, GPIO.HIGH)
             cache.values.set_case_fan_run_state(True)
-        elif running and temp <= thresh - tolerance:
-            logger.info('Threshold: {0}, Tolerance: {1}, Charger Temp: {2}, Turning case fan off'.format(thresh, tolerance, temp))
+        elif running and temp <= thresh - hyst:
+            logger.info('Threshold: {0}, Hysteresis: {1}, Charger Temp: {2}, Turning case fan off'.format(thresh, hyst, temp))
             GPIO.output(self.fan_pin, GPIO.LOW)
             cache.values.set_case_fan_run_state(False)
 
@@ -46,14 +46,14 @@ class CaseFanControl:
     def get_temp_threshold(self):
         return self.prefs['threshold']
 
-    def set_temp_tolerance(self, tolerance):
+    def set_temp_hysteresis(self, hysteresis):
         try:
-            CaseFanControl.prefs['tolerance'] = int(tolerance)
+            CaseFanControl.prefs['hysteresis'] = int(hysteresis)
         except ValueError:
             pass
 
-    def get_temp_tolerance(self):
-        return self.prefs['tolerance']
+    def get_temp_ hysteresis(self):
+        return self.prefs['hysteresis']
 
     def set_gpio_pin(self, pin):
         try:
