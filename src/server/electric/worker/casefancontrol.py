@@ -6,10 +6,11 @@ from cache import Cache
 logger = logging.getLogger('electric.worker.casefancontrol')
 
 class CaseFanControl:
-    prefs = { 'control':'on', 'threshold':37, 'hysteresis':3, 'gpio':23 }
+    prefs = { 'control':'off', 'threshold':37, 'hysteresis':3, 'gpio':23 }
 
     def __init__(self):
         self.load_prefs()
+        self.save_prefs()
         self.running = False
         self.fan_pin = self.prefs['gpio'];
         GPIO.setmode(GPIO.BCM)
