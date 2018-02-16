@@ -12,7 +12,6 @@ RUN apk update \
     && pip install --upgrade setuptools \
     && pip install --upgrade pip \
     && pip install hidapi \
-    && pip install rpi.gpio \
     && pip install -r requirements-worker.txt \
     && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/old-setup /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
     && chmod +x /www/run_zmq_worker.sh \
