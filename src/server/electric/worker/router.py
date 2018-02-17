@@ -55,7 +55,7 @@ def route_message(charger, method, args):
     elif method == "set_beep_properties":
         return charger.set_beep_properties(args["beep_index"], args["enabled"], args["volume"])
     elif method == "get_case_fan_info":
-        info = fan_control.prefs;
+        info = fan_control.prefs.copy()
         info["running"] = cache.values.get_case_fan_run_state()
         return info
     elif method == "set_case_fan_prefs":
