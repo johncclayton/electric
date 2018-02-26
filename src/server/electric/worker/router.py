@@ -1,6 +1,7 @@
 import logging
-import electric.worker.cache as cache
+
 import electric.testing_control as testing_control
+import electric.worker.cache as cache
 
 logger = logging.getLogger('electric.worker.router')
 
@@ -12,6 +13,8 @@ logger = logging.getLogger('electric.worker.router')
 
 
 def route_message(charger, method, args):
+    fan_controller = cache.values.get_case_fan_controller()
+
     if method == "get_device_info":
         if testing_control.values.bypass_caches:
             return charger.get_device_info()
@@ -52,5 +55,15 @@ def route_message(charger, method, args):
         return charger.turn_off_logging()
     elif method == "set_beep_properties":
         return charger.set_beep_properties(args["beep_index"], args["enabled"], args["volume"])
+    elif method == "get_case_fan_info":
+        # This returns a CaseFan object (the state of the case fan controller)
+        return fan_controller.fan
+    elif method == "set_case_fan_prefs":
+        # Updates the state of the fan controller
+        fan_controller.set_control_onoff(args.control)
+        fan_controller.set_temp_threshold(args.threshold)
+        fan_controller.set_temp_hysteresis(args.hysteresis)
+        fan_controller.set_gpio_pin(args.gpio)
+        return fan_controller.save_prefs()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))

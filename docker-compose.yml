@@ -37,6 +37,7 @@ services:
     privileged: true
     volumes:
       - /dev/bus/usb:/dev/bus/usb
+      - /opt:/opt
 
     restart: always
 
