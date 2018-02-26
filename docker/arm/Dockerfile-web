@@ -1,24 +1,11 @@
-FROM hypriot/rpi-alpine:3.6
+FROM johnclayton/electric-pi-python:latest
 
-LABEL maintainer="Neil Clayton, John Clayton" \
-    version="1.0"
+LABEL maintainer="Neil Clayton, John Clayton" version="1.0"
 
 VOLUME /www
-
 WORKDIR /www
+
 ENV ELECTRIC_WORKER=tcp://127.0.0.1:5001
-
-COPY ./src/server/ /www
-ENV MAKEFLAGS="-j 4"
-
-RUN apk update \
-    && apk add bash zeromq py-pip python-dev linux-headers musl-dev gcc g++ \
-    && pip install --upgrade setuptools \
-    && pip install --upgrade pip \
-    && pip install -r requirements-web.txt \
-    && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/old-setup /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
-    && chmod +x /www/run_gunicorn.sh \
-    && apk del gcc g++ musl-dev linux-headers python-dev --purge
 
 EXPOSE 5000
 

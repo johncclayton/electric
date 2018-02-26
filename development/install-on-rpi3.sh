@@ -18,7 +18,7 @@ set -e
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/docker-compose.yml
 
 # get the script to fetch the latest build # from travis
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/get-latest-build-number.py
+curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
 
 # and the udev rules?
 if [ ! -d "/etc/udev/rules.d/10-icharger.rules" ]; then

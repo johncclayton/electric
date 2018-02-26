@@ -1,1 +1,8 @@
 src/app
+development
+docs
+firmware
+src/server/cplusplus
+.git
+.idea
+

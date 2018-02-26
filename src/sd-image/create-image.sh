@@ -65,7 +65,7 @@ if [ ! -f "$QEMU_ARM" ]; then
 fi
 
 # get the script to fetch the latest build # from travis
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/get-latest-build-number.py
+curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
 VERSION_NUM=`python get-latest-build-number.py`
 echo "Latest version is: $VERSION_NUM"
 
