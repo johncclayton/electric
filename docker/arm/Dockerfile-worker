@@ -4,6 +4,8 @@ LABEL maintainer="Neil Clayton, John Clayton" \
 
 VOLUME /www
 WORKDIR /www
+VOLUME /opt/prefs
+
 COPY ./src/server/ /www
 ENV ELECTRIC_WORKER_LISTEN=tcp://0.0.0.0:5001
 
