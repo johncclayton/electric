@@ -113,6 +113,7 @@ sudo cp ../../docker-compose.yml "$OPT"
 
 sudo cp scripts/bootstrap_docker_images.sh "$OPT"
 sudo cp scripts/ensure_gpio_writable.sh "$OPT"
+sudo cp scripts/upgrade.sh "$OPT"
 sudo cp compose-command.sh "$OPT"
 
 sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x

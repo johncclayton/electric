@@ -2,15 +2,10 @@ sudo: required
 services:
 - docker
 language: bash
-
 jobs:
   include:
     - stage: base
-      script:
-        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        - docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
-        - docker build -f docker/arm/Dockerfile-base -t johncclayton/electric-pi-base .
-        - docker push johncclayton/electric-pi-base
+      script: ./travis_build_base_image.sh
 
     - stage: python
       script:
@@ -20,16 +15,8 @@ jobs:
         - docker push johncclayton/electric-pi-python
 
     - stage: build images
-      env:
-        - SERVICE=web
-        - SERVICE=worker
-      script:
-        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        - docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
-        - TAG=$TRAVIS_BUILD_NUMBER
-        - docker build -f docker/arm/Dockerfile-$SERVICE -t johncclayton/electric-pi-$SERVICE .
-        - docker tag johncclayton/electric-pi-$SERVICE johncclayton/electric-pi-$SERVICE:$TAG
-        - docker push johncclayton/electric-pi-$SERVICE
+      script: SERVICE=web ./travis_build_docker_image.sh
+      script: SERVICE=worker ./travis_build_docker_image.sh
 
     - stage: build SD image
       env:
