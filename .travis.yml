@@ -7,28 +7,28 @@ jobs:
   include:
     - stage: base
       script:
-        docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
-        docker build -f docker/arm/Dockerfile-base -t johncclayton/electric-pi-base .
-        docker push johncclayton/electric-pi-base
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        - docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
+        - docker build -f docker/arm/Dockerfile-base -t johncclayton/electric-pi-base .
+        - docker push johncclayton/electric-pi-base
 
     - stage: python
       script:
-        docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
-        docker build -f docker/arm/Dockerfile-python -t johncclayton/electric-pi-python .
-        docker push johncclayton/electric-pi-python
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        - docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
+        - docker build -f docker/arm/Dockerfile-python -t johncclayton/electric-pi-python .
+        - docker push johncclayton/electric-pi-python
 
     - stage: build images
       env:
         - SERVICE=web
         - SERVICE=worker
       script:
-        docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
-        TAG=$TRAVIS_BUILD_NUMBER
-        docker tag johncclayton/electric-pi-$SERVICE johncclayton/electric-pi-$SERVICE:$TAG
-        docker push johncclayton/electric-pi-$SERVICE
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        - docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
+        - TAG=$TRAVIS_BUILD_NUMBER
+        - docker tag johncclayton/electric-pi-$SERVICE johncclayton/electric-pi-$SERVICE:$TAG
+        - docker push johncclayton/electric-pi-$SERVICE
 
     - stage: build SD image
       env:
