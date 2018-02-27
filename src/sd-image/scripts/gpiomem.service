@@ -1,6 +1,6 @@
 [Unit]
 Description=Ensure GPIO is writable
-Before=electric-pi.service
+Before=electric-pi.service,docker.service
 
 [Service]
 Type=oneshot
