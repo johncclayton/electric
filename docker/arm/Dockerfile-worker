@@ -1,4 +1,4 @@
-FROM johnclayton/electric-pi-python:latest
+FROM johncclayton/electric-pi-python:latest
 
 LABEL maintainer="Neil Clayton, John Clayton" version="1.0"
 
