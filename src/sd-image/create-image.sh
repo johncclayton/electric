@@ -64,9 +64,10 @@ if [ ! -f "$QEMU_ARM" ]; then
 	exit 6
 fi
 
-# get the script to fetch the latest build # from travis
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
-VERSION_NUM=`python get-latest-build-number.py`
+# We're building. Now. We DONT want to use the 'latest build from travis', we want to use the one we just pushed!
+VERSION_NUM="$TRAVIS_BUILD_NUMBER"
+#curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
+#VERSION_NUM=`python get-latest-build-number.py`
 echo "Latest version is: $VERSION_NUM"
 
 # pull docker image and save it as a file...
