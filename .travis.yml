@@ -22,4 +22,5 @@ jobs:
     - stage: build SD image
       env:
         - YAY=amazeballs
+        - TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
       script: ./travis_webhook_to_build_sd_image.sh
