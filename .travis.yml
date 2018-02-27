@@ -16,6 +16,7 @@ jobs:
 
     - stage: build images
       script: SERVICE=web ./travis_build_docker_image.sh
+    -
       script: SERVICE=worker ./travis_build_docker_image.sh
 
     - stage: build SD image
