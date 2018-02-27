@@ -2,32 +2,34 @@ sudo: required
 services:
 - docker
 language: bash
-env:
-- SERVICE=base
-- SERVICE=python
-- SERVICE=web
-- SERVICE=worker
-script:
-# prepare qemu
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
-# build image
-- docker build -f docker/arm/Dockerfile-$SERVICE -t johncclayton/electric-pi-$SERVICE .
-# push image
-- >
-  if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
-    TAG=$TRAVIS_BUILD_NUMBER
-
-    if [ "$SERVICE" == "base" ] || [ "$SERVICE" == "python" ]; then
-      docker push johncclayton/electric-pi-$SERVICE
-    else
-      docker tag johncclayton/electric-pi-$SERVICE johncclayton/electric-pi-$SERVICE:$TAG
-      docker push johncclayton/electric-pi-$SERVICE
-    fi
-  fi
 
 jobs:
-  include: 
+  include:
+    - stage: base
+      script:
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
+        docker build -f docker/arm/Dockerfile-base -t johncclayton/electric-pi-base .
+        docker push johncclayton/electric-pi-base
+
+    - stage: python
+      script:
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
+        docker build -f docker/arm/Dockerfile-python -t johncclayton/electric-pi-python .
+        docker push johncclayton/electric-pi-python
+
+    - stage: build images
+      env:
+        - SERVICE=web
+        - SERVICE=worker
+      script:
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker login -u="$DOCKER_JC_USER" -p="$DOCKER_JC_PASS"
+        TAG=$TRAVIS_BUILD_NUMBER
+        docker tag johncclayton/electric-pi-$SERVICE johncclayton/electric-pi-$SERVICE:$TAG
+        docker push johncclayton/electric-pi-$SERVICE
+
     - stage: build SD image
       env:
         - YAY=amazeballs
