@@ -3,9 +3,9 @@ import logging
 from flask import request
 from flask_restful import Resource
 
-from zmq_marshall import ZMQCommsManager
 from electric.models import Operation, CaseFan
-from electric.models import ObjectNotFoundException, SystemStorage, Preset, PresetIndex
+from electric.models import SystemStorage, Preset, PresetIndex
+from zmq_marshall import ZMQCommsManager
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 comms = ZMQCommsManager()
@@ -56,12 +56,10 @@ class StatusResource(Resource):
 class UnifiedResource(Resource):
     def get(self):
         device_info = comms.get_device_info()
-        case_fan_info = comms.get_case_fan_info()
 
         obj = {}
         obj.update(connection_state_dict())
         obj['status'] = device_info.to_primitive()
-        obj['case_fan_info'] = case_fan_info.to_primitive()
 
         # Yeh, very meh. These are currently serialized by DeviceInfo.
         # I want to (for now) keep them for /status, but I don't want them in my /unified response.
@@ -195,14 +193,16 @@ class StopResource(ControlRegisterResource):
 class SystemStorageResource(Resource):
     def get(self):
         syst = comms.get_system_storage()
-        obj = syst.to_primitive()
-        obj.update(connection_state_dict())
+
+        system_json = syst.to_primitive()
+        system_json.update(connection_state_dict())
+
         capabilities = {
             'case_fan': True
         }
-        obj['capabilities'] = capabilities
+        system_json['capabilities'] = capabilities
 
-        return obj
+        return system_json
 
     def put(self):
         json_dict = request.json
