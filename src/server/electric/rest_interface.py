@@ -197,6 +197,10 @@ class SystemStorageResource(Resource):
         syst = comms.get_system_storage()
         obj = syst.to_primitive()
         obj.update(connection_state_dict())
+        capabilities = {
+            'case_fan': True
+        }
+        obj['capabilities'] = capabilities
 
         return obj
 
