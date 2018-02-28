@@ -35,6 +35,31 @@
         </ion-range>
     </ion-item>
 </ion-list>
+
+<ion-list>
+    <ion-list-header color="light">Fan Control</ion-list-header>
+    <ion-item>
+        <ion-label>Enabled</ion-label>
+        <ion-toggle [disabled]="!can_do_case_fan" [(ngModel)]="case_fan.control"></ion-toggle>
+    </ion-item>
+    <temp-range label="Turn fans On"
+                [disabled]="!case_fan.control"
+                min=10 max=50
+                [metric]="charger.isCelsius"
+                [(value)]="case_fan.threshold"></temp-range>
+
+    <ion-item>
+        <ion-label>Hysteresis ({{case_fan.hysteresis}} deg)</ion-label>
+        <ion-range
+                [disabled]="!case_fan.control"
+                min=0 max=10
+                [(ngModel)]="case_fan.hysteresis">
+            <ion-label range-left>0</ion-label>
+            <ion-label range-right>10</ion-label>
+        </ion-range>
+    </ion-item>
+</ion-list>
+
 <ion-list>
     <ion-list-header color="light">LCD Screen</ion-list-header>
     <ion-item>

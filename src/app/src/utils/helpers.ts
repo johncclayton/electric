@@ -13,3 +13,29 @@ export function propertiesThatHaveBeenModified(obj1, obj2): {} {
         return result;
     }, {});
 }
+
+export function compareTwoMaps(new_data, old_data) {
+    let result = [];
+
+    return _.reduce(new_data, (result, value, key) => {
+        if (old_data.hasOwnProperty(key)) {
+            if (_.isEqual(value, old_data[key])) {
+                return result;
+            } else {
+                if (typeof (new_data[key]) != typeof ({}) || typeof (old_data[key]) != typeof ({})) {
+                    //dead end.
+                    result.push(key);
+                    return result;
+                } else {
+                    let deeper = compareTwoMaps(new_data[key], old_data[key]);
+                    return result.concat(_.map(deeper, (sub_path) => {
+                        return key + "." + sub_path;
+                    }));
+                }
+            }
+        } else {
+            result.push(key);
+            return result;
+        }
+    }, result);
+}

@@ -1,14 +1,14 @@
-import {Injectable} from "@angular/core";
+import {EventEmitter, Injectable} from "@angular/core";
 import {Headers, Http, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
 import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";
-import {System} from "../models/system";
+import {IChargerCaseFan, System} from "../models/system";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
-import {IConfig, INetwork} from "../models/state/reducers/configuration";
+import {IConfig} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
 import {Vibration} from "@ionic-native/vibration";
 import {Subject} from "rxjs/Subject";
@@ -16,7 +16,8 @@ import {LocalNotifications} from "@ionic-native/local-notifications";
 import {IUIState} from "../models/state/reducers/ui";
 import {ConfigurationActions} from "../models/state/actions/configuration";
 import {ElectricNetworkService} from "./network.service";
-import {observable} from "rxjs/symbol/observable";
+import {SystemActions} from "../models/state/actions/system";
+import {AppModule} from "../app/app.module";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -50,7 +51,10 @@ ChargerMetadata[ChargerType.iCharger4010Duo] = {
 @Injectable()
 export class iChargerService {
     autoStopSubscriptions: any[] = [];
+    serverReconnection: EventEmitter<any> = new EventEmitter();
 
+    // Lazily instantiated via direct injector, not constructor. See getSystemActions()
+    private systemActions: SystemActions;
     private static device_id: number;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
@@ -91,6 +95,7 @@ export class iChargerService {
     public startPollingCharger() {
         console.log("Start polling for charger state...");
         this.uiActions.setConfiguringNetwork(false);
+
         this.getChargerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
@@ -111,7 +116,6 @@ export class iChargerService {
                 console.log("Stopped polling for network/server status")
             });
     }
-
 
     getConfig(): IConfig {
         return this.ngRedux.getState().config;
@@ -163,15 +167,19 @@ export class iChargerService {
     }
 
     getChargerStatus(): Observable<any> {
-        let interval = 1000;
+        let interval = 1100;
 
-        return Observable.timer(interval, interval)
+        return Observable.timer(interval * 2, interval)
             .flatMap(v => {
                 // If disconnected, do a round robbin between various known IP addresses
                 this.tryNextInterfaceIfDisconnected();
 
                 let url = this.getChargerURL("/unified");
-                return this.http.get(url);
+                let state = this.ngRedux.getState();
+                if (state.ui.disconnected) {
+                    console.log(`Trying ${url}`);
+                }
+                return this.http.get(url)
             }).map(r => {
                 let state = this.ngRedux.getState();
 
@@ -181,6 +189,7 @@ export class iChargerService {
 
                 if (state.ui.disconnected) {
                     this.uiActions.serverReconnected();
+                    this.serverReconnection.emit();
                 }
             })
             .catch(error => {
@@ -192,6 +201,46 @@ export class iChargerService {
             })
             .retry();
     }
+
+    getSystemActions(): SystemActions {
+        if (this.systemActions == null) {
+            this.systemActions = AppModule.injector.get(SystemActions);
+        }
+        return this.systemActions;
+    }
+
+    getCaseFan(): Observable<IChargerCaseFan> {
+        let url = this.getChargerURL("/casefan");
+        return Observable.create(obs => {
+            let http = this.http.get(url);
+            http.subscribe(r => {
+                // Map this into the system 'case fan' state.
+                this.getSystemActions().updateCaseFan(r.json());
+                obs.next(r.json());
+                obs.complete();
+            })
+        });
+    }
+
+    saveCaseFan(case_fan: IChargerCaseFan): Observable<IChargerCaseFan> {
+        let headers = new Headers({'Content-Type': 'application/json'});
+        let options = new RequestOptions({headers: headers});
+        let operationURL = this.getChargerURL("/casefan");
+        return Observable.create((observable) => {
+            this.http.put(operationURL, case_fan, options).subscribe((resp) => {
+                if (!resp.ok) {
+                    observable.error(resp);
+                } else {
+                    observable.next(case_fan);
+                    observable.complete();
+                }
+            }, error => {
+                observable.error(error);
+            });
+        });
+
+    }
+
 
     public static getHostNameUsingConfigAndState(config: IConfig, ui: IUIState, port: number) {
         // If on index 0, use private WLAN address
@@ -415,6 +464,7 @@ export class iChargerService {
         let headers = new Headers({'Content-Type': 'application/json'});
         let options = new RequestOptions({headers: headers});
         let operationURL = this.getChargerURL("/system");
+
         return Observable.create((observable) => {
             this.http.put(operationURL, system.json(), options).subscribe((resp) => {
                 if (!resp.ok) {
@@ -624,7 +674,7 @@ export class iChargerService {
         if (state.ui.disconnected) {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
-            console.log("Switch to connection index: ", config.lastConnectionIndex);
+            console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.getHostName()}`);
         }
     }
 }

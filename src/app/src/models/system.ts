@@ -1,5 +1,13 @@
 import {ENV} from '@app/env'
 
+export interface IChargerCaseFan {
+    control: boolean;
+    running: boolean;
+    threshold: number;
+    hysteresis: number;
+    gpio: number;
+}
+
 export class System {
     public static CELSIUS: string = "°C";
     public static FARENHEIGHT: string = "°F";
@@ -12,8 +20,11 @@ export class System {
     }
 
     constructor(private data: {}) {
-        console.error("System object created");
-        console.error("Env is: " + ENV.ionicEnvName + ", NODE_ENV is: ");
+        console.error(`System object created.  Environment: ${ENV.ionicEnvName}`);
+        if (this.has_capabilities) {
+            let keys = Object.keys(this.data['capabilities']);
+            console.error(`System Capabilities: ${keys.join(",")}`);
+        }
     }
 
     static get environment(): any {
@@ -40,11 +51,31 @@ export class System {
     }
 
     json() {
-        return JSON.stringify(this.data);
+        // Exclude the 'capabilities' as these cannot be saved
+        let copied_dict = {...this.data};
+        if(this.has_capabilities) {
+            delete copied_dict['capabilities'];
+        }
+        return JSON.stringify(copied_dict);
     }
 
     get data_structure() {
         return this.data;
+    }
+
+    get has_capabilities(): boolean {
+        return 'capabilities' in this.data;
+    }
+
+    get has_case_fan() : boolean {
+        return this.has_capability('case_fan')
+    }
+
+    public has_capability(capability_name: string): boolean {
+        if (this.has_capabilities) {
+            return capability_name in this.data['capabilities'];
+        }
+        return false;
     }
 
     get isCelsius(): boolean {

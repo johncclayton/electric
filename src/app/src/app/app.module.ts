@@ -1,6 +1,6 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
-import {ErrorHandler, NgModule} from "@angular/core";
+import {ErrorHandler, Injector, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
@@ -134,9 +134,13 @@ let config = {
     ]
 })
 export class AppModule {
+    static injector: Injector;
+
     constructor(ngRedux: NgRedux<IAppState>,
+                injector: Injector,
                 configEpic: ConfigurationEpics,
                 devTools: DevToolsExtension) {
         configureAppStateStore(ngRedux, configEpic, devTools);
+        AppModule.injector = injector;
     }
 }
