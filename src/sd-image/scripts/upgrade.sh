@@ -17,11 +17,17 @@ set -e
 # go get the docker-compose.yml file
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/docker-compose.yml
 
-# get the script to fetch the latest build # from travis
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
+VERSION_NUM="$1"
 
-VERSION_NUM=`python get-latest-build-number.py`
-echo "Latest version is: $VERSION_NUM"
+if [ "${VERSION_NUM}x" = "x" ]; then
+    # get the script to fetch the latest build # from travis
+    curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
+
+    VERSION_NUM=`python get-latest-build-number.py`
+    echo "Latest version is: $VERSION_NUM"
+else
+    echo "Using specific version $VERSION_NUM"
+fi
 
 if [ -f 'LAST_DEPLOY' ]; then
     LAST_DEPLOY=`cat LAST_DEPLOY`
@@ -29,8 +35,9 @@ if [ -f 'LAST_DEPLOY' ]; then
         echo "Up to date. No need to redeploy"
         exit 0
     fi
-    echo "Deployed is version $LAST_DEPLOY... going to upgrade"
+    echo "Deployed is version: $LAST_DEPLOY... going to stop that and use version: $VERSION_NUM"
 fi
+
 
 # If we already have containers, we need to remove them.
 shutdown_existing docker-ui
