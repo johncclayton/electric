@@ -13,7 +13,7 @@ class CaseFanControl:
         self.save_prefs()
         self.running = False
         self.fan_pin = self.prefs['gpio'];
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.fan_pin, GPIO.OUT, initial = GPIO.LOW)
 
     def set_fan_state(self, channel_status, cache):
