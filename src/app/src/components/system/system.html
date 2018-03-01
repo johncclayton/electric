@@ -37,7 +37,7 @@
 </ion-list>
 
 <ion-list>
-    <ion-list-header color="light">Fan Control</ion-list-header>
+    <ion-list-header color="light">Case Fan Control<ion-badge *ngIf="!can_do_case_fan" item-end color="warning">Upgrade your pi3 SD Card</ion-badge></ion-list-header>
     <ion-item>
         <ion-label>Enabled</ion-label>
         <ion-toggle [disabled]="!can_do_case_fan" [(ngModel)]="case_fan.control"></ion-toggle>

@@ -1,4 +1,4 @@
-##Version 1.0.2
+##Version 1.0.4 (the case of the fan)
 
 
 ####Server
@@ -15,5 +15,5 @@
 - Client has new UI for case fan control
 - Improved initial network detection a little (it's a little bit quicker)
 
-##Version 1.0.0
+##Version 1.0.3 (first public)
 - Initial release

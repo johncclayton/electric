@@ -286,5 +286,12 @@ class CaseFanResource(Resource):
 
     def put(self):
         json_dict = request.json
+
+        # Overwrite existing with new values. That way we can specify partial JSON
+        # The key 'running' is ignored and will never be acted upon
+
+        existing_values = comms.get_device_info().to_native()
+        existing_values.update(json_dict)
+
         case_fan = CaseFan(json_dict)
         return comms.set_case_fan_prefs(case_fan).to_native()

@@ -178,19 +178,19 @@ class WriteDataSegment(object):
 
 class CaseFan(Model):
     # Whether or not we should be trying to control the fan at all
-    control = BooleanType(required=True, default=False)
+    control = BooleanType(required=False, default=False)
 
     # True if the fan is currently running (GPIO pin is high)
     running = BooleanType(default=False, required=False)
 
     # Temp you want fan to kick in at
-    threshold = IntType(required=True, min_value=-30, max_value=80, default=37)
+    threshold = IntType(required=False, min_value=-30, max_value=80, default=37)
 
     # How much lag do you want, in deg C?
-    hysteresis = IntType(required=True, min_value=0, max_value=20, default=3)
+    hysteresis = IntType(required=False, min_value=0, max_value=20, default=3)
 
     # Which pin on the board will control the fan circuit?
-    gpio = IntType(required=True, min_value=1, max_value=40, default=23)
+    gpio = IntType(required=False, min_value=1, max_value=40, default=23)
 
 
 class DeviceInfoStatus(Model):
