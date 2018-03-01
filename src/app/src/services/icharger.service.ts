@@ -211,9 +211,9 @@ export class iChargerService {
 
     getCaseFan(): Observable<IChargerCaseFan> {
         let url = this.getChargerURL("/casefan");
+
         return Observable.create(obs => {
-            let http = this.http.get(url);
-            http.subscribe(r => {
+            this.http.get(url).subscribe(r => {
                 // Map this into the system 'case fan' state.
                 this.getSystemActions().updateCaseFan(r.json());
                 obs.next(r.json());

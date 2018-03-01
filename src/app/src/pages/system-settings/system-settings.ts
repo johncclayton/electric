@@ -6,12 +6,12 @@ import {Observable} from "rxjs/Observable";
 import {SystemActions} from "../../models/state/actions/system";
 import {propertiesThatHaveBeenModified} from "../../utils/helpers";
 import {IUIState} from "../../models/state/reducers/ui";
-import {IChargerCaseFan, System} from "../../models/system";
 import {UIActions} from "../../models/state/actions/ui";
 import {Subject} from "rxjs/Subject";
 import {LocalNotifications} from "@ionic-native/local-notifications";
 import {ISystem} from "../../models/state/reducers/system";
 import {iChargerService} from "../../services/icharger.service";
+import {cloneDeep} from 'lodash';
 
 @IonicPage()
 @Component({
@@ -22,8 +22,7 @@ export class SystemSettingsPage {
     @select() system$: Observable<ISystem>;
     @select() ui$: Observable<IUIState>;
 
-    originalUnmodified: System;
-    originalCaseFan: IChargerCaseFan;
+    originalUnmodified: ISystem;
     savingAlert: Toast;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
@@ -70,19 +69,16 @@ export class SystemSettingsPage {
         if (this.originalUnmodified == null) {
             return false;
         }
-        let system = this.ngRedux.getState().system;
-        let current = system.system;
 
-        let modifiedProperties = propertiesThatHaveBeenModified(this.originalUnmodified.data_structure, current.data_structure);
+        /*
+        The follow works for the case fan as well.
+        If we DONT have case_fan, then there will be some state, but it'll never change.
+        If we DO, then it'll be there, but possibly changing. So don't actually have to explicitly check for it.
+         */
+        let system = this.ngRedux.getState().system;
+        let modifiedProperties = propertiesThatHaveBeenModified(this.originalUnmodified, system);
         let keys = Object.keys(modifiedProperties);
 
-        if (system.system.has_case_fan && this.originalCaseFan) {
-            let fanModifiedFanProperties = propertiesThatHaveBeenModified(this.originalCaseFan, system.case_fan);
-            keys = keys.concat(Object.keys(fanModifiedFanProperties));
-            for (let name in fanModifiedFanProperties) {
-                modifiedProperties[name] = fanModifiedFanProperties[name];
-            }
-        }
         if (keys.length > 0) {
             console.log("Modified: " + JSON.stringify(modifiedProperties));
         }
@@ -107,12 +103,9 @@ export class SystemSettingsPage {
                 }
                 if (v.fetching == false) {
                     console.log("I've made a clone...");
-                    this.originalUnmodified = v.system.clone();
 
-                    this.charger.getCaseFan().subscribe(cf => {
-                        console.log("I've made a clone of the case fan...");
-                        this.originalCaseFan = cf;
-                    })
+                    // This'll make a deep clone
+                    this.originalUnmodified = cloneDeep(v);
                 }
             });
         this.actions.fetchSystemFromCharger();

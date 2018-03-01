@@ -29,7 +29,7 @@ let defaultSystemState: ISystem = {
     },
     system: new System({
         temp_unit: 'C'
-    })
+    }),
 };
 
 

@@ -83,7 +83,6 @@ export class HomePage {
         this.platform.ready().then((r) => {
             this.systemActions.fetchSystemFromCharger(() => {
                 this.configActions.resetNetworkAtrributes();
-                this.chargerService.getCaseFan().subscribe()
                 this.loadFirstPageDoingDebugging();
             });
             // this.chargerService.serverReconnection.subscribe(() => {

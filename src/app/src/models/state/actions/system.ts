@@ -1,13 +1,15 @@
 import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
-import {System} from "../../system";
+import {IChargerCaseFan, System} from "../../system";
 import {iChargerService} from "../../../services/icharger.service";
 import {UIActions} from "./ui";
 import {Observable} from "rxjs/Observable";
 import {AppModule} from "../../../app/app.module";
 import {compareTwoMaps} from "../../../utils/helpers";
 import {ISystem} from "../reducers/system";
+import {forkJoin} from "rxjs/observable/forkJoin";
+import {of} from "rxjs/observable/of";
 
 @Injectable()
 export class SystemActions {
@@ -39,8 +41,18 @@ export class SystemActions {
 
         let chargerService = this.chargerService();
         if (chargerService) {
-            chargerService.getSystem().subscribe(system => {
-                this.ngRedux.dispatch(this.endFetchAction(system));
+            let system_request = chargerService.getSystem();
+            let case_request = chargerService.getCaseFan();
+
+            forkJoin(
+                system_request,
+                case_request
+            ).subscribe(v => {
+                // We get a LIST of responses.
+                // The case_fan response is dispatched to redux by the getCaseFan call.
+                let system_object = v[0];
+                // let case_fan_info = v[1];
+                this.ngRedux.dispatch(this.endFetchAction(system_object));
                 if (callback) {
                     callback();
                 }
@@ -65,7 +77,7 @@ export class SystemActions {
 
     saveSystemSettings(systemObject: ISystem): Observable<ISystem> {
         let sysValues = systemObject.system;
-        if(sysValues.has_case_fan) {
+        if (sysValues.has_case_fan) {
             let fanValues = systemObject.case_fan;
             this.chargerService().saveCaseFan(fanValues).subscribe()
         }
