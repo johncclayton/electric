@@ -213,7 +213,7 @@ class CaseFan(Model):
     hysteresis = IntType(required=True, min_value=0, max_value=20, default=3)
 
     # Which pin on the board will control the fan circuit?
-    gpio = IntType(required=True, min_value=1, max_value=40, default=23)
+    gpio = IntType(required=True, min_value=1, max_value=40, default=16)
 
 
 class DeviceInfoStatus(Model):
