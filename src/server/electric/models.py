@@ -113,7 +113,6 @@ Control_OrderOperations = (
     (8, "msgbox no")
 )
 
-
 class ReadDataSegment:
     """
     The iCharger USB HID API cannot read more than 64 bytes at a time, yet some of the data structures are much
@@ -174,6 +173,47 @@ class WriteDataSegment(object):
         u16s_repeat = size_of_packed_data / 2
         u16s_format = "{0}H".format(u16s_repeat)
         return struct.unpack(u16s_format, packed_data_as_bytes)
+
+class RFIDTag(Model):
+    # Battery ID
+    battery_id = IntType(required=True, min_value=0)
+    
+    # Capacity in mAh
+    capacity = IntType(required=True, min_value=1, default=100)
+    
+    # Charge cycles
+    cycles = IntType(required=True, min_value=0, default=0)
+    
+    # Number of cells
+    cells = IntType(required=True, min_value=1, max_value=20, default=3)
+    
+    # C rating of the pack
+    c_rating = FloatType(required=True, min_value=0.1, max_value=5, default=1)
+    
+    # Chemistry (e.g. LiPo, LiFe, NiMH)
+    chemistry = IntType(required=True, min_value=ChemistryType.LiPo, max_value=ChemistryType.NiZn, default=ChemistryType.LiPo)
+    
+    # Charge rate in mA
+    charge_mA = IntType(required=True, min_value=1, default=1000)
+    
+    # Discharge rate in mA
+    discharge_mA = IntType(required=True, min_value=1, default=1000)
+    
+class CaseFan(Model):
+    # Whether or not we should be trying to control the fan at all
+    control = BooleanType(required=True, default=False)
+
+    # True if the fan is currently running (GPIO pin is high)
+    running = BooleanType(default=False, required=False)
+
+    # Temp you want fan to kick in at
+    threshold = IntType(required=True, min_value=-30, max_value=80, default=37)
+
+    # How much lag do you want, in deg C?
+    hysteresis = IntType(required=True, min_value=0, max_value=20, default=3)
+
+    # Which pin on the board will control the fan circuit?
+    gpio = IntType(required=True, min_value=1, max_value=40, default=23)
 
 
 class DeviceInfoStatus(Model):
@@ -388,7 +428,7 @@ class ChannelStatus(Model):
 
             # With this, we can work out if the main battery lead is plugged in
             if self.device_id is DEVICEID_406_DUO:
-                max_voltage = 22 # because 3.75 * n gives the max voltage?
+                max_voltage = 22  # because 3.75 * n gives the max voltage?
             elif self.device_id is DEVICEID_308_DUO:
                 max_voltage = 30
             elif self.device_id is DEVICEID_4010_DUO:
@@ -1161,5 +1201,3 @@ class Preset(Model):
         self.store_compensation /= 100.0
 
         self.name = self.name.split('\0')[0]
-
-
