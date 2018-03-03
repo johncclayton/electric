@@ -6,9 +6,10 @@ LABEL maintainer="Neil Clayton, John Clayton" \
 VOLUME /www
 VOLUME /app
 
-WORKDIR /www
 COPY ./src/server/ /www
 COPY ./src/app/ /app
+
+WORKDIR /www
 
 ENV MAKEFLAGS="-j 4"
 

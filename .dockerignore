@@ -1,4 +1,10 @@
-src/app
+src/app/.idea
+src/app/.sourcemaps
+src/app/.vscode
+src/app/node_modules
+src/app/build
+src/app/platforms
+src/app/www
 development
 docs
 firmware
