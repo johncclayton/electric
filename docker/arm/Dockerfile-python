@@ -4,8 +4,11 @@ LABEL maintainer="Neil Clayton, John Clayton" \
     version="1.0"
 
 VOLUME /www
+VOLUME /app
+
 WORKDIR /www
 COPY ./src/server/ /www
+COPY ./src/app/ /app
 
 ENV MAKEFLAGS="-j 4"
 
@@ -14,4 +17,3 @@ RUN pip install -r requirements-all.txt \
     && chmod +x /www/run_gunicorn.sh \
     && chmod +x /www/run_zmq_worker.sh \
     && apk del gcc g++ python-dev libusb-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
-
