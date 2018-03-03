@@ -4,10 +4,8 @@ LABEL maintainer="Neil Clayton, John Clayton" \
     version="1.0"
 
 VOLUME /www
-VOLUME /app
 
 COPY ./src/server/ /www
-COPY ./src/app/ /app
 
 WORKDIR /www
 
