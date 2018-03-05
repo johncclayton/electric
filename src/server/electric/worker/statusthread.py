@@ -1,22 +1,23 @@
 import datetime
+import logging
 import threading
 import time
-import logging
 
 from electric.worker import cache as cache
-from casefancontrol import CaseFanControl
+
 logger = logging.getLogger('electric.worker.statusthread')
 
-
 class StatusThread(threading.Thread):
-    fan_control = CaseFanControl()
-
     def __init__(self, my_charger):
         super(StatusThread, self).__init__(name="Fetch Status from Charger")
         self.daemon = True
         self.comms = my_charger
         self.wait_time = 0.5
         self.keep_going = True
+
+    @property
+    def fan_control(self):
+        return cache.values.get_case_fan_controller()
 
     def run(self):
         while self.keep_going:
@@ -28,14 +29,17 @@ class StatusThread(threading.Thread):
                 device_info = self.comms.get_device_info()
                 if device_info and self.keep_going:
                     cache.values.set_device_info(device_info)
+                    max_temp = 0
 
                     for channel in range(0, device_info.channel_count):
                         channel_status = self.comms.get_channel_status(channel, device_info.device_id)
                         if channel == 0 or channel == 1:
-                            self.fan_control.set_fan_state(channel_status, cache)
+                            max_temp = max(channel_status.curr_int_temp, max_temp)
                             cache.values.set_channel_status(channel, channel_status)
                         if not self.keep_going:
                             return
+
+                    self.fan_control.set_fan_state(max_temp)
 
                 end_time = datetime.datetime.now()
 

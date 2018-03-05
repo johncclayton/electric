@@ -14,9 +14,10 @@ First, you need to install the code and Python packages into their own virtualen
   1. log into the pi
   1. curl -O --location https://raw.githubusercontent.com/johncclayton/electric/master/development/development_part_1.sh
   1. curl -O --location https://raw.githubusercontent.com/johncclayton/electric/master/development/development_part_2.sh
-  1. run development_part_1.sh
+  1. run by doing 'bash development_part_1.sh'
   1. relogin to the pi
-  1. run development_part_2.sh
+  1. run by doing 'bash development_part_2.sh'
+    1. Don't use 'sh ...', it won't work
 
 
 # To run the server

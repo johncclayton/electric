@@ -98,6 +98,11 @@ export class ElectricNetworkService {
         return ssidLength > 0 && (passLength >= 8 && passLength <= 63);
     }
 
+    can_do_case_fan() {
+        // Introduced at build 565
+        return this.ngRedux.getState().config.network.docker_last_deploy > 565;
+    }
+
     haveSeenStatusRecently() {
         return this.ngRedux.getState().config.network.docker_last_deploy > 0;
     }

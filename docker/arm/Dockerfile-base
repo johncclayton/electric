@@ -1,0 +1,21 @@
+FROM hypriot/rpi-alpine:3.6 as base
+
+LABEL maintainer="Neil Clayton, John Clayton" version="1.0"
+
+WORKDIR /www
+COPY ./src/server/requirements-base.txt /www
+ENV MAKEFLAGS="-j 4"
+
+RUN apk update \
+    && apk add bash zeromq py-pip python-dev linux-headers musl-dev gcc g++ libressl-dev openssl
+
+RUN apk add eudev-dev libusb gcc cython cython-dev libusb-dev
+
+RUN pip install --upgrade setuptools \
+    && pip install --upgrade pip
+
+RUN pip install hidapi==0.7.99.post21 \
+    && pip install -r requirements-base.txt \
+    && rm -rf /www
+
+# Intentionally not deleting compilers, because might be useful to non-base image
