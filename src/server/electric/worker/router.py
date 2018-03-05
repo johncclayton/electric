@@ -1,10 +1,9 @@
 import logging
-import electric.worker.cache as cache
+
 import electric.testing_control as testing_control
-from electric.worker.casefancontrol import CaseFanControl
+import electric.worker.cache as cache
 
 logger = logging.getLogger('electric.worker.router')
-fan_control = CaseFanControl()
 
 
 #
@@ -14,6 +13,8 @@ fan_control = CaseFanControl()
 
 
 def route_message(charger, method, args):
+    fan_controller = cache.values.get_case_fan_controller()
+
     if method == "get_device_info":
         if testing_control.values.bypass_caches:
             return charger.get_device_info()
@@ -55,19 +56,18 @@ def route_message(charger, method, args):
     elif method == "set_beep_properties":
         return charger.set_beep_properties(args["beep_index"], args["enabled"], args["volume"])
     elif method == "get_case_fan_info":
-        info = fan_control.prefs.copy()
-        info["running"] = cache.values.get_case_fan_run_state()
-        return info
+        # This returns a CaseFan object (the state of the case fan controller)
+        return fan_controller.fan
     elif method == "set_case_fan_prefs":
-        for k in args:
-            if k == "control":
-                fan_control.set_control_onoff(args["control"])
-            if k == "threshold":
-                fan_control.set_temp_threshold(args["threshold"])
-            if k == "hysteresis":
-                fan_control.set_temp_hysteresis(args["hysteresis"])
-            if k == "gpio":
-                fan_control.set_gpio_pin(args["gpio"])
-        return fan_control.save_prefs()
+        # Updates the state of the fan controller
+        if args.get('control'):
+            fan_controller.set_control_onoff(args.control)
+        if args.get('threshold'):
+            fan_controller.set_temp_threshold(args.threshold)
+        if args.get('hysteresis'):
+            fan_controller.set_temp_hysteresis(args.hysteresis)
+        if args.get('gpio'):
+            fan_controller.set_gpio_pin(args.gpio)
+        return fan_controller.save_prefs()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))

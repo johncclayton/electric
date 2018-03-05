@@ -8,6 +8,7 @@ logger = logging.getLogger('electric.app.{0}'.format(__name__))
 def get_worker_loc():
     return os.environ.get("ELECTRIC_WORKER", "tcp://127.0.0.1:5001")
 
+
 RESPONSE_TIMEOUT_MS = 5000
 
 
@@ -87,7 +88,7 @@ class ZMQCommsManager(object):
                     e = f
 
                 # if we get here, e MUST be set
-                assert(e is not None)
+                assert (e is not None)
 
                 raise e
             else:
@@ -99,7 +100,7 @@ class ZMQCommsManager(object):
             # Can't send, most likely
             self.close_and_reopen_connection()
             timeout_s = int(RESPONSE_TIMEOUT_MS / 1000.0)
-            raise IOError("failed to send request {1} to ZMQ: {0}".format(method_name, request["tag"]))
+            raise IOError("failed to send request {1} to ZMQ: {0}, {2}".format(method_name, request["tag"], e))
 
     def turn_off_logging(self):
         return self._send_message_get_response("turn_off_logging")
@@ -238,6 +239,6 @@ class ZMQCommsManager(object):
 
     def get_case_fan_info(self):
         return self._send_message_get_response("get_case_fan_info")
-    
-    def set_case_fan_prefs(self, prefs):
-        return self._send_message_get_response("set_case_fan_prefs", prefs)
+
+    def set_case_fan_prefs(self, case_fan_object):
+        return self._send_message_get_response("set_case_fan_prefs", case_fan_object)

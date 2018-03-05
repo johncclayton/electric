@@ -1,21 +1,13 @@
-FROM hypriot/rpi-alpine:3.6
-LABEL maintainer="Neil Clayton, John Clayton" \
-    version="1.0"
+FROM johncclayton/electric-pi-python:latest
+
+LABEL maintainer="Neil Clayton, John Clayton" version="1.0"
 
 VOLUME /www
-WORKDIR /www
-COPY ./src/server/ /www
-ENV ELECTRIC_WORKER_LISTEN=tcp://0.0.0.0:5001
+VOLUME /opt/prefs
 
-RUN apk update \
-    && apk add bash zeromq python-dev libusb libusb-dev udev eudev-dev linux-headers usbutils py-pip gcc musl-dev cython-dev gcc g++ \
-    && pip install --upgrade setuptools \
-    && pip install --upgrade pip \
-    && pip install hidapi \
-    && pip install -r requirements-worker.txt \
-    && rm -rf /www/scripts /www/MANIFEST /www/requirements*.txt /www/old-setup /www/DEVELOPMENT.md /www/pypirc_template /www/setup.py \
-    && chmod +x /www/run_zmq_worker.sh \
-    && apk del gcc g++ python-dev libusb-dev eudev-dev linux-headers gcc musl-dev cython cython-dev --purge
+WORKDIR /www
+
+ENV ELECTRIC_WORKER_LISTEN=tcp://0.0.0.0:5001
 
 EXPOSE 5001
 

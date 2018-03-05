@@ -1,0 +1,11 @@
+[Unit]
+Description=Ensure GPIO is writable
+Before=electric-pi.service docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/opt/ensure_gpio_writable.sh
+
+[Install]
+WantedBy=multi-user.target

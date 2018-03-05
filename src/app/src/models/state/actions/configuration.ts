@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 import * as _ from "lodash";
+import {compareTwoMaps} from "../../../utils/helpers";
 
 
 @Injectable()
@@ -66,47 +67,6 @@ export class ConfigurationActions {
         this.updateConfiguration(change);
     }
 
-    // isValueDifferent(left: Object, right: Object) {
-    //     for (let in_key in left) {
-    //         let value_changed = false;
-    //         if (right.hasOwnProperty(in_key)) {
-    //             let existing_value = right[in_key];
-    //             value_changed = left[in_key] != existing_value;
-    //             if (value_changed) {
-    //                 console.log("CHANGE: " + in_key + " from " + left[in_key] + " to " + existing_value);
-    //                 return true;
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // }
-    //
-    compareTwoMaps(new_data, old_data) {
-        let result = [];
-
-        return _.reduce(new_data, (result, value, key) => {
-            if (old_data.hasOwnProperty(key)) {
-                if (_.isEqual(value, old_data[key])) {
-                    return result;
-                } else {
-                    if (typeof (new_data[key]) != typeof ({}) || typeof (old_data[key]) != typeof ({})) {
-                        //dead end.
-                        result.push(key);
-                        return result;
-                    } else {
-                        let deeper = this.compareTwoMaps(new_data[key], old_data[key]);
-                        return result.concat(_.map(deeper, (sub_path) => {
-                            return key + "." + sub_path;
-                        }));
-                    }
-                }
-            } else {
-                result.push(key);
-                return result;
-            }
-        }, result);
-    }
-
     updateConfigurationFromEmit(change) {
         let map_change = {};
         let key = Object.keys(change)[0];
@@ -134,7 +94,7 @@ export class ConfigurationActions {
             let config = this.ngRedux.getState().config;
 
             // Check to see if any values have changed
-            let comparison_result = this.compareTwoMaps(change, config);
+            let comparison_result = compareTwoMaps(change, config);
             if (comparison_result.length > 0) {
                 console.log("Keys differ: " + comparison_result.join(", "));
                 this.ngRedux.dispatch({

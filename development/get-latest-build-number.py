@@ -2,9 +2,10 @@
 import urllib2
 import json
 
-url = "https://api.travis-ci.org/repos/johncclayton/electric/builds"
+url = "https://api.travis-ci.org/repo/johncclayton%2Felectric/builds?build.state=passed"
 request_headers = {
     'User-Agent': 'electric',
+    'Travis-API-Version': 3,
     'Accept': 'application/vnd.travis-ci.2+json'
 }
 

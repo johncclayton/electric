@@ -2,8 +2,7 @@ import logging
 import unittest
 
 from schematics.exceptions import ModelValidationError
-from electric.models import DeviceInfo, DeviceInfoStatus, PresetIndex, Preset
-from electric.worker.cache import reset_caches, get_device_info_cached, get_channel_status_cached, set_channel_status, set_device_info_cached
+from electric.models import DeviceInfoStatus, DeviceInfo, Preset, PresetIndex
 
 logger = logging.getLogger("electric.app.test.{0}".format(__name__))
 
@@ -18,24 +17,26 @@ class TestDeviceStatusInfoSerialization(unittest.TestCase):
         self.assertEqual(status.err, 0)
 
     def test_can_fetch_device_info_when_its_not_been_set(self):
-        reset_caches()
-        self.assertIsNotNone(get_device_info_cached())
-        self.assertIsNotNone(get_channel_status_cached(0))
-        self.assertIsNotNone(get_channel_status_cached(1))
+        from electric.worker import cache
+        cache_values = cache.values
+        cache_values.reset()
+        self.assertIsNotNone(cache_values.get_device_info())
+        self.assertIsNotNone(cache_values.get_channel_status(0))
+        self.assertIsNotNone(cache_values.get_channel_status(1))
 
-        score = { "them": 1, "me": None }
-        set_device_info_cached(score)
+        score = {"them": 1, "me": None}
+        cache_values.set_device_info(score)
 
-        self.assertEqual(get_device_info_cached(), score)
+        self.assertEqual(cache_values.get_device_info(), score)
 
-        set_channel_status(0, score)
-        self.assertEqual(get_channel_status_cached(0), score)
-        self.assertIsNotNone(get_channel_status_cached(1))
+        cache_values.set_channel_status(0, score)
+        self.assertEqual(cache_values.get_channel_status(0), score)
+        self.assertIsNotNone(cache_values.get_channel_status(1))
 
-        set_channel_status(0, None)
-        set_channel_status(1, score)
-        self.assertEqual(get_channel_status_cached(1), score)
-        self.assertIsNone(get_channel_status_cached(0))
+        cache_values.set_channel_status(0, None)
+        cache_values.set_channel_status(1, score)
+        self.assertEqual(cache_values.get_channel_status(1), score)
+        self.assertIsNone(cache_values.get_channel_status(0))
 
     def test_deviceinfostatus_json_keys(self):
         status = DeviceInfoStatus()
