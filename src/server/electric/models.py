@@ -181,23 +181,26 @@ class RFIDTag(Model):
     
     # Tag UID
     tag_uid = ListType(IntType, required=False, min_size=4, max_size=4)
-    
+
+    # Chemistry (e.g. LiPo, LiFe, NiMH)
+    chemistry = IntType(required=True, min_value=ChemistryType.LiPo, max_value=ChemistryType.NiZn, default=ChemistryType.LiPo)                                                                    
+
     # Capacity in mAh
     capacity = IntType(required=False, min_value=1, default=100)
     
+    # Number of cells
+    cells = IntType(required=False, min_value=1, max_value=20, default=3)    
+    
+    # C rating of the pack
+    c_rating = FloatType(required=True, min_value=0.1, max_value=5, default=1)    
+    
     # Charge cycles
     cycles = IntType(required=False, min_value=0, default=0)
+
+    # Charge rate limit in C
+    c_charge_limit = IntType(required=False, default=1)
     
-    # Number of cells
-    cells = IntType(required=False, min_value=1, max_value=20, default=3)
-    
-    # C rating of the pack
-    c_rating = FloatType(required=True, min_value=0.1, max_value=5, default=1)
-    
-    # Chemistry (e.g. LiPo, LiFe, NiMH)
-    chemistry = IntType(required=True, min_value=ChemistryType.LiPo, max_value=ChemistryType.NiZn, default=ChemistryType.LiPo)
-    
-    # Charge rate in mA
+    # Desired charge rate in mA (validated against c_charge_limit)
     charge_mA = IntType(required=True, min_value=1, default=1000)
     
     # Discharge rate in mA
