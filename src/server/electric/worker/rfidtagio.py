@@ -187,7 +187,6 @@ class TagReader(threading.Thread):
     def instance(cls):
         if lone_read_thread == None:
             lone_read_thread = cls()
-            lone_read_thread.start()
         return lone_read_thread
             
     def __init__(self):
@@ -195,6 +194,13 @@ class TagReader(threading.Thread):
         self.loop_done = False
         self.tags = []
 
+    def start(self):
+        if self.loop_done:
+            lone_read_thread = None
+            TagReader.instance().start()
+        else if not self.is_alive():
+            super(TagReader, self).start()
+            
     def run(self):
         prev_uid = None
         tio = TagIO()
@@ -268,21 +274,25 @@ class TagWriter(threading.Thread):
     INVALID_TAG = 5
 
     @classmethod
-    def instance(cls, rfid_tag, **kwargs):
-        if lone_read_thread != None:
-            lone_read_thread.abort()
-        if lone_write_thread == None:
-            lone_write_thread = cls(rfid_tag, **kwargs)
-            lone_write_thread.start()
-        return lone_write_thread
+    def instance(cls):
+        if lone_read_thread == None:
+            lone_read_thread = cls()
+        return lone_read_thread
     
-    def __init__(self, batt_info, **kwargs):
+    def __init__(self):
         super(TagWriter, self).__init__(name="Write RFID tag")
         self.loop_done = False
         self.write_result = None
-        self.batt_info = batt_info
-        self.force = kwargs.get("force", False)
 
+    def start(self, batt_info, **kwargs):
+        if self.loop_done:
+            lone_read_thread = None
+            TagReader.instance().start(batt_info, **kwargs)
+        else if not self.is_alive():
+            self.batt_info = batt_info
+            self.force = kwargs.get("force", False)
+            super(TagWriter, self).start()
+            
     def run(self):
         self.write_result = self.IN_PROGRESS
         tio = TagIO()
