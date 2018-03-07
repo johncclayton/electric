@@ -183,12 +183,17 @@ class TagIO:
         self.last_trailer_block = None
 
 class TagReader(threading.Thread):
+    @classmethod
+    def instance(cls):
+        if lone_read_thread == None:
+            lone_read_thread = cls()
+            lone_read_thread.start()
+        return lone_read_thread
+            
     def __init__(self):
         super(TagReader, self).__init__(name="Read RFID tags")
         self.loop_done = False
-        self.battery_data = { "chemistry":None, "cell count":None, \
-                              "charge rate":0, "discharge rate":0, \
-                              "battery ids":[] }
+        self.tags = []
 
     def run(self):
         prev_uid = None
@@ -218,17 +223,41 @@ class TagReader(threading.Thread):
                 continue
 
             print "preregister_batt_info = ", batt_info
-            if (batt_info["battery id"], uid) \
-                                       not in self.battery_data["battery ids"]:
-                if self.battery_data["battery ids"] == []:
-                    self.battery_data["chemistry"] = batt_info["chemistry"]
-                    self.battery_data["cell count"] = batt_info["cell count"]
-                elif self.battery_data["chemistry"] != batt_info["chemistry"] or\
-                     self.battery_data["cell count"] != batt_info["cell count"]:
-                    continue
-                self.battery_data["charge rate"] += batt_info["charge rate"]
-                self.battery_data["discharge rate"] += batt_info["discharge rate"]
-                self.battery_data["battery ids"].append((batt_info["battery id"], uid))
+            found_tag = None
+            for tag in self.tags:
+                found_tag = tag  # Doesn't matter which one we export
+                if tag.battery_id == batt_info["battery id"] \
+                   and tag.tag_uid == uid:
+                    found_tag = None
+                    break
+            # Only allow the tag to be added to the list if the list is
+            # empty or the chemistry and cell count match the existing
+            # tags
+            if self.tags == [] \
+               or (found_tag != None \
+                   and found_tag.chemistry == batt_info["chemistry"] \
+                   and found_tag.cells == batt_info["cell count"]):
+                tag = RFIDTag()
+                tag.chemistry = batt_info["chemistry"]
+                tag.capacity = batt_info["capacity"]
+                tag.cells = batt_info["cell count"]
+                tag.c_rating = batt_info["c rating"]
+                tag.c_charge_limit = batt_info["max charge c"]
+                tag.charge_mA = batt_info["charge rate"]
+                tag.discharge_mA = batt_info["discharge rate"]
+                tag.cycles = batt_info["cycle count"]
+                self.tags.append(tag)
+        
+    def stop(self):
+        self.loop_done = True
+        self.join()
+
+    def get_tag_list(self):
+        return self.tags
+
+    def exit(self):
+        self.stop()
+        lone_read_thread = None
 
 class TagWriter(threading.Thread):
     SUCCESS = 0
@@ -238,6 +267,15 @@ class TagWriter(threading.Thread):
     READONLY_TAG = 4
     INVALID_TAG = 5
 
+    @classmethod
+    def instance(cls, rfid_tag, **kwargs):
+        if lone_read_thread != None:
+            lone_read_thread.abort()
+        if lone_write_thread == None:
+            lone_write_thread = cls(rfid_tag, **kwargs)
+            lone_write_thread.start()
+        return lone_write_thread
+    
     def __init__(self, batt_info, **kwargs):
         super(TagWriter, self).__init__(name="Write RFID tag")
         self.loop_done = False
@@ -277,53 +315,13 @@ class TagWriter(threading.Thread):
                 self.write_result = self.SUCCESS
             break
 
-def start_tag_reader():
-    global lone_read_thread
-
-    if lone_read_thread != None:
-        stop_tag_reader()
-    lone_read_thread = TagReader()
-    lone_read_thread.start()
-    logger.info("start_tag_reading: thread started")
-    return lone_read_thread
-
-def stop_tag_reader():
-    global lone_read_thread
-
-    if lone_read_thread != None:
-        lone_read_thread.loop_done = True
-        lone_read_thread.join()
-        lone_read_thread = None
-
-def start_tag_writer(parameters, **kwargs):
-    global lone_write_thread
-
-    if lone_write_thread != None:
-        abort_tag_writer()
-    lone_write_thread = TagWriter(parameters, **kwargs)
-    lone_write_thread.start()
-    return lone_write_thread
-
-def abort_tag_writer():
-    global lone_write_thread
-
-    if lone_write_thread != None:
-        lone_write_thread.loop_done = True
-        lone_write_thread.join()
+    def get_result(self):
+        if lone_write_thread != None:
+            return self.write_result
+        else:
+            return None
+    
+    def exit(self):
+        self.loop_done = True
+        self.join()
         lone_write_thread = None
-
-def get_tag_write_result():
-    global lone_write_thread
-
-    if lone_write_thread != None:
-        return lone_write_thread.write_result
-    else:
-        return None
-
-def get_tag_read_data():
-    global lone_read_thread
-
-    if lone_read_thread != None:
-        return lone_read_thread.battery_data
-    else:
-        return None
