@@ -179,14 +179,17 @@ class RFIDTag(Model):
     # Battery ID
     battery_id = IntType(required=True, min_value=0)
     
+    # Tag UID
+    tag_uid = ListType(IntType, required=False, min_size=4, max_size=4)
+    
     # Capacity in mAh
-    capacity = IntType(required=True, min_value=1, default=100)
+    capacity = IntType(required=False, min_value=1, default=100)
     
     # Charge cycles
-    cycles = IntType(required=True, min_value=0, default=0)
+    cycles = IntType(required=False, min_value=0, default=0)
     
     # Number of cells
-    cells = IntType(required=True, min_value=1, max_value=20, default=3)
+    cells = IntType(required=False, min_value=1, max_value=20, default=3)
     
     # C rating of the pack
     c_rating = FloatType(required=True, min_value=0.1, max_value=5, default=1)
