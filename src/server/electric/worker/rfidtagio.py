@@ -1,3 +1,6 @@
+# Requires the MFRC522.py Python module available here:
+#    https://github.com/pimylifeup/MFRC522-python
+
 import datetime
 import threading
 import time
