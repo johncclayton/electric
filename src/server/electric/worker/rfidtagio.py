@@ -19,15 +19,27 @@ class TagIO:
     REVO_TAG = 0x00     # MIFARE UL
     AUTH_KEY = (0xFF,0xFF,0xFF,0xFF,0xFF,0xFF)
 
-    RCT_SCHEMA = { 60: { "battery id"    :( 0, 2 ),   \
-                         "capacity"      :( 2, 2 ),   \
-                         "cycle count"   :( 4, 2 ),   \
-                         "cell count"    :( 6, 2 ) }, \
-                   61: { "c rating"      :( 0, 2 ) }, \
-                   62: { "chemistry"     :( 0, 2 ),   \
-                         "max charge c"  :( 2, 2 ),   \
-                         "charge rate"   :( 4, 4 ),   \
-                         "discharge rate":( 8, 4 ) } }
+    # MUST match the member names in the RFIDTag model definition
+    BATTERY_ID_KEY = "battery_id"
+    TAG_UID_KEY = "tag_uid"
+    CHEMISTRY_KEY = "chemistry"
+    CAPACITY_KEY = "capacity"
+    CELLS_KEY = "cells"
+    C_RATING_KEY = "c_rating"
+    C_CHARGE_MAX_KEY = "c_charge_limit"
+    CHARGE_RATE_KEY = "charge_mA"
+    DISCHARGE_RATE_KEY = "discharge_mA"
+    CYCLES_KEY = "cycles"
+    
+    RCT_SCHEMA = { 60: { BATTERY_ID_KEY    :( 0, 2 ),   \
+                         CAPACITY_KEY      :( 2, 2 ),   \
+                         CYCLES_KEY        :( 4, 2 ),   \
+                         CELLS_KEY         :( 6, 2 ) }, \
+                   61: { C_RATING_KEY      :( 0, 2 ) }, \
+                   62: { CHEMISTRY_KEY     :( 0, 2 ),   \
+                         C_CHARGE_MAX_KEY  :( 2, 2 ),   \
+                         CHARGE_RATE_KEY   :( 4, 4 ),   \
+                         DISCHARGE_RATE_KEY:( 8, 4 ) } }
     REVO_SCHEMA = {}
 
     def __init__(self):
@@ -102,7 +114,7 @@ class TagIO:
         return data
 
     def read_tag(self, schema):
-        batt_info = {}
+        batt_dict = {}
 
         for block in schema.keys():
             print "block in schema.keys =", block
@@ -118,27 +130,27 @@ class TagIO:
                 byte_len = posn_tuple[1]
 
                 if byte_len == 1:
-                    batt_info[param] = data[start_byte]
+                    batt_dict[param] = data[start_byte]
                 elif byte_len == 2:
-                    batt_info[param] = (data[start_byte]     << 8) | \
+                    batt_dict[param] = (data[start_byte]     << 8) | \
                                         data[start_byte + 1]
                 elif byte_len == 3:
-                    batt_info[param] = (data[start_byte]     << 16) | \
+                    batt_dict[param] = (data[start_byte]     << 16) | \
                                        (data[start_byte + 1] <<  8) | \
                                         data[start_byte + 2]
                 elif byte_len == 4:
-                    batt_info[param] = (data[start_byte]     << 24) | \
+                    batt_dict[param] = (data[start_byte]     << 24) | \
                                        (data[start_byte + 1] << 16) | \
                                        (data[start_byte + 2] <<  8) | \
                                         data[start_byte + 3]
 
-        return batt_info
+        return batt_dict
 
-    def write_tag(self, schema, batt_info):
+    def write_tag(self, schema, batt_dict):
         for block in schema.keys():
             data = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             block_dict = schema[block]
-            print "batt_info = ", batt_info
+            print "batt_dict = ", batt_dict
 
             for param in block_dict.keys():
                 posn_tuple = block_dict[param]
@@ -147,7 +159,7 @@ class TagIO:
                 print "start_byte = ", start_byte
                 byte_len = posn_tuple[1]
                 print "byte_len = ", byte_len
-                value = batt_info[param]
+                value = batt_dict[param]
                 print "value = ", value
 
                 if byte_len == 1:
@@ -167,7 +179,7 @@ class TagIO:
                 print "block =", block, "data =",data
 
             # Don't write the block if nothing changed
-            print "Data after conversion from batt_info =", data
+            print "Data after conversion from batt_dict =", data
             current_data = self.read_block(block)
             print "Data currently in target block =", current_data
             if current_data != data:
@@ -180,8 +192,8 @@ class TagIO:
 
     def reset(self):
         self.read_writer.MFRC522_Init()
-        self.last_trailer_block = None
-
+        self.last_trailer_block = None        
+    
 class TagReader(threading.Thread):
     @classmethod
     def instance(cls):
@@ -198,8 +210,11 @@ class TagReader(threading.Thread):
         if self.loop_done:
             lone_read_thread = None
             TagReader.instance().start()
-        else if not self.is_alive():
-            super(TagReader, self).start()
+        else if self.is_alive():
+            self.stop()
+            self.start()
+        else:
+            super(TagReader, self).start()
             
     def run(self):
         prev_uid = None
@@ -213,46 +228,38 @@ class TagReader(threading.Thread):
 
             (schema, writable) = tio.get_schema(type)
             if schema != None:
-                batt_info = tio.read_tag(schema)
-                print "post-read batt_info = ", batt_info
-                if batt_info != None and writable:
+                batt_dict = tio.read_tag(schema)
+                print "post-read batt_dict = ", batt_dict
+                if batt_dict != None and writable:
                     # Increment cycle count if needed
-                    print "post-read batt_info = ", batt_info
+                    print "post-read batt_dict = ", batt_dict
                     if False:# If the battery has been cycled since the last bump:
-                        batt_info["cycle count"] += 1
-                        new_batt_info = tio.write_tag(schema, batt_info)
-                        if new_batt_info != None:
-                            batt_info = new_batt_info
+                        batt_dict[tio.CYCLES_KEY] += 1
+                        new_batt_dict = tio.write_tag(schema, batt_dict)
+                        if new_batt_dict != None:
+                            batt_dict = new_batt_dict
                             # Reset the "cycled" flag for this battery
             else:
                 print "Invalid tag type: ", type
                 continue
 
-            print "preregister_batt_info = ", batt_info
+            print "preregister_batt_dict = ", batt_dict
             found_tag = None
-            for tag in self.tags:
-                found_tag = tag  # Doesn't matter which one we export
-                if tag.battery_id == batt_info["battery id"] \
-                   and tag.tag_uid == uid:
-                    found_tag = None
+            for tag_dict in self.tags:
+                found_tag_dict = tag_dict  # Doesn't matter which one we export
+                if tag_dict[tio.BATTERY_ID_KEY] == batt_dict[tio.BATTERY_ID_KEY] \
+                   and tag_dict[tio.TAG_UID_KEY] == uid:
+                    found_tag_dict = None
                     break
             # Only allow the tag to be added to the list if the list is
             # empty or the chemistry and cell count match the existing
             # tags
             if self.tags == [] \
-               or (found_tag != None \
-                   and found_tag.chemistry == batt_info["chemistry"] \
-                   and found_tag.cells == batt_info["cell count"]):
-                tag = RFIDTag()
-                tag.chemistry = batt_info["chemistry"]
-                tag.capacity = batt_info["capacity"]
-                tag.cells = batt_info["cell count"]
-                tag.c_rating = batt_info["c rating"]
-                tag.c_charge_limit = batt_info["max charge c"]
-                tag.charge_mA = batt_info["charge rate"]
-                tag.discharge_mA = batt_info["discharge rate"]
-                tag.cycles = batt_info["cycle count"]
-                self.tags.append(tag)
+               or (found_tag_dict != None \
+                   and found_tag_dict[tio.CHEMISTRY_KEY] == batt_dict[tio.CHEMISTRY_KEY] \
+                   and found_tag_dict[tio.CELLS_KEY] == batt_dict[tio.CELLS_KEY]):
+                batt_dict[tio.TAG_UID_KEY] = uid
+                self.tags.append(batt_dict)
         
     def stop(self):
         self.loop_done = True
@@ -284,14 +291,20 @@ class TagWriter(threading.Thread):
         self.loop_done = False
         self.write_result = None
 
-    def start(self, batt_info, **kwargs):
+    def start():
+        print "start() requires at least an RFIDTag argument in this class"
+        
+    def start(self, batt_dict, **kwargs):
         if self.loop_done:
             lone_read_thread = None
-            TagReader.instance().start(batt_info, **kwargs)
-        else if not self.is_alive():
-            self.batt_info = batt_info
+            TagReader.instance().start(batt_dict, **kwargs)
+        else if self.is_alive():
+            self.stop()
+            self.start(batt_dict, **kwargs)
+        else:
+            self.batt_dict = batt_dict
             self.force = kwargs.get("force", False)
-            super(TagWriter, self).start()
+            super(TagWriter, self).start()  # Invoke the superclass's method
             
     def run(self):
         self.write_result = self.IN_PROGRESS
@@ -308,10 +321,10 @@ class TagWriter(threading.Thread):
                     self.write_result = self.READONLY_TAG
                     break
                 if not self.force:
-                    batt_info = tio.read_tag(schema)
-                    print "batt_info during virginity check =", batt_info
+                    batt_dict = tio.read_tag(schema)
+                    print "batt_dict during virginity check =", batt_dict
                     # Capacity should be 0 on a virgin tag
-                    if batt_info["capacity"] != 0:
+                    if batt_dict[tio.CAPACITY_KEY] != 0:
                         # Tag already written; must use force to overwrite
                         self.write_result = self.USED_TAG
                         break
@@ -319,7 +332,7 @@ class TagWriter(threading.Thread):
                 self.write_result = self.INVALID_TAG
                 break
 
-            if tio.write_tag(schema, self.batt_info) == None:
+            if tio.write_tag(schema, self.batt_dict) == None:
                 self.write_result = self.FAILED
             else:
                 self.write_result = self.SUCCESS
