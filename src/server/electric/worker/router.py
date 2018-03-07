@@ -69,10 +69,20 @@ def route_message(charger, method, args):
         if args.get('gpio'):
             fan_controller.set_gpio_pin(args.gpio)
         return fan_controller.save_prefs()
-    elif method == "get_rfid_tag_list":
-        self.tag_reader = TagReader.instance()
-        return self.tag_reader.tags
-    elif method == "write_rfid_tag":
-        self.tag_writer = TagWriter.instance(args)
+    # RFID tag methods
+    elif method == "start_tag_reading":
+        TagReader.instance().start()
+    elif method == "stop_tag_reading":
+        TagReader.instance().stop()
+    elif method == "get_tag_list":
+        return TagReader.instance().get_tag_list()
+    elif method == "kill_tag_reading":
+        TagReader.instance().exit()
+    elif method == "write_tag":
+        TagWriter.instance().start(args)
+    elif method == "get_tag_write_result:
+        TagWriter.instance().get_result()
+    elif method == "kill_tag_writing":
+        TagWriter.instance().exit()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))
