@@ -11,8 +11,8 @@ from Queue import Queue
 import RPi.GPIO as GPIO
 from electric.models import RFIDTag, RFIDTagList
 
-logger = logging.getLogger('electric.worker.statusthread')
-lone_tag_thread = None
+logger = logging.getLogger('electric.worker.rfidtagio')
+lone_thread = None
 
 class TagIO:
     RCT_TAG  = 0x08     # MIFARE 1K
