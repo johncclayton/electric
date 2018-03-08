@@ -75,7 +75,7 @@ def route_message(charger, method, args):
     elif method == "stop_tag_reading":
         TagReader.instance().stop()
     elif method == "get_tag_list":
-        return TagReader.instance().get_tag_list()
+        return RFIDTagList({ "list" : TagReader.instance().get_tag_list() })
     elif method == "kill_tag_reading":
         TagReader.instance().exit()
     elif method == "write_tag":

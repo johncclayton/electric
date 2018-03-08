@@ -1,7 +1,7 @@
 import time
 import rfidtagio
 
-rfidtagio.start_tag_reader()
+rfidtagio.instance().start()
 i = 0
 try:
     while i < 60:
@@ -14,6 +14,6 @@ try:
 except KeyboardInterrupt:
    print "Aborted."
 else:
+   rfidtagio.instance().stop()()
    print rfidtagio.get_tag_read_data()
-finally:
-   rfidtagio.stop_tag_reader()
+   rfidtagio.instance().exitr()()

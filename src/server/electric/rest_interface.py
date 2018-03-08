@@ -3,7 +3,7 @@ import logging
 from flask import request
 from flask_restful import Resource
 
-from electric.models import Operation, CaseFan
+from electric.models import Operation, CaseFan, RFIDTag
 from electric.models import SystemStorage, Preset, PresetIndex
 from zmq_marshall import ZMQCommsManager
 
@@ -296,7 +296,33 @@ class CaseFanResource(Resource):
         case_fan = CaseFan(json_dict)
         return comms.set_case_fan_prefs(case_fan).to_native()
 
-class RFIDReadTagResource(Resource):
+class RFIDTagReadResource(Resource):
     def get(self):
-        rfid_tag_object = comms.get_tag_list()
-        return rfid_tag_object.to_native()
+        tag_list_object = comms.get_tag_list()
+        return tag_list_object.to_native()
+
+    def put(self, commannd):
+        json_dict = request.json
+        command = json_dict["command")
+        if command == "start reading":
+            return comms.start_tag_reading()
+        elif command == "stop reading":
+            return comms.stop_tag_reading()
+        elif command == "kill reading":
+            return comms.kill_tag_reading()
+
+class RFIDTagWriteResource(Resource):
+    def get(self):
+        write_status_object = comms.get_tag_write_result()
+        return write_status_object.to_native()
+
+    def put(self, commannd):
+        json_dict = request.json
+        command = json_dict["command")
+        if command == "kill writing":
+            return comms.kill_tag_writing()
+        
+    def post(self, batt_dict):
+        json_dict = request.json
+        rfid_tag = RFIDTag(json_dict)
+        return cmms.write_tag(rfid_tag).to_native()

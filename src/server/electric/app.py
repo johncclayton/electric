@@ -14,7 +14,7 @@ from rest_interface import \
     PresetResource, ChargeResource, DischargeResource, \
     BalanceResource, MeasureIRResource, StopResource, \
     PresetOrderResource, AddNewPresetResource, StoreResource, UnifiedResource, PushTokenResource, \
-    CaseFanResource
+    CaseFanResource, RFIDTagReadResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
@@ -46,6 +46,8 @@ api.add_resource(PresetOrderResource, "/presetorder")
 api.add_resource(DialogCloseResource, "/closedialog/<channel_id>")
 api.add_resource(PushTokenResource, "/pushtoken/<token>")
 api.add_resource(CaseFanResource, "/casefan")
+api.add_resource(RFIDTagReadResource, "/rfid/read")
+api.add_resource(RFIDTagWriteResource, "/rfid/write")
 
 # application.config['TRAP_HTTP_EXCEPTIONS']=True
 #
