@@ -14,7 +14,7 @@ from rest_interface import \
     PresetResource, ChargeResource, DischargeResource, \
     BalanceResource, MeasureIRResource, StopResource, \
     PresetOrderResource, AddNewPresetResource, StoreResource, UnifiedResource, PushTokenResource, \
-    CaseFanResource, RFIDTagReadResource
+    CaseFanResource, RFIDTagReadResource, RFIDTagWriteResource
 
 application = Flask(__name__, instance_path='/etc')
 cors_app = CORS(application)
