@@ -1,7 +1,7 @@
 import time
 import rfidtagio
 
-reader = rfidtagio.instance()
+reader = rfidtagio.TagReader.instance()
 reader.start()
 i = 0
 try:
