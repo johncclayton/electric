@@ -295,3 +295,8 @@ class CaseFanResource(Resource):
 
         case_fan = CaseFan(json_dict)
         return comms.set_case_fan_prefs(case_fan).to_native()
+
+class RFIDReadTagResource(Resource):
+    def get(self):
+        rfid_tag_object = comms.get_tag_list()
+        return rfid_tag_object.to_native()
