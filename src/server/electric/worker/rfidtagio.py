@@ -12,8 +12,7 @@ import RPi.GPIO as GPIO
 from electric.models import RFIDTag, RFIDTagList
 
 logger = logging.getLogger('electric.worker.statusthread')
-lone_read_thread = None
-lone_write_thread = None
+lone_tag_thread = None
 
 class TagIO:
     RCT_TAG  = 0x08     # MIFARE 1K
@@ -198,9 +197,9 @@ class TagIO:
 class TagReader(threading.Thread):
     @classmethod
     def instance(cls):
-        if lone_read_thread == None:
-            lone_read_thread = cls()
-        return lone_read_thread
+        if lone_thread == None:
+            lone_thread = cls()
+        return lone_thread
             
     def __init__(self):
         super(TagReader, self).__init__(name="Read RFID tags")
@@ -209,7 +208,7 @@ class TagReader(threading.Thread):
 
     def start(self):
         if self.loop_done:
-            lone_read_thread = None
+            lone_thread.exit()
             TagReader.instance().start()
         elif self.is_alive():
             self.stop()
@@ -244,27 +243,30 @@ class TagReader(threading.Thread):
                 print "Invalid tag type: ", type
                 continue
 
+            # Check for already scanned and get the chemistry and cell count
             print "preregister_batt_dict = ", batt_dict
-            found_tag_dict = None
-            for tag_model in self.tags.tag_list:
-                found_tag_model = tag_model # Doesn't matter which one we export
-                if tag_model[tio.BATTERY_ID_KEY] == \
+            chemistry = None
+            cells = None
+            for rfid_tag in self.tags.tag_list:
+                if (chemistry == None): chemistry = rfid_tag[tio.CHEMSTRY_KEY]
+                if (cells == None): cells = rfid_tag[tio.CHEMISTRY_KEY]
+                if rfid_tag[tio.BATTERY_ID_KEY] == \
                                                  batt_dict[tio.BATTERY_ID_KEY] \
-                   and tag_model[tio.TAG_UID_KEY] == uid:
-                    found_tag_model = None
+                   and rfid_tag[tio.TAG_UID_KEY] == uid:
+                    chemistry = None
+                    cells = None
                     break
-            # Only allow the tag to be added to the list if the list is
-            # empty or the chemistry and cell count match the existing
-            # tags
-            if self.tags == [] \
-               or (found_tag_model != None \
-                   and found_tag_model[tio.CHEMISTRY_KEY] == \
-                                                 batt_dict[tio.CHEMISTRY_KEY] \
-                   and found_tag_model[tio.CELLS_KEY] == \
-                                                 batt_dict[tio.CELLS_KEY]):
+                    
+            # Only allow the tag to be added to the list if:
+            # 1. The list is empty, or
+            # 2. The tag is not already in the list and the chemistry and
+            #    cell count in the new tag match that of the existing tags
+            if self.tags.tag_list == [] \
+               or (batt_dict[tio.CHEMISTRY_KEY] == chemistry \
+                   and batt_dict[tio.CELLS_KEY] == cells):
                 batt_dict[tio.TAG_UID_KEY] = uid
-                batt_model = RFIDTag(batt_dict)
-                self.tags.tag_list.append(batt_model)
+                #self.tags.tag_list.append(RFIDTag(batt_dict))
+                self.tags.tag_list.append(batt_dict) # Don't know if this will work
         
     def stop(self):
         self.loop_done = True
@@ -275,7 +277,7 @@ class TagReader(threading.Thread):
 
     def exit(self):
         self.stop()
-        lone_read_thread = None
+        lone_thread = None
 
 class TagWriter(threading.Thread):
     SUCCESS = 0
@@ -287,9 +289,9 @@ class TagWriter(threading.Thread):
 
     @classmethod
     def instance(cls):
-        if lone_read_thread == None:
-            lone_read_thread = cls()
-        return lone_read_thread
+        if lone_thread == None:
+            lone_thread = cls()
+        return lone_thread
     
     def __init__(self):
         super(TagWriter, self).__init__(name="Write RFID tag")
@@ -299,17 +301,17 @@ class TagWriter(threading.Thread):
     def start():
         print "start() requires at least an RFIDTag argument in this class"
         
-    def start(self, batt_dict, **kwargs):
+    def start(self, rfid_tag, **kwargs):
         if self.loop_done:
-            lone_read_thread = None
-            TagReader.instance().start(batt_dict, **kwargs)
+            lone_thread.exit()
+            TagReader.instance().start(rfid_tag, **kwargs)
         elif self.is_alive():
             self.stop()
-            self.start(batt_dict, **kwargs)
+            self.start(rfid_tag, **kwargs)
         else:
-            self.batt_dict = batt_dict
+            self.rfid_tag = rfid_tag
             self.force = kwargs.get("force", False)
-            super(TagWriter, self).start()  # Invoke the superclass's method
+            super(TagWriter, self).start()  # Spin up the thread
             
     def run(self):
         self.write_result = self.IN_PROGRESS
@@ -324,6 +326,7 @@ class TagWriter(threading.Thread):
             if schema != None:
                 if not writable:
                     self.write_result = self.READONLY_TAG
+                    self.loop_done = True
                     break
                 if not self.force:
                     batt_dict = tio.read_tag(schema)
@@ -332,24 +335,23 @@ class TagWriter(threading.Thread):
                     if batt_dict[tio.CAPACITY_KEY] != 0:
                         # Tag already written; must use force to overwrite
                         self.write_result = self.USED_TAG
+                        self.loop_done = True
                         break
             else:
                 self.write_result = self.INVALID_TAG
+                self.loop_done = True
                 break
 
-            if tio.write_tag(schema, self.batt_dict) == None:
+            if tio.write_tag(schema, self.rfid_tag.to_native()) == None:
                 self.write_result = self.FAILED
             else:
                 self.write_result = self.SUCCESS
-            break
+            self.loop_done = True
 
     def get_result(self):
-        if lone_write_thread != None:
-            return self.write_result
-        else:
-            return None
+        return self.write_result
     
     def exit(self):
         self.loop_done = True
         self.join()
-        lone_write_thread = None
+        lone_thread = None
