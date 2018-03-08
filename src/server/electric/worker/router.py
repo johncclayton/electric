@@ -2,6 +2,7 @@ import logging
 
 import electric.testing_control as testing_control
 import electric.worker.cache as cache
+from electric.worker.rfidtagio import TagReader, TagWriter
 
 logger = logging.getLogger('electric.worker.router')
 
