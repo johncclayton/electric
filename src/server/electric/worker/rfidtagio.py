@@ -195,12 +195,13 @@ class TagIO:
         self.last_trailer_block = None        
     
 class TagReader(threading.Thread):
-    @classmethod
-    def instance(cls):
-        if type(lone_thread).__name__ == "TagWriter":
-            lone_thread.exit()
+    @staticmethod
+    def instance():
         if lone_thread == None:
-            lone_thread = cls()
+            lone_thread = TagReader()
+        elif type(lone_thread).__name__ == "TagWriter":
+            lone_thread.exit()
+            lone_thread = TagReader()
         return lone_thread
             
     def __init__(self):
@@ -289,12 +290,13 @@ class TagWriter(threading.Thread):
     READONLY_TAG = 4
     INVALID_TAG = 5
 
-    @classmethod
-    def instance(cls):
-        if type(lone_thread).__name__ == "TagReader":
-            lone_thread.exit()
+    @staticmethod
+    def instance():
         if lone_thread == None:
-            lone_thread = cls()
+            lone_thread = TagWriter()
+        elif type(lone_thread).__name__ == "TagReader":
+            lone_thread.exit()
+            lone_thread = TagWriter()
         return lone_thread
     
     def __init__(self):
