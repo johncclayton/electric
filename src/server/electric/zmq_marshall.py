@@ -242,3 +242,25 @@ class ZMQCommsManager(object):
 
     def set_case_fan_prefs(self, case_fan_object):
         return self._send_message_get_response("set_case_fan_prefs", case_fan_object)
+
+    # RFID Tag methods
+    def start_tag_reading(self):
+        return self._send_message_get_response("start_tag_reading")
+    
+    def stop_tag_reading(self):
+        return self._send_message_get_response("stop_tag_reading")
+    
+    def get_tag_list(self):
+        return self._send_message_get_response("get_tag_list")
+    
+    def kill_tag_reading(self):
+        return self._send_message_get_response("kill_tag_reading")
+    
+    def write_tag(self, rfid_tag_object):
+        return self._send_message_get_response("write_tag", rfid_tag_object)
+    
+    def get_tag_write_result(self):
+        return self._send_message_get_response("get_tag_write_result")
+        
+    def kill_tag_writing():
+        return self._send_message_get_response("kill_tag_writing")
