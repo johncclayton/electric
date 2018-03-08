@@ -325,4 +325,4 @@ class RFIDTagWriteResource(Resource):
     def post(self, batt_dict):
         json_dict = request.json
         rfid_tag = RFIDTag(json_dict)
-        return cmms.write_tag(rfid_tag).to_native()
+        return comms.write_tag(rfid_tag).to_native()
