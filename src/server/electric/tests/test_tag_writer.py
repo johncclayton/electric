@@ -1,7 +1,7 @@
-import time
-import rfidtagio
-import models
 import sys
+import time
+import electric.worker.rfidtagio
+import electric.models
 
 try:
     battery_id = int(raw_input("Battery ID? "))
