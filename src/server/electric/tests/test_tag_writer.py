@@ -1,7 +1,7 @@
 import sys
 import time
-import electric.worker.rfidtagio
-import electric.models
+from electric.worker.rfidtagio import TagWriter
+from electric.models import RFIDTag
 
 try:
     battery_id = int(raw_input("Battery ID? "))
@@ -30,21 +30,21 @@ except KeyboardInterrupt:
     
 try:
     rfid_tag = RFIDTag(batt_info)
-    writer = rfidtagio.TagWriter.instance()
+    writer = TagWriter.instance()
     writer.start(rfid_tag)
     result = writer.get_result()
-    while result == rfidtagio.TagWriter.IN_PROGRESS \
+    while result == TagWriter.IN_PROGRESS \
           or result == None:
         time.sleep(1)
         result = writer.get_result()
-    if result == rfidtagio.TagWriter.USED_TAG:
+    if result == TagWriter.USED_TAG:
         answer = raw_input("Tag already written. Rewrite? [y/N] ")
         if answer == "y" or answer == "Y":
             writer.exit()
-            writer = rfidtagio.TagWriter.instance()
-            writer = rfidtagio.start(rfid_tag, force=True)
+            writer = TagWriter.instance()
+            writer.start(rfid_tag, force=True)
             result = writer.get_result()
-            while result == rfidtagio.TagWriter.IN_PROGRESS
+            while result == TagWriter.IN_PROGRESS
                   or result == None:
                 time.sleep(1)
                 result = writer.get_result()
