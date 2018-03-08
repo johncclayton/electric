@@ -1,5 +1,7 @@
 import time
 import rfidtagio
+import models
+import sys
 
 try:
     battery_id = int(raw_input("Battery ID? "))
@@ -21,24 +23,37 @@ try:
                   "cycle count":cycles }
     print batt_info
     answer = raw_input("Is this correct? [y,N] ")
-    if answer == "Y" or answer == "y":
-        write_thread = rfidtagio.start_tag_writer(batt_info)
-        try:
-            while write_thread.write_result == rfidtagio.TagWriter.IN_PROGRESS\
-                  or write_thread.write_result == None:
+    if answer != "Y" and answer != "y":
+        raise KeyboardInterrupt
+except KeyboardInterrupt:
+    sys.exit()
+    
+try:
+    rfid_tag = RFIDTag(batt_info)
+    writer = rfidtagio.TagWriter.instance()
+    writer.start(rfid_tag)
+    result = writer.get_result()
+    while result == rfidtagio.TagWriter.IN_PROGRESS \
+          or result == None:
+        time.sleep(1)
+        result = writer.get_result()
+    if result == rfidtagio.TagWriter.USED_TAG:
+        answer = raw_input("Tag already written. Rewrite? [y/N] ")
+        if answer == "y" or answer == "Y":
+            writer.exit()
+            writer = rfidtagio.TagWriter.instance()
+            writer = rfidtagio.start(rfid_tag, force=True)
+            result = writer.get_result()
+            while result == rfidtagio.TagWriter.IN_PROGRESS
+                  or result == None:
                 time.sleep(1)
-            if write_thread.write_result == rfidtagio.TagWriter.USED_TAG:
-                answer = raw_input("Tag already written. Rewrite? [y/N] ")
-                if answer == "y" or answer == "Y":
-                    rfidtagio.abort_tag_writer()
-                    write_thread = rfidtagio.start_tag_writer(batt_info, \
-                                                                force=True)
-                    while write_thread.write_result == None:
-                        time.sleep(1)
-        except KeyboardInterrupt:
-            raise
-        finally:
-            rfidtagio.abort_tag_writer()
+                result = writer.get_result()
 
 except KeyboardInterrupt:      
     print "Aborted."
+
+else:
+    print "Write result:", result
+
+finally:
+    writer.exit()
