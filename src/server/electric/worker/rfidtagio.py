@@ -197,6 +197,8 @@ class TagIO:
 class TagReader(threading.Thread):
     @classmethod
     def instance(cls):
+        if type(lone_thread).__name__ == "TagWriter":
+            lone_thread.exit()
         if lone_thread == None:
             lone_thread = cls()
         return lone_thread
@@ -289,6 +291,8 @@ class TagWriter(threading.Thread):
 
     @classmethod
     def instance(cls):
+        if type(lone_thread).__name__ == "TagReader":
+            lone_thread.exit()
         if lone_thread == None:
             lone_thread = cls()
         return lone_thread
