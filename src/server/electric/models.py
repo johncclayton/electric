@@ -48,13 +48,13 @@ class ChemistryType:
     NiZn = 6
 
 class RFIDTagOpResults:
-    READY = "ready to start"
-    SUCCESS = "success"
-    IN_PROGRESS = "in progress"
-    FAILED = "failed"
-    USED_TAG = "used tag"
-    READONLY_TAG = "read-only tag"
-    INVALID_TAG = "invalid tag"
+    Ready = "ready to start"
+    Success = "success"
+    InProgress = "in progress"
+    Failed = "failed"
+    UsedTag = "used tag"
+    ReadOnlyTag = "read-only tag"
+    InvalidTag = "invalid tag"
 
 '''
 
