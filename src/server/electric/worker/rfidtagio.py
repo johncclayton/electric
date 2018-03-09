@@ -216,6 +216,7 @@ class TagReader(threading.Thread):
             self.start()
         else:
             super(TagReader, self).start()
+            return { "status":"success" }
             
     def run(self):
         prev_uid = None
@@ -288,6 +289,7 @@ class TagReader(threading.Thread):
     def stop(self):
         self.loop_done = True
         self.join()
+        return { "status":"success" }
 
     def get_tag_list(self):
         return self.tags
@@ -296,6 +298,7 @@ class TagReader(threading.Thread):
         global lone_thread
         self.stop()
         lone_thread = None
+        return { "status":"success" }
 
 class TagWriter(threading.Thread):
     SUCCESS = 0
@@ -335,6 +338,7 @@ class TagWriter(threading.Thread):
             self.rfid_tag = rfid_tag
             self.force = kwargs.get("force", False)
             super(TagWriter, self).start()  # Spin up the thread
+            return { "status":"success" }
             
     def run(self):
         self.write_result = self.IN_PROGRESS
@@ -379,3 +383,4 @@ class TagWriter(threading.Thread):
         self.loop_done = True
         self.join()
         lone_thread = None
+        return { "status":"success" }
