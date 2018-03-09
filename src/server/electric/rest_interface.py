@@ -324,5 +324,9 @@ class RFIDTagWriteResource(Resource):
         
     def post(self, batt_dict):
         json_dict = request.json
-        rfid_write_info = RFIDWriteInfo(json_dict)
-        return comms.write_tag(rfid_write_info).to_native()
+        try:
+            rfid_write_info = RFIDWriteInfo(json_dict).validate()
+        except:
+            return { "error":"Data validation error" }
+        else:
+            return comms.write_tag(rfid_write_info).to_native()
