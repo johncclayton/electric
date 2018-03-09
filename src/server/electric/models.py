@@ -47,6 +47,14 @@ class ChemistryType:
     Pb = 5
     NiZn = 6
 
+class RFIDTagOpResults:
+    READY = "ready to start"
+    SUCCESS = "success"
+    IN_PROGRESS = "in progress"
+    FAILED = "failed"
+    USED_TAG = "used tag"
+    READONLY_TAG = "read-only tag"
+    INVALID_TAG = "invalid tag"
 
 '''
 
@@ -211,7 +219,9 @@ class RFIDTag(Model):
                         default=1)
     def validate_charge_mA(self, data, value):
         if value > (data["capacity"] * data["c_charge_limit"]:
+            # Coerce the value in range
             value = data["capacity"] * data["c_charge_limit"]
+            data["charge_mA"] = value
         return value
     
     # Discharge rate in mA - validated against c_rating
@@ -219,7 +229,9 @@ class RFIDTag(Model):
                            default=1)
     def validate_discharge_mA(self, data, value):
         if value > (data["capacity"] * data["c_rating"]):
+            # Coerce the value in range
             value = data["capacity"] * data["c_rating"]
+            data["discharge_mA"] = value
         return value;
 
 class RFIDTagList(Model):
