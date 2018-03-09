@@ -258,9 +258,10 @@ class TagReader(threading.Thread):
                     #print "rfid_tag cells =", cells
                 #print "batt_dict chemistry =", batt_dict[tio.CHEMISTRY_KEY]
                 #print "batt_dict cells =", batt_dict[tio.CELLS_KEY]
-                if rfid_tag[tio.BATTERY_ID_KEY] == \
+                if batt_dict[tio.CAPACITY_KEY] <= 0 \
+                   or (rfid_tag[tio.BATTERY_ID_KEY] == \
                                                  batt_dict[tio.BATTERY_ID_KEY] \
-                   and rfid_tag[tio.TAG_UID_KEY] == uid:
+                       and rfid_tag[tio.TAG_UID_KEY] == uid):
                     chemistry = None
                     cells = None
                     break
