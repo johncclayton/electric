@@ -211,6 +211,10 @@ class RFIDTag(Model):
 class RFIDTagList(Model):
     tag_list = ListType(ModelType(RFIDTag))
 
+class RFIDWriteInfo(Model):
+    rfid_tag = ModelType(RFIDTag, required=True)
+    force = BooleanType(required=False, default=False)
+    
 class CaseFan(Model):
     # Whether or not we should be trying to control the fan at all
     control = BooleanType(required=False, default=False)
