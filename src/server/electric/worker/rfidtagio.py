@@ -339,10 +339,10 @@ class TagWriter(threading.Thread):
             self.rfid_tag = rfid_tag
             self.force = kwargs.get("force", False)
             super(TagWriter, self).start()  # Spin up the thread
-            return { "status":self.SUCCESS }
+            self.write_result = self.IN_PROGRESS
+            return { "status":self.write_result }
             
     def run(self):
-        self.write_result = self.IN_PROGRESS
         tio = TagIO()
         while not self.loop_done:
             tio.reset()
