@@ -71,27 +71,27 @@ class TagIO:
             return (None, None)
 
     def read_block(self, block):
-        print "tag_uid = ", self.tag_uid
-        print "block = ", block
+        #print "tag_uid = ", self.tag_uid
+        #print "block = ", block
         trailer_block = block // 4 * 4 + 3
-        print "trailer_block =",trailer_block,"last =",self.last_trailer_block
+        #print "trailer_block =",trailer_block,"last =",self.last_trailer_block
         if trailer_block != self.last_trailer_block:
             self.read_writer.MFRC522_StopCrypto1()
             status = self.read_writer.MFRC522_Auth( \
                                       self.read_writer.PICC_AUTHENT1A, \
                                       block, self.AUTH_KEY, self.tag_uid)
-            print "After read Auth: AUTH_KEY =", self.AUTH_KEY
+            #print "After read Auth: AUTH_KEY =", self.AUTH_KEY
             if status != self.read_writer.MI_OK:
                 return None
             else:
                 self.last_trailer_block = trailer_block
         data = self.read_writer.MFRC522_Read(block)
-        print "block[",block,"] = ",data
+        #print "block[",block,"] = ",data
         return data
 
     def write_block(self, block, data):
-        print "tag_uid = ", self.tag_uid
-        print "block = ", block
+        #print "tag_uid = ", self.tag_uid
+        #print "block = ", block
         trailer_block = block // 4 * 4 + 3
         "trailer_block =",trailer_block,"last =",self.last_trailer_block
         if trailer_block != self.last_trailer_block:
@@ -99,7 +99,7 @@ class TagIO:
             status = self.read_writer.MFRC522_Auth(self.read_writer.PICC_AUTHENT1A, \
                                                   block, \
                                                   self.AUTH_KEY, self.tag_uid)
-            print "After write Auth: AUTH_KEY =", self.AUTH_KEY
+            #print "After write Auth: AUTH_KEY =", self.AUTH_KEY
             if status != self.read_writer.MI_OK:
                 return None
             else:
@@ -107,19 +107,19 @@ class TagIO:
                 status = self.read_writer.MFRC522_Read(trailer_block)
                 if status != cls.read_writer.MI_OK:
                     return None
-        print "write block, data = ", block, ",",data
+        #print "write block, data = ", block, ",",data
         self.read_writer.MFRC522_Write(block, data)
         data = self.read_writer.MFRC522_Read(block)
-        print "read back block, data = ", block, ",",data
+        #print "read back block, data = ", block, ",",data
         return data
 
     def read_tag(self, schema):
         batt_dict = {}
 
         for block in schema.keys():
-            print "block in schema.keys =", block
+            #print "block in schema.keys =", block
             data = self.read_block(block)
-            print "data in block =", data
+            #print "data in block =", data
             if data == None:
                 return None
             block_dict = schema[block]
@@ -150,17 +150,13 @@ class TagIO:
         for block in schema.keys():
             data = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             block_dict = schema[block]
-            print "batt_dict = ", batt_dict
+            #print "batt_dict = ", batt_dict
 
             for param in block_dict.keys():
                 posn_tuple = block_dict[param]
-                print "posn_tuple = ", posn_tuple
                 start_byte = posn_tuple[0]
-                print "start_byte = ", start_byte
                 byte_len = posn_tuple[1]
-                print "byte_len = ", byte_len
-                value = batt_dict[param]
-                print "value = ", value
+                value = int(batt_dict[param])
 
                 if byte_len == 1:
                     data[start_byte] = value & 0xFF
@@ -176,18 +172,18 @@ class TagIO:
                     data[start_byte + 1] = (value >> 16) & 0xFF
                     data[start_byte + 2] = (value >> 8) & 0xFF
                     data[start_byte + 3] = value & 0xFF
-                print "block =", block, "data =",data
+                #print "block =", block, "data =",data
 
             # Don't write the block if nothing changed
-            print "Data after conversion from batt_dict =", data
+            #print "Data after conversion from batt_dict =", data
             current_data = self.read_block(block)
-            print "Data currently in target block =", current_data
+            #print "Data currently in target block =", current_data
             if current_data != data:
-                print "New data to write!"
+                #print "New data to write!"
                 if self.write_block(block, data) == None:
                     return None
 
-        print "data = ", data
+        #print "data = ", data
         return self.read_tag(schema)
 
     def reset(self):
@@ -197,6 +193,7 @@ class TagIO:
 class TagReader(threading.Thread):
     @staticmethod
     def instance():
+        global lone_thread
         if lone_thread == None:
             lone_thread = TagReader()
         elif type(lone_thread).__name__ == "TagWriter":
@@ -210,6 +207,7 @@ class TagReader(threading.Thread):
         self.tags = RFIDTagList({ "tag_list":[] })
 
     def start(self):
+        global lone_thread
         if self.loop_done:
             lone_thread.exit()
             TagReader.instance().start()
@@ -251,8 +249,15 @@ class TagReader(threading.Thread):
             chemistry = None
             cells = None
             for rfid_tag in self.tags.tag_list:
-                if (chemistry == None): chemistry = rfid_tag[tio.CHEMSTRY_KEY]
-                if (cells == None): cells = rfid_tag[tio.CHEMISTRY_KEY]
+                #print "tag in loop:",rfid_tag
+                if (chemistry == None):
+                    chemistry = rfid_tag[tio.CHEMISTRY_KEY]
+                    #print "rfid_tag chemistry =", chemistry
+                if (cells == None):
+                    cells = rfid_tag[tio.CELLS_KEY]
+                    #print "rfid_tag cells =", cells
+                #print "batt_dict chemistry =", batt_dict[tio.CHEMISTRY_KEY]
+                #print "batt_dict cells =", batt_dict[tio.CELLS_KEY]
                 if rfid_tag[tio.BATTERY_ID_KEY] == \
                                                  batt_dict[tio.BATTERY_ID_KEY] \
                    and rfid_tag[tio.TAG_UID_KEY] == uid:
@@ -279,6 +284,7 @@ class TagReader(threading.Thread):
         return self.tags
 
     def exit(self):
+        global lone_thread
         self.stop()
         lone_thread = None
 
@@ -292,6 +298,7 @@ class TagWriter(threading.Thread):
 
     @staticmethod
     def instance():
+        global lone_thread
         if lone_thread == None:
             lone_thread = TagWriter()
         elif type(lone_thread).__name__ == "TagReader":
@@ -308,6 +315,7 @@ class TagWriter(threading.Thread):
         print "start() requires at least an RFIDTag argument in this class"
         
     def start(self, rfid_tag, **kwargs):
+        global lone_thread
         if self.loop_done:
             lone_thread.exit()
             TagReader.instance().start(rfid_tag, **kwargs)
@@ -358,6 +366,7 @@ class TagWriter(threading.Thread):
         return self.write_result
     
     def exit(self):
+        global lone_thread
         self.loop_done = True
         self.join()
         lone_thread = None

@@ -1,6 +1,6 @@
 import sys
 import time
-from electric.worker.rfidtagio import TagWriter
+from electric.worker.rfidtagio import TagIO, TagWriter
 from electric.models import RFIDTag
 
 try:
@@ -16,11 +16,15 @@ try:
     discharge_rate = int(raw_input("Desired discharge rate (mAh)? "))
     cycles = int(raw_input("Initial cycle count? "))
 
-    batt_info = { "battery id":battery_id, "chemistry":chemistry, \
-                  "cell count":cells, "capacity":capacity, \
-                  "c rating":c_rating, "max charge c":max_charge_rate, \
-                  "charge rate":charge_rate, "discharge rate":discharge_rate, \
-                  "cycle count":cycles }
+    batt_info = { TagIO.BATTERY_ID_KEY:battery_id, \
+                  TagIO.CHEMISTRY_KEY:chemistry, \
+                  TagIO.CELLS_KEY:cells, \
+                  TagIO.CAPACITY_KEY:capacity, \
+                  TagIO.C_RATING_KEY:c_rating, \
+                  TagIO.C_CHARGE_MAX_KEY:max_charge_rate, \
+                  TagIO.CHARGE_RATE_KEY:charge_rate, \
+                  TagIO.DISCHARGE_RATE_KEY:discharge_rate, \
+                  TagIO.CYCLES_KEY:cycles }
     print batt_info
     answer = raw_input("Is this correct? [y,N] ")
     if answer != "Y" and answer != "y":
@@ -29,7 +33,9 @@ except KeyboardInterrupt:
     sys.exit()
     
 try:
+    print "Starting the write process..."
     rfid_tag = RFIDTag(batt_info)
+    print "rfid_tag contents =", rfid_tag.to_native()
     writer = TagWriter.instance()
     writer.start(rfid_tag)
     result = writer.get_result()
@@ -44,8 +50,7 @@ try:
             writer = TagWriter.instance()
             writer.start(rfid_tag, force=True)
             result = writer.get_result()
-            while result == TagWriter.IN_PROGRESS
-                  or result == None:
+            while result == TagWriter.IN_PROGRESS or result == None:
                 time.sleep(1)
                 result = writer.get_result()
 
