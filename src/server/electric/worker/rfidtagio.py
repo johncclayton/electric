@@ -258,10 +258,9 @@ class TagReader(threading.Thread):
                     #print "rfid_tag cells =", cells
                 #print "batt_dict chemistry =", batt_dict[tio.CHEMISTRY_KEY]
                 #print "batt_dict cells =", batt_dict[tio.CELLS_KEY]
-                if batt_dict[tio.CAPACITY_KEY] <= 0 \
-                   or (rfid_tag[tio.BATTERY_ID_KEY] == \
+                if rfid_tag[tio.BATTERY_ID_KEY] == \
                                                  batt_dict[tio.BATTERY_ID_KEY] \
-                       and rfid_tag[tio.TAG_UID_KEY] == uid):
+                   and rfid_tag[tio.TAG_UID_KEY] == uid):
                     chemistry = None
                     cells = None
                     break
@@ -270,9 +269,12 @@ class TagReader(threading.Thread):
             # 1. The list is empty, or
             # 2. The tag is not already in the list and the chemistry and
             #    cell count in the new tag match that of the existing tags
-            if self.tags.tag_list == [] \
-               or (batt_dict[tio.CHEMISTRY_KEY] == chemistry \
-                   and batt_dict[tio.CELLS_KEY] == cells):
+            if batt_dict[tio.BATTERY_ID_KEY] != 0 \
+               and batt_dict[tio.CELLS_KEY] > 0 \
+               and batt_dict[tio.CAPACITY_KEY] > 0 \
+               and (self.tags.tag_list == [] \
+                    or (batt_dict[tio.CHEMISTRY_KEY] == chemistry \
+                        and batt_dict[tio.CELLS_KEY] == cells):
                 batt_dict[tio.TAG_UID_KEY] = uid
                 #self.tags.tag_list.append(RFIDTag(batt_dict))
                 self.tags.tag_list.append(batt_dict) # Don't know if this will work
