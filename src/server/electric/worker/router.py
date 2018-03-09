@@ -80,7 +80,11 @@ def route_message(charger, method, args):
     elif method == "kill_tag_reading":
         TagReader.instance().exit()
     elif method == "write_tag":
-        TagWriter.instance().start(args)
+        rfid_tag = args.rfid_tag
+        if args.get('force'):
+            TagWriter.instance().start(rfid_tag, force=args.force)
+        else:
+            TagWriter.instance().start(rfid_tag)
     elif method == "get_tag_write_result:
         TagWriter.instance().get_result()
     elif method == "kill_tag_writing":
