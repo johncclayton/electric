@@ -50,11 +50,13 @@ class ChemistryType:
 class RFIDTagOpResults:
     Ready = "ready to start"
     Success = "success"
-    InProgress = "in progress"
+    Running = "running"
     Failed = "failed"
     UsedTag = "used tag"
     ReadOnlyTag = "read-only tag"
     InvalidTag = "invalid tag"
+    Stopped = "stopped"
+    Dead = "dead"
 
 '''
 
