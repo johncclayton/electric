@@ -256,8 +256,8 @@ class ZMQCommsManager(object):
     def kill_tag_reading(self):
         return self._send_message_get_response("kill_tag_reading")
     
-    def write_tag(self, rfid_tag_object):
-        return self._send_message_get_response("write_tag", rfid_tag_object)
+    def write_tag(self, rfid_write_info):
+        return self._send_message_get_response("write_tag", rfid_write_info)
     
     def get_tag_write_result(self):
         return self._send_message_get_response("get_tag_write_result")
