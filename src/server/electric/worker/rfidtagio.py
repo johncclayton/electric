@@ -9,7 +9,7 @@ import copy
 import MFRC522
 from Queue import Queue
 import RPi.GPIO as GPIO
-from electric.models import RFIDTag, RFIDTagList
+from electric.models import RFIDTagOpResult, RFIDTag, RFIDTagList
 
 logger = logging.getLogger('electric.worker.rfidtagio')
 lone_thread = None
@@ -209,14 +209,11 @@ class TagReader(threading.Thread):
     def start(self):
         global lone_thread
         if self.loop_done:
-            lone_thread.exit()
-            TagReader.instance().start()
-        elif self.is_alive():
-            self.stop()
-            self.start()
-        else:
+            self.exit()
+            return self.instance().start()
+        elif not self.is_alive():
             super(TagReader, self).start()
-            return { "status":TagWriter.SUCCESS }
+        return { "status":RFIDTagResult.Running }
             
     def run(self):
         prev_uid = None
@@ -253,12 +250,8 @@ class TagReader(threading.Thread):
                 #print "tag in loop:",rfid_tag
                 if (chemistry == None):
                     chemistry = rfid_tag[tio.CHEMISTRY_KEY]
-                    #print "rfid_tag chemistry =", chemistry
                 if (cells == None):
                     cells = rfid_tag[tio.CELLS_KEY]
-                    #print "rfid_tag cells =", cells
-                #print "batt_dict chemistry =", batt_dict[tio.CHEMISTRY_KEY]
-                #print "batt_dict cells =", batt_dict[tio.CELLS_KEY]
                 if rfid_tag[tio.BATTERY_ID_KEY] == \
                                                  batt_dict[tio.BATTERY_ID_KEY] \
                    and rfid_tag[tio.TAG_UID_KEY] == uid):
@@ -289,7 +282,7 @@ class TagReader(threading.Thread):
     def stop(self):
         self.loop_done = True
         self.join()
-        return { "status":TagWriter.SUCCESS }
+        return { "status":RFIDTagOpResult.Stopped }
 
     def get_tag_list(self):
         return self.tags
@@ -298,17 +291,9 @@ class TagReader(threading.Thread):
         global lone_thread
         self.stop()
         lone_thread = None
-        return { "status":TagWriter.SUCCESS }
+        return { "status":RFIDTagOpResult.Dead }
 
 class TagWriter(threading.Thread):
-    READY = "ready to start"
-    SUCCESS = "success"
-    IN_PROGRESS = "in progress"
-    FAILED = "failed"
-    USED_TAG = "used tag"
-    READONLY_TAG = "read-only tag"
-    INVALID_TAG = "invalid tag"
-
     @staticmethod
     def instance():
         global lone_thread
@@ -322,7 +307,7 @@ class TagWriter(threading.Thread):
     def __init__(self):
         super(TagWriter, self).__init__(name="Write RFID tag")
         self.loop_done = False
-        self.write_result = READY
+        self.write_result = RFIDTagOpResult.Ready
 
     def start():
         print "start() requires at least an RFIDTag argument in this class"
@@ -330,17 +315,14 @@ class TagWriter(threading.Thread):
     def start(self, rfid_tag, **kwargs):
         global lone_thread
         if self.loop_done:
-            lone_thread.exit()
-            TagReader.instance().start(rfid_tag, **kwargs)
-        elif self.is_alive():
-            self.stop()
-            self.start(rfid_tag, **kwargs)
-        else:
+            self.exit()
+            return self.instance().start(rfid_tag, **kwargs)
+        elif not self.is_alive():
             self.rfid_tag = rfid_tag
             self.force = kwargs.get("force", False)
             super(TagWriter, self).start()  # Spin up the thread
-            self.write_result = self.IN_PROGRESS
-            return { "status":self.write_result }
+            self.write_result = RFIDTagOpResult.Running
+        return { "status":self.write_result }
             
     def run(self):
         tio = TagIO()
@@ -353,7 +335,7 @@ class TagWriter(threading.Thread):
             (schema, writable) = tio.get_schema(type)
             if schema != None:
                 if not writable:
-                    self.write_result = self.READONLY_TAG
+                    self.write_result = RFIDTagOpResult.ReadOnlyTag
                     self.loop_done = True
                     break
                 if not self.force:
@@ -366,14 +348,14 @@ class TagWriter(threading.Thread):
                         self.loop_done = True
                         break
             else:
-                self.write_result = self.INVALID_TAG
+                self.write_result = RFIDTagOpResult.InvalidTag
                 self.loop_done = True
                 break
 
             if tio.write_tag(schema, self.rfid_tag.to_native()) == None:
-                self.write_result = self.FAILED
+                self.write_result = RFIDTagOpResult.Failed
             else:
-                self.write_result = self.SUCCESS
+                self.write_result = RFIDTagOpResult.Success
             self.loop_done = True
 
     def get_result(self):
@@ -384,4 +366,4 @@ class TagWriter(threading.Thread):
         self.loop_done = True
         self.join()
         lone_thread = None
-        return { "status":self.SUCCESS }
+        return { "status":RFIDTagOpResult.Dead }
