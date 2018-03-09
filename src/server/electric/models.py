@@ -176,37 +176,40 @@ class WriteDataSegment(object):
 
 
 class RFIDTag(Model):
-    # Battery ID
-    battery_id = IntType(required=True, min_value=0)
+    # Battery ID - used in conjunction with tag_uid to uniquely identify
+    #              the battery
+    battery_id = IntType(required=True, min_value=1, max_value=2**16-1)
     
-    # Tag UID
-    tag_uid = ListType(IntType, required=False, min_size=4, max_size=4)
+    # Tag UID - populated when writing a tag
+    tag_uid = ListType(IntType(min_value=0, max_value=2**8-1), \
+                       required=False, min_size=4, max_size=4)
 
-    # Chemistry (e.g. LiPo, LiFe, NiMH)
+    # Chemistry (e.g. LiPo, LiFe, NiMH) - required for charging and parallel
+    #                                     accumulation validation
     chemistry = IntType(required=True, min_value=ChemistryType.LiPo, \
                         max_value=ChemistryType.NiZn, \
                         default=ChemistryType.LiPo)
 
-    # Capacity in mAh
-    capacity = IntType(required=False, min_value=1, default=100)
+    # Capacity in mAh - required for charging and for charge_mA validation
+    capacity = IntType(required=True, min_value=1, max_value=2**16-1)
     
-    # Number of cells
-    cells = IntType(required=False, min_value=1, max_value=20, default=3)
+    # Number of cells - required for parallel accumulation validation
+    cells = IntType(required=True, min_value=1, max_value=20)
 
-    # C rating of the pack
-    c_rating = FloatType(required=True, min_value=0.1, max_value=5, default=1)
+    # C rating of the pack - required for discharge_mA validation
+    c_rating = IntType(required=True, min_value=1, max_value=2**16-1)
     
     # Charge cycles
-    cycles = IntType(required=False, min_value=0, default=0)
+    cycles = IntType(required=False, min_value=0, max_value=2**16-1, default=0)
 
-    # Charge rate limit in C
-    c_charge_limit = IntType(required=False, default=1)
+    # Charge rate limit in C - required for charge_mA validation
+    c_charge_limit = IntType(required=True, min_value=1, max_value=2**16-1, default=1)
     
-    # Desired charge rate in mA (validated against c_charge_limit)
-    charge_mA = IntType(required=True, min_value=1, default=1000)
+    # Desired charge rate in mA - validated against c_charge_limit
+    charge_mA = IntType(required=True, min_value=1, max_value=999999, default=1)
     
-    # Discharge rate in mA
-    discharge_mA = IntType(required=True, min_value=1, default=1000)
+    # Discharge rate in mA - validated against c_rating
+    discharge_mA = IntType(required=True, min_value=1, max_value=999999, default=1)
 
 class RFIDTagList(Model):
     tag_list = ListType(ModelType(RFIDTag))
