@@ -269,15 +269,21 @@ class TagReader(threading.Thread):
             # 1. The list is empty, or
             # 2. The tag is not already in the list and the chemistry and
             #    cell count in the new tag match that of the existing tags
-            if batt_dict[tio.BATTERY_ID_KEY] != 0 \
-               and batt_dict[tio.CELLS_KEY] > 0 \
-               and batt_dict[tio.CAPACITY_KEY] > 0 \
-               and (self.tags.tag_list == [] \
+            if """batt_dict[tio.BATTERY_ID_KEY] != 0""" \
+               """and batt_dict[tio.CELLS_KEY] > 0""" \
+               """and batt_dict[tio.CAPACITY_KEY] > 0""" \
+               """and""" (self.tags.tag_list == [] \
                     or (batt_dict[tio.CHEMISTRY_KEY] == chemistry \
                         and batt_dict[tio.CELLS_KEY] == cells):
                 batt_dict[tio.TAG_UID_KEY] = uid
-                #self.tags.tag_list.append(RFIDTag(batt_dict))
-                self.tags.tag_list.append(batt_dict) # Don't know if this will work
+                try:
+                    rfid_tag = RFIDTag(batt_dict).validate()
+                except ModelValidationError as e:
+                    print "Data error in scanned tag info!"
+                    print batt_dict
+                    print "Tag ignored."
+                else:
+                    self.tags.tag_list.append(rfid_tag)
         
     def stop(self):
         self.loop_done = True
