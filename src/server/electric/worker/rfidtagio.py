@@ -216,7 +216,7 @@ class TagReader(threading.Thread):
             self.start()
         else:
             super(TagReader, self).start()
-            return { "status":"success" }
+            return { "status":TagWriter.SUCCESS }
             
     def run(self):
         prev_uid = None
@@ -289,7 +289,7 @@ class TagReader(threading.Thread):
     def stop(self):
         self.loop_done = True
         self.join()
-        return { "status":"success" }
+        return { "status":TagWriter.SUCCESS }
 
     def get_tag_list(self):
         return self.tags
@@ -298,15 +298,16 @@ class TagReader(threading.Thread):
         global lone_thread
         self.stop()
         lone_thread = None
-        return { "status":"success" }
+        return { "status":TagWriter.SUCCESS }
 
 class TagWriter(threading.Thread):
-    SUCCESS = 0
-    IN_PROGRESS = 1
-    FAILED = 2
-    USED_TAG = 3
-    READONLY_TAG = 4
-    INVALID_TAG = 5
+    READY = "ready to start"
+    SUCCESS = "success"
+    IN_PROGRESS = "in progress"
+    FAILED = "failed"
+    USED_TAG = "used tag"
+    READONLY_TAG = "read-only tag"
+    INVALID_TAG = "invalid tag"
 
     @staticmethod
     def instance():
@@ -321,7 +322,7 @@ class TagWriter(threading.Thread):
     def __init__(self):
         super(TagWriter, self).__init__(name="Write RFID tag")
         self.loop_done = False
-        self.write_result = None
+        self.write_result = READY
 
     def start():
         print "start() requires at least an RFIDTag argument in this class"
@@ -338,7 +339,7 @@ class TagWriter(threading.Thread):
             self.rfid_tag = rfid_tag
             self.force = kwargs.get("force", False)
             super(TagWriter, self).start()  # Spin up the thread
-            return { "status":"success" }
+            return { "status":self.SUCCESS }
             
     def run(self):
         self.write_result = self.IN_PROGRESS
@@ -376,11 +377,11 @@ class TagWriter(threading.Thread):
             self.loop_done = True
 
     def get_result(self):
-        return self.write_result
+        return { "status":self.write_result }
     
     def exit(self):
         global lone_thread
         self.loop_done = True
         self.join()
         lone_thread = None
-        return { "status":"success" }
+        return { "status":self.SUCCESS }
