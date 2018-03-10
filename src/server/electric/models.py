@@ -47,16 +47,18 @@ class ChemistryType:
     Pb = 5
     NiZn = 6
 
-class RFIDTagOpResults:
-    Ready = "ready to start"
-    Success = "success"
-    Running = "running"
-    Failed = "failed"
-    UsedTag = "used tag"
-    ReadOnlyTag = "read-only tag"
-    InvalidTag = "invalid tag"
-    Stopped = "stopped"
-    Dead = "dead"
+
+class RFIDTagOpResult:
+    Ready = 'ready to start'
+    Success = 'success'
+    Running = 'running'
+    Failed = 'failed'
+    UsedTag = 'used tag'
+    ReadOnlyTag = 'read-only tag'
+    InvalidTag = 'invalid tag'
+    Stopped = 'stopped'
+    Dead = 'dead'
+
 
 '''
 
@@ -192,7 +194,7 @@ class RFIDTag(Model):
     
     # Tag UID - populated when writing a tag
     tag_uid = ListType(IntType(min_value=0, max_value=2**8-1), \
-                       required=False, min_size=4, max_size=4)
+                       required=False, min_size=5, max_size=5)
 
     # Chemistry (e.g. LiPo, LiFe, NiMH) - required for charging and parallel
     #                                     accumulation validation
@@ -220,7 +222,7 @@ class RFIDTag(Model):
     charge_mA = IntType(required=True, min_value=1, max_value=999999, \
                         default=1)
     def validate_charge_mA(self, data, value):
-        if value > (data["capacity"] * data["c_charge_limit"]:
+        if value > data["capacity"] * data["c_charge_limit"]:
             # Coerce the value in range
             value = data["capacity"] * data["c_charge_limit"]
             data["charge_mA"] = value
