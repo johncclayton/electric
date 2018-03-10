@@ -38,10 +38,10 @@ class TagIO:
                          CYCLES_KEY        :( 4, 2 ),   \
                          CELLS_KEY         :( 6, 2 ) }, \
                    61: { C_RATING_KEY      :( 0, 2 ) }, \
-                   62: { CHEMISTRY_KEY     :( 0, 2 ),   \
-                         C_CHARGE_MAX_KEY  :( 2, 2 ),   \
-                         CHARGE_RATE_KEY   :( 4, 4 ),   \
-                         DISCHARGE_RATE_KEY:( 8, 4 ) } }
+                   62: { CHEMISTRY_KEY     :( 0, 1 ),   \
+                         C_CHARGE_MAX_KEY  :( 1, 1 ),   \
+                         CHARGE_RATE_KEY   :( 2, 3 ),   \
+                         DISCHARGE_RATE_KEY:( 5, 3 ) } }
     REVO_SCHEMA = {}
 
     def __init__(self):
