@@ -215,7 +215,7 @@ class RFIDTag(Model):
     cycles = IntType(required=False, min_value=0, max_value=2**16-1, default=0)
 
     # Charge rate limit in C - required for charge_mA validation
-    c_charge_limit = IntType(required=True, min_value=1, max_value=2**16-1, \
+    c_charge_limit = IntType(required=True, min_value=1, max_value=2**8-1, \
                              default=1)
     
     # Desired charge rate in mA - validated against c_charge_limit
