@@ -48,7 +48,7 @@ class ChemistryType:
     NiZn = 6
 
 
-class RFIDTagOpResult:
+class RFIDTagOpStatus:
     Ready = 'ready to start'
     Success = 'success'
     Running = 'running'
@@ -240,10 +240,12 @@ class RFIDTag(Model):
 
 class RFIDTagList(Model):
     tag_list = ListType(ModelType(RFIDTag))
+    status = StringType()
 
 class RFIDWriteInfo(Model):
     rfid_tag = ModelType(RFIDTag, required=True)
     force = BooleanType(required=False, default=False)
+print RFIDWriteInfo.__dict__
     
 class CaseFan(Model):
     # Whether or not we should be trying to control the fan at all
@@ -258,8 +260,8 @@ class CaseFan(Model):
     # How much lag do you want, in deg C?
     hysteresis = IntType(required=False, min_value=0, max_value=20, default=3)
 
-    # Which pin on the board will control the fan circuit?
-    gpio = IntType(required=False, min_value=1, max_value=40, default=16)
+    # Which GPIO (NOT physical pin) on the board will control the fan circuit?
+    gpio = IntType(required=False, min_value=2, max_value=27, default=23)
 
 
 class DeviceInfoStatus(Model):

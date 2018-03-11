@@ -1,7 +1,7 @@
 import sys
 import time
 from electric.worker.rfidtagio import TagIO, TagWriter
-from electric.models import RFIDTag
+from electric.models import RFIDTag, RFIDTagOpStatus
 
 try:
     battery_id = int(raw_input("Battery ID? "))
@@ -39,18 +39,19 @@ try:
     writer = TagWriter.instance()
     writer.start(rfid_tag)
     result = writer.get_result()
-    while result == TagWriter.IN_PROGRESS \
-          or result == None:
+    while result["status"] == RFIDTagOpStatus.Running \
+          or result["status"] == RFIDTagOpStatus.Ready:
         time.sleep(1)
         result = writer.get_result()
-    if result == TagWriter.USED_TAG:
+    if result["status"] == RFIDTagOpStatus.UsedTag:
         answer = raw_input("Tag already written. Rewrite? [y/N] ")
         if answer == "y" or answer == "Y":
             writer.exit()
             writer = TagWriter.instance()
             writer.start(rfid_tag, force=True)
             result = writer.get_result()
-            while result == TagWriter.IN_PROGRESS or result == None:
+            while result["status"] == RFIDTagOpStatus.Running \
+                  or result["status"] == RFIDTagOpStatus.Ready:
                 time.sleep(1)
                 result = writer.get_result()
 

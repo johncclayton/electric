@@ -76,18 +76,20 @@ def route_message(charger, method, args):
     elif method == "stop_tag_reading":
         return TagReader.instance().stop()
     elif method == "get_tag_list":
-        return TagReader.instance().get_tag_list()
+        return TagReader.get_tag_list()
     elif method == "kill_tag_reading":
         return TagReader.instance().exit()
     elif method == "write_tag":
         rfid_tag = args.rfid_tag
+        print "router:", type(rfid_tag)
         if args.get('force'):
             return TagWriter.instance().start(rfid_tag, force=args.force)
         else:
             return TagWriter.instance().start(rfid_tag)
-    elif method == "get_tag_write_result:
-        return TagWriter.instance().get_result()
+    elif method == "get_tag_write_status":
+        return TagWriter.get_status()
     elif method == "kill_tag_writing":
+        print "EXITING A TAGWRITER INSTANCE"
         return TagWriter.instance().exit()
     else:
         raise IOError("Unknown method name, cannot execute anything: {0}".format(method))

@@ -254,13 +254,14 @@ class ZMQCommsManager(object):
         return self._send_message_get_response("get_tag_list")
     
     def kill_tag_reading(self):
-        return self._send_message_get_response("kill_tag_reading")
+        return self._send_message_get_response("kill_tag_reading")
     
     def write_tag(self, rfid_write_info):
-        return self._send_message_get_response("write_tag", rfid_write_info)
+        print "zmq_marshall:", type(rfid_write_info)
+        return self._send_message_get_response("write_tag", rfid_write_info)
     
-    def get_tag_write_result(self):
-        return self._send_message_get_response("get_tag_write_result")
+    def get_tag_write_status(self):
+        return self._send_message_get_response("get_tag_write_status")
         
-    def kill_tag_writing():
+    def kill_tag_writing(self):
         return self._send_message_get_response("kill_tag_writing")

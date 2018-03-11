@@ -3,7 +3,7 @@ import logging
 from flask import request
 from flask_restful import Resource
 
-from electric.models import Operation, CaseFan, RFIDTag
+from electric.models import Operation, CaseFan, RFIDTag, RFIDWriteInfo
 from electric.models import SystemStorage, Preset, PresetIndex
 from zmq_marshall import ZMQCommsManager
 
@@ -301,9 +301,10 @@ class RFIDTagReadResource(Resource):
         tag_list_object = comms.get_tag_list()
         return tag_list_object.to_native()
 
-    def put(self, commannd):
+    def put(self):
+        print "request =", request.__dict__
         json_dict = request.json
-        command = json_dict["command")
+        command = json_dict["command"]
         if command == "start reading":
             return comms.start_tag_reading()
         elif command == "stop reading":
@@ -313,20 +314,22 @@ class RFIDTagReadResource(Resource):
 
 class RFIDTagWriteResource(Resource):
     def get(self):
-        write_status_object = comms.get_tag_write_result()
-        return write_status_object.to_native()
+        write_status_object = comms.get_tag_write_status()
+        return write_status_object
 
-    def put(self, commannd):
+    def put(self):
         json_dict = request.json
-        command = json_dict["command")
+        command = json_dict["command"]
         if command == "kill writing":
             return comms.kill_tag_writing()
         
-    def post(self, batt_dict):
+    def post(self):
         json_dict = request.json
         try:
-            rfid_write_info = RFIDWriteInfo(json_dict).validate()
-        except:
+            rfid_write_info = RFIDWriteInfo(json_dict)
+            rfid_write_info.validate()
+        except Exception as e:
+            print "RFIDTags.post() exception:", e
             return { "status":"Data validation error" }
         else:
-            return comms.write_tag(rfid_write_info).to_native()
+            return comms.write_tag(rfid_write_info)
