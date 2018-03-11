@@ -13,7 +13,7 @@ class CaseFanControl:
     def __init__(self, load_preferences=True, testing=False):
         self.fan = CaseFan()
         self.testing = testing
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
 
         if load_preferences:
             self.load_prefs()
