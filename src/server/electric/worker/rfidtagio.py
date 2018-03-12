@@ -15,6 +15,45 @@ from electric.models import RFIDTagOpStatus, RFIDTag, RFIDTagList
 logger = logging.getLogger('electric.worker.rfidtagio')
 lone_thread = None
 
+class LEDColor:
+    Amber = { 16:GPIO.HIGH, 20:GPIO.HIGH }
+    Red =   { 16:GPIO.HIGH, 20:GPIO.LOW }
+    Green = { 16:GPIO.LOW,  20:GPIO.HIGH }
+    Off =   { 16:GPIO.LOW,  20:GPIO.LOW }
+    current_color = None
+
+    @classmethod
+    def set_color(cls, color):
+        for key in color.keys():
+            try:
+                GPIO.output(key, color[key])
+            except:
+                GPIO.setmode(GPIO.BCM)
+                GPIO.setup(key, GPIO.OUT)
+                GPIO.output(key, color[key])
+        old_color = cls.current_color
+        cls.current_color = color
+        return old_color
+
+    @classmethod
+    def get_current_color(cls):
+        return cls.current_color
+
+    @classmethod
+    def flash(cls, num_flashes, color1=None, color2=None, period=0.25):
+        if color1 == None:
+            color1 = cls.get_current_color()
+        if color2 == None:
+            color2 = cls.Off
+        saved_color = cls.get_current_color()
+        cls.set_color(color1)
+        for x in range(num_flashes):
+            time.sleep(period / 2)
+            prev_color = cls.set_color(color2)
+            time.sleep(period / 2)
+            cls.set_color(color1)
+        cls.set_color(saved_color)
+
 class TagIO:
     RCT_TAG  = 0x08     # MIFARE 1K
     REVO_TAG = 0x00     # MIFARE UL
@@ -172,7 +211,7 @@ class TagIO:
     def reset(self):
         self.read_writer.MFRC522_Init()
         self.last_trailer_block = None        
-    
+
 class TagReader(threading.Thread):
     @staticmethod
     def instance():
@@ -202,6 +241,7 @@ class TagReader(threading.Thread):
         elif not self.is_alive():
             super(TagReader, self).start()
             self.status = RFIDTagOpStatus.Running
+            LEDColor.set_color(LEDColor.Green)
         return { "status":self.status }
             
     def run(self):
@@ -256,20 +296,26 @@ class TagReader(threading.Thread):
                     rfid_tag = RFIDTag(batt_dict)
                     rfid_tag.validate()
                 except ModelValidationError as e:
+                    LEDColor.set_color(LEDColor.Red)
                     print "Data error in scanned tag info!"
                     print e
                     print "Tag ignored."
                 else:
                     self.tags.tag_list.append(rfid_tag)
+                    LEDColor.flash(4)
                     print "Tag added!"
                     print rfid_tag[tio.BATTERY_ID_KEY], \
                           rfid_tag[tio.TAG_UID_KEY]
+                finally:
+                    time.sleep(1)
+                    LEDColor.set_color(LEDColor.Green)
         
     def stop(self):
         if self.is_alive():
             self.loop_done = True
             self.join()
         self.status = RFIDTagOpStatus.Stopped
+        LEDColor.set_color(LEDColor.Off)
         return { "status":self.status }
 
     @classmethod
@@ -324,6 +370,7 @@ class TagWriter(threading.Thread):
             self.force = kwargs.get("force", False)
             super(TagWriter, self).start()  # Spin up the thread
             self.status = RFIDTagOpStatus.Running
+            LEDColor.set_color(LEDColor.Amber)
         return { "status":self.status }
             
     def run(self):
@@ -346,6 +393,8 @@ class TagWriter(threading.Thread):
                     if batt_dict[tio.CAPACITY_KEY] != 0:
                         # Tag already written; must use force to overwrite
                         self.status = RFIDTagOpStatus.UsedTag
+                        LEDColor.set_color(LEDColor.Red)
+                        time.sleep(5)
                         self.loop_done = True
                         break
             else:
@@ -355,10 +404,14 @@ class TagWriter(threading.Thread):
 
             if tio.write_tag(schema, self.rfid_tag.to_native()) == None:
                 self.status = RFIDTagOpStatus.Failed
+                LEDColor.set_color(LEDColor.Red)
             else:
                 self.status = RFIDTagOpStatus.Success
+                LEDColor.flash(4)
+            time.sleep(5)
             self.loop_done = True
         self.status = RFIDTagOpStatus.Stopped
+        LEDColor.set_color(LEDColor.Off)
         return { "status":self.status }
 
     @classmethod
@@ -376,4 +429,5 @@ class TagWriter(threading.Thread):
             self.join()
         lone_thread = None
         self.status = RFIDTagOpStatus.Dead
+        LEDColor.set_color(LEDColor.Off)
         return { "status":self.status }
