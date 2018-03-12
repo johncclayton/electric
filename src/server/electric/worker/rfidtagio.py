@@ -297,6 +297,8 @@ class TagReader(threading.Thread):
                     rfid_tag.validate()
                 except ModelValidationError as e:
                     LEDColor.set_color(LEDColor.Red)
+                    time.sleep(2)
+                    LEDColor.set_color(LEDColor.Green)
                     print "Data error in scanned tag info!"
                     print e
                     print "Tag ignored."
@@ -306,9 +308,10 @@ class TagReader(threading.Thread):
                     print "Tag added!"
                     print rfid_tag[tio.BATTERY_ID_KEY], \
                           rfid_tag[tio.TAG_UID_KEY]
-                finally:
-                    time.sleep(1)
-                    LEDColor.set_color(LEDColor.Green)
+            else:
+                LEDColor.set_color(LEDColor.Red)
+                time.sleep(2)
+                LEDColor.set_color(LEDColor.Green)
         
     def stop(self):
         if self.is_alive():
@@ -394,7 +397,7 @@ class TagWriter(threading.Thread):
                         # Tag already written; must use force to overwrite
                         self.status = RFIDTagOpStatus.UsedTag
                         LEDColor.set_color(LEDColor.Red)
-                        time.sleep(5)
+                        time.sleep(2)
                         self.loop_done = True
                         break
             else:
@@ -408,7 +411,7 @@ class TagWriter(threading.Thread):
             else:
                 self.status = RFIDTagOpStatus.Success
                 LEDColor.flash(4)
-            time.sleep(5)
+            time.sleep(2)
             self.loop_done = True
         self.status = RFIDTagOpStatus.Stopped
         LEDColor.set_color(LEDColor.Off)
