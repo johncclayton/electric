@@ -319,7 +319,7 @@ class TagReader(threading.Thread):
                     print "Tag added!"
                     print rfid_tag[tio.BATTERY_ID_KEY], \
                           rfid_tag[tio.TAG_UID_KEY]
-            else:
+            elif chemistry != None:
                 # We'll flash at a little faster rate for anyone who is
                 # colorblind
                 LEDControl.flash(6, period=0.167, color1=LEDControl.Red)
@@ -411,6 +411,7 @@ class TagWriter(threading.Thread):
                         # Let's keep going in case the wrong tag was touched
                         #self.loop_done = True
                         #break
+                        continue
             else:
                 self.status = RFIDTagOpStatus.InvalidTag
                 self.loop_done = True
