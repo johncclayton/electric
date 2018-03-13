@@ -192,9 +192,13 @@ class StopResource(ControlRegisterResource):
 
 class SystemStorageResource(Resource):
     def get(self):
-        syst = comms.get_system_storage()
+        system_json = {}
+        try:
+            syst = comms.get_system_storage()
+            system_json = syst.to_primitive()
+        except Exception, ex:
+            logger.error("Can't get system info from the charger - skipping, {0}".format(ex))
 
-        system_json = syst.to_primitive()
         system_json.update(connection_state_dict())
 
         capabilities = {
@@ -286,12 +290,5 @@ class CaseFanResource(Resource):
 
     def put(self):
         json_dict = request.json
-
-        # Overwrite existing with new values. That way we can specify partial JSON
-        # The key 'running' is ignored and will never be acted upon
-
-        existing_values = comms.get_device_info().to_native()
-        existing_values.update(json_dict)
-
         case_fan = CaseFan(json_dict)
         return comms.set_case_fan_prefs(case_fan).to_native()
