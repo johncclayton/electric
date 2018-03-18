@@ -1,10 +1,11 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {IConfig, INetwork} from "../../models/state/reducers/configuration";
 import {ElectricNetworkService} from "../../services/network.service";
 
 @Component({
     selector: 'wifi-settings',
-    templateUrl: 'wifi-settings.html'
+    templateUrl: 'wifi-settings.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WifiSettingsComponent {
     @Input() network: INetwork;

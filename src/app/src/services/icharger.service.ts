@@ -60,6 +60,7 @@ export class iChargerService {
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     private lastUsedIPAddressIndex = 0;
+    private firstRun: boolean;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -78,6 +79,7 @@ export class iChargerService {
                        private configActions: ConfigurationActions,
                        private localNotifications: LocalNotifications,) {
 
+        this.firstRun = true;
         this.lastUsedIPAddressIndex = 0;
         this.startPollingCharger();
 
@@ -141,7 +143,11 @@ export class iChargerService {
         let haveNetwork = this.isNetworkAvailable();
         let haveCharger = this.isConnectedToCharger();
         let haveServer = this.isConnectedToServer();
-        return !haveNetwork || !haveCharger || !haveServer;
+        let result = !haveNetwork || !haveCharger || !haveServer;
+        if (result) {
+            console.log(`haveNetwork: ${haveNetwork}, haveCharger: ${haveCharger}, haveServer: ${haveServer}`);
+        }
+        return result;
     }
 
     isNetworkAvailable(): boolean {
@@ -167,9 +173,9 @@ export class iChargerService {
     }
 
     getChargerStatus(): Observable<any> {
-        let interval = 1100;
+        let interval = 1000;
 
-        return Observable.timer(interval * 2, interval)
+        return Observable.timer(0, interval)
             .flatMap(v => {
                 // If disconnected, do a round robbin between various known IP addresses
                 this.tryNextInterfaceIfDisconnected();
@@ -179,6 +185,7 @@ export class iChargerService {
                 if (state.ui.disconnected) {
                     console.log(`Trying ${url}`);
                 }
+                this.firstRun = false;
                 return this.http.get(url)
             }).map(r => {
                 let state = this.ngRedux.getState();
@@ -671,7 +678,7 @@ export class iChargerService {
 
     private tryNextInterfaceIfDisconnected() {
         let state = this.ngRedux.getState();
-        if (state.ui.disconnected) {
+        if (state.ui.disconnected && !this.firstRun) {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
             console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.getHostName()}`);

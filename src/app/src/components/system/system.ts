@@ -1,11 +1,12 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {ISystem} from "../../models/state/reducers/system";
 import {IUIState} from "../../models/state/reducers/ui";
 import {IChargerCaseFan, System} from "../../models/system";
 
 @Component({
     selector: 'system-display',
-    templateUrl: 'system.html'
+    templateUrl: 'system.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemComponent {
     _system: ISystem;
