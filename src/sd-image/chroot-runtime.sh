@@ -14,7 +14,7 @@ apt-get -y remove python-pip && easy_install pip
 # curl -sSL https://get.docker.com | sh
 
 # already done as part of v1.8 user-data (cloud-init)
-# usermod -aG docker pirate
+usermod -aG docker pirate
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
