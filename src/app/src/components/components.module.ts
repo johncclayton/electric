@@ -6,6 +6,7 @@ import {TempRangeComponent} from './temp-range/temp-range';
 import {BetterRangeComponent} from './better-range/better-range';
 import {NetworkConfigComponent} from './network-config/network-config';
 import {UtilsModule} from "../utils/utils.module";
+import {WifiSettingsComponent} from './wifi-settings/wifi-settings';
 
 @NgModule({
     declarations: [
@@ -14,6 +15,7 @@ import {UtilsModule} from "../utils/utils.module";
         TempRangeComponent,
         BetterRangeComponent,
         NetworkConfigComponent,
+        WifiSettingsComponent,
     ],
     imports: [
         IonicPageModule.forChild(ConfigComponent),
@@ -25,6 +27,7 @@ import {UtilsModule} from "../utils/utils.module";
         TempRangeComponent,
         BetterRangeComponent,
         NetworkConfigComponent,
+        WifiSettingsComponent,
     ]
 })
 export class ComponentsModule {

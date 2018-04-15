@@ -75,8 +75,8 @@ STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
 DEVICEID_4010_DUO = 64
+DEVICEID_406_DUO = 67  # TODO: Update to the real device number
 DEVICEID_308_DUO = 66
-DEVICEID_306_DUO = 67  # TODO: Update to the real device number
 
 
 class ObjectNotFoundException(Exception):
@@ -89,7 +89,7 @@ class BadRequestException(Exception):
 
 DeviceIdCellCount = (
     (DEVICEID_308_DUO, 8),
-    (DEVICEID_306_DUO, 6),
+    (DEVICEID_406_DUO, 6),
     (DEVICEID_4010_DUO, 10)
 )
 
@@ -174,6 +174,23 @@ class WriteDataSegment(object):
         u16s_repeat = size_of_packed_data / 2
         u16s_format = "{0}H".format(u16s_repeat)
         return struct.unpack(u16s_format, packed_data_as_bytes)
+
+
+class CaseFan(Model):
+    # Whether or not we should be trying to control the fan at all
+    control = BooleanType(required=True, default=False)
+
+    # True if the fan is currently running (GPIO pin is high)
+    running = BooleanType(default=False, required=False)
+
+    # Temp you want fan to kick in at
+    threshold = IntType(required=True, min_value=-30, max_value=80, default=37)
+
+    # How much lag do you want, in deg C?
+    hysteresis = IntType(required=True, min_value=0, max_value=20, default=3)
+
+    # Which pin on the board will control the fan circuit?
+    gpio = IntType(required=True, min_value=1, max_value=40, default=23)
 
 
 class DeviceInfoStatus(Model):
@@ -387,8 +404,8 @@ class ChannelStatus(Model):
             max_voltage = 0
 
             # With this, we can work out if the main battery lead is plugged in
-            if self.device_id is DEVICEID_306_DUO:
-                max_voltage = 26
+            if self.device_id is DEVICEID_406_DUO:
+                max_voltage = 22  # because 3.75 * n gives the max voltage?
             elif self.device_id is DEVICEID_308_DUO:
                 max_voltage = 30
             elif self.device_id is DEVICEID_4010_DUO:
@@ -1161,5 +1178,3 @@ class Preset(Model):
         self.store_compensation /= 100.0
 
         self.name = self.name.split('\0')[0]
-
-

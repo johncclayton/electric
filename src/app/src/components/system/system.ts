@@ -1,11 +1,12 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {ISystem} from "../../models/state/reducers/system";
 import {IUIState} from "../../models/state/reducers/ui";
-import {System} from "../../models/system";
+import {IChargerCaseFan, System} from "../../models/system";
 
 @Component({
     selector: 'system-display',
-    templateUrl: 'system.html'
+    templateUrl: 'system.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemComponent {
     _system: ISystem;
@@ -14,9 +15,10 @@ export class SystemComponent {
     get system(): ISystem {
         return this._system;
     }
+
     set system(value: ISystem) {
         this._system = Object.create(value);
-        console.log("*** Got new system value");
+        console.log("*** New system value was provided to the system UI component");
     }
 
     @Input() ui: IUIState;
@@ -26,6 +28,14 @@ export class SystemComponent {
 
     get charger(): System {
         return this.system.system;
+    }
+
+    get case_fan(): IChargerCaseFan {
+        return this.system.case_fan;
+    }
+
+    get can_do_case_fan(): boolean {
+        return this.system.system.has_case_fan;
     }
 
     constructor() {

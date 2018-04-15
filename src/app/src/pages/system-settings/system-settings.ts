@@ -1,16 +1,17 @@
 import {Component} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams, Toast, ToastController} from 'ionic-angular';
+import {AlertController, IonicPage, NavController, Toast, ToastController} from 'ionic-angular';
 import {NgRedux, select} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {Observable} from "rxjs/Observable";
-import {ISystem} from "../../models/state/reducers/system";
 import {SystemActions} from "../../models/state/actions/system";
 import {propertiesThatHaveBeenModified} from "../../utils/helpers";
 import {IUIState} from "../../models/state/reducers/ui";
-import {System} from "../../models/system";
 import {UIActions} from "../../models/state/actions/ui";
 import {Subject} from "rxjs/Subject";
 import {LocalNotifications} from "@ionic-native/local-notifications";
+import {ISystem} from "../../models/state/reducers/system";
+import {iChargerService} from "../../services/icharger.service";
+import {cloneDeep} from 'lodash';
 
 @IonicPage()
 @Component({
@@ -21,7 +22,7 @@ export class SystemSettingsPage {
     @select() system$: Observable<ISystem>;
     @select() ui$: Observable<IUIState>;
 
-    originalUnmodified: System;
+    originalUnmodified: ISystem;
     savingAlert: Toast;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
@@ -34,6 +35,7 @@ export class SystemSettingsPage {
     constructor(private navCtrl: NavController,
                 private actions: SystemActions,
                 private uiActions: UIActions,
+                private charger: iChargerService,
                 private toastController: ToastController,
                 private localNotifications: LocalNotifications,
                 private alertController: AlertController,
@@ -51,11 +53,11 @@ export class SystemSettingsPage {
 
     saveSettings() {
         this.createSaveAlert();
-        let system = this.ngRedux.getState().system.system;
+        let iSystem = this.ngRedux.getState().system;
 
-        this.actions.saveSystemSettings(system)
+        this.actions.saveSystemSettings(iSystem)
             .takeUntil(this.ngUnsubscribe)
-            .subscribe(sys => {
+            .subscribe(ignored_value => {
             }, err => {
                 this.uiActions.setErrorMessage(err);
             }, () => {
@@ -67,9 +69,16 @@ export class SystemSettingsPage {
         if (this.originalUnmodified == null) {
             return false;
         }
-        let current = this.ngRedux.getState().system.system;
-        let modifiedProperties = propertiesThatHaveBeenModified(this.originalUnmodified.data_structure, current.data_structure);
+
+        /*
+        The follow works for the case fan as well.
+        If we DONT have case_fan, then there will be some state, but it'll never change.
+        If we DO, then it'll be there, but possibly changing. So don't actually have to explicitly check for it.
+         */
+        let system = this.ngRedux.getState().system;
+        let modifiedProperties = propertiesThatHaveBeenModified(this.originalUnmodified, system);
         let keys = Object.keys(modifiedProperties);
+
         if (keys.length > 0) {
             console.log("Modified: " + JSON.stringify(modifiedProperties));
         }
@@ -78,9 +87,11 @@ export class SystemSettingsPage {
 
     ionViewCanLeave() {
         if (this.settingsAreModified) {
-            let current = this.ngRedux.getState().system.system;
-            return this.changeAlert(current);
+            return this.changeAlert(this.ngRedux.getState().system);
         }
+    }
+
+    ionViewDidLeave() {
     }
 
     ionViewDidLoad() {
@@ -92,13 +103,18 @@ export class SystemSettingsPage {
                 }
                 if (v.fetching == false) {
                     console.log("I've made a clone...");
-                    this.originalUnmodified = v.system.clone();
+
+                    // This'll make a deep clone
+                    this.originalUnmodified = cloneDeep(v);
                 }
             });
         this.actions.fetchSystemFromCharger();
     }
 
-    private changeAlert(system: System) {
+    ionViewWillEnter() {
+    }
+
+    private changeAlert(system: ISystem) {
         return new Promise((resolve, reject) => {
             let alert = this.alertController.create({
                 title: "Save settings",
@@ -110,7 +126,7 @@ export class SystemSettingsPage {
                             this.createSaveAlert();
                             this.actions.saveSystemSettings(system)
                                 .takeUntil(this.ngUnsubscribe)
-                                .subscribe(sys => {
+                                .subscribe(ignored_value => {
                                     resolve();
                                 }, err => {
                                     this.uiActions.setErrorMessage(err);

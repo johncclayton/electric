@@ -3,9 +3,9 @@ import logging
 from flask import request
 from flask_restful import Resource
 
+from electric.models import Operation, CaseFan
+from electric.models import SystemStorage, Preset, PresetIndex
 from zmq_marshall import ZMQCommsManager
-from electric.models import Operation
-from electric.models import ObjectNotFoundException, SystemStorage, Preset, PresetIndex
 
 logger = logging.getLogger('electric.app.{0}'.format(__name__))
 comms = ZMQCommsManager()
@@ -192,11 +192,21 @@ class StopResource(ControlRegisterResource):
 
 class SystemStorageResource(Resource):
     def get(self):
-        syst = comms.get_system_storage()
-        obj = syst.to_primitive()
-        obj.update(connection_state_dict())
+        system_json = {}
+        try:
+            syst = comms.get_system_storage()
+            system_json = syst.to_primitive()
+        except Exception, ex:
+            logger.error("Can't get system info from the charger - skipping, {0}".format(ex))
 
-        return obj
+        system_json.update(connection_state_dict())
+
+        capabilities = {
+            'case_fan': True
+        }
+        system_json['capabilities'] = capabilities
+
+        return system_json
 
     def put(self):
         json_dict = request.json
@@ -271,3 +281,14 @@ class PresetOrderResource(Resource):
         json_dict = request.json
         preset_list = PresetIndex(json_dict)
         return comms.save_full_preset_list(preset_list)
+
+
+class CaseFanResource(Resource):
+    def get(self):
+        case_fan_object = comms.get_case_fan_info()
+        return case_fan_object.to_native()
+
+    def put(self):
+        json_dict = request.json
+        case_fan = CaseFan(json_dict)
+        return comms.set_case_fan_prefs(case_fan).to_native()

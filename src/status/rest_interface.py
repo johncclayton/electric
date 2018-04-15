@@ -1,29 +1,15 @@
+import json
 import logging
 import os
 import subprocess
+import urllib2
 
 import docker
 import requests
-from flask import jsonify
+
 from flask import request, redirect, url_for
 from flask_restful import Resource
-
-
-class InvalidUsage(Exception):
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
+from werkzeug.exceptions import BadRequest
 
 logger = logging.getLogger('electric.status.{0}'.format(__name__))
 
@@ -77,13 +63,13 @@ class WiFiConnectionResource(Resource):
 
     def put(self):
         if not request.json:
-            raise InvalidUsage("No JSON payload")
+            raise BadRequest("No JSON payload")
 
         if "SSID" not in request.json:
-            raise InvalidUsage("No SSID in payload")
+            raise BadRequest("No SSID in payload")
 
         if "PWD" not in request.json:
-            raise InvalidUsage("No PWD in payload")
+            raise BadRequest("No PWD in payload")
 
         ssid_value = request.json["SSID"]
         ssid_pwd = request.json["PWD"]
@@ -100,6 +86,57 @@ class WiFiConnectionResource(Resource):
             }
 
         return redirect(url_for("wifi"))
+
+
+class DeploymentResource(Resource):
+    def put(self):
+        if "version" not in request.json:
+            raise BadRequest("No version in payload")
+
+        version = request.json['version']
+
+        (deploy_output, err, deploy_ret) = read_output_for(
+            [script_path("upgrade_deployed_containers.sh"), version], "Redeployment failed")
+
+        return {
+            'result': deploy_output,
+            'err': err,
+            'code': deploy_ret
+        }
+
+    def get(self):
+        url = "https://api.travis-ci.org/repos/johncclayton/electric/builds"
+        request_headers = {
+            'User-Agent': 'electric',
+            'Accept': 'application/vnd.travis-ci.2+json'
+        }
+
+        try:
+            logger.info("Getting status from {}".format(url))
+            the_request = urllib2.Request(url, headers=request_headers)
+            http_response = urllib2.urlopen(the_request)
+            content = json.load(http_response)
+            logger.info("Got content: {0}".format(content))
+
+            builds = content['builds']
+            if builds:
+                for build in builds:
+                    if build['state'] != 'passed':
+                        continue
+
+                    return {
+                        'latest_build_at_travis': int(build['number'])
+                    }
+            else:
+                return {
+                    'error': 'No builds from travis'
+                }
+
+        except Exception, ex:
+            logger.error("Failed to talk to travis to get version: {}".format(ex.message))
+            return {
+                'error': "{}".format(ex)
+            }
 
 
 class StatusResource(Resource):
@@ -174,7 +211,7 @@ class StatusResource(Resource):
         (wlan1, err, wlan1_ret) = read_output_for(
             [script_path("get_ip_address.sh"), "wlan1"], "wlan1 device not found")
 
-        ver = get_last_deployed_version()
+        last_deployed_version = get_last_deployed_version()
 
         res["services"] = {
             "dnsmasq": self._systemctl_running("dnsmasq"),
@@ -204,18 +241,18 @@ class StatusResource(Resource):
         worker_image_running = self.check_docker_container_running(WORKER_CONTAINER_NAME)
 
         res["docker"] = {
-            "last_deploy": ver,
+            "last_deploy": last_deployed_version,
             "web": {
-                "image_name": image_name(WEB_IMAGE_NAME, ver),
+                "image_name": image_name(WEB_IMAGE_NAME, last_deployed_version),
                 "container_name": WEB_CONTAINER_NAME,
-                "image_exists": self.check_docker_image_exists(image_name(WEB_IMAGE_NAME, ver)),
+                "image_exists": self.check_docker_image_exists(image_name(WEB_IMAGE_NAME, last_deployed_version)),
                 "container_created": self.check_docker_container_created(WEB_CONTAINER_NAME),
                 "container_running": web_image_running
             },
             "worker": {
-                "image_name": image_name(WORKER_IMAGE_NAME, ver),
+                "image_name": image_name(WORKER_IMAGE_NAME, last_deployed_version),
                 "container_name": WORKER_CONTAINER_NAME,
-                "image_exists": self.check_docker_image_exists(image_name(WORKER_IMAGE_NAME, ver)),
+                "image_exists": self.check_docker_image_exists(image_name(WORKER_IMAGE_NAME, last_deployed_version)),
                 "container_created": self.check_docker_container_created(WORKER_CONTAINER_NAME),
                 "container_running": worker_image_running
             }
@@ -236,11 +273,4 @@ class StatusResource(Resource):
 #
 # This is here so as to not cause a recursive module import
 #
-from main import application
 
-
-@application.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response

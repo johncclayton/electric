@@ -18,7 +18,7 @@ export class ConfigurationEpics {
             ConfigurationActions.RESET_TO_DEFAULTS,
         )
             .debounceTime(1000)
-            .mergeMap((payload) => {
+            .mergeMap(payload => {
                 let config = this.ngRedux.getState()['config'];
                 return this.configStore.saveConfiguration(config).map(r => {
                     return {

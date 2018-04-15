@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {IConfig, INetwork, INetworkKeyNames} from "../../models/state/reducers/configuration";
+import {IConfig, INetworkKeyNames} from "../../models/state/reducers/configuration";
 import {iChargerService} from "../../services/icharger.service";
 import {isUndefined} from "ionic-angular/util/util";
 import * as _ from "lodash";
@@ -13,41 +13,32 @@ export class NetworkConfigComponent {
 
     @Input() config?: IConfig;
     @Input() showAutoButton: boolean;
+    @Input() current_ip_address: string;
 
+    @Output() networkWizard: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
-    @Output() sendWifiSettings: EventEmitter<any> = new EventEmitter();
 
     private lastUsedDiscoveryIndex = 0;
 
-    constructor(public chargerService: iChargerService) {
+    constructor(public chargerService: iChargerService,
+                public configActions: ConfigurationActions) {
     }
 
     autoDetect() {
         if (this.config) {
-            let network = this.config.network;
-            if (network.discoveredServers != null) {
-                // console.log("Have: ", this.config.discoveredServers.join(","));
-                if (network.discoveredServers.length > 0) {
-                    if (this.lastUsedDiscoveryIndex > network.discoveredServers.length - 1) {
+            let discoveredServers = this.config.network.discoveredServers;
+            if (discoveredServers != null) {
+                // console.log("Have: ", discoveredServers.join(","));
+                if (discoveredServers.length > 0) {
+                    if (this.lastUsedDiscoveryIndex > discoveredServers.length - 1) {
                         this.lastUsedDiscoveryIndex = 0;
                     }
-                    this.config.ipAddress = network.discoveredServers[this.lastUsedDiscoveryIndex];
+                    this.config.ipAddress = discoveredServers[this.lastUsedDiscoveryIndex];
                     this.lastUsedDiscoveryIndex++;
                 }
             }
         }
     }
-
-    // wifiConnectionStatusString(): string {
-    //     if (this.config.homeLanConnecting) {
-    //         return "Connecting...";
-    //     }
-    //     if (this.config.homeLanConnected) {
-    //         return "Connected: " + this.config.homeLanIPAddress;
-    //
-    //     }
-    //     return "Not connected";
-    // }
 
     change(keyName, value) {
         let change = [];
@@ -55,58 +46,77 @@ export class NetworkConfigComponent {
         this.updateConfiguration.emit(change);
     }
 
-    change_network(keyName, value) {
-        let change = [];
-        change[keyName] = value;
-        this.updateConfiguration.emit(change);
+    num(value) {
+        if (value == "") {
+            return 0;
+        }
+        return parseInt(value);
     }
 
-    wifiStateFor(key: string) {
-        return this.wifiState()[key];
+    wifiStateFor(heading: string, key: string) {
+        return this.sectionState(heading)[key];
     }
 
-    wifiStateKeyFor(key: string) {
+    wifiStateKeyFor(heading: string, key: string) {
         if (INetworkKeyNames.hasOwnProperty(key)) {
             return INetworkKeyNames[key];
         }
         return key;
     }
 
+    sectionNames() {
+        return Object.keys(this.wifiState());
+    }
+
+    sectionName(key: string) {
+        return this.wifiState()[key].name;
+    }
+
+    sectionState(key: string) {
+        return this.wifiState()[key].items;
+    }
+
     wifiState() {
+        let sections = {
+            'wifi': {name: 'Wifi Association', items: {}},
+            'network': {name: 'Network / IPs', items: {}},
+            'server': {name: 'Server Status', items: {}}
+        };
+
         let network = this.config.network;
         if (network) {
-            let state = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid', 'docker_last_deploy']);
-            if(network.interfaces) {
+            sections['wifi'].items = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid']);
+
+            if (network.interfaces) {
                 if (network.interfaces.hasOwnProperty("wlan0")) {
-                    state["Wifi IP"] = network.interfaces["wlan0"];
+                    let wlan0interface = network.interfaces["wlan0"];
+                    if (wlan0interface) {
+                        sections['network'].items["Home Wifi IP"] = wlan0interface;
+                        this.configActions.addDiscoveredServer(wlan0interface);
+                    }
+                }
+                if (network.interfaces.hasOwnProperty("wlan1")) {
+                    sections['network'].items["Static IP"] = network.interfaces["wlan1"];
                 }
             }
-            if(network.services) {
-                state["DNS Masq"] = network.services['dnsmasq'];
-                state["Hostapd"] = network.services['hostapd'];
-                state["Docker"] = network.services['docker'];
-                state["Electric PI"] = network.services['electric-pi.service'];
+            if (network.discoveredServers != null) {
+                let i = 1;
+                for (let srv in network.discoveredServers) {
+                    sections['server'].items["Discovery #" + i] = network.discoveredServers[srv];
+                    i++;
+                }
             }
-            return state;
+            if (network.services) {
+                sections['server'].items["Server Version"] = network['docker_last_deploy'];
+                sections['server'].items["DNS Masq"] = network.services['dnsmasq'];
+                sections['server'].items["Hostapd"] = network.services['hostapd'];
+                sections['server'].items["Docker"] = network.services['docker'];
+                sections['server'].items["Electric PI"] = network.services['electric-pi.service'];
+            }
+            return sections;
         }
         return {"Fetching": "..."};
     }
 
-    get wifiSettingsValid(): boolean {
-        if (this.config) {
-            let network = this.config.network;
-            if (isUndefined(network.wifi_password)) {
-                return false;
-            }
-            if (isUndefined(network.wifi_ssid)) {
-                return false;
-            }
-
-            let passLength = network.wifi_password.length;
-            let ssidLength = network.wifi_ssid.length;
-            return ssidLength > 0 && (passLength >= 8 && passLength <= 63);
-        }
-        return false;
-    }
 
 }

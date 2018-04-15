@@ -1,0 +1,11 @@
+config:
+  target: 'http://192.168.1.66:5000'
+  phases:
+    - duration: 20
+      arrivalRate: 20
+scenarios:
+  - flow:
+    - get:
+        url: "/unified"
+    - get:
+        url: "/status"

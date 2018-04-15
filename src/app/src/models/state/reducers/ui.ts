@@ -5,6 +5,7 @@ import {error} from "util";
 export interface IUIState {
     exception: string;
     details: string;
+    isConfiguringNetwork: boolean,
     disconnected: boolean;
     disconnectionErrorCount: number;
 }
@@ -14,6 +15,7 @@ let defaultUIState: IUIState = {
     details: null,
     disconnected: true,
     disconnectionErrorCount: 0,
+    isConfiguringNetwork: false,
 };
 
 export const
@@ -25,17 +27,17 @@ export const
         let nextErrorCount = state.disconnectionErrorCount + 1;
 
         switch (action.type) {
+            case UIActions.SET_CONFIG_NETWORK:
+                return {
+                    ...state,
+                    isConfiguringNetwork: action.payload
+                };
+
             case UIActions.SERVER_RECONNECTED:
                 return {
                     ...defaultUIState,
                     disconnected: false,
                     disconnectionErrorCount: 0
-                };
-
-            case UIActions.SERVER_TRY_NEXT_INTERFACE:
-                return {
-                    ...defaultUIState,
-                    disconnectionErrorCount: nextErrorCount
                 };
 
             case UIActions.SERVER_DISCONNECTED:

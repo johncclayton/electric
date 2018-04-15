@@ -5,6 +5,7 @@ import {NgRedux} from "@angular-redux/store";
 @Injectable()
 export class UIActions {
     static SET_EXCEPTION_MESSAGE: string = "SET_EXCEPTION_MESSAGE";
+    static SET_CONFIG_NETWORK: string = "SET_CONFIG_NETWORK";
     static SET_EXCEPTION_FROM_ERROR: string = "SET_EXCEPTION_FROM_ERROR";
 
     static SERVER_DISCONNECTED: string = "SERVER_DISCONNECTED";
@@ -57,5 +58,12 @@ export class UIActions {
         this.ngRedux.dispatch({
             type: UIActions.SERVER_RECONNECTED
         });
+    }
+
+    setConfiguringNetwork(new_value: boolean) {
+        this.ngRedux.dispatch({
+            type: UIActions.SET_CONFIG_NETWORK,
+            payload: new_value
+        })
     }
 }

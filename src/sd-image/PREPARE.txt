@@ -6,4 +6,58 @@ How I prepared:
 
 read all of https://raspberrypi.stackexchange.com/questions/4943/resize-image-file-before-writing-to-sd-card?noredirect=1&lq=1
 
+truncate -s +1G ./image.img
+Next map the whole image as a loop device so we can poke at the partition table
+
+sudo losetup /dev/loop0 ./image.img
+For future reference lets dump it:
+
+sudo fdisk -l /dev/loop0
+Output looks like:
+
+Disk /dev/loop0: 2962 MB, 2962227200 bytes
+255 heads, 63 sectors/track, 360 cylinders, total 5785600 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x000c4661
+
+      Device Boot      Start         End      Blocks   Id  System
+/dev/loop0p1            8192      122879       57344    c  W95 FAT32 (LBA)
+/dev/loop0p2          122880     5785599     2831360   83  Linux
+Now we'll remake the last partition by deleting it, then recreating it at the same start location, same type but different end location. So make note of the "Start" column for loop0p2 (partition 2 - the Linux partition) - we'll use it later - its 122880 here.
+
+sudo fdisk /dev/loop0
+Enter the following - they are safe to enter - nothing permanent happens until you've read my explanation that follows:
+
+p
+d
+2
+n
+p
+2
+122880
+just hit enter to accept the default
+p
+Step 1 - print current table. Steps 2-3 - delete partition 2, Steps 4-8 - recreate partition 2 with new end point (default is end of image), Step 9 - print out the new table.
+
+Assuming your newly printed table is identical to the original table except for the End value and Blocks value (ie the size has changed) you're ready to commit.
+
+Enter w to commit your change, then enter q to quit.
+
+You can delete that loopback device, we'll make another for the second partition. Remember the start offset you noted and used above - we'll use it again:
+
+sudo losetup -d /dev/loop0     # delete the old loop setup
+sudo losetup -o $((122880*512)) /dev/loop0 ./image.img
+That will create a new mapping on /dev/loop0 pointing just at partition 2 - for reference 512 is the sector-size you can see in the first fdisk output.
+
+Now resize the partition to fill the available space:
+
+sudo e2fsck -f /dev/loop0
+sudo resize2fs /dev/loop0
+Done - now clean up:
+
+sudo losetup -d /dev/loop0
+
+
 and then copy /tmp/john.img back to the hypriot inmage :-)

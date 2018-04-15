@@ -1,7 +1,6 @@
 import {AnyAction, Reducer} from "redux";
 import {ChargerActions} from "../actions/charger";
 import {Channel} from "../../channel";
-import {UIActions} from "../actions/ui";
 
 export interface IChargerState {
     charger_presence: string;
@@ -29,6 +28,7 @@ let defaultStatus: IChargerState = {
     device_sn: "",
     memory_len: 0,
     software_ver: 0,
+
     channels: [],
 
     // Synthetic state, summed from the channels

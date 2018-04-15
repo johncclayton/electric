@@ -1,13 +1,41 @@
 network-config {
 
-  .wifi {
-    color: red;
-    .connecting {
-      color: orange;
+  .current {
+    text-align: center;
+  }
+
+  .network {
+    .heading {
     }
-    .connected {
-      color: green;
+
+  }
+
+  ion-list-header.note {
+    p {
+      font-size: 0.8em;
+    }
+    .below {
+      padding-top: 15px;
+    }
+
+    .above {
+      padding-top: 8px;
+      padding-bottom: 15px;
     }
   }
 
+  .sections {
+    color: black;
+    .wifi {
+      background-color: rgba(purple, 0.1);
+    }
+
+    .network {
+      background-color: rgba(cyan, 0.1);
+    }
+
+    .server {
+      background-color: rgba(yellow, 0.1);
+    }
+  }
 }

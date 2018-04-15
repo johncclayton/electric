@@ -15,16 +15,19 @@ export interface IChargeSettings {
 }
 
 export const INetworkKeyNames = {
-    "ap_name": "AP Name",
-    "ap_channel": "AP Channel",
+    "ap_name": "Pi3 AP Name",
+    "ap_channel": "Pi3 Wifi Channel",
 
-    "wifi_ssid": "SSID",
+    "wifi_ssid": "Home Wifi SSID",
     "wifi_password": "Password",
 
     "docker_last_deploy": "Server Version"
 };
 
 export interface INetwork {
+    last_status_update: Date,
+    is_applying_change:boolean;
+
     ap_associated: boolean, // synthetic, ip from wlan0, and channel + name
     ap_channel: number,
     ap_name: string,
@@ -36,9 +39,10 @@ export interface INetwork {
     web_running: boolean,
     worker_running: boolean,
 
+    current_ip_address: string,
     interfaces: Map<string, string>,
     services: Map<string, boolean>
-    discoveredServers: string[],
+    discoveredServers: Array<string>,
 }
 
 export interface IConfig {
@@ -75,6 +79,9 @@ const chargerDefaults: IChargeSettings = {
 };
 
 let defaultNetworkState: INetwork = {
+    last_status_update: null,
+    is_applying_change:false,
+
     ap_associated: false,
     ap_channel: 0,
     ap_name: "",
@@ -86,6 +93,7 @@ let defaultNetworkState: INetwork = {
     web_running: false,
     worker_running: false,
 
+    current_ip_address: "",
     discoveredServers: [],
     interfaces: new Map<string, string>(),
     services: new Map<string, boolean>()
@@ -114,6 +122,7 @@ export const
         switch (action.type) {
             case ConfigurationActions.SET_FULL_CONFIG:
                 if (action.payload) {
+                    // console.log("We're using the payload..." + JSON.stringify(action.payload));
                     return action.payload;
                 } else {
                     return state;
@@ -144,9 +153,23 @@ export const
 
             case ConfigurationActions.UPDATE_CONFIG_KEYVALUE:
                 if (action.payload) {
+
+                    // if have a network subtree, merge this first
+                    // otherwise setting anything on the root tree clobbers 'network'
+                    let new_network_tree = state.network;
+                    if (action.payload.hasOwnProperty('network')) {
+                        new_network_tree = {
+                            ...state.network,
+                            ...action.payload.network,
+                            last_status_update: new Date()
+                        }
+                    }
+
                     return {
                         ...state,
-                        ...action.payload
+                        ...action.payload,
+                        network: new_network_tree
+
                     }
                 }
                 return state;

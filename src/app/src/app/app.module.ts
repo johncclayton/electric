@@ -1,6 +1,6 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {HttpModule} from "@angular/http";
-import {ErrorHandler, NgModule} from "@angular/core";
+import {ErrorHandler, Injector, NgModule} from "@angular/core";
 import {IonicStorageModule} from "@ionic/storage";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
 import {MyApp} from "./app.component";
@@ -32,17 +32,16 @@ import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
 import {ConfigurationEpics} from "../models/state/epics/configuration";
 import {ConfigurationActions} from "../models/state/actions/configuration";
-import {NgSpinKitModule} from "ng-spin-kit";
 import {SystemActions} from "../models/state/actions/system";
 import {SystemSettingsPageModule} from "../pages/system-settings/system-settings.module";
 import {ComponentsModule} from "../components/components.module";
 import {Vibration} from "@ionic-native/vibration";
 import {LocalNotifications} from "@ionic-native/local-notifications";
-import {FCM} from '@ionic-native/fcm';
 import {Zeroconf} from "@ionic-native/zeroconf";
 import {NetworkPage} from "../pages/network-page/network-page";
 import {UtilsModule} from "../utils/utils.module";
-// import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ElectricNetworkService} from "../services/network.service";
+import {NetworkWizHomePage} from "../pages/network-wiz-home/network-wiz-home";
 
 export const firebaseConfig = {
     apiKey: "AIzaSyDDfmaQMyk_8UgQmcTJa8u2Ruv3emGEKAc",
@@ -83,6 +82,7 @@ let config = {
         PresetCyclePage,
         ChargeOptionsPage,
         NetworkPage,
+        NetworkWizHomePage,
         ChargerStatusComponent,
     ],
     imports: [
@@ -91,7 +91,6 @@ let config = {
         // BrowserAnimationsModule,
         UtilsModule,
         NgReduxModule,
-        NgSpinKitModule,
         ComponentsModule,
         SystemSettingsPageModule,
         IonicModule.forRoot(MyApp, config),
@@ -104,6 +103,7 @@ let config = {
         HomePage,
         ConfigPage,
         NetworkPage,
+        NetworkWizHomePage,
         PresetListPage,
         PresetPage,
         PresetChargePage,
@@ -125,18 +125,22 @@ let config = {
         StatusBar,
         SplashScreen,
         Vibration,
-        FCM,
         Zeroconf,
         LocalNotifications,
+        ElectricNetworkService,
         {provide: iChargerService, useClass: iChargerService},
         {provide: ErrorHandler, useClass: IonicErrorHandler},
         ConfigStoreProvider
     ]
 })
 export class AppModule {
+    static injector: Injector;
+
     constructor(ngRedux: NgRedux<IAppState>,
+                injector: Injector,
                 configEpic: ConfigurationEpics,
                 devTools: DevToolsExtension) {
         configureAppStateStore(ngRedux, configEpic, devTools);
+        AppModule.injector = injector;
     }
 }

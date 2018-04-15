@@ -1,5 +1,6 @@
 export const ENV = {
     name: 'Development',
-    logging: true,
+    logging: false,
+    redux_devtools: true,
     ionicEnvName: 'dev'
 };

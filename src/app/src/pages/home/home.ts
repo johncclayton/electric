@@ -74,13 +74,20 @@ export class HomePage {
         this.ngRedux.select('config').takeUntil(this.ngUnsubscribe).take(2).subscribe(undefined, undefined, () => {
             console.log("Configuration loaded. Now getting system.");
 
-            // Wait until configuration is loaded before starting things.
-            this.platform.ready().then((r) => {
-                this.systemActions.fetchSystemFromCharger();
-                this.configActions.resetNetworkAtrributes();
-            });
+            this._afterConfigurationLoaded();
+        });
+    }
 
-            this.loadFirstPageDoingDebugging();
+    _afterConfigurationLoaded() {
+        // Wait until configuration is loaded before starting things.
+        this.platform.ready().then((r) => {
+            this.systemActions.fetchSystemFromCharger(() => {
+                this.configActions.resetNetworkAtrributes();
+                this.loadFirstPageDoingDebugging();
+            });
+            // this.chargerService.serverReconnection.subscribe(() => {
+            //     this.loadFirstPageDoingDebugging();
+            // });
         });
     }
 
@@ -104,7 +111,7 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
-        this.showNetworkPage();
+        // this.showNetworkPage();
         // this.showConfigPage();
         // this.showSystemPage();
         // this.showPresetsPage();

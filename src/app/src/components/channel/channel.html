@@ -1,14 +1,14 @@
 <ion-grid>
     <ion-row id="heading" align-items-baseline>
-        <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel.runState > 0}">
+        <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel?.runState > 0}">
             {{index + 1}}
         </ion-col>
-        <ion-col id="title" class="userInitiated" *ngIf="channel.hasUserInitiatedCommandText" col-auto>
-            <h4 class="channelColor operation">{{channel.userCommandText}}</h4>
-            <h4 class="channelColor action">{{channel.actionText}}</h4>
+        <ion-col id="title" class="userInitiated" *ngIf="channel?.hasUserInitiatedCommandText" col-auto>
+            <h4 class="channelColor operation">{{channel?.userCommandText}}</h4>
+            <h4 class="channelColor action">{{channel?.actionText}}</h4>
         </ion-col>
-        <ion-col id="title" *ngIf="!channel.hasUserInitiatedCommandText" col-auto>
-            <h4 class="channelColor" [ngClass]="{actionError:channel.lastActionResultedInError}">{{channel.actionText}}</h4>
+        <ion-col id="title" *ngIf="!channel?.hasUserInitiatedCommandText" col-auto>
+            <h4 class="channelColor" [ngClass]="{actionError:channel?.lastActionResultedInError}">{{channel?.actionText}}</h4>
         </ion-col>
         <!--<ion-col id="title">-->
         <!--<h4 class="channelColor">{{channel.actionText}}</h4>-->
@@ -17,7 +17,7 @@
             <ion-row justify-content-end no-padding>
                 <ion-col class="cellcontainer" text-right no-padding>
                     <ion-icon ios="ios-clock-outline" md="md-clock"></ion-icon>
-                    &nbsp;{{channel.timestamp|duration}}
+                    &nbsp;{{channel?.timestamp|duration}}
                 </ion-col>
             </ion-row>
         </ion-col>
@@ -25,15 +25,15 @@
     <ion-row nowrap>
         <ion-col class="cellcontainer" text-left>
             <ion-icon ios="ios-flash-outline" md="md-flash"></ion-icon>
-            &nbsp;{{channel.channel_volts|number:'1.3-3'}}
+            &nbsp;{{channel?.channel_volts|number:'1.3-3'}}
         </ion-col>
         <ion-col class="cellcontainer" text-center>
             <ion-icon name="pulse" align-self-baseline></ion-icon>
-            &nbsp;{{channel.curr_out_amps|number:'1.2-2'}}
+            &nbsp;{{channel?.curr_out_amps|number:'1.2-2'}}
         </ion-col>
         <ion-col class="cellcontainer" text-right>
             <ion-icon ios="ios-flask-outline" md="md-flask"></ion-icon>
-            &nbsp;{{channel.curr_out_capacity|number:'1.0-0'}}
+            &nbsp;{{channel?.curr_out_capacity|number:'1.0-0'}}
         </ion-col>
     </ion-row>
 
@@ -51,10 +51,10 @@
 
     <ion-row padding-top class="cells summary">
         <ion-col no-padding>
-            All cell volts: {{channel.cell_total_voltage|number:'1.3-3'}}V
+            All cell volts: {{channel?.cell_total_voltage|number:'1.3-3'}}V
         </ion-col>
         <ion-col no-padding>
-            ΔV: {{channel.maxMilliVoltDiff|number:'1.0-0'}} mV
+            ΔV: {{channel?.maxMilliVoltDiff|number:'1.0-0'}} mV
         </ion-col>
     </ion-row>
 

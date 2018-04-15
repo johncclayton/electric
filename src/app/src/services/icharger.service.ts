@@ -1,20 +1,23 @@
-import {Injectable} from "@angular/core";
+import {EventEmitter, Injectable} from "@angular/core";
 import {Headers, Http, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
 import {Preset} from "../models/preset-class";
 import {Channel} from "../models/channel";
-import {System} from "../models/system";
+import {IChargerCaseFan, System} from "../models/system";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {ChargerActions} from "../models/state/actions/charger";
 import {UIActions} from "../models/state/actions/ui";
-import {IConfig, INetwork} from "../models/state/reducers/configuration";
+import {IConfig} from "../models/state/reducers/configuration";
 import {IChargerState} from "../models/state/reducers/charger";
 import {Vibration} from "@ionic-native/vibration";
 import {Subject} from "rxjs/Subject";
 import {LocalNotifications} from "@ionic-native/local-notifications";
 import {IUIState} from "../models/state/reducers/ui";
 import {ConfigurationActions} from "../models/state/actions/configuration";
+import {ElectricNetworkService} from "./network.service";
+import {SystemActions} from "../models/state/actions/system";
+import {AppModule} from "../app/app.module";
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -48,12 +51,16 @@ ChargerMetadata[ChargerType.iCharger4010Duo] = {
 @Injectable()
 export class iChargerService {
     autoStopSubscriptions: any[] = [];
+    serverReconnection: EventEmitter<any> = new EventEmitter();
 
+    // Lazily instantiated via direct injector, not constructor. See getSystemActions()
+    private systemActions: SystemActions;
     private static device_id: number;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     private lastUsedIPAddressIndex = 0;
+    private firstRun: boolean;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -67,10 +74,12 @@ export class iChargerService {
                        public vibration: Vibration,
                        public uiActions: UIActions,
                        private ngRedux: NgRedux<IAppState>,
+                       private networkService: ElectricNetworkService,
                        private chargerActions: ChargerActions,
                        private configActions: ConfigurationActions,
                        private localNotifications: LocalNotifications,) {
 
+        this.firstRun = true;
         this.lastUsedIPAddressIndex = 0;
         this.startPollingCharger();
 
@@ -87,6 +96,8 @@ export class iChargerService {
 
     public startPollingCharger() {
         console.log("Start polling for charger state...");
+        this.uiActions.setConfiguringNetwork(false);
+
         this.getChargerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
@@ -98,6 +109,7 @@ export class iChargerService {
 
     public startPollingStatusServer() {
         console.log("Starting polling for network status....");
+        this.uiActions.setConfiguringNetwork(true);
         this.getServerStatus()
             .takeUntil(this.ngUnsubscribe)
             .subscribe(status => {
@@ -106,7 +118,6 @@ export class iChargerService {
                 console.log("Stopped polling for network/server status")
             });
     }
-
 
     getConfig(): IConfig {
         return this.ngRedux.getState().config;
@@ -132,7 +143,11 @@ export class iChargerService {
         let haveNetwork = this.isNetworkAvailable();
         let haveCharger = this.isConnectedToCharger();
         let haveServer = this.isConnectedToServer();
-        return !haveNetwork || !haveCharger || !haveServer;
+        let result = !haveNetwork || !haveCharger || !haveServer;
+        if (result) {
+            console.log(`haveNetwork: ${haveNetwork}, haveCharger: ${haveCharger}, haveServer: ${haveServer}`);
+        }
+        return result;
     }
 
     isNetworkAvailable(): boolean {
@@ -160,13 +175,18 @@ export class iChargerService {
     getChargerStatus(): Observable<any> {
         let interval = 1000;
 
-        return Observable.timer(10, interval)
+        return Observable.timer(0, interval)
             .flatMap(v => {
                 // If disconnected, do a round robbin between various known IP addresses
                 this.tryNextInterfaceIfDisconnected();
 
                 let url = this.getChargerURL("/unified");
-                return this.http.get(url);
+                let state = this.ngRedux.getState();
+                if (state.ui.disconnected) {
+                    console.log(`Trying ${url}`);
+                }
+                this.firstRun = false;
+                return this.http.get(url)
             }).map(r => {
                 let state = this.ngRedux.getState();
 
@@ -176,6 +196,7 @@ export class iChargerService {
 
                 if (state.ui.disconnected) {
                     this.uiActions.serverReconnected();
+                    this.serverReconnection.emit();
                 }
             })
             .catch(error => {
@@ -187,6 +208,46 @@ export class iChargerService {
             })
             .retry();
     }
+
+    getSystemActions(): SystemActions {
+        if (this.systemActions == null) {
+            this.systemActions = AppModule.injector.get(SystemActions);
+        }
+        return this.systemActions;
+    }
+
+    getCaseFan(): Observable<IChargerCaseFan> {
+        let url = this.getChargerURL("/casefan");
+
+        return Observable.create(obs => {
+            this.http.get(url).subscribe(r => {
+                // Map this into the system 'case fan' state.
+                this.getSystemActions().updateCaseFan(r.json());
+                obs.next(r.json());
+                obs.complete();
+            })
+        });
+    }
+
+    saveCaseFan(case_fan: IChargerCaseFan): Observable<IChargerCaseFan> {
+        let headers = new Headers({'Content-Type': 'application/json'});
+        let options = new RequestOptions({headers: headers});
+        let operationURL = this.getChargerURL("/casefan");
+        return Observable.create((observable) => {
+            this.http.put(operationURL, case_fan, options).subscribe((resp) => {
+                if (!resp.ok) {
+                    observable.error(resp);
+                } else {
+                    observable.next(case_fan);
+                    observable.complete();
+                }
+            }, error => {
+                observable.error(error);
+            });
+        });
+
+    }
+
 
     public static getHostNameUsingConfigAndState(config: IConfig, ui: IUIState, port: number) {
         // If on index 0, use private WLAN address
@@ -207,7 +268,7 @@ export class iChargerService {
     getManagementHostName(): string {
         let config = this.getConfig();
         let state = this.ngRedux.getState();
-        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, 4999);
+        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, config.port - 1);
     }
 
     // Gets the status of the charger
@@ -410,6 +471,7 @@ export class iChargerService {
         let headers = new Headers({'Content-Type': 'application/json'});
         let options = new RequestOptions({headers: headers});
         let operationURL = this.getChargerURL("/system");
+
         return Observable.create((observable) => {
             this.http.put(operationURL, system.json(), options).subscribe((resp) => {
                 if (!resp.ok) {
@@ -503,33 +565,31 @@ export class iChargerService {
     }
 
 
-    public updateWifi(ssid: string, password: string) {
-        // this.configActions.setConfiguration("homeLanConnecting", true);
-        //
-        // Observable.create((observable) => {
-        //     let wifiURL = this.getManagementURL("/wifi");
-        //     let payload = {
-        //         "SSID": ssid,
-        //         "PWD": password
-        //     };
-        //
-        //     let headers = new Headers({'Content-Type': 'application/json'});
-        //     let options = new RequestOptions({headers: headers});
-        //
-        //     let body = JSON.stringify(payload);
-        //     console.log("Sending: ", body, "to", wifiURL);
-        //     this.http.put(wifiURL, body, options).subscribe((resp) => {
-        //             if (resp.ok) {
-        //                 console.log("Yay. It worked");
-        //             }
-        //         }, (e) => {
-        //
-        //         }, () => {
-        //             this.configActions.setConfiguration("homeLanConnecting", false);
-        //             this.detectWifiConnectionStatus();
-        //         }
-        //     );
-        // }).subscribe()
+    public updateWifi(ssid: string, password: string): Observable<any> {
+        return Observable.create((observable) => {
+            let wifiURL = this.getManagementURL("/wifi");
+            let payload = {
+                "SSID": ssid,
+                "PWD": password
+            };
+
+            let headers = new Headers({'Content-Type': 'application/json'});
+            let options = new RequestOptions({headers: headers});
+
+            let body = JSON.stringify(payload);
+            // console.log("Sending: ", body, "to", wifiURL);
+            this.http.put(wifiURL, body, options).subscribe((resp) => {
+                    if (resp.ok) {
+                        console.log("Yay. It worked");
+                    }
+                    observable.next();
+                }, (e) => {
+                    observable.error();
+                }, () => {
+                    observable.complete();
+                }
+            );
+        });
     }
 
     private getServerStatus(): Observable<any> {
@@ -537,6 +597,7 @@ export class iChargerService {
         return Observable.timer(10, interval).flatMap(v => {
             // If disconnected, do a round robbin between various known IP addresses
             this.tryNextInterfaceIfDisconnected();
+            this.networkService.fetchCurrentIPAddress();
 
             let wifiURL = this.getManagementURL("/status");
             // console.log("Get status from " + wifiURL);
@@ -554,8 +615,19 @@ export class iChargerService {
                     ap_associated: false,
                     ap_channel: access_point.channel,
                     ap_name: access_point.name,
-                    wifi_ssid: access_point.wifi_ssid,
                 };
+
+                let current_network = this.ngRedux.getState().config.network;
+                let havnt_had_update_yet = current_network.last_status_update == null;
+                let update_is_old = false;
+                if (havnt_had_update_yet == false) {
+                    let right_now: Date = new Date();
+                    let diff_in_ms = right_now.getTime() - current_network.last_status_update.getTime();
+                    update_is_old = diff_in_ms > 10000;
+                }
+                if (havnt_had_update_yet || update_is_old) {
+                    new_values['wifi_ssid'] = access_point.wifi_ssid;
+                }
 
                 if (docker.hasOwnProperty('last_deploy')) {
                     new_values['docker_last_deploy'] = docker['last_deploy'];
@@ -598,7 +670,7 @@ export class iChargerService {
                 this.uiActions.setDisconnected();
             }
         }).catch(e => {
-            console.error("Error getting /status: " + e);
+            console.error("Error getting server status: " + e);
             this.uiActions.setDisconnected();
             return Observable.throw(e);
         }).retry();
@@ -606,10 +678,10 @@ export class iChargerService {
 
     private tryNextInterfaceIfDisconnected() {
         let state = this.ngRedux.getState();
-        if (state.ui.disconnected) {
+        if (state.ui.disconnected && !this.firstRun) {
             let config = this.getConfig();
-            config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2;
-            console.log("Switch to connection index: ", config.lastConnectionIndex);
+            config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
+            console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.getHostName()}`);
         }
     }
 }

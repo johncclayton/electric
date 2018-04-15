@@ -18,7 +18,7 @@ set -e
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/docker-compose.yml
 
 # get the script to fetch the latest build # from travis
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/get-latest-build-number.py
+curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
 
 # and the udev rules?
 if [ ! -d "/etc/udev/rules.d/10-icharger.rules" ]; then
@@ -43,9 +43,9 @@ shutdown_existing docker-ui
 shutdown_existing electric-web
 shutdown_existing electric-worker
 
-echo Running with DOCKER_TAG=$VERSION_NUM, and execute docker-compose up -d
-DOCKER_TAG=$VERSION_NUM docker-compose up -d
-echo >LAST_DEPLOY $VERSION_NUM
+echo Running with VERSION_TAG=":$VERSION_NUM", and execute docker-compose up -d
+VERSION_TAG=":$VERSION_NUM" docker-compose up -d
+echo >/opt/LAST_DEPLOY $VERSION_NUM
 
 # get the script to setup the wireless
 #curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/install-wlan.sh

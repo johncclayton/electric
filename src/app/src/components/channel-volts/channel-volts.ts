@@ -1,10 +1,11 @@
-import {Component, Input} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {Channel} from "../../models/channel";
 import * as _ from "lodash";
 
 @Component({
     selector: 'channel-volts',
-    templateUrl: 'channel-volts.html'
+    templateUrl: 'channel-volts.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChannelVoltsComponent {
     public maxBalanceSeen: number = 8;

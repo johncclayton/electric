@@ -1,5 +1,13 @@
 import {ENV} from '@app/env'
 
+export interface IChargerCaseFan {
+    control: boolean;
+    running: boolean;
+    threshold: number;
+    hysteresis: number;
+    gpio: number;
+}
+
 export class System {
     public static CELSIUS: string = "°C";
     public static FARENHEIGHT: string = "°F";
@@ -11,9 +19,12 @@ export class System {
         return System.FARENHEIGHT;
     }
 
-    constructor(private data: {}) {
-        console.error("System object created");
-        console.error("Env is: " + ENV.ionicEnvName);
+    constructor(private system_data: {}) {
+        console.error(`System object created.  Environment: ${ENV.ionicEnvName}`);
+        if (this.has_capabilities) {
+            let keys = Object.keys(this.system_data['capabilities']);
+            console.error(`System Capabilities: ${keys.join(",")}`);
+        }
     }
 
     static get environment(): any {
@@ -33,58 +44,78 @@ export class System {
 
     clone(): System {
         let system: System = new System({});
-        for (let k in this.data) {
-            system.data[k] = this.data[k];
+        for (let k in this.system_data) {
+            system.system_data[k] = this.system_data[k];
         }
         return system;
     }
 
     json() {
-        return JSON.stringify(this.data);
+        // Exclude the 'capabilities' as these cannot be saved
+        let copied_dict = {...this.system_data};
+        if(this.has_capabilities) {
+            delete copied_dict['capabilities'];
+        }
+        return JSON.stringify(copied_dict);
     }
 
     get data_structure() {
-        return this.data;
+        return this.system_data;
+    }
+
+    get has_capabilities(): boolean {
+        return 'capabilities' in this.system_data;
+    }
+
+    get has_case_fan() : boolean {
+        return this.has_capability('case_fan')
+    }
+
+    public has_capability(capability_name: string): boolean {
+        if (this.has_capabilities) {
+            return capability_name in this.system_data['capabilities'];
+        }
+        return false;
     }
 
     get isCelsius(): boolean {
-        return this.data['temp_unit'] == 'C';
+        return this.system_data['temp_unit'] == 'C';
     }
 
     set isCelsius(value: boolean) {
-        this.data['temp_unit'] = value ? 'C' : 'F';
+        this.system_data['temp_unit'] = value ? 'C' : 'F';
     }
 
     get temp_shutdown(): number {
-        return this.data['temp_stop'];
+        return this.system_data['temp_stop'];
     }
 
     set temp_shutdown(value: number) {
-        this.data['temp_stop'] = +value;
+        this.system_data['temp_stop'] = +value;
     }
 
     get temp_power_reduce(): number {
-        return -this.data['temp_reduce'] / 10.0;
+        return -this.system_data['temp_reduce'] / 10.0;
     }
 
     set temp_power_reduce(value: number) {
-        this.data['temp_reduce'] = value * -10.0;
+        this.system_data['temp_reduce'] = value * -10.0;
     }
 
     get temp_fans_on(): number {
-        return this.data['temp_fans_on'];
+        return this.system_data['temp_fans_on'];
     }
 
     set temp_fans_on(value: number) {
-        this.data['temp_fans_on'] = +value;
+        this.system_data['temp_fans_on'] = +value;
     }
 
     get fans_off_time(): number {
-        return this.data['fans_off_delay'];
+        return this.system_data['fans_off_delay'];
     }
 
     set fans_off_time(value: number) {
-        this.data['fans_off_delay'] = +value;
+        this.system_data['fans_off_delay'] = +value;
     }
 
     get unitsOfMeasure(): string {
@@ -95,19 +126,19 @@ export class System {
     }
 
     get brightness(): number {
-        return this.data['lcd_brightness'];
+        return this.system_data['lcd_brightness'];
     }
 
     set brightness(value: number) {
-        this.data['lcd_brightness'] = +value;
+        this.system_data['lcd_brightness'] = +value;
     }
 
     get contrast(): number {
-        return this.data['lcd_contrast'];
+        return this.system_data['lcd_contrast'];
     }
 
     set contrast(value: number) {
-        this.data['lcd_contrast'] = +value;
+        this.system_data['lcd_contrast'] = +value;
     }
 
 }
