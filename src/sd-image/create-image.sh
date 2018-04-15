@@ -19,7 +19,8 @@ DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
 # Let the user specify defaults in a .config if they are brave
 FROM="hypriotos-rpi-v1.8.0-resized.img"
-BRANCH=`git rev-parse --abbrev-ref HEAD | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
+#BRANCH=`git rev-parse --abbrev-ref HEAD | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
+BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
 
 if [ ! -f "$QEMU_ARM" ]; then
 	echo "Whoa - expected to find $QEMU_ARM binary... didn't, have you done: sudo apt-get install binfmt-support qemu qemu-user-static"
