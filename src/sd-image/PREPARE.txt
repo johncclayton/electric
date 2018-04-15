@@ -1,3 +1,6 @@
+Prepare to Resize Source Image
+==============================
+
 How I prepared:
 
 1. take the hypriot image
