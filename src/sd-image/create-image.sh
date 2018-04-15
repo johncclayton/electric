@@ -18,7 +18,7 @@ DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
 DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
 # Let the user specify defaults in a .config if they are brave
-FROM="hypriotos-rpi-v1.4.0.img"
+FROM="hypriotos-rpi-v1.8.0-resized.img"
 BRANCH=`git rev-parse --abbrev-ref HEAD | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
 
 if [ ! -f "$QEMU_ARM" ]; then
