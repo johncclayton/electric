@@ -61,3 +61,5 @@ sudo losetup -d /dev/loop0
 
 
 and then copy /tmp/john.img back to the hypriot inmage :-)
+
+
