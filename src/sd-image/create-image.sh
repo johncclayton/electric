@@ -3,9 +3,7 @@
 set -e
 set -x
 
-FROM="$1"
 TO="/tmp/electric-sd-card.img"
-
 PIIMG=`which piimg`
 QEMU_ARM="/usr/bin/qemu-arm-static"
 
@@ -20,18 +18,27 @@ DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
 DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
 # Let the user specify defaults in a .config if they are brave
-if [ -f ./.config ]; then
-	. ./.config
+FROM="hypriotos-rpi-v1.4.0.img"
+BRANCH=`git rev-parse --abbrev-ref HEAD | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
+
+if [ ! -f "$QEMU_ARM" ]; then
+	echo "Whoa - expected to find $QEMU_ARM binary... didn't, have you done: sudo apt-get install binfmt-support qemu qemu-user-static"
+	exit 6
 fi
 
-if [ -z "$FROM" ]; then
-	echo "Use create-image.sh <from>"
-	exit 1
+if [ -z "$PIIMG" ]; then
+	echo "Cannot find piimg utility, aborting"
+	exit 5
 fi
 
 if [ ! -f "$FROM" ]; then
 	echo "Source img does not exist: $FROM"
 	exit 2
+fi
+
+if [ -z "$BRANCH" ]; then
+	echo "I can't detect the name of the branch - aborting..."
+	exit 7
 fi
 
 if [ -f "$TO" ]; then
@@ -54,21 +61,20 @@ if [ ! -d "$MNT" ]; then
 	exit 4
 fi	
 
-if [ -z "$PIIMG" ]; then
-	echo "Cannot find piimg utility, aborting"
-	exit 5
-fi
-
-if [ ! -f "$QEMU_ARM" ]; then
-	echo "Whoa - expected to find $QEMU_ARM binary... didn't, have you done: sudo apt-get install binfmt-support qemu qemu-user-static"
-	exit 6
-fi
-
 # We're building. Now. We DONT want to use the 'latest build from travis', we want to use the one we just pushed!
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
+
 #curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
 #VERSION_NUM=`python get-latest-build-number.py`
+echo "Branch is: $BRANCH"
 echo "Latest version is: $VERSION_NUM"
+
+copy_to_external()
+{
+        N="${DESTINATION_NAME}_${BRANCH}"
+        cp "$TO" "$DESTINATION_AFTER_BUILD/${N}_${VERSION_NUM}.img"
+        cd "$DESTINATION_AFTER_BUILD" && ls -1 -tp ${N}* | grep -v '/$' | tail -n +2 | xargs -I {} rm {}
+}
 
 # pull docker image and save it as a file...
 docker pull "$DOCKER_IMAGE_WEB:$VERSION_NUM"
@@ -125,8 +131,7 @@ RES=$?
 sudo $PIIMG umount "$MNT"
 
 if [ -d "$DESTINATION_AFTER_BUILD" -a "$RES" -eq 0 ]; then
-	cp "$TO" "$DESTINATION_AFTER_BUILD/${DESTINATION_NAME}_${VERSION_NUM}.img"
-	cd "$DESTINATION_AFTER_BUILD" && ls -1 -tp | grep -v '/$' | tail -n +2 | xargs -I {} rm {}
+	copy_to_external
 else
 	echo "$TO not moved, there was a problem"
 fi
