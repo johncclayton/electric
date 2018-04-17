@@ -35,6 +35,12 @@ def get_last_deployed_version():
         return 0
     return int(last_deploy.strip())
 
+def get_last_deployed_branch():
+    (last_deploy, err, last_deploy_ret) = read_output_for(
+        [script_path("get_last_deploy_branch.sh")])
+    if last_deploy_ret != 0:
+        return 0
+    return int(last_deploy.strip())
 
 def script_path(name):
     return os.path.join("/opt/status/scripts", name)
@@ -212,6 +218,7 @@ class StatusResource(Resource):
             [script_path("get_ip_address.sh"), "wlan1"], "wlan1 device not found")
 
         last_deployed_version = get_last_deployed_version()
+        last_deployed_branch = get_last_deployed_branch()
 
         res["services"] = {
             "dnsmasq": self._systemctl_running("dnsmasq"),
@@ -242,6 +249,7 @@ class StatusResource(Resource):
 
         res["docker"] = {
             "last_deploy": last_deployed_version,
+            "last_branch": last_deployed_branch,
             "web": {
                 "image_name": image_name(WEB_IMAGE_NAME, last_deployed_version),
                 "container_name": WEB_CONTAINER_NAME,

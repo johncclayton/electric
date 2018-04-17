@@ -21,7 +21,10 @@ shutdown_existing docker-ui
 shutdown_existing electric-web
 shutdown_existing electric-worker
 
+# TODO: fix so that we can work out the next possible version using a specific branch
+
 echo Running with VERSION_TAG=$1, and execute docker-compose up
+
 export VERSION_TAG=":$1"
 docker-compose up -d
 

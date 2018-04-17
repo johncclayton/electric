@@ -19,7 +19,7 @@ DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
 # Let the user specify defaults in a .config if they are brave
 FROM="hypriotos-rpi-v1.8.0-resized.img"
-#BRANCH=`git rev-parse --abbrev-ref HEAD | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
+GIT_BRANCH=`git rev-parse --abbrev-ref HEAD | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
 BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
 
 if [ ! -f "$QEMU_ARM" ]; then
@@ -98,6 +98,7 @@ sudo chmod 777 "$OPT/wireless"
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY
+echo "$GIT_BRANCH" > ./LAST_BRANCH
 sudo mv ./LAST_DEPLOY "$OPT"
 
 sudo cp -r ../../wireless/etc "$OPT/wireless/"
