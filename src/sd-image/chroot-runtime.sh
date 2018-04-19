@@ -28,7 +28,7 @@ sudo chown -R root:users /opt
 sudo chmod +x /opt/wireless/scripts/*
 sudo chmod +x /opt/*.sh
 
-# ensure SSH is enabled
+# ensure SSH is enabled (still need this with user-data / cloud-init?)
 touch /boot/ssh
 
 # Remove /boot/device-init.yaml. It interferes with wpa supplicant
