@@ -120,6 +120,9 @@ sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"
 
+sudo cp scripts/user-data "$MNT/boot/user-data"
+sudo chmod 755 "$MNT/boot/user-data"
+
 sudo cp scripts/bootstrap_docker_images.sh "$OPT"
 sudo cp scripts/ensure_gpio_writable.sh "$OPT"
 sudo cp scripts/upgrade.sh "$OPT"

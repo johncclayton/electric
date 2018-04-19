@@ -31,9 +31,6 @@ sudo chmod +x /opt/*.sh
 # ensure SSH is enabled
 touch /boot/ssh
 
-systemctl enable electric-pi-status.service
-systemctl enable electric-pi.service
-
 # Remove /boot/device-init.yaml. It interferes with wpa supplicant
 # and prevents wlan1 from coming up properly.
 if [ -f "/boot/device-init.yaml" ]; then
