@@ -73,6 +73,7 @@ runcmd:
   # enable the status service
   - 'systemctl enable --now electric-pi-status.service'
   - 'systemctl enable --now electric-pi.service'
+  - 'locale-gen UTF-8'
 
 # Activate the static WiFi interface
   - 'ifup wlan1'
