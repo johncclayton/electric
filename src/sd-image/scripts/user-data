@@ -71,11 +71,8 @@ runcmd:
   - 'systemctl restart dnsmasq'
   - 'systemctl restart hostapd'
   # enable the status service
-  - 'systemctl enable electric-pi-status.service'
-  - 'systemctl enable electric-pi.service'
-  # and start them too
-  #- 'systemctl restart electric-pi-status'
-  #- 'systemctl restart electric-pi'
+  - 'systemctl enable --now electric-pi-status.service'
+  - 'systemctl enable --now electric-pi.service'
 
 # Activate the static WiFi interface
   - 'ifup wlan1'
