@@ -15,7 +15,7 @@ apt-get -y remove python-pip && easy_install pip
 
 # install docker
 curl -sSL https://get.docker.com | sh
-apt-get -y install docker-compose
+curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 
 # add pirate user - this makes the runtime compatible with Hypriot (and all the scripts we wrote for that)
 sudo useradd --shell /bin/bash -G docker -m -s /bin/bash pirate
