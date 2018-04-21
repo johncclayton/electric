@@ -7,9 +7,19 @@ set -u
 apt-get -y update
 apt-get -y install g++ python-dev python-setuptools python-pip hostapd dnsmasq gawk avahi-daemon 
 
-apt-get -y remove dhcpcd python-pip && easy_install pip
+# Hypriot 1.8 was using this - bye bye, don't want it - we run dnsmasq instead.
+apt-get -y remove --purge dhcpcd5
+
+apt-get -y remove python-pip && easy_install pip
 
 /usr/local/bin/pip install -r /opt/status/requirements.txt
+
+# install docker
+curl -sSL https://get.docker.com | sh
+
+# add pirate user
+sudo adduser --shell /bin/bash pirate
+usermod -aG docker pirate
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
