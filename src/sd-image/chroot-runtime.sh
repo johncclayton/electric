@@ -7,7 +7,7 @@ set -u
 apt-get -y update
 apt-get -y install g++ python-dev python-setuptools python-pip hostapd dnsmasq gawk avahi-daemon 
 
-apt-get -y remove python-pip && easy_install pip 
+apt-get -y remove dhcpcd python-pip && easy_install pip
 
 /usr/local/bin/pip install -r /opt/status/requirements.txt
 
