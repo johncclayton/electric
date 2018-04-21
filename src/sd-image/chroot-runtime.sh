@@ -15,13 +15,16 @@ apt-get -y remove python-pip && easy_install pip
 
 # install docker
 curl -sSL https://get.docker.com | sh
-curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+
+# install docker-compose
+sudo curl -L https://github.com/mjuu/rpi-docker-compose/blob/master/v1.12.0/docker-compose-v1.12.0?raw=true -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
 # add pirate user - this makes the runtime compatible with Hypriot (and all the scripts we wrote for that)
 sudo useradd --shell /bin/bash -G docker -m -s /bin/bash pirate
 sudo usermod -a -G users pirate
 sudo usermod -a -G docker pi
+sudo sh -c 'echo "pirate:hypriot" | chpasswd'
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
