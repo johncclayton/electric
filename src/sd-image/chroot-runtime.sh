@@ -18,8 +18,7 @@ apt-get -y remove python-pip && easy_install pip
 curl -sSL https://get.docker.com | sh
 
 # add pirate user
-sudo adduser --shell /bin/bash pirate
-usermod -aG docker pirate
+sudo useradd --shell /bin/bash -G docker -m -s /bin/bash pirate
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
