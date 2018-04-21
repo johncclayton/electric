@@ -122,6 +122,10 @@ sudo cp ../../docker-compose.yml "$OPT"
 sudo cp scripts/user-data "$MNT/boot/user-data"
 sudo chmod 755 "$MNT/boot/user-data"
 
+# lets try to disable network config for cloud-init
+sudo echo "network: {config: disabled}" > "$MNT/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg"
+sudo chmod 644 "$MNT/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg"
+
 sudo cp scripts/bootstrap_docker_images.sh "$OPT"
 sudo cp scripts/ensure_gpio_writable.sh "$OPT"
 sudo cp scripts/upgrade.sh "$OPT"
