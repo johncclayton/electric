@@ -9,13 +9,13 @@ apt-get -y install g++ python-dev python-setuptools python-pip hostapd dnsmasq g
 
 # Hypriot 1.8 was using this - bye bye, don't want it - we run dnsmasq instead.
 apt-get -y remove --purge dhcpcd5
-
 apt-get -y remove python-pip && easy_install pip
 
 /usr/local/bin/pip install -r /opt/status/requirements.txt
 
 # install docker
 curl -sSL https://get.docker.com | sh
+apt-get -y install docker-compose
 
 # add pirate user - this makes the runtime compatible with Hypriot (and all the scripts we wrote for that)
 sudo useradd --shell /bin/bash -G docker -m -s /bin/bash pirate
