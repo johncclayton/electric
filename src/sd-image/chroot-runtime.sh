@@ -17,8 +17,10 @@ apt-get -y remove python-pip && easy_install pip
 # install docker
 curl -sSL https://get.docker.com | sh
 
-# add pirate user
+# add pirate user - this makes the runtime compatible with Hypriot (and all the scripts we wrote for that)
 sudo useradd --shell /bin/bash -G docker -m -s /bin/bash pirate
+sudo usermod -a -G users pirate
+sudo usermod -a -G docker pi
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd

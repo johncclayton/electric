@@ -40,7 +40,7 @@ def get_last_deployed_branch():
         [script_path("get_last_deploy_branch.sh")])
     if last_deploy_ret != 0:
         return 0
-    return int(last_deploy.strip())
+    return last_deploy.strip()
 
 def script_path(name):
     return os.path.join("/opt/status/scripts", name)
