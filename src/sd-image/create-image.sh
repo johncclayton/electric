@@ -17,8 +17,7 @@ DOCKER_IMAGE_WEB="johncclayton/electric-pi-web"
 DOCKER_IMAGE_WORKER="johncclayton/electric-pi-worker"
 DOCKER_IMAGE_UI="hypriot/rpi-dockerui"
 
-# Let the user specify defaults in a .config if they are brave
-FROM="hypriotos-rpi-v1.8.0-resized.img"
+FROM="2018-04-18-raspbian-stretch-lite.img"
 BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
 
 if [ ! -f "$QEMU_ARM" ]; then
@@ -64,10 +63,8 @@ fi
 # We're building. Now. We DONT want to use the 'latest build from travis', we want to use the one we just pushed!
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
 
-#curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
-#VERSION_NUM=`python get-latest-build-number.py`
-echo "Branch is: $BRANCH"
-echo "Latest version is: $VERSION_NUM"
+echo "Travis Branch (stripped/safe) is : $BRANCH"
+echo "Travis Build Number              : $VERSION_NUM"
 
 copy_to_external()
 {
@@ -98,7 +95,9 @@ sudo chmod 777 "$OPT/wireless"
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY
 echo "$TRAVIS_BRANCH" > ./LAST_BRANCH
+
 sudo mv ./LAST_DEPLOY "$OPT"
+sudo mv ./LAST_BRANCH "$OPT"
 
 sudo cp -r ../../wireless/etc "$OPT/wireless/"
 sudo cp -r ../../wireless/config "$OPT/wireless/"
@@ -119,8 +118,9 @@ sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"
 
-sudo cp scripts/user-data "$MNT/boot/user-data"
-sudo chmod 755 "$MNT/boot/user-data"
+# for cloud-init
+#sudo cp scripts/user-data "$MNT/boot/user-data"
+#sudo chmod 755 "$MNT/boot/user-data"
 
 # lets try to disable network config for cloud-init
 #sudo mkdir -p "$MNT/etc/cloud/cloud.cfg.d"
