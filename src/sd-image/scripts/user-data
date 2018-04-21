@@ -10,7 +10,7 @@
 # Set your hostname here, the manage_etc_hosts will update the hosts file entries as well
 hostname: electric
 manage_etc_hosts: true
-manage_resolve_conf: false
+manage_resolv_conf: false
 
 # You could modify this for your own user information
 users:
