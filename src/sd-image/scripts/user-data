@@ -10,6 +10,7 @@
 # Set your hostname here, the manage_etc_hosts will update the hosts file entries as well
 hostname: electric
 manage_etc_hosts: true
+manage_resolve_conf: false
 
 # You could modify this for your own user information
 users:
@@ -36,10 +37,6 @@ users:
 # package_reboot_if_required: true
 package_upgrade: false
 
-# # Install any additional apt packages you need here
-# packages:
-#  - ntp
-
 # # WiFi connect to HotSpot
 # # - use `wpa_passphrase SSID PASSWORD` to encrypt the psk
 # write_files:
@@ -65,6 +62,7 @@ package_upgrade: false
 
 # These commands will be ran once on first boot only
 runcmd:
+  - 'locale-gen UTF-8'
   # Pickup the hostname changes
   - 'systemctl restart avahi-daemon'
   # start up dns/access point
@@ -73,7 +71,6 @@ runcmd:
   # enable the status service
   - 'systemctl enable --now electric-pi-status.service'
   - 'systemctl enable --now electric-pi.service'
-  - 'locale-gen UTF-8'
 
 # Activate the static WiFi interface
   - 'ifup wlan1'
