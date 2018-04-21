@@ -19,7 +19,6 @@ curl -sSL https://get.docker.com | sh
 
 # add pirate user
 sudo useradd --shell /bin/bash -G docker -m -s /bin/bash pirate
-sudo groupmod -aG docker pi
 
 # compile the enumeration_interfaces.c code for raspberry pi
 pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
