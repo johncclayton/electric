@@ -28,7 +28,6 @@ ask_question() {
 copy_template() {
     template_str=$(cat $1)
     eval "echo >$2 \"${template_str}\""
-
 }
 
 set_wifi_pwd() {
