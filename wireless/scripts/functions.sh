@@ -38,8 +38,6 @@ set_wifi_pwd() {
 
     N=/etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 
-    echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev" > $N
-    echo "update_config=1" >> $N
     echo "country=GB" >> $N
 
     wpa_passphrase "$SSID" "$PSK" >> $N
