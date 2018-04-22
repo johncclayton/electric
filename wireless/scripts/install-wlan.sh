@@ -59,7 +59,8 @@ fi
 
 # Fix the WLAN0 ssid/password
 echo "Configuring wlan0 to use $WLAN0_SSID"
-wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
+echo "country=GB" > /etc/wpa_supplicant/wpa_supplicant.conf
+wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >> /etc/wpa_supplicant/wpa_supplicant.conf
 
 # Bounce the interface to get wpa_supplicant to do its thing
 ifdown wlan0
