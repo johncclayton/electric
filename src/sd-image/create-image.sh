@@ -115,20 +115,8 @@ sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 
-sudo cp scripts/020_pirate-nopasswd "$MNT/etc/sudoers.d/"
-sudo chmod 0440 "$MNT/etc/sudoers.d/020_pirate-nopasswd"
-
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"
-
-# for cloud-init
-#sudo cp scripts/user-data "$MNT/boot/user-data"
-#sudo chmod 755 "$MNT/boot/user-data"
-
-# lets try to disable network config for cloud-init
-#sudo mkdir -p "$MNT/etc/cloud/cloud.cfg.d"
-#sudo cp scripts/disable-network-config.cfg "$MNT/etc/cloud/cloud.cfg.d/01-disable-network-config.cfg"
-#sudo chmod 644 "$MNT/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg"
 
 sudo cp scripts/bootstrap_docker_images.sh "$OPT"
 sudo cp scripts/ensure_gpio_writable.sh "$OPT"

@@ -15,9 +15,10 @@ fi
 
 /sbin/ifdown wlan0
 
-# sets the current configured SSID/PSK value in the wpa_supplicant.conf file
-echo "country=GB" > /etc/wpa_supplicant/wpa_supplicant.conf
-/usr/bin/wpa_passphrase "$WIFINAME" "$WIFIPWD" >> /etc/wpa_supplicant/wpa_supplicant.conf
+INSTALL_ROOT=/opt
+. ${INSTALL_ROOT}/wireless/scripts/functions.sh
+
+set_wifi_pwd "$1" "$2"
 
 /sbin/ifup wlan0
 

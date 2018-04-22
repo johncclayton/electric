@@ -30,3 +30,18 @@ copy_template() {
     eval "echo >$2 \"${template_str}\""
 
 }
+
+set_wifi_pwd() {
+    SSID="$1"
+    PSK="$2"
+
+    echo "Configuring wlan0 to use $SSID"
+
+    N=/etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+
+    echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev" > $N
+    echo "update_config=1" >> $N
+    echo "country=GB" >> $N
+
+    wpa_passphrase "$SSID" "$PSK" >> $N
+}
