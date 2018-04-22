@@ -36,9 +36,12 @@ set_wifi_pwd() {
 
     echo "Configuring wlan0 to use $SSID"
 
+    # specifying only wlan0.conf here - not the global file, the Stretch install appears to write
+    # the ctrl_interface and update_config=1 commands into the global file automatically - yay!
     N=/etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 
-    echo "country=GB" >> $N
-
+    # note!  the first one overwrites the entire file
+    echo "country=GB" > $N
+    # and this just appends the network {} config
     wpa_passphrase "$SSID" "$PSK" >> $N
 }
