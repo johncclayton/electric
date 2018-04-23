@@ -115,8 +115,11 @@ sudo cp scripts/electric-pi-status.service "$MNT/etc/systemd/system/"
 sudo cp scripts/electric-pi.service "$MNT/etc/systemd/system/"
 sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 
-sudo cp scripts/020_pirate-nopasswd "$MNT/etc/sudoers.d/"
+sudo cp config/020_pirate-nopasswd "$MNT/etc/sudoers.d/"
 sudo chmod 0440 "$MNT/etc/sudoers.d/020_pirate-nopasswd"
+
+sudo cp config/electric.conf "$MNT/etc/rsyslog.d/"
+sudo chmod 644 "$MNT/etc/rsyslog.d/electric.conf"
 
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"

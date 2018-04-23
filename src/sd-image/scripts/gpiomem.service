@@ -6,6 +6,9 @@ Before=electric-pi.service docker.service
 Type=oneshot
 RemainAfterExit=true
 ExecStart=/opt/ensure_gpio_writable.sh
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=electric-gpiomem
 
 [Install]
 WantedBy=multi-user.target
