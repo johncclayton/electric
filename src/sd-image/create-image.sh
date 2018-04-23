@@ -118,6 +118,9 @@ sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo cp config/020_pirate-nopasswd "$MNT/etc/sudoers.d/"
 sudo chmod 0440 "$MNT/etc/sudoers.d/020_pirate-nopasswd"
 
+sudo mkdir -p "$MNT/etc/rsyslog.d"
+sudo chmod 755 "$MNT/etc/rsyslog.d"
+
 sudo cp config/*.conf "$MNT/etc/rsyslog.d/"
 sudo chmod 644 "$MNT/etc/rsyslog.d/*.conf"
 
