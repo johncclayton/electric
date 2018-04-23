@@ -122,7 +122,8 @@ sudo mkdir -p "$MNT/etc/rsyslog.d"
 sudo chmod 755 "$MNT/etc/rsyslog.d"
 
 sudo cp config/*.conf "$MNT/etc/rsyslog.d/"
-sudo chmod 644 "$MNT/etc/rsyslog.d/*.conf"
+sudo chmod 644 "$MNT/etc/rsyslog.d/electric.conf"
+sudo chmod 644 "$MNT/etc/rsyslog.d/hostapd.conf"
 
 sudo cp -r ../status "$OPT"
 sudo cp ../../docker-compose.yml "$OPT"
