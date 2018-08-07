@@ -9,14 +9,14 @@ import {ChargerActions} from '../models/state/actions/charger';
 import {UIActions} from '../models/state/actions/ui';
 import {IConfig} from '../models/state/reducers/configuration';
 import {IChargerState} from '../models/state/reducers/charger';
-import {Vibration} from '@ionic-native/vibration';
-import {LocalNotifications} from '@ionic-native/local-notifications';
 import {IUIState} from '../models/state/reducers/ui';
 import {ConfigurationActions} from '../models/state/actions/configuration';
 import {ElectricNetworkService} from './network.service';
 import {SystemActions} from '../models/state/actions/system';
 import {HttpClient} from '@angular/common/http';
 import {catchError, flatMap, map, retry, takeUntil, takeWhile} from 'rxjs/operators';
+import {Vibration} from '@ionic-native/vibration/ngx';
+import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -562,7 +562,7 @@ export class iChargerService {
             catchError(e => {
                 console.error('Error getting server status: ' + e);
                 this.uiActions.setDisconnected();
-                return throwError(r);
+                return throwError(e);
             }),
             retry()
         );
