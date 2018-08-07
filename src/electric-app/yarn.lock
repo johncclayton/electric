@@ -181,6 +181,12 @@
   dependencies:
     "@types/cordova" latest
 
+"@ionic-native/local-notifications@^5.0.0-beta.14":
+  version "5.0.0-beta.14"
+  resolved "https://registry.yarnpkg.com/@ionic-native/local-notifications/-/local-notifications-5.0.0-beta.14.tgz#edf1154062a0a626bb71d975d90a2d96fc189c3d"
+  dependencies:
+    "@types/cordova" latest
+
 "@ionic-native/splash-screen@5.0.0-beta.14":
   version "5.0.0-beta.14"
   resolved "https://registry.yarnpkg.com/@ionic-native/splash-screen/-/splash-screen-5.0.0-beta.14.tgz#a8f436236b1984b23bea34820db029e1464eba8d"
@@ -190,6 +196,12 @@
 "@ionic-native/status-bar@5.0.0-beta.14":
   version "5.0.0-beta.14"
   resolved "https://registry.yarnpkg.com/@ionic-native/status-bar/-/status-bar-5.0.0-beta.14.tgz#196e0d43256266986bd7b9eaf3fd974cadbce88d"
+  dependencies:
+    "@types/cordova" latest
+
+"@ionic-native/vibration@^5.0.0-beta.14":
+  version "5.0.0-beta.14"
+  resolved "https://registry.yarnpkg.com/@ionic-native/vibration/-/vibration-5.0.0-beta.14.tgz#be29b87f3817d6f80e065dddc3429f421a7ad159"
   dependencies:
     "@types/cordova" latest
 
@@ -1777,6 +1789,14 @@ copy-webpack-plugin@^4.5.2:
     minimatch "^3.0.4"
     p-limit "^1.0.0"
     serialize-javascript "^1.4.0"
+
+cordova-plugin-local-notification@^0.9.0-beta.2:
+  version "0.9.0-beta.2"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-local-notification/-/cordova-plugin-local-notification-0.9.0-beta.2.tgz#e3a0b4a35d11f95bb4f1e367d9baee9909cca695"
+
+cordova-plugin-vibration@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-vibration/-/cordova-plugin-vibration-3.1.0.tgz#63e57a1de72e318b0944ef727d7c4eff13ca2c93"
 
 core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.3:
   version "2.5.7"

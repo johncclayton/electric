@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ConfigurationActions} from '../actions/configuration';
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from '../configure';
-import {ConfigStoreService} from '../../../providers/config-store.service';
+import {ConfigStoreService} from '../../../services/config-store.service';
 import {map} from 'rxjs/operators';
 
 @Injectable()

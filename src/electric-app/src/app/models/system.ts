@@ -1,4 +1,4 @@
-import {ENV} from '@app/env'
+import {environment} from '../../environments/environment';
 
 export interface IChargerCaseFan {
     control: boolean;
@@ -20,7 +20,7 @@ export class System {
     }
 
     constructor(private system_data: {}) {
-        console.error(`System object created.  Environment: ${ENV.ionicEnvName}`);
+        console.error(`System object created.  Environment: ${environment.ionicEnvName}`);
         if (this.has_capabilities) {
             let keys = Object.keys(this.system_data['capabilities']);
             console.error(`System Capabilities: ${keys.join(",")}`);
@@ -28,7 +28,7 @@ export class System {
     }
 
     static get environment(): any {
-        return ENV;
+        return environment;
     }
 
     static get isProduction(): boolean {
