@@ -1,0 +1,7 @@
+{
+  "name": "electric-app",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
