@@ -1,69 +1,81 @@
-import {Component} from '@angular/core';
-import {NavController, NavParams, Toast, ToastController} from 'ionic-angular';
-import {Channel} from "../../models/channel";
-import {iChargerService} from "../../services/icharger.service";
-import {ChemistryType, Preset} from "../../models/preset-class";
-import {Chemistry} from "../../utils/mixins";
-
+import {Component, OnInit} from '@angular/core';
+import {Chemistry} from '../../utils/mixins';
+import {applyMixins} from 'rxjs/internal-compatibility';
+import {IChargeSettings, IConfig} from '../../models/state/reducers/configuration';
+import {IUIState} from '../../models/state/reducers/ui';
+import {Channel} from '../../models/channel';
+import {Subject} from 'rxjs';
+import {NavController, ToastController} from '@ionic/angular';
+import {iChargerService} from '../../services/icharger.service';
+import {UIActions} from '../../models/state/actions/ui';
+import {NgRedux} from '@angular-redux/store';
+import {IAppState} from '../../models/state/configure';
+import {DataBagService} from '../../services/data-bag.service';
+import {takeUntil} from 'rxjs/operators';
+import {ChemistryType, Preset} from '../../models/preset-class';
+import {sprintf} from 'sprintf-js';
 import * as _ from "lodash";
-import {sprintf} from "sprintf-js";
-import {applyMixins} from "rxjs/util/applyMixins";
-import {NgRedux} from "@angular-redux/store";
-import {IAppState} from "../../models/state/configure";
-import {IChargeSettings, IConfig} from "../../models/state/reducers/configuration";
-import {IUIState} from "../../models/state/reducers/ui";
-import {UIActions} from "../../models/state/actions/ui";
-import {Subject} from "rxjs/Subject";
 
 @Component({
-    selector: 'page-charge-options',
-    templateUrl: 'charge-options.html'
+    selector: 'app-charge-options',
+    templateUrl: './charge-options.page.html',
+    styleUrls: ['./charge-options.page.scss'],
 })
-export class ChargeOptionsPage implements Chemistry {
+export class ChargeOptionsPage implements OnInit, Chemistry {
+    private previousURL: string;
+
     config: IConfig;
     chargeSettings: IChargeSettings;
     ui: IUIState;
 
     channel: Channel;
-    title: string = "Charge";
+    title: string = 'Charge';
     showCapacityAndC: boolean = true;
     charging: boolean = true;
     presets: Array<any> = [];
 
     private callback: any;
-    private simpleAlert: Toast;
+    private simpleAlert: any;
 
-    public static CHARGE_BY_PLAN_PRESET_NAME: string = "Electric Charge Plan";
+    public static CHARGE_BY_PLAN_PRESET_NAME: string = 'Electric Charge Plan';
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public uiActions: UIActions,
+                public dataBag: DataBagService,
                 public toastController: ToastController,
-                public ngRedux: NgRedux<IAppState>,
-                public navParams: NavParams) {
+                public ngRedux: NgRedux<IAppState>) {
 
-        this.channel = navParams.data['channel'];
-        this.showCapacityAndC = navParams.data['showCapacityAndC'];
-        this.charging = navParams.data['charging'];
-        this.title = navParams.data['title'];
-        this.callback = navParams.data['callback'];
+        const options = this.dataBag.get('chargingOptions');
+        this.channel = options['channel'];
+        this.showCapacityAndC = options['showCapacityAndC'];
+        this.charging = options['charging'];
+        this.title = options['title'];
+        this.callback = options['callback'];
         this.config = null;
+        this.previousURL = options['previousURL'];
         this.chargeSettings = null;
 
         ngRedux.select<IConfig>('config')
-            .takeUntil(this.ngUnsubscribe)
+            .pipe(
+                takeUntil(this.ngUnsubscribe)
+            )
             .subscribe(c => {
                 this.config = c;
                 this.chargeSettings = this.config.charge_settings;
 
                 if (!this.showCapacityAndC) {
                     // Force to presets (not computed)
-                    this.chargeSettings.chargeMethod = "presets";
+                    this.chargeSettings.chargeMethod = 'presets';
                 }
             });
     }
+
+    ngOnInit() {
+    }
+
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -72,19 +84,25 @@ export class ChargeOptionsPage implements Chemistry {
 
     ionViewDidLoad() {
         this.chargerService.getPresets()
-            .takeUntil(this.ngUnsubscribe)
+            .pipe(
+                takeUntil(this.ngUnsubscribe)
+            )
             .subscribe((presetList) => {
                 this.presets = presetList;
             });
     }
 
     chargeUsingPreset(preset: Preset) {
-        this.navCtrl.pop().then(() => {
-            this.callback(preset);
-        })
+        this.closePage(preset);
     }
 
-    chargeUsingPlan() {
+    closePage(passObject) {
+        this.navCtrl.goBack(this.previousURL).then(() => {
+            this.callback(passObject);
+        });
+    }
+
+    async chargeUsingPlan() {
         let chargePlanPreset: Preset = this.presets.find((p: Preset) => {
             return p.name == ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME;
         });
@@ -99,22 +117,22 @@ export class ChargeOptionsPage implements Chemistry {
             // Meaning: it'll be ADDED when saved.
             chargePlanPreset = toClone.clone();
             if (chargePlanPreset.index != -1) {
-                this.uiActions.setErrorMessage("Oh oh! New preset doesn't have -1 index");
+                this.uiActions.setErrorMessage('Oh oh! New preset doesn\'t have -1 index');
                 return;
             }
 
             chargePlanPreset.charge_current = this.chargeSettings.safeAmpsForWantedChargeRate;
             chargePlanPreset.name = ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME;
-            console.log("No charge plan preset. Creating one for:", chargePlanPreset.charge_current, "amps");
+            console.log('No charge plan preset. Creating one for:', chargePlanPreset.charge_current, 'amps');
         } else {
             chargePlanPreset.charge_current = this.chargeSettings.safeAmpsForWantedChargeRate;
         }
 
-        this.simpleAlert = this.toastController.create({
-            'message': "Setting up preset...",
+        this.simpleAlert = await this.toastController.create({
+            'message': 'Setting up preset...',
             'position': 'bottom',
         });
-        this.simpleAlert.present();
+        await this.simpleAlert.present();
 
         let observable;
         if (createNewPreset) {
@@ -124,17 +142,17 @@ export class ChargeOptionsPage implements Chemistry {
         }
 
         observable
-            .takeUntil(this.ngUnsubscribe)
+            .pipe(
+                takeUntil(this.ngUnsubscribe)
+            )
             .subscribe((preset: Preset) => {
-                this.simpleAlert.dismiss();
-
-                this.navCtrl.pop().then(() => {
-                    this.callback(preset);
-                })
+                this.simpleAlert.dismiss().then(() => {
+                    this.closePage(preset);
+                });
             }, (error) => {
-                this.simpleAlert.dismiss();
-                this.uiActions.setErrorMessage(error);
-            }, () => {
+                this.simpleAlert.dismiss().then(() => {
+                    this.uiActions.setErrorMessage(error);
+                });
             });
     }
 
@@ -191,7 +209,7 @@ export class ChargeOptionsPage implements Chemistry {
     }
 
     chargePlan() {
-        return "Charge at " + sprintf("%2.01fA", this.chargeSettings.safeAmpsForWantedChargeRate);
+        return 'Charge at ' + sprintf('%2.01fA', this.chargeSettings.safeAmpsForWantedChargeRate);
     }
 
     filterByChemistryAndSort(chemistry: string) {
@@ -217,8 +235,9 @@ export class ChargeOptionsPage implements Chemistry {
         return _.chunk(presets, 3);
     }
 
+    // noinspection JSMethodCanBeStatic
     ampsLimit() {
-        return this.chargerService.getMaxAmpsPerChannel();
+        return iChargerService.getMaxAmpsPerChannel();
     }
 
     chemistryClass: () => string;

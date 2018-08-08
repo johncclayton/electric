@@ -35,11 +35,13 @@
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-sqlite-storage": "^2.3.3",
     "core-js": "^2.5.3",
+    "include-media": "^1.4.9",
     "lodash": "^4.17.10",
     "redux": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-observable": "^1.0.0",
     "rxjs": "^6.2.2",
+    "sprintf-js": "^1.1.1",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
