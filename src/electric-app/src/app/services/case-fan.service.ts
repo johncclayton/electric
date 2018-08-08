@@ -3,15 +3,14 @@ import {Observable} from 'rxjs';
 import {IChargerCaseFan} from '../models/system';
 import {map} from 'rxjs/operators';
 import {URLService} from './url.service';
-import {SystemActions} from '../models/state/actions/system';
 import {HttpClient} from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CaseFanService {
-
-    constructor(private http: HttpClient, private url: URLService, private systemActions: SystemActions) {
+    constructor(private http: HttpClient,
+                private url: URLService) {
     }
 
     getCaseFan(): Observable<IChargerCaseFan> {
@@ -19,7 +18,6 @@ export class CaseFanService {
         return this.http.get(url).pipe(
             map(r => {
                 // Map this into the system 'case fan' state.
-                this.systemActions.updateCaseFan(r);
                 return r as IChargerCaseFan;
             })
         );
@@ -33,5 +31,4 @@ export class CaseFanService {
             })
         );
     }
-
 }

@@ -30,14 +30,16 @@ export class HomePage {
         this.ngUnsubscribe.complete();
     }
 
-    constructor(public readonly navCtrl: NavController,
-                public readonly chargerService: iChargerService,
-                private uiAction: UIActions,
-                private configActions: ConfigurationActions,
-                private platform: Platform,
-                private menuController: MenuController,
-                private systemActions: SystemActions,
-                public readonly ngRedux: NgRedux<IAppState>) {
+    constructor(
+        public readonly navCtrl: NavController,
+        public readonly chargerService: iChargerService,
+        private uiAction: UIActions,
+        private configActions: ConfigurationActions,
+        private platform: Platform,
+        private menuController: MenuController,
+        public readonly ngRedux: NgRedux<IAppState>,
+        private systemActions: SystemActions,
+    ) {
 
         let timeout = 2000;
         this.timeoutUp = false;

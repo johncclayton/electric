@@ -22,10 +22,12 @@ export class SystemActions {
     static FETCH_CASE_FAN: string = 'FETCH_CASE_FAN';
     static UPDATE_CASE_FAN: string = 'UPDATE_CASE_FAN';
 
-    constructor(private ngRedux: NgRedux<IAppState>,
-                private caseFan: CaseFanService,
-                private chargerService: iChargerService,
-                private uiActions: UIActions) {
+    constructor(
+        private ngRedux: NgRedux<IAppState>,
+        private caseFan: CaseFanService,
+        private chargerService: iChargerService,
+        private uiActions: UIActions
+    ) {
     }
 
     fetchSystemFromCharger(callback = null) {
@@ -45,7 +47,8 @@ export class SystemActions {
                 // We get a LIST of responses.
                 // The case_fan response is dispatched to redux by the getCaseFan call.
                 let system_object = v[0] as System;
-                // let case_fan_info = v[1];
+                let case_fan_info = v[1];
+                this.updateCaseFan(case_fan_info);
                 this.ngRedux.dispatch(this.endFetchAction(system_object));
                 if (callback) {
                     callback();
