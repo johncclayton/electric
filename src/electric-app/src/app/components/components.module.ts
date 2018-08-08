@@ -9,6 +9,7 @@ import {ChannelStatusComponent} from './channel-status/channel-status.component'
 import {ChannelIRComponent} from './channel-ir/channel-ir.component';
 import {ConfigComponent} from './config/config.component';
 import {ConnectionStateComponent} from './connection-state/connection-state.component';
+import {NetworkConfigComponent} from './network-config/network-config.component';
 
 @NgModule({
     declarations: [
@@ -18,7 +19,8 @@ import {ConnectionStateComponent} from './connection-state/connection-state.comp
         ChannelIRComponent,
         ChannelStatusComponent,
         ConfigComponent,
-        ConnectionStateComponent
+        ConnectionStateComponent,
+        NetworkConfigComponent
     ],
     imports: [
         CommonModule,
@@ -32,7 +34,8 @@ import {ConnectionStateComponent} from './connection-state/connection-state.comp
         ChannelIRComponent,
         ChannelStatusComponent,
         ConfigComponent,
-        ConnectionStateComponent
+        ConnectionStateComponent,
+        NetworkConfigComponent
     ]
 })
 export class ComponentsModule {
