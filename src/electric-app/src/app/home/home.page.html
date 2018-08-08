@@ -1,29 +1,71 @@
 <ion-header>
     <ion-toolbar>
-        <ion-title>
-            Ionic Blank
+        <ion-title text-center>
+            <div class="chargername">
+                {{chargerName}}
+                <span class="tag">{{chargerTag}}</span>
+            </div>
         </ion-title>
+        <button ion-button icon-only menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
     </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
-    The world is your oyster.
-    <p>If you get lost, the <a target="_blank" href="https://ionicframework.com/docs">docs</a> will be your guide.</p>
-    <ion-list>
-        <ion-item>
-            <ion-label text-center>Discharge Current -
-                <ion-badge>20A</ion-badge>
-            </ion-label>
-        </ion-item>
-        <ion-item no-margin>
-            <better-range [(value)]="value"
-                          min="0.05"
-                          [max]="50"
-                          multiplier="100"
-                          left_label="0.05A"
-                          right_label="50A"
-            ></better-range>
-        </ion-item>
-    </ion-list>
+<ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
+    Yo!
+    <div *ngIf="anyNetworkOrConnectivityProblems()">
+        <p text-center>Looking for your charger...</p>
+        <div class="searching">
+            <ion-spinner></ion-spinner>
+        </div>
 
+        <ion-grid>
+            <ion-row>
+                <ion-col col-6 offset-3>
+                    <div class="configButton">
+                        <button ion-button block
+                                color="secondary" (click)="showNetworkPage()" *ngIf="showConfigureButton">
+                            <ion-icon name="tools"></ion-icon>
+                            Network Settings
+                        </button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+
+        <div class="cannot-connect" *ngIf="timeoutUp">
+            <!--<ion-item-->
+            <ion-grid class="errors">
+                <ion-row align-items-start>
+                    <ion-col col-12 [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
+                        <span>{{serverText()}}</span>
+                    </ion-col>
+                    <ion-col col-12 [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
+                        <span>{{chargerText()}}</span>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+
+            <div *ngIf="exception$|async" class="tryme">
+                <ion-list>
+                    <ion-list-header>The Server Said:</ion-list-header>
+                    <h4 padding color="danger">{{exception$|async}}</h4>
+                </ion-list>
+            </div>
+        </div>
+    </div>
+
+
+    <div *ngIf="!anyNetworkOrConnectivityProblems()">
+        <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
+        <charger-status [system]="system$|async" [charger]="charger$|async"></charger-status>
+
+        <channel name="Channel 1" [charger]="charger$|async" [index]="0"></channel>
+        <channel name="Channel 2" [charger]="charger$|async" [index]="1"></channel>
+        <!--<button ion-button (click)="chargerService.notificationWhenDone('Mooo')">DO SOMETHING</button>-->
+    </div>
+
+    <connection-state></connection-state>
 </ion-content>
+

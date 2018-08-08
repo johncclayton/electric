@@ -5,7 +5,7 @@ import {IonicModule} from '@ionic/angular';
 import {CommonModule} from '@angular/common';
 import {ChannelComponent} from './channel/channel.component';
 import {ChannelVoltsComponent} from './channel-volts/channel-volts.component';
-import {ChannelStatusComponent} from './channel-status/channel-status.component';
+import {ChargerStatusComponent} from './charger-status/charger-status.component';
 import {ChannelIRComponent} from './channel-ir/channel-ir.component';
 import {ConfigComponent} from './config/config.component';
 import {ConnectionStateComponent} from './connection-state/connection-state.component';
@@ -20,7 +20,7 @@ import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
         ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
-        ChannelStatusComponent,
+        ChargerStatusComponent,
         ConfigComponent,
         ConnectionStateComponent,
         NetworkConfigComponent,
@@ -38,7 +38,7 @@ import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
         ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
-        ChannelStatusComponent,
+        ChargerStatusComponent,
         ConfigComponent,
         ConnectionStateComponent,
         NetworkConfigComponent,

@@ -1,0 +1,26 @@
+<ion-grid class="overview" padding-left padding-right padding-top>
+
+    <ion-row>
+        <ion-col class="value" text-center>
+            {{charger?.input_volts|number:'1.3-3'}}<br/>
+        </ion-col>
+        <ion-col class="value" text-center>
+            {{charger?.total_output_amps|number:'1.2-2'}}<br/>
+        </ion-col>
+        <ion-col class="value" text-center>
+            {{charger?.total_capacity}}<br/>
+        </ion-col>
+        <ion-col class="value" width-20 text-nowrap
+                 [ngClass]="{'warning':tempAtWarningLevel(), 'emergency':tempAtEmergencyLevel()}">
+            {{charger?.charger_temp|temp|number:'1.1-1'}}{{unitOfMeasure()}}
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col class="label" text-center>DC V</ion-col>
+        <ion-col class="label" text-center>Amps</ion-col>
+        <ion-col class="label" text-center>mAh</ion-col>
+        <ion-col class="label" text-center>Temp</ion-col>
+    </ion-row>
+
+</ion-grid>
