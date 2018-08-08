@@ -15,7 +15,7 @@
 <ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
     <div *ngIf="anyNetworkOrConnectivityProblems()">
         <p text-center>Looking for your charger...</p>
-        <div class="searching">
+        <div class="searching" text-center>
             <ion-spinner></ion-spinner>
         </div>
 
