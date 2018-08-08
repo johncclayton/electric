@@ -2,7 +2,9 @@ import {Injectable} from "@angular/core";
 import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class UIActions {
     static SET_EXCEPTION_MESSAGE: string = "SET_EXCEPTION_MESSAGE";
     static SET_CONFIG_NETWORK: string = "SET_CONFIG_NETWORK";

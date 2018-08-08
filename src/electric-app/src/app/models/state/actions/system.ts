@@ -1,4 +1,4 @@
-import {forwardRef, Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {IAppState} from '../configure';
 import {NgRedux} from '@angular-redux/store';
 import {System} from '../../system';
@@ -7,22 +7,32 @@ import {UIActions} from './ui';
 import {compareTwoMaps} from '../../../utils/helpers';
 import {ISystem} from '../reducers/system';
 import {forkJoin, Observable} from 'rxjs';
+import {AppModule} from '../../../app.module';
+import {map} from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class SystemActions {
-    static FETCH_SYSTEM: string = "FETCH_SYSTEM";
-    static START_FETCH: string = "START_FETCH";
-    static END_FETCH: string = "END_FETCH";
-    static SAVE_SETTINGS: string = "SAVE_SETTINGS";
-    static UPDATE_SETTINGS_VALUE: string = "UPDATE_SETTINGS_VALUE";
-    static FETCH_CASE_FAN: string = "FETCH_CASE_FAN";
-    static UPDATE_CASE_FAN: string = "UPDATE_CASE_FAN";
+    static FETCH_SYSTEM: string = 'FETCH_SYSTEM';
+    static START_FETCH: string = 'START_FETCH';
+    static END_FETCH: string = 'END_FETCH';
+    static SAVE_SETTINGS: string = 'SAVE_SETTINGS';
+    static UPDATE_SETTINGS_VALUE: string = 'UPDATE_SETTINGS_VALUE';
+    static FETCH_CASE_FAN: string = 'FETCH_CASE_FAN';
+    static UPDATE_CASE_FAN: string = 'UPDATE_CASE_FAN';
 
-    // private _chargerService: iChargerService;
+    private _chargerService: iChargerService;
 
     constructor(private ngRedux: NgRedux<IAppState>,
-                @Inject(forwardRef(() => iChargerService)) chargerService,
                 private uiActions: UIActions) {
+    }
+
+    private get chargerService() {
+        if (this._chargerService == null) {
+            this._chargerService = AppModule.injector.get(iChargerService);
+        }
+        return this._chargerService;
     }
 
     fetchSystemFromCharger(callback = null) {
@@ -70,12 +80,16 @@ export class SystemActions {
         let sysValues = systemObject.system;
         if (sysValues.has_case_fan) {
             let fanValues = systemObject.case_fan;
-            this.chargerService.saveCaseFan(fanValues).subscribe()
+            this.chargerService.saveCaseFan(fanValues).subscribe();
         }
 
-        return this.chargerService.saveSystem(sysValues).map((s: System) => {
-            this.ngRedux.dispatch(this.endFetchAction(s));
-        });
+        return this.chargerService.saveSystem(sysValues)
+            .pipe(
+                map((s: System) => {
+                    this.ngRedux.dispatch(this.endFetchAction(s));
+                    return systemObject;
+                })
+            );
     }
 
     startFetch() {
@@ -97,11 +111,11 @@ export class SystemActions {
         let existing = this.ngRedux.getState().system.case_fan;
         let comparison_result = compareTwoMaps(existing, case_fan_state);
         if (comparison_result.length > 0) {
-            console.log("Case fan state differs: " + comparison_result.join(", "));
+            console.log('Case fan state differs: ' + comparison_result.join(', '));
             this.ngRedux.dispatch({
                 type: SystemActions.UPDATE_CASE_FAN,
                 payload: case_fan_state
-            })
+            });
         }
     }
 }

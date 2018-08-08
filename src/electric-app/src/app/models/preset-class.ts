@@ -1,4 +1,4 @@
-import {clamp} from "ionic-angular/util/util";
+import * as _ from "lodash";
 
 export enum ChemistryType {
     LiPo = 0,
@@ -305,7 +305,7 @@ export class Preset {
     }
 
     set charge_end_current(value: number) {
-        value = clamp(10, 50, +value);
+        value = _.clamp(+value, 10, 50);
         this.data['end_charge'] = value;
     }
 

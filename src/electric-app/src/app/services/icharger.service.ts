@@ -1,4 +1,4 @@
-import {EventEmitter, forwardRef, Inject, Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {Observable, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';
@@ -17,6 +17,7 @@ import {HttpClient} from '@angular/common/http';
 import {catchError, flatMap, map, retry, takeUntil, takeWhile} from 'rxjs/operators';
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
+import {AppModule} from '../app.module';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -47,7 +48,9 @@ ChargerMetadata[ChargerType.iCharger4010Duo] = {
     'maxVolts': 38
 };
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class iChargerService {
     autoStopSubscriptions: any[] = [];
     serverReconnection: EventEmitter<any> = new EventEmitter();
@@ -70,7 +73,6 @@ export class iChargerService {
     public constructor(public http: HttpClient,
                        public vibration: Vibration,
                        public uiActions: UIActions,
-                       @Inject(forwardRef(() => SystemActions)) private systemActions,
                        private ngRedux: NgRedux<IAppState>,
                        private networkService: ElectricNetworkService,
                        private chargerActions: ChargerActions,
@@ -210,12 +212,10 @@ export class iChargerService {
         );
     }
 
-    // getSystemActions(): SystemActions {
-    //     if (this.systemActions == null) {
-    //         this.systemActions = AppModule.injector.get(SystemActions);
-    //     }
-    //     return this.systemActions;
-    // }
+    // noinspection JSMethodCanBeStatic
+    private get systemActions(): SystemActions {
+        return AppModule.injector.get(SystemActions);
+    }
 
     getCaseFan(): Observable<IChargerCaseFan> {
         let url = this.getChargerURL('/casefan');

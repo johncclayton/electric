@@ -3,7 +3,9 @@ import {IAppState} from "../configure";
 import {NgRedux} from "@angular-redux/store";
 import {IConfig} from "../reducers/configuration";
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ChargerActions {
     static UPDATE_STATE_FROM_CHARGER: string = "UPDATE_STATE_FROM_CHARGER";
     static SET_LAST_ERROR: string = "SET_LAST_ERROR";

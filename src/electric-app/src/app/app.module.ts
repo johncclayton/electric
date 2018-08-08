@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {Injector, NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {RouteReuseStrategy} from '@angular/router';
 
@@ -8,19 +8,44 @@ import {StatusBar} from '@ionic-native/status-bar/ngx';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
-import {ConfigStoreService} from './services/config-store.service';
+import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
+import {Vibration} from '@ionic-native/vibration/ngx';
+import {ConfigurationEpics} from './models/state/epics/configuration';
+import {DevToolsExtension, NgRedux, NgReduxModule} from '@angular-redux/store';
+import {configureAppStateStore, IAppState} from './models/state/configure';
+import {HttpClientModule} from '@angular/common/http';
+import {IonicStorageModule} from '@ionic/storage';
+import {UtilsModule} from './utils/utils.module';
 
 @NgModule({
     declarations: [AppComponent],
     entryComponents: [],
-    imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule],
+    imports: [BrowserModule,
+        IonicModule.forRoot(),
+        IonicStorageModule.forRoot(),
+        HttpClientModule,
+        UtilsModule,
+        NgReduxModule,
+        AppRoutingModule],
     providers: [
         StatusBar,
         SplashScreen,
-        ConfigStoreService,
+        LocalNotifications,
+        Vibration,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
     ],
     bootstrap: [AppComponent]
 })
+
 export class AppModule {
+    static injector: Injector;
+
+    constructor(ngRedux: NgRedux<IAppState>,
+                devTools: DevToolsExtension,
+                configEpic: ConfigurationEpics,
+                injector: Injector,
+    ) {
+        AppModule.injector = injector;
+        configureAppStateStore(ngRedux, configEpic, devTools);
+    }
 }

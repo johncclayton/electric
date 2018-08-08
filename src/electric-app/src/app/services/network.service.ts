@@ -7,7 +7,9 @@ import {Subject} from 'rxjs';
 
 declare const networkinterface;
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ElectricNetworkService {
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 

@@ -1,14 +1,14 @@
 import {createLogger} from 'redux-logger';
-import {DevToolsExtension, NgRedux} from "@angular-redux/store";
-import {combineReducers} from "redux";
-import {configReducer, IConfig} from "./reducers/configuration";
-import {chargerStateReducer, IChargerState} from "./reducers/charger";
-import {IUIState, uiReducer} from "./reducers/ui";
-import {ChargerActions} from "./actions/charger";
-import {ConfigurationEpics} from "./epics/configuration";
-import {combineEpics, createEpicMiddleware} from "redux-observable";
-import {ISystem, systemReducer} from "./reducers/system";
-import {System} from "../system";
+import {DevToolsExtension, NgRedux} from '@angular-redux/store';
+import {combineReducers} from 'redux';
+import {configReducer, IConfig} from './reducers/configuration';
+import {chargerStateReducer, IChargerState} from './reducers/charger';
+import {IUIState, uiReducer} from './reducers/ui';
+import {ChargerActions} from './actions/charger';
+import {ConfigurationEpics} from './epics/configuration';
+import {combineEpics, createEpicMiddleware} from 'redux-observable';
+import {ISystem, systemReducer} from './reducers/system';
+import {System} from '../system';
 
 export interface IAppState {
     config: IConfig;
@@ -35,16 +35,13 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
 
         // Insert the epic middleware first.
         let middleware = [];
-        middleware.push(createEpicMiddleware(
-            combineEpics(
-                configEpic.configChanged,
-            )
-            )
-        );
+        let rootEpic = combineEpics(configEpic.configChanged);
+        let epicMiddleware = createEpicMiddleware();
+        middleware.push(epicMiddleware);
 
         // Add logger if in development (web browsers)
         if (System.environment.logging) {
-            console.log("Adding in state logging...");
+            console.log('Adding in state logging...');
             middleware.push(createLogger({
                 predicate: (getState, action) => {
                     // Don't show certain charger actions
@@ -58,20 +55,21 @@ export const configureAppStateStore = (ngRedux: NgRedux<IAppState>,
             if (isChrome || 1) {
 
                 if (devTools.isEnabled()) {
-                    console.log("Adding in redux devtools ...");
+                    console.log('Adding in redux devtools ...');
                     // Don't show certain charger actions
                     let options = {
                         actionsBlacklist: actionsBlacklist,
                     };
                     enhancers.push(devTools.enhancer(options));
                 } else {
-                    console.log("Redux devtools wanted, but nothing loaded. No redux devtools :(");
+                    console.log('Redux devtools wanted, but nothing loaded. No redux devtools :(');
                 }
             }
         }
 
         ngRedux.configureStore(reducers, <IAppState>{}, middleware, enhancers);
 
+        epicMiddleware.run(rootEpic);
     }
 ;
 

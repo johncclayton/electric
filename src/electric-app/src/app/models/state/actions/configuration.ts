@@ -5,7 +5,9 @@ import * as _ from "lodash";
 import {compareTwoMaps} from "../../../utils/helpers";
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ConfigurationActions {
     static RESET_TO_DEFAULTS: string = 'RESET_TO_DEFAULTS';
     static UPDATE_CONFIG_KEYVALUE: string = 'UPDATE_CONFIG_KEYVALUE';
