@@ -1,16 +1,17 @@
-import {Component} from "@angular/core";
-import {Platform, ToastController} from "ionic-angular";
-import {iChargerService} from "../../services/icharger.service";
-import {NgRedux} from "@angular-redux/store";
-import {IAppState} from "../../models/state/configure";
-import {isDefined} from "ionic-angular/util/util";
-import {Subject} from "rxjs/Subject";
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
+import {IAppState} from '../../models/state/configure';
+import {Subject} from 'rxjs';
+import {Platform, ToastController} from '@ionic/angular';
+import {isDefined} from '@angular/compiler/src/util';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
-    selector: 'connection-state',
-    templateUrl: 'connection-state.html'
+    selector: 'app-connection-state',
+    templateUrl: './connection-state.component.html',
+    styleUrls: ['./connection-state.component.scss']
 })
-export class ConnectionStateComponent {
+export class ConnectionStateComponent implements OnInit, OnDestroy {
     /*
     Don't ever set this to nil, let the GC do it. Otherwise, you'll have race conditions when the alert is closed by the user.
     The framework looks to be still holding onto it (well, trying to) and if you set it to nil, it seems to do some cleanup, yet STILL be referenced by the f/work later.
@@ -24,37 +25,43 @@ export class ConnectionStateComponent {
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
-    ngOnDestroy() {
-        this.ngUnsubscribe.next();
-        this.ngUnsubscribe.complete();
-    }
-
     constructor(public platform: Platform,
-                public charger: iChargerService,
                 public ngRedux: NgRedux<IAppState>,
                 public toastController: ToastController) {
 
         // Listen for changes to the exception, and do something with the UI
         this.ngRedux.select(['ui', 'exception'])
-            .takeUntil(this.ngUnsubscribe)
+            .pipe(
+                takeUntil(this.ngUnsubscribe)
+            )
             .subscribe((message: string) => {
-            if (isDefined(message)) {
-                if (message) {
-                    this.showGeneralError(message, true);
+                if (isDefined(message)) {
+                    if (message) {
+                        this.showGeneralError(message, true);
+                    }
                 }
-            }
-        });
+            });
 
         this.ngRedux.select(['ui', 'disconnectionErrorCount'])
-            .takeUntil(this.ngUnsubscribe)
+            .pipe(
+                takeUntil(this.ngUnsubscribe)
+            )
             .subscribe((thing) => {
-            let uiState = this.ngRedux.getState().ui;
-            if (uiState.disconnected) {
-                this.incrementDisconnectionCount();
-            } else {
-                this.serverReconnected();
-            }
-        });
+                let uiState = this.ngRedux.getState().ui;
+                if (uiState.disconnected) {
+                    this.incrementDisconnectionCount();
+                } else {
+                    this.serverReconnected();
+                }
+            });
+    }
+
+    ngOnInit() {
+    }
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     get connectionFailureCount(): number {
@@ -78,15 +85,15 @@ export class ConnectionStateComponent {
         }
     }
 
-    showGeneralError(message: string, allowCreation = false) {
+    async showGeneralError(message: string, allowCreation = false) {
         if (message == null) {
-            message = 'Unknown problem?!'
+            message = 'Unknown problem?!';
         }
 
         if (!this.haveAlertObject && allowCreation) {
             this.alertHasBeenPresented = false;
             this.alertShownBecauseOfConnectionError = false;
-            this.generalAlert = this.toastController.create({
+            this.generalAlert = await this.toastController.create({
                 'message': message,
                 'cssClass': 'redToast',
                 'position': 'bottom',
@@ -118,7 +125,7 @@ export class ConnectionStateComponent {
     private incrementDisconnectionCount() {
         this.lastConnectionFailureCount = this.connectionFailureCount;
 
-        if(this.ngRedux.getState().ui.isConfiguringNetwork) {
+        if (this.ngRedux.getState().ui.isConfiguringNetwork) {
             return;
         }
 
