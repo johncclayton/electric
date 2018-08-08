@@ -7,7 +7,7 @@ import {isDefined} from '@angular/compiler/src/util';
 import {takeUntil} from 'rxjs/operators';
 
 @Component({
-    selector: 'app-connection-state',
+    selector: 'connection-state',
     templateUrl: './connection-state.component.html',
     styleUrls: ['./connection-state.component.scss']
 })

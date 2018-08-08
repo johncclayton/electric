@@ -7,7 +7,7 @@ import {iChargerService} from '../../services/icharger.service';
 import {NavController} from '@ionic/angular';
 
 @Component({
-    selector: 'app-config',
+    selector: 'config',
     templateUrl: './config.component.html',
     styleUrls: ['./config.component.scss']
 })

@@ -1,0 +1,15 @@
+<span>
+<ion-item>
+    <ion-label>{{label}} | {{displayableValue}}{{unitsOfMeasure}}</ion-label>
+    <ion-range [(value)]="displayableValue"
+               pin={{pin}}
+               disabled="{{disabled}}"
+               min="{{min_val}}"
+               max="{{max_val}}"
+               (ionChange)="emitChangedCelsiusValue($event)">
+        <ion-label slot="start" padding-end>{{min_val}}{{unitsOfMeasure}}</ion-label>
+        <ion-label slot="end" text-right margin-start margin-vertical>{{max_val}}{{unitsOfMeasure}}</ion-label>
+    </ion-range>
+</ion-item>
+</span>
+

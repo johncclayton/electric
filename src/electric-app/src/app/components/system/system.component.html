@@ -1,0 +1,81 @@
+<ion-list>
+    <ion-list-header color="light">Temperature & Fans</ion-list-header>
+    <ion-item>
+        <ion-label>Temperature shown in celsius</ion-label>
+        <ion-toggle [disabled]="ui.disconnected"
+                    [(value)]="charger.isCelsius"></ion-toggle>
+    </ion-item>
+
+
+    <temp-range label="Shutdown Temp"
+                [disabled]="ui.disconnected"
+                [metric]="charger.isCelsius"
+                min=60 max=75
+                [(value)]="charger.temp_shutdown"></temp-range>
+
+    <temp-range label="Power Reduce"
+                [disabled]="ui.disconnected"
+                min=-20 max=-5
+                [metric]="charger.isCelsius"
+                [(value)]="charger.temp_power_reduce"></temp-range>
+
+    <temp-range label="Temp for Fans On"
+                [disabled]="ui.disconnected"
+                min=30 max=50
+                [metric]="charger.isCelsius"
+                [(value)]="charger.temp_fans_on"></temp-range>
+
+    <ion-item>
+        <ion-label>Fans Off ({{charger.fans_off_time}} mins)</ion-label>
+        <ion-range [(value)]="charger.fans_off_time"
+                   pin=true min="0" max="10"
+                   [disabled]="ui.disconnected">
+            <ion-label range-left>0</ion-label>
+            <ion-label range-right>10</ion-label>
+        </ion-range>
+    </ion-item>
+</ion-list>
+
+<ion-list>
+    <ion-list-header color="light">Case Fan Control
+        <ion-badge *ngIf="!can_do_case_fan" item-end color="warning">Upgrade your pi3 SD Card</ion-badge>
+    </ion-list-header>
+    <ion-item>
+        <ion-label>Enabled</ion-label>
+        <ion-toggle [disabled]="!can_do_case_fan" [(value)]="case_fan.control"></ion-toggle>
+    </ion-item>
+    <temp-range label="Turn fans On"
+                [disabled]="!case_fan.control"
+                min=10 max=50
+                [metric]="charger.isCelsius"
+                [(value)]="case_fan.threshold"></temp-range>
+
+    <ion-item>
+        <ion-label>Hysteresis ({{case_fan.hysteresis}} deg)</ion-label>
+        <ion-range
+                [disabled]="!case_fan.control"
+                min=0 max=10
+                [(value)]="case_fan.hysteresis">
+            <ion-label range-left>0</ion-label>
+            <ion-label range-right>10</ion-label>
+        </ion-range>
+    </ion-item>
+</ion-list>
+
+<ion-list>
+    <ion-list-header color="light">LCD Screen</ion-list-header>
+    <ion-item>
+        <ion-label>Brightness</ion-label>
+        <ion-range [(value)]="charger.brightness"
+                   pin=true min="0" max="30"
+                   [disabled]="ui.disconnected">
+        </ion-range>
+    </ion-item>
+    <ion-item>
+        <ion-label>Contrast</ion-label>
+        <ion-range [(value)]="charger.contrast"
+                   pin=true min="0" max="30"
+                   [disabled]="ui.disconnected">
+        </ion-range>
+    </ion-item>
+</ion-list>

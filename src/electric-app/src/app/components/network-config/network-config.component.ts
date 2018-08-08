@@ -5,7 +5,7 @@ import {ConfigurationActions} from '../../models/state/actions/configuration';
 import * as _ from "lodash";
 
 @Component({
-    selector: 'app-network-config',
+    selector: 'network-config',
     templateUrl: './network-config.component.html',
     styleUrls: ['./network-config.component.scss']
 })
