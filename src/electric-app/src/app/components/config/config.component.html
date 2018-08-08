@@ -1,0 +1,44 @@
+<ion-list>
+    <ion-list-header color="light">App Settings</ion-list-header>
+    <ion-item>
+        <ion-label>Max cells to show</ion-label>
+        <ion-select [value]="config.cellLimit" (valueChange)="change('cellLimit', num($event))">
+            <ion-select-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-select-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Notification when done</ion-label>
+        <ion-toggle
+                [value]="config.notificationWhenDone"
+                (valueChange)="change('notificationWhenDone', $event)">
+        </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="config.vibrateWhenDone" no-lines>
+        <ion-label>Vibrate when done</ion-label>
+        <ion-toggle
+                [value]="config.vibrateWhenDone"
+                (valueChange)="change('vibrateWhenDone', $event)">
+        </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="!config.vibrateWhenDone">
+        <ion-label>Vibrate when done</ion-label>
+        <ion-toggle
+                [value]="config.vibrateWhenDone"
+                (valueChange)="change('vibrateWhenDone', $event)">
+        </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="config.vibrateWhenDone" text-center>
+        <ion-badge color="light">Your device must support vibration!</ion-badge>
+    </ion-item>
+    <ion-item>
+        <ion-label>Prevent Dashboard Scrolling</ion-label>
+        <ion-toggle
+                [value]="config.preventChargerVerticalScrolling"
+                (valueChange)="change('preventChargerVerticalScrolling', $event)">
+        </ion-toggle>
+    </ion-item>
+</ion-list>
+
+<button expand="full" color="danger" ion-button (click)="resetToDefaults.emit()">Reset to Defaults</button>
+<!--<button full color="secondary" ion-button (click)="testFunc.emit()">Test</button>-->
+

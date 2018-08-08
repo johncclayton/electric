@@ -17,6 +17,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {IonicStorageModule} from '@ionic/storage';
 import {UtilsModule} from './utils/utils.module';
 import {ComponentsModule} from './components/components.module';
+import { ConfigComponent } from './components/config/config.component';
 
 @NgModule({
     declarations: [

@@ -7,6 +7,7 @@ import {ChannelComponent} from './channel/channel.component';
 import {ChannelVoltsComponent} from './channel-volts/channel-volts.component';
 import {ChannelStatusComponent} from './channel-status/channel-status.component';
 import {ChannelIRComponent} from './channel-ir/channel-ir.component';
+import {ConfigComponent} from './config/config.component';
 
 @NgModule({
     declarations: [
@@ -14,7 +15,8 @@ import {ChannelIRComponent} from './channel-ir/channel-ir.component';
         ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
-        ChannelStatusComponent
+        ChannelStatusComponent,
+        ConfigComponent
     ],
     imports: [
         CommonModule,
@@ -26,7 +28,8 @@ import {ChannelIRComponent} from './channel-ir/channel-ir.component';
         ChannelComponent,
         ChannelVoltsComponent,
         ChannelIRComponent,
-        ChannelStatusComponent
+        ChannelStatusComponent,
+        ConfigComponent
     ]
 })
 export class ComponentsModule {
