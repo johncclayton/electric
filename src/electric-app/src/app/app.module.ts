@@ -16,17 +16,23 @@ import {configureAppStateStore, IAppState} from './models/state/configure';
 import {HttpClientModule} from '@angular/common/http';
 import {IonicStorageModule} from '@ionic/storage';
 import {UtilsModule} from './utils/utils.module';
+import {ComponentsModule} from './components/components.module';
 
 @NgModule({
-    declarations: [AppComponent],
+    declarations: [
+        AppComponent,
+    ],
     entryComponents: [],
-    imports: [BrowserModule,
+    imports: [
+        BrowserModule,
         IonicModule.forRoot(),
         IonicStorageModule.forRoot(),
         HttpClientModule,
         UtilsModule,
         NgReduxModule,
-        AppRoutingModule],
+        AppRoutingModule,
+        ComponentsModule
+    ],
     providers: [
         StatusBar,
         SplashScreen,
