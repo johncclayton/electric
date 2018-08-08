@@ -1,9 +1,9 @@
-<ion-list>
+<ion-list *ngIf="config">
     <ion-list-header color="light">App Settings</ion-list-header>
     <ion-item>
         <ion-label>Max cells to show</ion-label>
         <ion-select [value]="config.cellLimit" (valueChange)="change('cellLimit', num($event))">
-            <ion-select-option *ngFor="let v of cellChoices()" value="{{v.value}}">{{v.text}}</ion-select-option>
+            <ion-select-option *ngFor="let v of cellChoices()" [value]="v.value">{{v.text}}</ion-select-option>
         </ion-select>
     </ion-item>
     <ion-item>
@@ -39,6 +39,6 @@
     </ion-item>
 </ion-list>
 
-<button expand="full" color="danger" ion-button (click)="resetToDefaults.emit()">Reset to Defaults</button>
+<ion-button expand="full" color="danger" (click)="resetToDefaults.emit()">Reset to Defaults</ion-button>
 <!--<button full color="secondary" ion-button (click)="testFunc.emit()">Test</button>-->
 

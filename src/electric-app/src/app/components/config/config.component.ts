@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {AfterContentInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {IConfig} from '../../models/state/reducers/configuration';
 import {IChargerState} from '../../models/state/reducers/charger';
 import {IUIState} from '../../models/state/reducers/ui';
@@ -7,18 +7,20 @@ import {iChargerService} from '../../services/icharger.service';
 import {NavController} from '@ionic/angular';
 
 @Component({
-    selector: 'config',
+    selector: 'app-config',
     templateUrl: './config.component.html',
     styleUrls: ['./config.component.scss']
 })
-export class ConfigComponent implements OnInit {
-    @Input() ui?: IUIState;
-    @Input() config?: IConfig;
-    @Input() charger?: IChargerState;
+export class ConfigComponent implements OnInit, AfterContentInit {
+    @Input('ui') ui: IUIState;
+    @Input('config') config: IConfig;
+    @Input('charger') charger: IChargerState;
 
     @Output() resetToDefaults: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
     @Output() testFunc: EventEmitter<any> = new EventEmitter();
+
+    choices: Array<any>;
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
@@ -27,6 +29,30 @@ export class ConfigComponent implements OnInit {
 
 
     ngOnInit() {
+    }
+
+    ngAfterContentInit() {
+        let choices = [];
+        let maxCells = 10;
+        let cellsFromChargerConfig = this.charger.cell_count;
+        if (cellsFromChargerConfig > 0) {
+            maxCells = cellsFromChargerConfig;
+        }
+        // console.error(`Cells from config: ${cellsFromChargerConfig}`);
+        // return [];
+        // -1 means: All
+        // 0 means: Nothing
+        for (let i = -1; i <= maxCells; i++) {
+            if (i == -1) {
+                choices.push({'value': i, 'text': 'All'});
+            } else if (i == 0) {
+                choices.push({'value': i, 'text': 'None'});
+            } else {
+                choices.push({'value': i, 'text': i.toString() + ''});
+            }
+        }
+        console.error(`Making ${choices.length} choices`);
+        this.choices = choices;
     }
 
     // noinspection JSMethodCanBeStatic
@@ -59,24 +85,7 @@ export class ConfigComponent implements OnInit {
             return [];
         }
 
-        let choices = [];
-        let maxCells = 10;
-        let cellsFromChargerConfig = this.charger.cell_count;
-        if (cellsFromChargerConfig > 0) {
-            maxCells = cellsFromChargerConfig;
-        }
-        // -1 means: All
-        // 0 means: Nothing
-        for (let i = -1; i <= maxCells; i++) {
-            if (i == -1) {
-                choices.push({'value': i, 'text': 'All'});
-            } else if (i == 0) {
-                choices.push({'value': i, 'text': 'None'});
-            } else {
-                choices.push({'value': i, 'text': i.toString() + ''});
-            }
-        }
-        return choices;
+        return this.choices;
     }
 
 }

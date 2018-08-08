@@ -1,8 +1,8 @@
-import {Component} from '@angular/core';
+import {Component, NgZone} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {Observable, Subject, timer} from 'rxjs';
 import {Channel} from '../models/channel';
-import {MenuController, NavController, Platform} from '@ionic/angular';
+import {MenuController, Platform} from '@ionic/angular';
 import {iChargerService} from '../services/icharger.service';
 import {UIActions} from '../models/state/actions/ui';
 import {ConfigurationActions} from '../models/state/actions/configuration';
@@ -26,16 +26,17 @@ export class HomePage {
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     ngOnDestroy() {
+        console.warn(`Stopping all subscribers...`);
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
     }
 
     constructor(
-        public readonly navCtrl: NavController,
         public readonly chargerService: iChargerService,
         private uiAction: UIActions,
         private configActions: ConfigurationActions,
         private platform: Platform,
+        private zone: NgZone,
         private menuController: MenuController,
         public readonly ngRedux: NgRedux<IAppState>,
         private systemActions: SystemActions,
@@ -47,11 +48,14 @@ export class HomePage {
 
         timer(timeout)
             .pipe(
-                takeUntil(this.ngUnsubscribe)
+                takeUntil(this.ngUnsubscribe),
+                take(1)
             )
             .subscribe(r => {
                 this.timeoutUp = true;
                 this.showConfigureButton = true;
+            }, null, () => {
+                console.debug(`'timeout and its time to show some stuff' function completed.`);
             });
 
         // Gotta be a better way than this.
@@ -60,15 +64,17 @@ export class HomePage {
         // 2nd is it being loaded.
         // After THAT it's OK to do stuff.
         // Pretty messy having to have empty next + error handlers
-        this.ngRedux.select('config')
-            .pipe(
-                takeUntil(this.ngUnsubscribe),
-                take(2)
-            )
-            .subscribe(undefined, undefined, () => {
-                console.log('Configuration loaded. Now getting system.');
-                this._afterConfigurationLoaded();
-            });
+        this.zone.runOutsideAngular(() => {
+            this.ngRedux.select('config')
+                .pipe(
+                    takeUntil(this.ngUnsubscribe),
+                    take(2)
+                )
+                .subscribe(undefined, undefined, () => {
+                    console.log('Configuration loaded. Now getting system.');
+                    this._afterConfigurationLoaded();
+                });
+        });
     }
 
     _afterConfigurationLoaded() {
@@ -108,9 +114,6 @@ export class HomePage {
 
     isConnectedToCharger() {
         return this.chargerService.isConnectedToCharger();
-    }
-
-    ionViewWillEnter() {
     }
 
     loadFirstPageDoingDebugging() {

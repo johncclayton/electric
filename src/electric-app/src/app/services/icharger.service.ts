@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable} from '@angular/core';
+import {EventEmitter, Injectable, NgZone} from '@angular/core';
 import {Observable, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';
@@ -70,6 +70,7 @@ export class iChargerService {
 
     public constructor(public http: HttpClient,
                        public url: URLService,
+                       private zone: NgZone,
                        public vibration: Vibration,
                        public uiActions: UIActions,
                        private ngRedux: NgRedux<IAppState>,
@@ -97,24 +98,28 @@ export class iChargerService {
         console.log('Start polling for charger state...');
         this.uiActions.setConfiguringNetwork(false);
 
-        this.getChargerStatus().pipe(
-            takeUntil(this.ngUnsubscribe)
-        ).subscribe(status => {
-            // console.log("Refreshed from charger...");
-        }, null, () => {
-            console.log('Stopped polling for charger state');
+        this.runOutsideAngular(() => {
+            this.getChargerStatus().pipe(
+                takeUntil(this.ngUnsubscribe)
+            ).subscribe(status => {
+                // console.log("Refreshed from charger...");
+            }, null, () => {
+                console.log('Stopped polling for charger state');
+            });
         });
     }
 
     public startPollingStatusServer() {
         console.log('Starting polling for network status....');
         this.uiActions.setConfiguringNetwork(true);
-        this.getServerStatus().pipe(
-            takeUntil(this.ngUnsubscribe)
-        ).subscribe(status => {
-            // console.log("Network update from server...");
-        }, null, () => {
-            console.log('Stopped polling for network/server status');
+        this.runOutsideAngular(() => {
+            this.getServerStatus().pipe(
+                takeUntil(this.ngUnsubscribe)
+            ).subscribe(status => {
+                // console.log("Network update from server...");
+            }, null, () => {
+                console.log('Stopped polling for network/server status');
+            });
         });
     }
 
@@ -161,56 +166,60 @@ export class iChargerService {
 
     getPresets(): Observable<any> {
         let url = this.url.getChargerURL('/preset');
-        return this.http.get(url).pipe(
-            map((arrayOfPresets: any[]) => {
-                // This should be a list of presets
-                let presetList = [];
-                for (let presetDict of arrayOfPresets) {
-                    presetList.push(new Preset(presetDict));
-                }
-                return presetList;
-            }));
+        return this.runOutsideAngular(() => {
+            return this.http.get(url).pipe(
+                map((arrayOfPresets: any[]) => {
+                    // This should be a list of presets
+                    let presetList = [];
+                    for (let presetDict of arrayOfPresets) {
+                        presetList.push(new Preset(presetDict));
+                    }
+                    return presetList;
+                }));
+        });
     }
 
     getChargerStatus(): Observable<any> {
         let interval = 1000;
 
-        return timer(0, interval).pipe(
-            flatMap(v => {
-                // If disconnected, do a round robbin between various known IP addresses
-                this.tryNextInterfaceIfDisconnected();
+        return this.runOutsideAngular(() => {
+            return timer(0, interval).pipe(
+                flatMap(v => {
+                    // If disconnected, do a round robbin between various known IP addresses
+                    this.tryNextInterfaceIfDisconnected();
 
-                let url = this.url.getChargerURL('/unified');
-                let state = this.ngRedux.getState();
-                if (state.ui.disconnected) {
-                    console.log(`Trying ${url}`);
-                }
-                this.firstRun = false;
-                return this.http.get(url, {observe: 'response'});
-            }),
-            map(resp => {
-                let state = this.ngRedux.getState();
+                    let url = this.url.getChargerURL('/unified');
+                    let state = this.ngRedux.getState();
+                    if (state.ui.disconnected) {
+                        console.log(`Trying ${url}`);
+                    }
+                    this.firstRun = false;
+                    return this.http.get(url, {observe: 'response'});
+                }),
+                map(resp => {
+                    let state = this.ngRedux.getState();
 
-                // Update device ID
-                iChargerService.device_id = state.charger.device_id;
-                this.chargerActions.refreshStateFromCharger(resp);
+                    // Update device ID
+                    iChargerService.device_id = state.charger.device_id;
+                    this.chargerActions.refreshStateFromCharger(resp);
 
-                if (state.ui.disconnected) {
-                    this.uiActions.serverReconnected();
-                    this.serverReconnection.emit();
-                }
-            }),
-            catchError(error => {
-                console.error('Probably connection problem: ' + error);
-                if (!this.isDisconnected) {
-                    this.uiActions.setDisconnected();
-                }
+                    if (state.ui.disconnected) {
+                        this.uiActions.serverReconnected();
+                        this.serverReconnection.emit();
+                    }
+                }),
+                catchError(error => {
+                    console.error('Probably connection problem: ' + error);
+                    if (!this.isDisconnected) {
+                        this.uiActions.setDisconnected();
+                    }
 
-                // I think I do this to force a 'retry'?
-                return throwError(error);
-            }),
-            retry(),
-        );
+                    // I think I do this to force a 'retry'?
+                    return throwError(error);
+                }),
+                retry(),
+            );
+        });
     }
 
     static lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
@@ -249,7 +258,9 @@ export class iChargerService {
         this.cancelAutoStopForChannel(channel.index);
         console.log('Stopping current task...');
         let url = this.url.getChargerURL('/stop/' + channel.index);
-        return this.http.put(url, '');
+        return this.runOutsideAngular(() => {
+            return this.http.put(url, '');
+        });
     }
 
     /* Same as savePreset(), but it forces the index to -1 so that the save will result in an "add" on the server */
@@ -271,71 +282,91 @@ export class iChargerService {
         let action = addingNewPreset ? 'Adding' : 'Saving';
         console.log(action + ' Preset: ', body);
 
-        return this.http.put(putURL, body).pipe(
-            map(resp => {
-                // Expect a copy of the modified preset?
-                // If we were adding, the preset is returned. If we're saving, it isn't.
-                // At the moment, it just returns "ok"
+        return this.runOutsideAngular(() => {
+            return this.http.put(putURL, body).pipe(
+                map(resp => {
+                    // Expect a copy of the modified preset?
+                    // If we were adding, the preset is returned. If we're saving, it isn't.
+                    // At the moment, it just returns "ok"
 
-                if (addingNewPreset) {
-                    // Return the newly saved preset, with its new memory slot (index)
-                    return new Preset(resp);
-                } else {
-                    // Just return the modified preset, that the user just saved
-                    return preset;
-                }
-            }),
-            catchError(error => {
-                this.uiActions.setErrorMessage(`Can't save: ${error}`);
-                return throwError(error);
-            })
-        );
+                    if (addingNewPreset) {
+                        // Return the newly saved preset, with its new memory slot (index)
+                        return new Preset(resp);
+                    } else {
+                        // Just return the modified preset, that the user just saved
+                        return preset;
+                    }
+                }),
+                catchError(error => {
+                    this.uiActions.setErrorMessage(`Can't save: ${error}`);
+                    return throwError(error);
+                })
+            );
+        });
+    }
+
+    runOutsideAngular(funcThing): any {
+        return this.zone.runOutsideAngular(funcThing);
     }
 
     startCharge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/charge/' + channel.index + '/' + preset.index);
         console.log('Beginning charge on channel ', channel.index, ' using preset at slot ', preset.index);
-        return this.http.put(operationURL, null);
+        return this.runOutsideAngular(() => {
+            return this.http.put(operationURL, null);
+        });
     }
 
     startDischarge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/discharge/' + channel.index + '/' + preset.index);
         console.log('Beginning discharge on channel ', channel.index, ' using preset at slot ', preset.index);
-        return this.http.put(operationURL, null);
+        return this.runOutsideAngular(() => {
+            return this.http.put(operationURL, null);
+        });
     }
 
     startStore(channel: Channel, preset: Preset, operationPlan: string) {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/store/' + channel.index + '/' + preset.index);
         console.log('Beginning storage on channel ', channel.index, ' using preset at slot ', preset.index);
-        return this.http.put(operationURL, '');
+        return this.runOutsideAngular(() => {
+            return this.http.put(operationURL, '');
+        });
     }
 
     startBalance(channel: Channel, preset: Preset, operationPlan: string) {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/balance/' + channel.index + '/' + preset.index);
         console.log('Beginning balance on channel ', channel.index, ' using preset at slot ', preset.index);
-        return this.http.put(operationURL, '');
+        return this.runOutsideAngular(() => {
+            return this.http.put(operationURL, '');
+        });
     }
 
     measureIR(channel: Channel) {
         let operationURL = this.url.getChargerURL('/measureir/' + channel.index);
         console.log('Beginning IR measurement on channel ', channel.index);
-        return this.http.put(operationURL, '');
+        return this.runOutsideAngular(() => {
+            return this.http.put(operationURL, '');
+        });
     }
 
     getSystem(): Observable<System> {
         let operationURL = this.url.getChargerURL('/system');
-        return this.http.get(operationURL).pipe(
-            map(resp => resp as System)
-        );
+        return this.runOutsideAngular(() => {
+            return this.http.get(operationURL).pipe(
+                map(resp => resp as System)
+            );
+        });
     }
 
     saveSystem(system: System) {
         let operationURL = this.url.getChargerURL('/system');
-        return this.http.put(operationURL, system);
+        return this.runOutsideAngular(() => {
+            return this.http.put(operationURL, system);
+        });
     }
 
     cancelAutoStopForChannel(index: number) {
@@ -354,30 +385,33 @@ export class iChargerService {
         this.cancelAutoStopForChannel(channel.index);
         let channel_index = channel.index;
 
-        this.autoStopSubscriptions[channel.index] = timer(250, 250).pipe(
-            takeUntil(this.ngUnsubscribe),
-            takeWhile(() => {
-                let ch: Channel = this.getCharger().channels[channel_index];
-                // console.log("Channel ", ch.index, ", state: ", ch.runState);
-                return !states_to_stop_on.some((state) => {
-                    return ch.runState == state;
+        this.autoStopSubscriptions[channel.index] =
+            this.runOutsideAngular(() => {
+                timer(250, 250).pipe(
+                    takeUntil(this.ngUnsubscribe),
+                    takeWhile(() => {
+                        let ch: Channel = this.getCharger().channels[channel_index];
+                        // console.log("Channel ", ch.index, ", state: ", ch.runState);
+                        return !states_to_stop_on.some((state) => {
+                            return ch.runState == state;
+                        });
+                    }),
+                ).subscribe(() => {
+                }, (error) => {
+                    console.log('Error while waiting for the channel to change state:', error);
+                    this.cancelAutoStopForChannel(channel_index);
+                }, () => {
+                    let ch: Channel = this.getCharger().channels[channel_index];
+                    if (ch.runState == 41) {
+                        // Error!
+                        this.chargerActions.setErrorOnChannel(ch.index, 'Error');
+                    } else {
+                        this.stopCurrentTask(ch).subscribe();
+                    }
+                    this.sendCompletionNotifications(ch, operationPlan);
+                    this.cancelAutoStopForChannel(ch.index);
                 });
-            }),
-        ).subscribe(() => {
-        }, (error) => {
-            console.log('Error while waiting for the channel to change state:', error);
-            this.cancelAutoStopForChannel(channel_index);
-        }, () => {
-            let ch: Channel = this.getCharger().channels[channel_index];
-            if (ch.runState == 41) {
-                // Error!
-                this.chargerActions.setErrorOnChannel(ch.index, 'Error');
-            } else {
-                this.stopCurrentTask(ch).subscribe();
-            }
-            this.sendCompletionNotifications(ch, operationPlan);
-            this.cancelAutoStopForChannel(ch.index);
-        });
+            });
     }
 
     private sendCompletionNotifications(channel: Channel, operationName: string) {
@@ -418,99 +452,105 @@ export class iChargerService {
 
 
     public updateWifi(ssid: string, password: string): Observable<any> {
-        return Observable.create((observable) => {
-            let wifiURL = this.url.getManagementURL('/wifi');
-            let payload = {
-                'SSID': ssid,
-                'PWD': password
-            };
-            // console.log("Sending: ", body, "to", wifiURL);
-            return this.http.put(wifiURL, payload);
+        return this.runOutsideAngular(() => {
+            return Observable.create((observable) => {
+                let wifiURL = this.url.getManagementURL('/wifi');
+                let payload = {
+                    'SSID': ssid,
+                    'PWD': password
+                };
+                // console.log("Sending: ", body, "to", wifiURL);
+                return this.runOutsideAngular(() => {
+                    return this.http.put(wifiURL, payload);
+                });
+            });
         });
     }
 
     private getServerStatus(): Observable<any> {
         let interval = 1500;
-        return timer(10, interval).pipe(
-            flatMap(v => {
-                // If disconnected, do a round robbin between various known IP addresses
-                this.tryNextInterfaceIfDisconnected();
-                this.networkService.fetchCurrentIPAddress();
+        return this.runOutsideAngular(() => {
+            return timer(10, interval).pipe(
+                flatMap(v => {
+                    // If disconnected, do a round robbin between various known IP addresses
+                    this.tryNextInterfaceIfDisconnected();
+                    this.networkService.fetchCurrentIPAddress();
 
-                let wifiURL = this.url.getManagementURL('/status');
-                // console.log("Get status from " + wifiURL);
-                return this.http.get(wifiURL);
-            }),
-            map(json => {
-                let access_point = json['access_point'];
-                let interfaces = json['interfaces'];
-                let docker = json['docker'];
-                let server = json['server_status'];
-                let services = json['services'];
+                    let wifiURL = this.url.getManagementURL('/status');
+                    // console.log("Get status from " + wifiURL);
+                    return this.http.get(wifiURL);
+                }),
+                map(json => {
+                    let access_point = json['access_point'];
+                    let interfaces = json['interfaces'];
+                    let docker = json['docker'];
+                    let server = json['server_status'];
+                    let services = json['services'];
 
-                let new_values = {
-                    ap_associated: false,
-                    ap_channel: access_point.channel,
-                    ap_name: access_point.name,
-                };
+                    let new_values = {
+                        ap_associated: false,
+                        ap_channel: access_point.channel,
+                        ap_name: access_point.name,
+                    };
 
-                let current_network = this.ngRedux.getState().config.network;
-                let havnt_had_update_yet = current_network.last_status_update == null;
-                let update_is_old = false;
-                if (havnt_had_update_yet == false) {
-                    let right_now: Date = new Date();
-                    let diff_in_ms = right_now.getTime() - current_network.last_status_update.getTime();
-                    update_is_old = diff_in_ms > 10000;
-                }
-                if (havnt_had_update_yet || update_is_old) {
-                    new_values['wifi_ssid'] = access_point.wifi_ssid;
-                }
-
-                if (docker.hasOwnProperty('last_deploy')) {
-                    new_values['docker_last_deploy'] = docker['last_deploy'];
-                }
-                if (docker.hasOwnProperty('web')) {
-                    new_values['web_running'] = docker['web'].container_running;
-                }
-                if (docker.hasOwnProperty('worker')) {
-                    new_values['worker_running'] = docker['worker'].container_running;
-                }
-
-                if (server.hasOwnProperty('exception')) {
-                    // SERVER ISNT RUNNING?
-                } else if (server.hasOwnProperty('charger_presence')) {
-                    // SERVER IS RUNNING OK
-                }
-
-                let ssid_length = new_values.ap_name.length;
-
-                for (let interface_name of Object.keys(interfaces)) {
-                    let interface_ip: string = interfaces[interface_name];
-                    if (interface_name == 'wlan0') {
-                        if (interface_ip.length > 0) {
-                            new_values.ap_associated = ssid_length > 0;
-                        }
+                    let current_network = this.ngRedux.getState().config.network;
+                    let havnt_had_update_yet = current_network.last_status_update == null;
+                    let update_is_old = false;
+                    if (havnt_had_update_yet == false) {
+                        let right_now: Date = new Date();
+                        let diff_in_ms = right_now.getTime() - current_network.last_status_update.getTime();
+                        update_is_old = diff_in_ms > 10000;
                     }
-                    new_values['interfaces'] = interfaces;
-                    new_values['services'] = services;
-                }
+                    if (havnt_had_update_yet || update_is_old) {
+                        new_values['wifi_ssid'] = access_point.wifi_ssid;
+                    }
 
-                this.configActions.updateConfiguration({
-                    network: new_values,
-                });
+                    if (docker.hasOwnProperty('last_deploy')) {
+                        new_values['docker_last_deploy'] = docker['last_deploy'];
+                    }
+                    if (docker.hasOwnProperty('web')) {
+                        new_values['web_running'] = docker['web'].container_running;
+                    }
+                    if (docker.hasOwnProperty('worker')) {
+                        new_values['worker_running'] = docker['worker'].container_running;
+                    }
 
-                let state = this.ngRedux.getState();
-                if (state.ui.disconnected) {
-                    this.uiActions.serverReconnected();
-                }
-            }),
-            catchError(e => {
-                console.error('Error getting server status: ' + e);
-                this.uiActions.setDisconnected();
-                return throwError(e);
-            }),
-            retry()
-        );
+                    if (server.hasOwnProperty('exception')) {
+                        // SERVER ISNT RUNNING?
+                    } else if (server.hasOwnProperty('charger_presence')) {
+                        // SERVER IS RUNNING OK
+                    }
+
+                    let ssid_length = new_values.ap_name.length;
+
+                    for (let interface_name of Object.keys(interfaces)) {
+                        let interface_ip: string = interfaces[interface_name];
+                        if (interface_name == 'wlan0') {
+                            if (interface_ip.length > 0) {
+                                new_values.ap_associated = ssid_length > 0;
+                            }
+                        }
+                        new_values['interfaces'] = interfaces;
+                        new_values['services'] = services;
+                    }
+
+                    this.configActions.updateConfiguration({
+                        network: new_values,
+                    });
+
+                    let state = this.ngRedux.getState();
+                    if (state.ui.disconnected) {
+                        this.uiActions.serverReconnected();
+                    }
+                }),
+                catchError(e => {
+                    console.error('Error getting server status: ' + e);
+                    this.uiActions.setDisconnected();
+                    return throwError(e);
+                }),
+                retry()
+            );
+        });
     }
 
     private get isDisconnected() {
