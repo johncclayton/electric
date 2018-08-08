@@ -144,7 +144,7 @@ export class iChargerService {
         let haveServer = this.isConnectedToServer();
         let result = !haveNetwork || !haveCharger || !haveServer;
         if (result) {
-            console.log(`haveNetwork: ${haveNetwork}, haveCharger: ${haveCharger}, haveServer: ${haveServer}`);
+            console.debug(`haveNetwork: ${haveNetwork}, haveCharger: ${haveCharger}, haveServer: ${haveServer}`);
         }
         return result;
     }
@@ -186,14 +186,14 @@ export class iChargerService {
                     console.log(`Trying ${url}`);
                 }
                 this.firstRun = false;
-                return this.http.get(url);
+                return this.http.get(url, {observe: 'response'});
             }),
-            map(r => {
+            map(resp => {
                 let state = this.ngRedux.getState();
 
                 // Update device ID
                 iChargerService.device_id = state.charger.device_id;
-                this.chargerActions.refreshStateFromCharger(r);
+                this.chargerActions.refreshStateFromCharger(resp);
 
                 if (state.ui.disconnected) {
                     this.uiActions.serverReconnected();
@@ -202,12 +202,14 @@ export class iChargerService {
             }),
             catchError(error => {
                 console.error('Probably connection problem: ' + error);
-                this.uiActions.setDisconnected();
+                if (!this.isDisconnected) {
+                    this.uiActions.setDisconnected();
+                }
 
                 // I think I do this to force a 'retry'?
                 return throwError(error);
             }),
-            retry()
+            retry(),
         );
     }
 
@@ -511,12 +513,17 @@ export class iChargerService {
         );
     }
 
-    private tryNextInterfaceIfDisconnected() {
+    private get isDisconnected() {
         let state = this.ngRedux.getState();
-        if (state.ui.disconnected && !this.firstRun) {
+        return state.ui.disconnected && !this.firstRun;
+    }
+
+    private tryNextInterfaceIfDisconnected() {
+        if (this.isDisconnected) {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
             console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
+            this.uiActions.setDisconnected();
         }
     }
 }

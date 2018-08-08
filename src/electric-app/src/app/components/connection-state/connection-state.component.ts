@@ -85,41 +85,48 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
         }
     }
 
+    async dismissAlertImmediately() {
+        if (this.generalAlert != null) {
+            this.generalAlert.willAnimate = false;
+            await this.generalAlert.dismiss();
+            this.haveAlertObject = false;
+            this.generalAlert = null;
+        }
+    }
+
     async showGeneralError(message: string, allowCreation = false) {
         if (message == null) {
             message = 'Unknown problem?!';
         }
 
-        if (!this.haveAlertObject && allowCreation) {
-            this.alertHasBeenPresented = false;
-            this.alertShownBecauseOfConnectionError = false;
-            this.generalAlert = await this.toastController.create({
-                'message': message,
-                'cssClass': 'redToast',
-                'position': 'bottom',
-                'showCloseButton': true,
-                'closeButtonText': 'Dismiss'
-            });
+        await this.dismissAlertImmediately();
+        await this.createNewAlert(message);
+    }
 
-            this.generalAlert.onDidDismiss(() => {
-                // Clear the alert... but don't let another show up if the connection errors continue
-                this.haveAlertObject = false;
-            });
+    private async createNewAlert(message: string, animateIn: boolean = false) {
+        this.alertHasBeenPresented = false;
+        this.alertShownBecauseOfConnectionError = false;
+        this.generalAlert = await this.toastController.create({
+            'message': message,
+            'cssClass': 'redToast',
+            'position': 'bottom',
+            'showCloseButton': true,
+            'closeButtonText': 'Dismiss'
+        });
 
-            this.haveAlertObject = true;
+        this.generalAlert.onDidDismiss(() => {
+            // Clear the alert... but don't let another show up if the connection errors continue
+            this.haveAlertObject = false;
+        });
+
+        this.haveAlertObject = true;
+        if (!animateIn) {
+            this.generalAlert.willAnimate = false;
         }
-
-        if (this.haveAlertObject) {
-            if (this.generalAlert != null) {
-                this.generalAlert.setMessage(message);
-
-                if (!this.alertHasBeenPresented) {
-                    this.generalAlert.present().then(() => {
-                        this.alertHasBeenPresented = true;
-                    });
-                }
-            }
-        }
+        this.generalAlert.present().then(() => {
+            this.alertHasBeenPresented = true;
+            this.generalAlert.willAnimate = true;
+        });
     }
 
     private incrementDisconnectionCount() {
