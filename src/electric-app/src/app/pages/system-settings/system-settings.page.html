@@ -1,0 +1,17 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Charger Settings</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <system
+            [system]="system$|async"
+            [ui]="ui$|async"
+            (valueWasChanged)="actions.userChangedValue($event)"
+    >
+    </system>
+</ion-content>

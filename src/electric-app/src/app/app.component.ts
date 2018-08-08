@@ -70,7 +70,7 @@ export class AppComponent {
                     title: 'Presets', url: '/PresetListPage', visible: connectedToCharger,
                 },
                 {
-                    title: 'iCharger Settings', url: 'SystemSettingsPage', visible: connectedToCharger
+                    title: 'iCharger Settings', url: 'SystemSettings', visible: connectedToCharger
                 },
                 {
                     title: 'App Settings', url: 'Config', visible: () => {

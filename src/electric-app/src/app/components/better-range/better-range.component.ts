@@ -12,6 +12,7 @@ export class BetterRangeComponent implements OnInit {
     @Input() min: number = 0;
     @Input() max: number = 10;
 
+    @Input() label: string = null;
     @Input() left_label: string = null;
     @Input() right_label: string = null;
 

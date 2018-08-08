@@ -25,21 +25,19 @@
                 [metric]="charger.isCelsius"
                 [(value)]="charger.temp_fans_on"></temp-range>
 
-    <ion-item>
-        <ion-label>Fans Off ({{charger.fans_off_time}} mins)</ion-label>
-        <ion-range [(value)]="charger.fans_off_time"
-                   pin=true min="0" max="10"
-                   [disabled]="ui.disconnected">
-            <ion-label range-left>0</ion-label>
-            <ion-label range-right>10</ion-label>
-        </ion-range>
-    </ion-item>
+    <better-range
+            label="Fans Off ({{charger.fans_off_time}} mins)"
+            [(value)]="charger.fans_off_time"
+            pin=true min="0" max="10"
+            left_label="0" right_label="10"
+            [disabled]="ui.disconnected">
+    </better-range>
 </ion-list>
 
+<ion-list-header color="light">Case Fan Control
+    <ion-badge *ngIf="!can_do_case_fan" color="warning">Upgrade your pi3 SD Card</ion-badge>
+</ion-list-header>
 <ion-list>
-    <ion-list-header color="light">Case Fan Control
-        <ion-badge *ngIf="!can_do_case_fan" item-end color="warning">Upgrade your pi3 SD Card</ion-badge>
-    </ion-list-header>
     <ion-item>
         <ion-label>Enabled</ion-label>
         <ion-toggle [disabled]="!can_do_case_fan" [(value)]="case_fan.control"></ion-toggle>
@@ -50,16 +48,14 @@
                 [metric]="charger.isCelsius"
                 [(value)]="case_fan.threshold"></temp-range>
 
-    <ion-item>
-        <ion-label>Hysteresis ({{case_fan.hysteresis}} deg)</ion-label>
-        <ion-range
-                [disabled]="!case_fan.control"
-                min=0 max=10
-                [(value)]="case_fan.hysteresis">
-            <ion-label range-left>0</ion-label>
-            <ion-label range-right>10</ion-label>
-        </ion-range>
-    </ion-item>
+    <better-range
+            label="Hysteresis ({{case_fan.hysteresis}} deg)"
+            [disabled]="!case_fan.control"
+            min=0 max=10
+            left_label="0" right_label="10"
+            [(value)]="case_fan.hysteresis"
+    >
+    </better-range>
 </ion-list>
 
 <ion-list>
