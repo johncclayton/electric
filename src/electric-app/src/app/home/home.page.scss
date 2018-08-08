@@ -12,10 +12,16 @@ The file begins (on disk) with a _, meaning: "don't compile me to CSS when impor
   overflow: hidden;
 }
 
-.searching {
+$large_text_offset: 1.5rem;
+
+ion-spinner.searching {
   padding-top: 0;
   padding-bottom: 15px;
   opacity: 0.6;
+}
+
+p.searching {
+  padding-top: 10px;
 }
 
 .folding-cube-spinner {
@@ -52,7 +58,6 @@ The file begins (on disk) with a _, meaning: "don't compile me to CSS when impor
   }
 
   .cannot-connect {
-    font-size: 2.0rem;
   }
 
   .errors {
@@ -98,7 +103,7 @@ The file begins (on disk) with a _, meaning: "don't compile me to CSS when impor
 @include media(">=widephone") {
   .charger {
     // Make everything bigger in general
-    font-size: 2.0rem;
+    //font-size: $large_text_offset;
 
     .overview {
       .label {
@@ -111,7 +116,7 @@ The file begins (on disk) with a _, meaning: "don't compile me to CSS when impor
 @include media(">=tablet") {
   .charger {
     // Make everything bigger in general
-    font-size: 3.0rem;
+    font-size: 2.5rem;
 
     .overview {
       .label {

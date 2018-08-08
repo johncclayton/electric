@@ -1,33 +1,32 @@
 <ion-header>
-    <ion-toolbar>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
         <ion-title text-center>
             <div class="chargername">
                 {{chargerName}}
                 <span class="tag">{{chargerTag}}</span>
             </div>
         </ion-title>
-        <button ion-button icon-only menuToggle>
-            <ion-icon name="menu"></ion-icon>
-        </button>
     </ion-toolbar>
 </ion-header>
 
 <ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
     <div *ngIf="anyNetworkOrConnectivityProblems()">
-        <p text-center>Looking for your charger...</p>
+        <p text-center class="searching">Looking for your charger...</p>
         <div class="searching" text-center>
             <ion-spinner></ion-spinner>
         </div>
 
         <ion-grid>
             <ion-row>
-                <ion-col col-6 offset-3>
+                <ion-col size="6" offset="3">
                     <div class="configButton">
-                        <button ion-button block
-                                color="secondary" (click)="showNetworkPage()" *ngIf="showConfigureButton">
+                        <ion-button expand="block" color="secondary" (click)="showNetworkPage()" *ngIf="showConfigureButton">
                             <ion-icon name="tools"></ion-icon>
                             Network Settings
-                        </button>
+                        </ion-button>
                     </div>
                 </ion-col>
             </ion-row>
@@ -37,10 +36,10 @@
             <!--<ion-item-->
             <ion-grid class="errors">
                 <ion-row align-items-start>
-                    <ion-col col-12 [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
+                    <ion-col size="12" [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
                         <span>{{serverText()}}</span>
                     </ion-col>
-                    <ion-col col-12 [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
+                    <ion-col size="12" [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
                         <span>{{chargerText()}}</span>
                     </ion-col>
                 </ion-row>
@@ -62,7 +61,7 @@
 
         <channel name="Channel 1" [charger]="charger$|async" [index]="0"></channel>
         <channel name="Channel 2" [charger]="charger$|async" [index]="1"></channel>
-        <!--<button ion-button (click)="chargerService.notificationWhenDone('Mooo')">DO SOMETHING</button>-->
+        <!--<ion-button (click)="chargerService.notificationWhenDone('Mooo')">DO SOMETHING</ion-button>-->
     </div>
 
     <connection-state></connection-state>
