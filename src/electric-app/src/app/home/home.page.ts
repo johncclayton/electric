@@ -117,30 +117,6 @@ export class HomePage {
     }
 
     loadFirstPageDoingDebugging() {
-        // this.showNetworkPage();
-        // this.showConfigPage();
-        // this.showSystemPage();
-        // this.showPresetsPage();
-        // this.menuController.open();
-    }
-
-    showPresetsPage() {
-        // this.navCtrl.push(PresetListPage);
-    }
-
-    showNetworkPage() {
-        // TODO: put back when other pages in place
-        // this.navCtrl.push(NetworkPage);
-    }
-
-    showConfigPage() {
-        // TODO: put back when other pages in place
-        // this.navCtrl.push(ConfigPage);
-    }
-
-    showSystemPage() {
-        // TODO: put back when other pages in place
-        // this.navCtrl.push(SystemSettingsPage);
     }
 
     makeError() {

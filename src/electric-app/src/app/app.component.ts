@@ -78,7 +78,7 @@ export class AppComponent {
                     }
                 },
                 {
-                    title: 'Network Settings', url: '/NetworkPage', visible: () => {
+                    title: 'Network Settings', url: '/NetworkConfig', visible: () => {
                         return true;
                     }
                 },

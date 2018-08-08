@@ -1,0 +1,19 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Network Config</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <network-config
+            [config]="config$|async"
+            [showAutoButton]="canUseZeroconf() && haveZeroConfAddresses()"
+            [current_ip_address]="current_ip_address$|async"
+            (updateConfiguration)="actions.updateConfigurationFromEmit($event)"
+            (networkWizard)="showWizard()"
+    >
+    </network-config>
+</ion-content>

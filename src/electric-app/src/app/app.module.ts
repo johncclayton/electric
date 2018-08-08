@@ -17,6 +17,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {IonicStorageModule} from '@ionic/storage';
 import {UtilsModule} from './utils/utils.module';
 import {ComponentsModule} from './components/components.module';
+import {Zeroconf} from '@ionic-native/zeroconf/ngx';
 
 @NgModule({
     declarations: [
@@ -37,6 +38,7 @@ import {ComponentsModule} from './components/components.module';
         StatusBar,
         SplashScreen,
         LocalNotifications,
+        Zeroconf,
         Vibration,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
     ],
