@@ -12,6 +12,7 @@ import {ConnectionStateComponent} from './connection-state/connection-state.comp
 import {NetworkConfigComponent} from './network-config/network-config.component';
 import {SystemComponent} from './system/system.component';
 import {TempRangeComponent} from './temp-range/temp-range.component';
+import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 
 @NgModule({
     declarations: [
@@ -24,7 +25,8 @@ import {TempRangeComponent} from './temp-range/temp-range.component';
         ConnectionStateComponent,
         NetworkConfigComponent,
         SystemComponent,
-        TempRangeComponent
+        TempRangeComponent,
+        WifiSettingsComponent
     ],
     imports: [
         CommonModule,
@@ -41,7 +43,8 @@ import {TempRangeComponent} from './temp-range/temp-range.component';
         ConnectionStateComponent,
         NetworkConfigComponent,
         SystemComponent,
-        TempRangeComponent
+        TempRangeComponent,
+        WifiSettingsComponent
     ]
 })
 export class ComponentsModule {
