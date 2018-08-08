@@ -2,22 +2,20 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {Observable, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';
-import {IChargerCaseFan, System} from '../models/system';
+import {System} from '../models/system';
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from '../models/state/configure';
 import {ChargerActions} from '../models/state/actions/charger';
 import {UIActions} from '../models/state/actions/ui';
 import {IConfig} from '../models/state/reducers/configuration';
 import {IChargerState} from '../models/state/reducers/charger';
-import {IUIState} from '../models/state/reducers/ui';
 import {ConfigurationActions} from '../models/state/actions/configuration';
 import {ElectricNetworkService} from './network.service';
-import {SystemActions} from '../models/state/actions/system';
 import {HttpClient} from '@angular/common/http';
 import {catchError, flatMap, map, retry, takeUntil, takeWhile} from 'rxjs/operators';
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
-import {AppModule} from '../app.module';
+import {URLService} from './url.service';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -71,6 +69,7 @@ export class iChargerService {
     }
 
     public constructor(public http: HttpClient,
+                       public url: URLService,
                        public vibration: Vibration,
                        public uiActions: UIActions,
                        private ngRedux: NgRedux<IAppState>,
@@ -161,7 +160,7 @@ export class iChargerService {
     }
 
     getPresets(): Observable<any> {
-        let url = this.getChargerURL('/preset');
+        let url = this.url.getChargerURL('/preset');
         return this.http.get(url).pipe(
             map((arrayOfPresets: any[]) => {
                 // This should be a list of presets
@@ -181,7 +180,7 @@ export class iChargerService {
                 // If disconnected, do a round robbin between various known IP addresses
                 this.tryNextInterfaceIfDisconnected();
 
-                let url = this.getChargerURL('/unified');
+                let url = this.url.getChargerURL('/unified');
                 let state = this.ngRedux.getState();
                 if (state.ui.disconnected) {
                     console.log(`Trying ${url}`);
@@ -212,62 +211,6 @@ export class iChargerService {
         );
     }
 
-    // noinspection JSMethodCanBeStatic
-    private get systemActions(): SystemActions {
-        return AppModule.injector.get(SystemActions);
-    }
-
-    getCaseFan(): Observable<IChargerCaseFan> {
-        let url = this.getChargerURL('/casefan');
-        return this.http.get(url).pipe(
-            map(r => {
-                // Map this into the system 'case fan' state.
-                this.systemActions.updateCaseFan(r);
-                return r as IChargerCaseFan;
-            })
-        );
-    }
-
-    saveCaseFan(case_fan: IChargerCaseFan): Observable<IChargerCaseFan> {
-        let operationURL = this.getChargerURL('/casefan');
-        return this.http.put(operationURL, case_fan).pipe(
-            map(r => {
-                return r as IChargerCaseFan;
-            })
-        );
-    }
-
-    public static getHostNameUsingConfigAndState(config: IConfig, ui: IUIState, port: number) {
-        // If on index 0, use private WLAN address
-        if (config.lastConnectionIndex == 0) {
-            return '192.168.10.1:' + port;
-        }
-
-        // If disconnected, do a round robbin between various known IP addresses
-        return config.ipAddress + ':' + port;
-    }
-
-    getHostName(): string {
-        let config = this.getConfig();
-        let state = this.ngRedux.getState();
-        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, config.port);
-    }
-
-    getManagementHostName(): string {
-        let config = this.getConfig();
-        let state = this.ngRedux.getState();
-        return iChargerService.getHostNameUsingConfigAndState(config, state.ui, config.port - 1);
-    }
-
-    // Gets the status of the charger
-    private getChargerURL(path) {
-        return 'http://' + this.getHostName() + path;
-    }
-
-    private getManagementURL(path) {
-        return 'http://' + this.getManagementHostName() + path;
-    }
-
     static lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
         // Not supplied? Look it up.
         if (!deviceId) {
@@ -284,26 +227,26 @@ export class iChargerService {
         return defaultValue;
     }
 
-    getMaxAmpsPerChannel() {
+    static getMaxAmpsPerChannel() {
         return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'maxAmps', 15);
     }
 
-    getChargerName() {
+    static getChargerName() {
         return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'name', 'iCharger');
     }
 
-    getChargerTag() {
+    static getChargerTag() {
         return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'tag', '');
     }
 
-    getMaxCells() {
+    static getMaxCells() {
         return iChargerService.lookupChargerMetadata(iChargerService.device_id, 'cells', 0);
     }
 
     stopCurrentTask(channel: Channel): Observable<any> {
         this.cancelAutoStopForChannel(channel.index);
         console.log('Stopping current task...');
-        let url = this.getChargerURL('/stop/' + channel.index);
+        let url = this.url.getChargerURL('/stop/' + channel.index);
         return this.http.put(url, '');
     }
 
@@ -321,7 +264,7 @@ export class iChargerService {
             return throwError('Asked to add preset, but it has an index of ' + preset.index + '. This would result in an overwrite.');
         }
 
-        let putURL = addingNewPreset ? this.getChargerURL('/addpreset') : this.getChargerURL('/preset/' + preset.index);
+        let putURL = addingNewPreset ? this.url.getChargerURL('/addpreset') : this.url.getChargerURL('/preset/' + preset.index);
         let body = preset.json();
         let action = addingNewPreset ? 'Adding' : 'Saving';
         console.log(action + ' Preset: ', body);
@@ -349,47 +292,47 @@ export class iChargerService {
 
     startCharge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
         this.autoStopOnRunStatus([40], channel, operationPlan);
-        let operationURL = this.getChargerURL('/charge/' + channel.index + '/' + preset.index);
+        let operationURL = this.url.getChargerURL('/charge/' + channel.index + '/' + preset.index);
         console.log('Beginning charge on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.http.put(operationURL, null);
     }
 
     startDischarge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
         this.autoStopOnRunStatus([40], channel, operationPlan);
-        let operationURL = this.getChargerURL('/discharge/' + channel.index + '/' + preset.index);
+        let operationURL = this.url.getChargerURL('/discharge/' + channel.index + '/' + preset.index);
         console.log('Beginning discharge on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.http.put(operationURL, null);
     }
 
     startStore(channel: Channel, preset: Preset, operationPlan: string) {
         this.autoStopOnRunStatus([40], channel, operationPlan);
-        let operationURL = this.getChargerURL('/store/' + channel.index + '/' + preset.index);
+        let operationURL = this.url.getChargerURL('/store/' + channel.index + '/' + preset.index);
         console.log('Beginning storage on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.http.put(operationURL, '');
     }
 
     startBalance(channel: Channel, preset: Preset, operationPlan: string) {
         this.autoStopOnRunStatus([40], channel, operationPlan);
-        let operationURL = this.getChargerURL('/balance/' + channel.index + '/' + preset.index);
+        let operationURL = this.url.getChargerURL('/balance/' + channel.index + '/' + preset.index);
         console.log('Beginning balance on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.http.put(operationURL, '');
     }
 
     measureIR(channel: Channel) {
-        let operationURL = this.getChargerURL('/measureir/' + channel.index);
+        let operationURL = this.url.getChargerURL('/measureir/' + channel.index);
         console.log('Beginning IR measurement on channel ', channel.index);
         return this.http.put(operationURL, '');
     }
 
     getSystem(): Observable<System> {
-        let operationURL = this.getChargerURL('/system');
+        let operationURL = this.url.getChargerURL('/system');
         return this.http.get(operationURL).pipe(
             map(resp => resp as System)
         );
     }
 
     saveSystem(system: System) {
-        let operationURL = this.getChargerURL('/system');
+        let operationURL = this.url.getChargerURL('/system');
         return this.http.put(operationURL, system);
     }
 
@@ -467,14 +410,14 @@ export class iChargerService {
         this.ngRedux.dispatch({
             type: ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE,
             payload: change,
-            maxAmpsPerChannel: this.getMaxAmpsPerChannel()
+            maxAmpsPerChannel: iChargerService.getMaxAmpsPerChannel()
         });
     }
 
 
     public updateWifi(ssid: string, password: string): Observable<any> {
         return Observable.create((observable) => {
-            let wifiURL = this.getManagementURL('/wifi');
+            let wifiURL = this.url.getManagementURL('/wifi');
             let payload = {
                 'SSID': ssid,
                 'PWD': password
@@ -492,7 +435,7 @@ export class iChargerService {
                 this.tryNextInterfaceIfDisconnected();
                 this.networkService.fetchCurrentIPAddress();
 
-                let wifiURL = this.getManagementURL('/status');
+                let wifiURL = this.url.getManagementURL('/status');
                 // console.log("Get status from " + wifiURL);
                 return this.http.get(wifiURL);
             }),
@@ -573,7 +516,7 @@ export class iChargerService {
         if (state.ui.disconnected && !this.firstRun) {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
-            console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.getHostName()}`);
+            console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
         }
     }
 }
