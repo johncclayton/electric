@@ -7,6 +7,7 @@ const routes: Routes = [
     {path: 'ChargeOptions', loadChildren: './pages/charge-options/charge-options.module#ChargeOptionsPageModule'},
     {path: 'Config', loadChildren: './pages/config/config.module#ConfigPageModule'},
     {path: 'NetworkConfig', loadChildren: './pages/network-config/network-config.module#NetworkConfigPageModule'},
+    {path: 'NetworkWizard', loadChildren: './pages/network-wizard/network-wizard.module#NetworkWizardPageModule'},
 ];
 
 @NgModule({

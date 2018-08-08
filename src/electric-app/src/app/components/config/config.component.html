@@ -13,7 +13,7 @@
                 (valueChange)="change('notificationWhenDone', $event)">
         </ion-toggle>
     </ion-item>
-    <ion-item *ngIf="config.vibrateWhenDone" no-lines>
+    <ion-item *ngIf="config.vibrateWhenDone" lines="none">
         <ion-label>Vibrate when done</ion-label>
         <ion-toggle
                 [value]="config.vibrateWhenDone"
@@ -40,5 +40,4 @@
 </ion-list>
 
 <ion-button expand="full" color="danger" (click)="resetToDefaults.emit()">Reset to Defaults</ion-button>
-<!--<button full color="secondary" ion-button (click)="testFunc.emit()">Test</button>-->
 

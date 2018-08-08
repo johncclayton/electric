@@ -1,33 +1,33 @@
 <div>
+  <ion-list-header class="note" color="light">
+    Home WiFi
+    <p class="below">These settings are used when you're at home.<br/>
+      They are <b>not</b> used when you're at the field.</p>
+  </ion-list-header>
   <ion-list class="network">
-    <ion-list-header class="note" color="light">
-      Home WiFi
-      <p class="below">These settings are used when you're at home.<br/>
-        They are <b>not</b> used when you're at the field.</p>
-    </ion-list-header>
     <ion-item>
-      <ion-label stacked>IP Address of Pi (on home wifi)</ion-label>
+      <ion-label position="stacked">IP Address of Pi (on home wifi)</ion-label>
       <ion-input type="text" [value]="config.ipAddress"
                  (valueChange)="change('ipAddress', $event)"></ion-input>
-      <button item-end outline icon-left ion-button (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton"
+      <ion-button slot="end" fill="outline" (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton"
               [class.button-disabled]="config.network.discoveredServers?.length == 0">
-        <ion-icon name="radio-outline"></ion-icon>
+        <ion-icon slot="start" name="radio-outline"></ion-icon>
         Auto Detect
-      </button>
+      </ion-button>
     </ion-item>
     <ion-item>
-      <ion-label stacked>Port of Pi (on home wifi)</ion-label>
+      <ion-label position="stacked">Port of Pi (on home wifi)</ion-label>
       <ion-input type="text" [value]="config.port"
                  (valueChange)="change('port', num($event))">
 
       </ion-input>
     </ion-item>
-    <ion-item detail-push (click)="networkWizard.emit()">
+    <ion-item detail="true" (click)="networkWizard.emit()">
       Network Settings Wizard
     </ion-item>
 
     <div class="sections">
-      <ion-list-header class="current" color="secondary" no-lines *ngIf="current_ip_address != null">
+      <ion-list-header class="current" color="secondary" lines="none" *ngIf="current_ip_address != null">
         Current IP Address: {{current_ip_address}}
       </ion-list-header>
       <div *ngFor="let heading of sectionNames()">
@@ -36,8 +36,8 @@
         </ion-list-header>
         <ion-grid class="sections">
           <ion-row *ngFor="let key of sectionState(heading)|keys">
-            <ion-col col-4 item-start>{{wifiStateKeyFor(heading, key)}}</ion-col>
-            <ion-col col-auto item-end>{{wifiStateFor(heading, key)}}</ion-col>
+            <ion-col size="4" slot="start">{{wifiStateKeyFor(heading, key)}}</ion-col>
+            <ion-col size="auto" slot="end">{{wifiStateFor(heading, key)}}</ion-col>
           </ion-row>
         </ion-grid>
         <br/>

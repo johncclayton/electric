@@ -1,9 +1,9 @@
 import {Directive, ElementRef, Input, Renderer2} from '@angular/core';
 
-@Directive({selector: '[elecstepstate]'})
+@Directive({selector: '[stepstate]'})
 export class StepStateDirective {
-    @Input('stepState')
-    set stepState(value: string) {
+    @Input('stepstate')
+    set stepstate(value: string) {
         this.renderer.addClass(this.element.nativeElement, value);
     }
 

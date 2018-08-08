@@ -7,6 +7,7 @@ import {IAppState} from '../../models/state/configure';
 import {iChargerService} from '../../services/icharger.service';
 import {ConfigurationActions} from '../../models/state/actions/configuration';
 import {Zeroconf} from '@ionic-native/zeroconf/ngx';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'network-config-page',
@@ -21,6 +22,7 @@ export class NetworkConfigPage implements OnInit, OnDestroy {
         private ngRedux: NgRedux<IAppState>,
         private zeroConf: Zeroconf,
         private platform: Platform,
+        private router: Router,
         private iChargerService: iChargerService,
         public actions: ConfigurationActions) {
     }
@@ -86,7 +88,7 @@ export class NetworkConfigPage implements OnInit, OnDestroy {
     }
 
     showWizard() {
-        // this.navCtrl.push(NetworkWizHomePage);
+        this.router.navigateByUrl('NetworkWizard');
     }
 
 }

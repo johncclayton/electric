@@ -1,0 +1,56 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="NetworkConfig"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Wizardry</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+    <!--Follow the yellow brick road-->
+
+    <ion-list class="steps">
+        <ion-list-header class="current" color="secondary" lines="none">
+            <ion-label>
+                IP Address: {{current_ip_address$|async}}
+            </ion-label>
+        </ion-list-header>
+
+        <!--<ion-item>{{current_ip_address$|async}}</ion-item>-->
+        <ion-item [stepstate]="stateFor(0)">
+            <ion-icon name="flash" slot="start"></ion-icon>
+            Get on the <b>Electric</b> network
+        </ion-item>
+
+        <ion-item [stepstate]="stateFor(1)">
+            <ion-icon name="wifi" slot="start"></ion-icon>
+            Connect to home WiFi
+        </ion-item>
+
+        <ion-item [stepstate]="stateFor(2)">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Verify connectivity
+        </ion-item>
+    </ion-list>
+
+    <ion-card>
+        <ion-card-header>
+            {{tip.header}}
+        </ion-card-header>
+        <ion-card-content>
+            <div *ngIf="tip.content != ''">
+                {{tip.content}}
+            </div>
+            <div *ngIf="currentState >= 1">
+                <wifi-settings
+                        [network]="network$|async"
+                        [disabled]="!nextStepIsEnabled()"
+                        (updateConfiguration)="actions.updateNetworkFromEmit($event)"
+                        (sendWifiSettings)="updateWifi()">
+                </wifi-settings>
+            </div>
+        </ion-card-content>
+    </ion-card>
+</ion-content>
