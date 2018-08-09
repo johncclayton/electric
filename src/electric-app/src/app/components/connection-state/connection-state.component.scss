@@ -1,5 +1,15 @@
 // Make the toast show up red
-.redToast .toast-wrapper {
-  background-color: var(--ion-color-danger) !important;
+:host {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  background: var(--ion-color-danger);
+  color: white;
+
+  ion-button {
+    --ion-color-base: var(--ion-color-danger-tint);
+    color: white;
+  }
 }
 

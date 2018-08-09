@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from '../../models/state/configure';
 import {Subject} from 'rxjs';
-import {Platform, ToastController} from '@ionic/angular';
+import {Platform} from '@ionic/angular';
 import {isDefined} from '@angular/compiler/src/util';
 import {takeUntil} from 'rxjs/operators';
 
@@ -12,22 +12,16 @@ import {takeUntil} from 'rxjs/operators';
     styleUrls: ['./connection-state.component.scss']
 })
 export class ConnectionStateComponent implements OnInit, OnDestroy {
-    /*
-    Don't ever set this to nil, let the GC do it. Otherwise, you'll have race conditions when the alert is closed by the user.
-    The framework looks to be still holding onto it (well, trying to) and if you set it to nil, it seems to do some cleanup, yet STILL be referenced by the f/work later.
-    i.e: BOOM. So Just Don't.
-     */
-    private generalAlert;
-    private alertHasBeenPresented: boolean;
+    message: string;
+    isShowing: boolean = false;
+    showCloseButton: boolean = false;
+
     private alertShownBecauseOfConnectionError: boolean = false;
     private lastConnectionFailureCount: number = 0;
-    private haveAlertObject = false;
-
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public platform: Platform,
-                public ngRedux: NgRedux<IAppState>,
-                public toastController: ToastController) {
+                public ngRedux: NgRedux<IAppState>) {
 
         // Listen for changes to the exception, and do something with the UI
         this.ngRedux.select(['ui', 'exception'])
@@ -69,12 +63,14 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
     }
 
     dismissAlertMessage(wasDismissedByUser = false) {
-        if (this.haveAlertObject) {
+        if (this.isShowing) {
             // Code is calling this to dismiss the current alert programmatically.
-            this.generalAlert.dismiss().then(() => {
-                this.haveAlertObject = false;
-            });
+            this.isShowing = false;
         }
+    }
+
+    closeBox() {
+        this.dismissAlertMessage(true);
     }
 
     // Server is back. Clear down the current alert if we were responsible for it.
@@ -85,48 +81,22 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
         }
     }
 
-    async dismissAlertImmediately() {
-        if (this.generalAlert != null) {
-            this.generalAlert.willAnimate = false;
-            await this.generalAlert.dismiss();
-            this.haveAlertObject = false;
-            this.generalAlert = null;
-        }
-    }
-
-    async showGeneralError(message: string, allowCreation = false) {
+    showGeneralError(message: string, allowCreation = false) {
         if (message == null) {
             message = 'Unknown problem?!';
         }
 
-        await this.dismissAlertImmediately();
-        await this.createNewAlert(message);
+        this.createNewAlert(message, allowCreation);
     }
 
-    private async createNewAlert(message: string, animateIn: boolean = false) {
-        this.alertHasBeenPresented = false;
-        this.alertShownBecauseOfConnectionError = false;
-        this.generalAlert = await this.toastController.create({
-            'message': message,
-            'cssClass': 'redToast',
-            'position': 'bottom',
-            'showCloseButton': true,
-            'closeButtonText': 'Dismiss'
-        });
+    createNewAlert(message: string, allowCreation: boolean) {
+        this.showCloseButton = false;
+        this.message = message;
 
-        this.generalAlert.onDidDismiss(() => {
-            // Clear the alert... but don't let another show up if the connection errors continue
-            this.haveAlertObject = false;
-        });
-
-        this.haveAlertObject = true;
-        if (!animateIn) {
-            this.generalAlert.willAnimate = false;
+        if (!this.isShowing && allowCreation) {
+            this.showCloseButton = true;
+            this.isShowing = true;
         }
-        this.generalAlert.present().then(() => {
-            this.alertHasBeenPresented = true;
-            this.generalAlert.willAnimate = true;
-        });
     }
 
     private incrementDisconnectionCount() {

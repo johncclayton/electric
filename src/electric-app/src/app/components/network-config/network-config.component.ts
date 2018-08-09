@@ -45,6 +45,7 @@ export class NetworkConfigComponent implements OnInit {
     change(keyName, value) {
         let change = [];
         change[keyName] = value;
+        console.warn(`Change ${keyName} to ${JSON.stringify(value)}`);
         this.updateConfiguration.emit(change);
     }
 

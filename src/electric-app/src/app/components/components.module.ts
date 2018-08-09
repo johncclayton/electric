@@ -13,6 +13,7 @@ import {NetworkConfigComponent} from './network-config/network-config.component'
 import {SystemComponent} from './system/system.component';
 import {TempRangeComponent} from './temp-range/temp-range.component';
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
     declarations: [
@@ -30,6 +31,7 @@ import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
     ],
     imports: [
         CommonModule,
+        FormsModule,
         IonicModule,
         UtilsModule,
     ],

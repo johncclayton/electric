@@ -2,8 +2,8 @@
     <ion-label>{{label}}</ion-label>
 </ion-item>
 <ion-item>
-    <ion-range [value]="displayableValue"
-               (valueChange)="displayableValue=$event"
+    <ion-range [ngModel]="displayableValue"
+               (ngModelChange)="displayableValue=$event"
                pin="{{pin}}"
                disabled="{{disabled}}"
                [min]="min * multiplier"

@@ -9,8 +9,8 @@
         <ion-label stacked>SSID / Name</ion-label>
         <ion-input type="text"
                    [disabled]="disabled"
-                   [value]="network?.wifi_ssid"
-                   (valueChange)="change('wifi_ssid', $event)"
+                   [ngModel]="network?.wifi_ssid"
+                   (ngModelChange)="change('wifi_ssid', $event)"
         >
         </ion-input>
     </ion-item>
@@ -19,8 +19,8 @@
         <ion-label stacked>Password (of above Wifi router)</ion-label>
         <ion-input type="text"
                    [disabled]="disabled"
-                   [value]="network?.wifi_password"
-                   (valueChange)="change('wifi_password', $event)"
+                   [ngModel]="network?.wifi_password"
+                   (ngModelChange)="change('wifi_password', $event)"
         >
         </ion-input>
     </ion-item>
