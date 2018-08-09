@@ -194,14 +194,14 @@ export class iChargerService {
                         console.log(`Trying ${url}`);
                     }
                     this.firstRun = false;
-                    return this.http.get(url, {observe: 'response'});
+                    return this.http.get(url);
                 }),
                 map(resp => {
                     let state = this.ngRedux.getState();
 
                     // Update device ID
-                    iChargerService.device_id = state.charger.device_id;
                     this.chargerActions.refreshStateFromCharger(resp);
+                    iChargerService.device_id = state.charger.device_id;
 
                     if (state.ui.disconnected) {
                         this.uiActions.serverReconnected();
