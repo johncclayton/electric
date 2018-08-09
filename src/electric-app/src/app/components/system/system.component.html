@@ -62,14 +62,14 @@
     <ion-list-header color="light">LCD Screen</ion-list-header>
     <ion-item>
         <ion-label>Brightness</ion-label>
-        <ion-range [(value)]="charger.brightness"
+        <ion-range [(ngModel)]="charger.brightness"
                    pin=true min="0" max="30"
                    [disabled]="ui.disconnected">
         </ion-range>
     </ion-item>
     <ion-item>
         <ion-label>Contrast</ion-label>
-        <ion-range [(value)]="charger.contrast"
+        <ion-range [(ngModel)]="charger.contrast"
                    pin=true min="0" max="30"
                    [disabled]="ui.disconnected">
         </ion-range>

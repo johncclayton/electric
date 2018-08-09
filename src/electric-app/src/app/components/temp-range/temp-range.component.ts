@@ -30,7 +30,7 @@ export class TempRangeComponent implements OnInit {
     }
 
     set value(newVal: number) {
-        console.warn(`Set new value for ${this.label} to ${newVal}`)
+        // console.warn(`Set new value for ${this.label} to ${newVal}`)
         this._value = newVal;
     }
 

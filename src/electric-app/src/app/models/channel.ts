@@ -103,6 +103,10 @@ export class Channel {
         return this._json;
     }
 
+    get timestamp() {
+        return this._json['timestamp'];
+    }
+
     get cell_count_with_voltage_values(): number {
         return this._json['cell_count_with_voltage_values'];
     }

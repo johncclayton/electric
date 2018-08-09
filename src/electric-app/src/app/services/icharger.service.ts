@@ -11,7 +11,7 @@ import {IConfig} from '../models/state/reducers/configuration';
 import {IChargerState} from '../models/state/reducers/charger';
 import {ConfigurationActions} from '../models/state/actions/configuration';
 import {ElectricNetworkService} from './network.service';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, flatMap, map, retry, takeUntil, takeWhile} from 'rxjs/operators';
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
@@ -259,7 +259,7 @@ export class iChargerService {
         console.log('Stopping current task...');
         let url = this.url.getChargerURL('/stop/' + channel.index);
         return this.runOutsideAngular(() => {
-            return this.http.put(url, '');
+            return this.http.put(url, '', this.putJsonOptions);
         });
     }
 
@@ -283,7 +283,7 @@ export class iChargerService {
         console.log(action + ' Preset: ', body);
 
         return this.runOutsideAngular(() => {
-            return this.http.put(putURL, body).pipe(
+            return this.http.put(putURL, body, this.putJsonOptions).pipe(
                 map(resp => {
                     // Expect a copy of the modified preset?
                     // If we were adding, the preset is returned. If we're saving, it isn't.
@@ -314,7 +314,7 @@ export class iChargerService {
         let operationURL = this.url.getChargerURL('/charge/' + channel.index + '/' + preset.index);
         console.log('Beginning charge on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
-            return this.http.put(operationURL, null);
+            return this.http.put(operationURL, null, this.putJsonOptions);
         });
     }
 
@@ -323,7 +323,7 @@ export class iChargerService {
         let operationURL = this.url.getChargerURL('/discharge/' + channel.index + '/' + preset.index);
         console.log('Beginning discharge on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
-            return this.http.put(operationURL, null);
+            return this.http.put(operationURL, null, this.putJsonOptions);
         });
     }
 
@@ -332,7 +332,7 @@ export class iChargerService {
         let operationURL = this.url.getChargerURL('/store/' + channel.index + '/' + preset.index);
         console.log('Beginning storage on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
-            return this.http.put(operationURL, '');
+            return this.http.put(operationURL, '', this.putJsonOptions);
         });
     }
 
@@ -341,7 +341,7 @@ export class iChargerService {
         let operationURL = this.url.getChargerURL('/balance/' + channel.index + '/' + preset.index);
         console.log('Beginning balance on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
-            return this.http.put(operationURL, '');
+            return this.http.put(operationURL, '', this.putJsonOptions);
         });
     }
 
@@ -349,7 +349,7 @@ export class iChargerService {
         let operationURL = this.url.getChargerURL('/measureir/' + channel.index);
         console.log('Beginning IR measurement on channel ', channel.index);
         return this.runOutsideAngular(() => {
-            return this.http.put(operationURL, '');
+            return this.http.put(operationURL, '', this.putJsonOptions);
         });
     }
 
@@ -362,10 +362,14 @@ export class iChargerService {
         });
     }
 
+    get putJsonOptions() {
+        return {headers: new HttpHeaders({'Content-Type': 'application/json'})};
+    }
+
     saveSystem(system: System) {
         let operationURL = this.url.getChargerURL('/system');
         return this.runOutsideAngular(() => {
-            return this.http.put(operationURL, system);
+            return this.http.put(operationURL, system.json(), this.putJsonOptions);
         });
     }
 
@@ -461,7 +465,7 @@ export class iChargerService {
                 };
                 // console.log("Sending: ", body, "to", wifiURL);
                 return this.runOutsideAngular(() => {
-                    return this.http.put(wifiURL, payload);
+                    return this.http.put(wifiURL, payload, this.putJsonOptions);
                 });
             });
         });

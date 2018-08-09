@@ -4,6 +4,9 @@
             <ion-back-button defaultHref="home"></ion-back-button>
         </ion-buttons>
         <ion-title>Charger Settings</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="saveSettings()" [disabled]="!settingsAreModified">Save</ion-button>
+        </ion-buttons>
     </ion-toolbar>
 </ion-header>
 

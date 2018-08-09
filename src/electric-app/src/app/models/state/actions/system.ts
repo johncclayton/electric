@@ -6,8 +6,8 @@ import {iChargerService} from '../../../services/icharger.service';
 import {UIActions} from './ui';
 import {compareTwoMaps} from '../../../utils/helpers';
 import {ISystem} from '../reducers/system';
-import {forkJoin, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {forkJoin, Observable, throwError} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
 import {CaseFanService} from '../../../services/case-fan.service';
 
 @Injectable({
@@ -81,9 +81,13 @@ export class SystemActions {
 
         return this.chargerService.saveSystem(sysValues)
             .pipe(
-                map((s: System) => {
-                    this.ngRedux.dispatch(this.endFetchAction(s));
+                map(() => {
+                    this.ngRedux.dispatch(this.endFetchAction(sysValues));
                     return systemObject;
+                }),
+                catchError((error) => {
+                    console.error(error);
+                    return throwError(error);
                 })
             );
     }
