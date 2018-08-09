@@ -20,10 +20,10 @@ export class System {
     }
 
     constructor(private system_data: {}) {
-        console.error(`System object created.  Environment: ${environment.ionicEnvName}`);
+        console.debug(`System object created. Data: ${JSON.stringify(this.system_data)}`);
         if (this.has_capabilities) {
             let keys = Object.keys(this.system_data['capabilities']);
-            console.error(`System Capabilities: ${keys.join(",")}`);
+            console.warn(`System Capabilities: ${keys.join(",")}. Env: ${System.environment.ionicEnvName}`);
         }
     }
 

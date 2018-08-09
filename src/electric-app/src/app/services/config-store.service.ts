@@ -1,24 +1,20 @@
 import {Injectable} from '@angular/core';
 import {Storage} from '@ionic/storage';
-import {from, Observable, Subject} from 'rxjs';
+import {from, Observable, ReplaySubject, Subject} from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ConfigStoreService {
-    configurationLoaded: Subject<boolean> = new Subject();
+    configurationLoaded: Subject<any> = new ReplaySubject(1);
 
     constructor(public storage: Storage) {
 
     }
 
-    loadConfiguration(): Observable<any> {
-        return from(this.storage.get('config'));
-    }
-
-    fireLoadedNotification() {
-        this.configurationLoaded.next();
-        this.configurationLoaded.complete();
+    loadConfiguration() {
+        const observable = from(this.storage.get('config'));
+        observable.subscribe(this.configurationLoaded);
     }
 
     saveConfiguration(config): Observable<any> {

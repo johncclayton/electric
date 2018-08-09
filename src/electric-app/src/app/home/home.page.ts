@@ -1,4 +1,4 @@
-import {Component, NgZone} from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {Observable, Subject, timer} from 'rxjs';
 import {Channel} from '../models/channel';
@@ -9,13 +9,14 @@ import {ConfigurationActions} from '../models/state/actions/configuration';
 import {SystemActions} from '../models/state/actions/system';
 import {IAppState} from '../models/state/configure';
 import {take, takeUntil} from 'rxjs/operators';
+import {ConfigStoreService} from '../services/config-store.service';
 
 @Component({
     selector: 'app-home',
     templateUrl: 'home.page.html',
     styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit, OnDestroy {
     @select('ui.exception') exception$: Observable<any>;
     @select() charger$: Observable<Channel>;
     @select() system$: Observable<Channel>;
@@ -25,27 +26,22 @@ export class HomePage {
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
-    ngOnDestroy() {
-        console.warn(`Stopping all subscribers...`);
-        this.ngUnsubscribe.next();
-        this.ngUnsubscribe.complete();
-    }
-
     constructor(
         public readonly chargerService: iChargerService,
         private uiAction: UIActions,
-        private configActions: ConfigurationActions,
+        private config: ConfigStoreService,
         private platform: Platform,
         private zone: NgZone,
         private menuController: MenuController,
         public readonly ngRedux: NgRedux<IAppState>,
-        private systemActions: SystemActions,
     ) {
-
-        let timeout = 2000;
         this.timeoutUp = false;
         this.showConfigureButton = false;
+    }
 
+
+    ngOnInit() {
+        let timeout = 2000;
         timer(timeout)
             .pipe(
                 takeUntil(this.ngUnsubscribe),
@@ -57,37 +53,12 @@ export class HomePage {
             }, null, () => {
                 console.debug(`'timeout and its time to show some stuff' function completed.`);
             });
-
-        // Gotta be a better way than this.
-        // This takes the 2nd notification.
-        // 1st I think is the store initializing.
-        // 2nd is it being loaded.
-        // After THAT it's OK to do stuff.
-        // Pretty messy having to have empty next + error handlers
-        this.zone.runOutsideAngular(() => {
-            this.ngRedux.select('config')
-                .pipe(
-                    takeUntil(this.ngUnsubscribe),
-                    take(2)
-                )
-                .subscribe(undefined, undefined, () => {
-                    console.log('Configuration loaded. Now getting system.');
-                    this._afterConfigurationLoaded();
-                });
-        });
     }
 
-    _afterConfigurationLoaded() {
-        // Wait until configuration is loaded before starting things.
-        this.platform.ready().then(() => {
-            this.systemActions.fetchSystemFromCharger(() => {
-                this.configActions.resetNetworkAtrributes();
-                this.loadFirstPageDoingDebugging();
-            });
-            // this.chargerService.serverReconnection.subscribe(() => {
-            //     this.loadFirstPageDoingDebugging();
-            // });
-        });
+    ngOnDestroy() {
+        console.warn(`Stopping all subscribers...`);
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     // noinspection JSMethodCanBeStatic

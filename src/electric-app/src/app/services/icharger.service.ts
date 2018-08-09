@@ -357,7 +357,7 @@ export class iChargerService {
         let operationURL = this.url.getChargerURL('/system');
         return this.runOutsideAngular(() => {
             return this.http.get(operationURL).pipe(
-                map(resp => resp as System)
+                map(resp => new System(resp))
             );
         });
     }

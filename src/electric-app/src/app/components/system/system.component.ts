@@ -1,12 +1,15 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {IUIState} from '../../models/state/reducers/ui';
 import {ISystem} from '../../models/state/reducers/system';
 import {IChargerCaseFan, System} from '../../models/system';
 
+//import {cloneDeep} from 'lodash';
+
 @Component({
     selector: 'system',
     templateUrl: './system.component.html',
-    styleUrls: ['./system.component.scss']
+    styleUrls: ['./system.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SystemComponent implements OnInit {
     @Input() ui: IUIState;
@@ -22,8 +25,15 @@ export class SystemComponent implements OnInit {
     }
 
     set system(value: ISystem) {
-        this._system = Object.create(value);
-        console.log('*** New system value was provided to the system UI component');
+        this._system = value;
+        console.debug(`*** New system value was provided to the system UI component: ${JSON.stringify(this._system)}`);
+    }
+
+    constructor() {
+    }
+
+    debugStuff() {
+        return JSON.stringify(this.charger.constructor.name);
     }
 
     ngOnInit() {
@@ -39,9 +49,6 @@ export class SystemComponent implements OnInit {
 
     get can_do_case_fan(): boolean {
         return this.system.system.has_case_fan;
-    }
-
-    constructor() {
     }
 
     change(keyName, event) {

@@ -7,10 +7,10 @@ import {ConfigurationActions} from './models/state/actions/configuration';
 import {iChargerService} from './services/icharger.service';
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from './models/state/configure';
-import {takeUntil} from 'rxjs/operators';
 import {Subject} from 'rxjs';
 import {System} from './models/system';
 import {ConfigStoreService} from './services/config-store.service';
+import {SystemActions} from './models/state/actions/system';
 
 @Component({
     selector: 'app-root',
@@ -26,6 +26,8 @@ export class AppComponent {
         private splashScreen: SplashScreen,
         private statusBar: StatusBar,
         private zone: NgZone,
+        private systemActions: SystemActions,
+        private configActions: ConfigurationActions,
         private chargerService: iChargerService,
         private config: ConfigStoreService,
         private ngRedux: NgRedux<IAppState>,
@@ -38,12 +40,9 @@ export class AppComponent {
             this.statusBar.styleDefault();
             this.splashScreen.hide();
 
-            this.config.loadConfiguration()
-                .pipe(
-                    takeUntil(this.ngUnsubscribe)
-                )
+            this.config.configurationLoaded
                 .subscribe(r => {
-                    console.log('Configuration loaded, putting into the store...');
+                    console.log('Configuration loaded...');
                     if (r != null) {
                         if (r.network) {
                             console.log('Clearing network transient state...');
@@ -51,15 +50,20 @@ export class AppComponent {
                             r.network.interfaces = [];
                             r.network.services = [];
                         }
+                        console.debug(`Putting config ${JSON.stringify(r)} into redux store`);
                         this.ngRedux.dispatch({
                             type: ConfigurationActions.SET_FULL_CONFIG,
                             payload: r
                         });
+                        console.log('Pushed config into redux store.');
+                    } else {
+                        console.error(`Config is null? wtf?`);
                     }
                 }, null, () => {
                     console.log(`Configuration loading completed`);
+                    this._afterConfigurationLoaded();
                 });
-
+            this.config.loadConfiguration();
 
             let connectedToCharger = () => {
                 return this.chargerService.isConnectedToCharger();
@@ -86,6 +90,12 @@ export class AppComponent {
         });
     }
 
+    _afterConfigurationLoaded() {
+        // Wait until configuration is loaded before starting things.
+        this.systemActions.fetchSystemFromCharger(() => {
+            this.configActions.resetNetworkAtrributes();
+        });
+    }
 
     get isProduction(): boolean {
         return System.isProduction;

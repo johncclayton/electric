@@ -19,11 +19,23 @@ export class TempRangeComponent implements OnInit {
     @Input() metric: boolean = true;
     @Input() disabled: boolean = false;
     @Input() pin: boolean = true;
-    @Input() value: number = 0; // this is ALWAYS in Celsius
     @Input() min: number = 0;
     @Input() max: number = 10;
 
+    // this is ALWAYS in Celsius
+    private _value: number = 0;
+    @Input()
+    get value() {
+        return this._value;
+    }
+
+    set value(newVal: number) {
+        console.warn(`Set new value for ${this.label} to ${newVal}`)
+        this._value = newVal;
+    }
+
     @Output() valueChange: EventEmitter<any> = new EventEmitter();
+
 
     get displayableValue(): number {
         return this.toDisplayValue(this.value);
@@ -39,10 +51,10 @@ export class TempRangeComponent implements OnInit {
     }
 
     emitChangedCelsiusValue(event) {
-        this.displayableValue = event.value;
+        // this.displayableValue = event.value;
         // We ALWAYS emit celsius values.
         // event.value = this.value;
-        this.valueChange.emit(this.value);
+        this.valueChange.emit(event);
     }
 
     // noinspection JSMethodCanBeStatic

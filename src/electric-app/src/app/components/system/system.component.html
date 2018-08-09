@@ -3,7 +3,7 @@
     <ion-item>
         <ion-label>Temperature shown in celsius</ion-label>
         <ion-toggle [disabled]="ui.disconnected"
-                    [(value)]="charger.isCelsius"></ion-toggle>
+                    [(ngModel)]="charger.isCelsius"></ion-toggle>
     </ion-item>
 
 

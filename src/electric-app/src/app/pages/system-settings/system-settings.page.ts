@@ -25,14 +25,6 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
     originalUnmodified: ISystem;
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
-    ngOnInit() {
-    }
-
-    ngOnDestroy() {
-        this.ngUnsubscribe.next();
-        this.ngUnsubscribe.complete();
-    }
-
     constructor(
         public actions: SystemActions,
         private uiActions: UIActions,
@@ -41,6 +33,27 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
         private localNotifications: LocalNotifications,
         private alertController: AlertController,
         private ngRedux: NgRedux<IAppState>) {
+    }
+
+    ngOnInit() {
+        console.debug(`Listening for system changes...`);
+        this.system$
+            .pipe(
+                takeUntil(this.ngUnsubscribe)
+            ).subscribe((v: ISystem) => {
+            if (v.fetching == true) {
+            }
+            if (v.fetching == false) {
+                console.log(`New system object, I've made a clone...`);
+                // This'll make a deep clone
+                this.originalUnmodified = cloneDeep(v);
+            }
+        });
+    }
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     async presentSaveAlert() {
@@ -92,23 +105,6 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
         if (this.settingsAreModified) {
             return this.changeAlert(this.ngRedux.getState().system);
         }
-    }
-
-    ionViewDidLoad() {
-        this.system$
-            .pipe(
-                takeUntil(this.ngUnsubscribe)
-            ).subscribe((v: ISystem) => {
-            if (v.fetching == true) {
-            }
-            if (v.fetching == false) {
-                console.log('I\'ve made a clone...');
-
-                // This'll make a deep clone
-                this.originalUnmodified = cloneDeep(v);
-            }
-        });
-        this.actions.fetchSystemFromCharger();
     }
 
     private async changeAlert(system: ISystem) {

@@ -2,12 +2,12 @@
     <ion-label text-center>{{label}} | {{displayableValue}}{{unitsOfMeasure}}</ion-label>
 </ion-item>
 <ion-item>
-    <ion-range [(value)]="displayableValue"
+    <ion-range [ngModel]="displayableValue"
                pin={{pin}}
                disabled="{{disabled}}"
                min="{{min_val}}"
                max="{{max_val}}"
-               (ionChange)="emitChangedCelsiusValue($event)">
+               (ngModelChange)="emitChangedCelsiusValue($event)">
         <ion-label class="label" slot="start" padding-end>{{min_val}}{{unitsOfMeasure}}</ion-label>
         <ion-label class="label" slot="end" text-right margin-start margin-vertical>{{max_val}}{{unitsOfMeasure}}</ion-label>
     </ion-range>
