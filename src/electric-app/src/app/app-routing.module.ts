@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
+import {CanDeactivateGuardService} from './services/can-deactivate-guard.service';
 
 const routes: Routes = [
     {path: '', redirectTo: 'home', pathMatch: 'full'},
@@ -10,11 +11,13 @@ const routes: Routes = [
     {path: 'NetworkWizard', loadChildren: './pages/network-wizard/network-wizard.module#NetworkWizardPageModule'},
     {path: 'SystemSettings', loadChildren: './pages/system-settings/system-settings.module#SystemSettingsPageModule'},
     {path: 'PresetList', loadChildren: './pages/preset-list/preset-list.module#PresetListPageModule'},
+    {path: 'Preset', canDeactivate: [CanDeactivateGuardService], loadChildren: './pages/preset/preset.module#PresetPageModule'},
 ];
 
 @NgModule({
     imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule]
+    exports: [RouterModule],
+    providers: [CanDeactivateGuardService]
 })
 export class AppRoutingModule {
 }

@@ -7,6 +7,11 @@ export class DataBagService {
     theData: Map<any, any>;
 
     constructor() {
+        this.clear();
+    }
+
+    clear() {
+        this.theData = new Map<any, any>();
     }
 
     set(key, value) {

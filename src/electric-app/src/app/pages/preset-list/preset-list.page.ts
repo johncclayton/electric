@@ -3,7 +3,7 @@ import {ChemistryType, Preset} from '../../models/preset-class';
 import {List, NavController, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
 import {iChargerService} from '../../services/icharger.service';
-import {takeUntil} from 'rxjs/operators';
+import {retry, takeUntil} from 'rxjs/operators';
 import {DataBagService} from '../../services/data-bag.service';
 import {applyMixins} from 'rxjs/internal-compatibility';
 import {Chemistry} from '../../utils/mixins';
@@ -37,9 +37,9 @@ export class PresetListPage implements OnInit, OnDestroy {
     }
 
     refreshPresets(refresher) {
-        this.chargerService.getPresets()
+        this.chargerService.getPresets(5)
             .pipe(
-                takeUntil(this.ngUnsubscribe)
+                takeUntil(this.ngUnsubscribe),
             ).subscribe(presetsList => {
             this.presets = presetsList;
             this.firstLoad = false;

@@ -1,0 +1,90 @@
+<ion-header>
+
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Edit {{preset?.name}}</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="savePreset()">Save</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content *ngIf="preset">
+    <ion-refresher (ionRefresh)="refreshPreset($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-spinner *ngIf="saving"></ion-spinner>
+    <ion-list>
+        <ion-list-header color="light">Settings</ion-list-header>
+        <ion-item>
+            <ion-label>Name</ion-label>
+            <ion-input text-right [(ngModel)]="preset.name" [disabled]="isDisabled() || isReadOnly()" no-right-padding></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Type</ion-label>
+            <ion-select [(ngModel)]="presetType" [disabled]="isDisabled() || isReadOnly()">
+                <ion-select-option [value]="opt.value" *ngFor="let opt of typeChoices()">{{opt.text}}
+                </ion-select-option>
+            </ion-select>
+
+        </ion-item>
+        <ion-item *ngIf="showCells()">
+            <ion-label>Cells</ion-label>
+            <ion-select [(ngModel)]="preset.cells" [disabled]="isDisabled()">
+                <ion-select-option
+                        [selected]="opt.value === preset.cells"
+                        [value]="opt.value"
+                        *ngFor="let opt of cellChoices()">{{opt.text}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Charge Current</ion-label>
+            <ion-select [(ngModel)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'" [interfaceOptions]="ourAlertOptions">
+                <ion-select-option
+                        *ngFor="let opt of currentChoices()"
+                        [value]="opt.value"
+                        [selected]="opt.value === preset.charge_current"
+                >
+                    {{opt.text}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Capacity</ion-label>
+            <ion-input text-right placeholder="Ignored" [(ngModel)]="preset.capacity" [disabled]="isDisabled()" type="number"
+                       no-right-padding></ion-input>
+        </ion-item>
+    </ion-list>
+
+    <ion-list>
+        <ion-list-header color="light">Task Options</ion-list-header>
+        <ion-item detail="true" *ngFor="let page of optionPagesForCurrentType()" [href]="page.url">
+            {{page.title}}
+        </ion-item>
+    </ion-list>
+
+    <ion-list>
+        <ion-list-header>Options</ion-list-header>
+        <ion-item>
+            <ion-label>Synchronous Mode</ion-label>
+            <ion-toggle [(ngModel)]="preset.channel_mode" [disabled]="isDisabled()"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Log to SD card</ion-label>
+            <ion-toggle [(ngModel)]="preset.save_to_sd" [disabled]="isDisabled()"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Run counter</ion-label>
+            <ion-input text-right [(ngModel)]="preset.run_counter" [disabled]="isDisabled()" no-right-padding></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Log interval (sec)</ion-label>
+            <ion-input text-right [(ngModel)]="preset.log_interval_sec" [disabled]="isDisabled()" no-right-padding></ion-input>
+        </ion-item>
+    </ion-list>
+</ion-content>

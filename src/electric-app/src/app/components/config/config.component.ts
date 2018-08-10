@@ -51,7 +51,7 @@ export class ConfigComponent implements OnInit, AfterContentInit {
                 choices.push({'value': i, 'text': i.toString() + ''});
             }
         }
-        console.error(`Making ${choices.length} choices`);
+        // console.error(`Making ${choices.length} choices`);
         this.choices = choices;
     }
 
@@ -84,7 +84,6 @@ export class ConfigComponent implements OnInit, AfterContentInit {
         if (this.config === undefined || this.charger === undefined) {
             return [];
         }
-
         return this.choices;
     }
 

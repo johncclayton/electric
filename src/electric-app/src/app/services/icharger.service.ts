@@ -164,7 +164,7 @@ export class iChargerService {
         return this.getCharger().channel_count;
     }
 
-    getPresets(): Observable<any> {
+    getPresets(retryTimes = 1): Observable<any> {
         let url = this.url.getChargerURL('/preset');
         return this.runOutsideAngular(() => {
             return this.http.get(url).pipe(
@@ -175,7 +175,7 @@ export class iChargerService {
                         presetList.push(new Preset(presetDict));
                     }
                     return presetList;
-                }));
+                }), retry(retryTimes));
         });
     }
 
@@ -229,8 +229,8 @@ export class iChargerService {
         }
         if (deviceId) {
             let md = ChargerMetadata[deviceId];
-            if (md) {
-                if (md[propertyName]) {
+            if (md !== undefined) {
+                if (md[propertyName] !== undefined) {
                     return md[propertyName];
                 }
             }
