@@ -43,11 +43,11 @@
         <div *ngSwitchCase="0" padding>
             <ion-spinner></ion-spinner>
         </div>
-        <div *ngSwitchCase="1" id="master" (tap)="showChargerActions()">
+        <div *ngSwitchCase="1" id="master" (click)="showChargerActions()">
             <channel-volts [channel]="channel"></channel-volts>
         </div>
         <div *ngSwitchCase="2">
-            <channel-ir [channel]="channel" (tap)="returnToShowingCellVolts($event)"></channel-ir>
+            <channel-ir [channel]="channel" (click)="returnToShowingCellVolts($event)"></channel-ir>
         </div>
     </div>
 

@@ -71,7 +71,7 @@ export class AppComponent {
 
             this.pages = [
                 {
-                    title: 'Presets', url: '/PresetListPage', visible: connectedToCharger,
+                    title: 'Presets', url: 'PresetList', visible: connectedToCharger,
                 },
                 {
                     title: 'iCharger Settings', url: 'SystemSettings', visible: connectedToCharger
@@ -82,7 +82,7 @@ export class AppComponent {
                     }
                 },
                 {
-                    title: 'Network Settings', url: '/NetworkConfig', visible: () => {
+                    title: 'Network Settings', url: 'NetworkConfig', visible: () => {
                         return true;
                     }
                 },

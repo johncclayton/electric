@@ -1,0 +1,35 @@
+<ion-header>
+
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Presets</ion-title>
+        <ion-buttons slot="end">
+            <ion-button slot="icon-only" (click)="addPreset()">
+                <ion-icon name="add"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content class="presets">
+    <ion-refresher (ionRefresh)="refreshPresets($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-spinner *ngIf="firstLoad"></ion-spinner>
+
+    <ion-list>
+        <ion-item *ngFor="let preset of presets" (tap)="editPreset(preset)">
+            <div class="item-left">{{preset.name}}</div>
+            <!--<div class="item-left">{{preset.name}}</div>-->
+            <div slot="end">
+                <div class="mini-badge {{chemistryClass(preset)}}" *ngFor="let tag of tagsForPreset(preset)">{{tag}}
+                </div>
+            </div>
+        </ion-item>
+    </ion-list>
+</ion-content>
+

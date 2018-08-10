@@ -1,0 +1,46 @@
+
+.mini-badge {
+  font-size: 0.7em;
+  color: white;
+  border-radius: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  background: var(--chemisty-color-other);
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.chemistry-LiPo {
+  background: var(--chemisty-color-lipo);
+}
+
+.chemistry-LiFe {
+  background: var(--chemisty-color-life);
+}
+
+.chemistry-LiLo {
+  background: var(--chemisty-color-lilo);
+}
+
+.chemistry-NiMH {
+  background: var(--chemisty-color-nimh);
+}
+
+.chemistry-Nicd {
+  background: var(--chemisty-color-nicd);
+}
+
+.chemistry-NiZn {
+  background: var(--chemisty-color-nicd);
+}
+
+.chemistry-Pb {
+  background: var(--chemisty-color-pb);
+}
+
+[no-right-padding] {
+  padding-right: 0 !important;
+  text-align: right;
+}

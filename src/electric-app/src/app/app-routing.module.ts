@@ -9,6 +9,7 @@ const routes: Routes = [
     {path: 'NetworkConfig', loadChildren: './pages/network-config/network-config.module#NetworkConfigPageModule'},
     {path: 'NetworkWizard', loadChildren: './pages/network-wizard/network-wizard.module#NetworkWizardPageModule'},
     {path: 'SystemSettings', loadChildren: './pages/system-settings/system-settings.module#SystemSettingsPageModule'},
+    {path: 'PresetList', loadChildren: './pages/preset-list/preset-list.module#PresetListPageModule'},
 ];
 
 @NgModule({

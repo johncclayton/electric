@@ -9,7 +9,7 @@
       <ion-label position="stacked">IP Address of Pi (on home wifi)</ion-label>
       <ion-input type="text" [ngModel]="config.ipAddress"
                  (ngModelChange)="change('ipAddress', $event)"></ion-input>
-      <ion-button slot="end" fill="outline" (tap)="autoDetect()" color="secondary" *ngIf="showAutoButton"
+      <ion-button slot="end" fill="outline" (click)="autoDetect()" color="secondary" *ngIf="showAutoButton"
               [class.button-disabled]="config.network.discoveredServers?.length == 0">
         <ion-icon slot="start" name="radio-outline"></ion-icon>
         Auto Detect

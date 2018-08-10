@@ -1,20 +1,8 @@
 // Ionic Variables and Theming. For more info, please see:
 // http://ionicframework.com/docs/theming/
 
-$chemistry: (
-        LiPo:ion-color(primary, base),
-        LiFe:ion-color(secondary, base),
-        LiLo:orange,
-        NiCd:#0aa,
-        NiMH:#f60,
-        NiZH:#a00,
-        Pb:#555,
-        'default':#bbb,
-);
-
 /** Ionic CSS Variables **/
 :root {
-
   /** primary **/
   --ion-color-primary: #488aff;
   --ion-color-primary-rgb: 72, 138, 255;
@@ -86,6 +74,15 @@ $chemistry: (
   --ion-color-dark-contrast-rgb: 255, 255, 255;
   --ion-color-dark-shade: #1e1e1e;
   --ion-color-dark-tint: #383838;
+
+
+  --chemisty-color-lipo: var(--ion-color-primary);
+  --chemisty-color-life: var(--ion-color-secondary);
+  --chemisty-color-lilo: orange;
+  --chemisty-color-nicd: #0aa;
+  --chemisty-color-nimh: #f60;
+  --chemisty-color-pb: #555;
+  --chemisty-color-other: #bbb;
 }
 
 
