@@ -37,25 +37,25 @@ export class SystemActions {
 
         let chargerService = this.chargerService;
         if (chargerService) {
-            let system_request = chargerService.getSystem();
-            let case_request = this.caseFan.getCaseFan();
+                let system_request = chargerService.getSystem();
+                let case_request = this.caseFan.getCaseFan();
 
-            forkJoin(
-                system_request,
-                case_request
-            ).subscribe(v => {
-                // We get a LIST of responses.
-                // The case_fan response is dispatched to redux by the getCaseFan call.
-                let system_object = v[0] as System;
-                let case_fan_info = v[1];
-                this.updateCaseFan(case_fan_info);
-                this.ngRedux.dispatch(this.endFetchAction(system_object));
-                if (callback) {
-                    callback();
-                }
-            }, (error) => {
-                this.uiActions.setErrorMessage(error);
-            });
+                forkJoin(
+                    system_request,
+                    case_request
+                ).subscribe(v => {
+                    // We get a LIST of responses.
+                    // The case_fan response is dispatched to redux by the getCaseFan call.
+                    let system_object = v[0] as System;
+                    let case_fan_info = v[1];
+                    this.updateCaseFan(case_fan_info);
+                    this.ngRedux.dispatch(this.endFetchAction(system_object));
+                    if (callback) {
+                        callback();
+                    }
+                }, (error) => {
+                    this.uiActions.setErrorMessage(error);
+                });
         }
     }
 

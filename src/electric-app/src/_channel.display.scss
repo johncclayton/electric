@@ -1,0 +1,257 @@
+@import "~@ionic/angular/dist/themes/ionic.globals.scss";
+@import "./include-media";
+
+channel {
+  // Container for all cells
+  position: relative;
+  display: block;
+
+  padding-left: var(--ion-content-padding, 16px);
+  padding-right: var(--ion-content-padding, 16px);
+
+  // Puts some space between the channel#/time row, and the cell readout
+  #heading {
+    padding-bottom: 0px;
+
+    // More gap between the channel heading and its number
+    #title {
+      padding-left: 10px;
+    }
+
+    .userInitiated {
+      .operation {
+        margin-bottom: 2px;
+      }
+
+      .action {
+        font-size: 1.5rem;
+        font-weight: normal;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .channelNumber {
+    $size: 35px;
+    position: relative;
+    top: 3px;
+
+    width: $size !important;
+    height: $size !important;
+    flex: 0 0 $size;
+
+    padding: 0;
+    font-size: 1.5rem;
+    margin: auto;
+    border-radius: 50%;
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
+    text-align: center;
+  }
+
+  .actionError {
+    border-color: var(--ion-color-danger) !important;
+    color: var(--ion-color-danger) !important;
+  }
+
+  // The channel number sits off on the edge of the cell
+  .channelnum {
+    background: var(--ion-color-primary);
+    color: white;
+    z-index: 1;
+    float: left;
+
+    padding-right: 4px;
+    padding-left: 3px;
+  }
+
+  .ir .channelnum {
+    background: var(--ion-color-warning);
+  }
+
+  channel-ir {
+    background: red;
+  }
+
+  .cells {
+    // *slightly* smaller vaules INSIDE each cell
+    font-size: .9em;
+
+    // Pad the right sides of every cell but the last in the column
+    .cell:nth-last-child(n+2) {
+      margin-right: 3px;
+    }
+
+    .cell {
+      border-radius: 4px;
+      border-color: gray;
+      border-style: solid;
+      border-width: 1px;
+    }
+  }
+
+  // Pad out the balance/ir rows a little, except the last one, don'd pad that
+  ion-row.cells:nth-last-child(n+2) {
+    padding-bottom: 5px;
+  }
+
+  .label {
+    font-size: 0.9em;
+  }
+  .summary {
+    :last-child {
+      text-align: right;
+    }
+  }
+
+  .unused {
+    opacity: 0.25;
+  }
+  .empty {
+    opacity: 0.0;
+  }
+
+  $balance-width: 2px;
+  $balance-right-margin: 2px;
+  $balance-height: 13px;
+  $balance-baseline: 3px;
+  $padding-top: 8px;
+
+  $balance-off-color: lightgrey;
+  $balance-offset: $balance-width + 1;
+
+  @mixin cellsMixin() {
+    .cells-container {
+      z-index: 1;
+      margin-right: $balance-right-margin;
+      position: relative;
+      display: block;
+
+      .balance {
+        border-radius: 5px;
+        position: absolute;
+        width: $balance-width;
+        top: -($balance-height + $balance-baseline);
+        margin-top: 22px; // no idea why we need this
+        margin-right: 5px;
+
+        @include transform-origin(right top);
+        @include transform(scale(-1), translateY(-$balance-height));
+      }
+      .b1 {
+        right: ($balance-width / 2.0) + $balance-offset * 4;
+        height: ($balance-height * 0.2);
+        background: mix(red, yellow, 8%);
+      }
+      .b2 {
+        right: ($balance-width / 2.0) + $balance-offset * 3;
+        height: ($balance-height * 0.4);
+        background: mix(red, yellow, 25%);
+      }
+      .b3 {
+        right: ($balance-width / 2.0) + $balance-offset * 2;
+        height: ($balance-height * 0.6);
+        background: mix(red, yellow, 50%);
+      }
+      .b4 {
+        right: ($balance-width / 2.0) + $balance-offset;
+        height: ($balance-height * 0.8);
+        background: mix(red, yellow, 75%);
+      }
+      .b5 {
+        right: ($balance-width / 2.0);
+        height: $balance-height;
+        background: mix(red, yellow, 100%);
+      }
+      .off {
+        background: $balance-off-color !important;
+      }
+    }
+  }
+
+  @include cellsMixin();
+
+  @include media(">=widephone") {
+    $balance-width: 3px;
+    $balance-height: 14px;
+    $balance-baseline: 1px;
+    $balance-offset: $balance-width + 1;
+
+    @include cellsMixin();
+
+    font-size: 0.8em;
+    // Force a little more spacing where we have it
+    ion-grid {
+      padding-top: $padding-top * 2 !important;
+    }
+
+    .cells {
+      // Pad the right sides of every cell but the last in the column
+      .cell:nth-last-child(n+2) {
+        margin-right: 6px;
+      }
+    }
+    // Pad out the rows a little more
+    ion-row.cells:nth-last-child(n+2) {
+      padding-bottom: 6px;
+    }
+  }
+
+  @include media(">=tablet") {
+    $balance-width: 6px;
+    $balance-height: 22px;
+    $balance-baseline: -7px;
+    $balance-offset: $balance-width + 2;
+    $balance-right-margin: 3px;
+
+    @include cellsMixin();
+
+    channel {
+      ion-grid {
+        padding-top: $padding-top * 4 !important;
+      }
+
+      .channelNumber {
+        $size: 60px;
+        border-width: 3px;
+
+        height: $size !important;
+        width: $size !important;
+        flex: 0 0 $size;
+
+        font-size: 3.6rem;
+      }
+    }
+  }
+}
+
+// Per channel colouring
+// Don't know why it starts at 2... weird.
+channel:nth-child(2) .channelColor {
+  color: var(--ion-color-primary-tint);
+}
+
+channel:nth-child(3) .channelColor {
+  color: var(--ion-color-success-tint);
+}
+
+channel:nth-child(2) .channelNumber {
+  border-color: var(--ion-color-primary-tint);
+}
+
+channel:nth-child(3) .channelNumber {
+  border-color: var(--ion-color-success-tint);
+}
+
+channel:nth-child(2) .channelColorInverted {
+  background-color: var(--ion-color-primary-tint) !important;
+  color: white !important;
+}
+
+channel:nth-child(3) .channelColorInverted {
+  background-color: var(--ion-color-success-tint) !important;
+  color: white !important;
+}
+
