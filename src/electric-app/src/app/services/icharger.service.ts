@@ -1,5 +1,5 @@
-import {EventEmitter, Injectable, NgZone} from '@angular/core';
-import {interval, Observable, of, pipe, range, Subject, throwError, timer} from 'rxjs';
+import {ApplicationRef, EventEmitter, Injectable, NgZone} from '@angular/core';
+import {interval, Observable, of, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';
 import {System} from '../models/system';
@@ -12,22 +12,7 @@ import {IChargerState} from '../models/state/reducers/charger';
 import {ConfigurationActions} from '../models/state/actions/configuration';
 import {ElectricNetworkService} from './network.service';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {
-    catchError,
-    delay,
-    filter,
-    flatMap,
-    map,
-    mergeMap,
-    repeatWhen,
-    retry,
-    retryWhen,
-    take,
-    takeUntil,
-    takeWhile,
-    tap,
-    zip
-} from 'rxjs/operators';
+import {catchError, delay, filter, flatMap, map, repeatWhen, retry, retryWhen, take, takeUntil, takeWhile, tap} from 'rxjs/operators';
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {URLService} from './url.service';
@@ -38,17 +23,6 @@ export enum ChargerType {
     iCharger308Duo = 66,
     iCharger406Duo = 67 // ??? probably not. We need to get the model number.
 }
-
-const backoff = (maxTries, ms) => {
-    return pipe(
-        retryWhen(attempts => range(1, maxTries)
-            .pipe(
-                zip(attempts, (i) => i),
-                map(i => i * i),
-                mergeMap(i => timer(i * ms))
-            ))
-    );
-};
 
 export let ChargerMetadata = {};
 ChargerMetadata[ChargerType.iCharger308Duo] = {
@@ -108,7 +82,7 @@ export class iChargerService {
                        private configActions: ConfigurationActions,
                        private localNotifications: LocalNotifications,) {
 
-        this.logger = this.loggerSvc.create({level:NgxLoggerLevel.INFO});
+        this.logger = this.loggerSvc.create({level: NgxLoggerLevel.INFO});
         this.haveReceivedSomeResponse = true;
         this.lastUsedIPAddressIndex = 0;
 
@@ -150,18 +124,17 @@ export class iChargerService {
                             numberErrors++;
                             if (v['name'] != 'TimeoutError') {
                                 if (numberErrors % 10 == 0) {
-                                    this.logger.error(`Error (retry) while polling for charger state: ${JSON.stringify(v)}...`);
+                                    this.logger.error(`Error (retry/${numberErrors}) while polling for charger state: ${JSON.stringify(v)}...`);
                                 }
                                 // Always set disconnected state if its not a timeout
                                 this.uiActions.setDisconnected();
                             } else {
-                                console.warn(`Timeout while getting status... will retry...`);
                                 if (numberErrors > 1) {
                                     // this will begin round robin
-                                    this.logger.warn(`# of disconnected: ${numberErrors} ... showing error`);
+                                    this.logger.warn(`Timeout: # of disconnected: ${numberErrors} ... setting disconnected flag`);
                                     this.uiActions.setDisconnected();
                                 } else {
-                                    this.logger.info(`# of disconnected: ${numberErrors} ... won't raise warn yet`);
+                                    this.logger.info(`Timeout: # of disconnected: ${numberErrors} ... won't raise warn yet`);
                                 }
                             }
                         }),
@@ -678,7 +651,6 @@ export class iChargerService {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
             this.logger.debug(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
-            this.uiActions.setDisconnected();
         }
     }
 }

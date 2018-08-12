@@ -24,7 +24,6 @@ export const
             return defaultUIState;
         }
 
-        let nextErrorCount = state.disconnectionErrorCount + 1;
 
         switch (action.type) {
             case UIActions.SET_CONFIG_NETWORK:
@@ -41,6 +40,7 @@ export const
                 };
 
             case UIActions.SERVER_DISCONNECTED:
+                let nextErrorCount = state.disconnectionErrorCount + 1;
                 return {
                     ...defaultUIState,
                     disconnected: true,

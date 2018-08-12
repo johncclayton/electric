@@ -11,6 +11,7 @@ import {Subject} from 'rxjs';
 import {System} from './models/system';
 import {ConfigStoreService} from './services/config-store.service';
 import {SystemActions} from './models/state/actions/system';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 @Component({
     selector: 'app-root',
@@ -20,19 +21,23 @@ export class AppComponent {
     pages: Array<{ title: string, url: string, visible: any }>;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private logger: NGXLogger;
 
     constructor(
         private platform: Platform,
         private splashScreen: SplashScreen,
         private statusBar: StatusBar,
         private zone: NgZone,
+        private logSvc: CustomNGXLoggerService,
         private systemActions: SystemActions,
         private configActions: ConfigurationActions,
         private chargerService: iChargerService,
         private config: ConfigStoreService,
         private ngRedux: NgRedux<IAppState>,
     ) {
+        this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
         this.initializeApp();
+
     }
 
     initializeApp() {
@@ -42,25 +47,25 @@ export class AppComponent {
 
             this.config.configurationLoaded
                 .subscribe(r => {
-                    console.log('Configuration loaded...');
+                    this.logger.info('Configuration loaded, setting up app...');
                     if (r != null) {
                         if (r.network) {
-                            console.log('Clearing network transient state...');
+                            this.logger.debug('Clearing network transient state...');
                             r.network.discoveredServers = [];
                             r.network.interfaces = [];
                             r.network.services = [];
                         }
-                        console.debug(`Putting config ${JSON.stringify(r)} into redux store`);
+                        this.logger.debug(`Putting config ${JSON.stringify(r)} into redux store`);
                         this.ngRedux.dispatch({
                             type: ConfigurationActions.SET_FULL_CONFIG,
                             payload: r
                         });
-                        console.log('Pushed config into redux store.');
+                        this.logger.debug('Pushed config into redux store.');
                     } else {
-                        console.error(`Config is null? wtf?`);
+                        this.logger.error(`Config is null? wtf?`);
                     }
                 }, null, () => {
-                    console.log(`Configuration loading completed`);
+                    this.logger.info(`Configuration loading completed`);
                     this._afterConfigurationLoaded();
                 });
             this.config.loadConfiguration();

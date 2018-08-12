@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterContentInit, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from '../../models/state/configure';
 import {Subject} from 'rxjs';
@@ -11,7 +11,7 @@ import {takeUntil} from 'rxjs/operators';
     templateUrl: './connection-state.component.html',
     styleUrls: ['./connection-state.component.scss']
 })
-export class ConnectionStateComponent implements OnInit, OnDestroy {
+export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDestroy {
     message: string;
     isShowing: boolean = false;
     showCloseButton: boolean = false;
@@ -21,8 +21,14 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public platform: Platform,
+                public changeDetector: ChangeDetectorRef,
                 public ngRedux: NgRedux<IAppState>) {
+    }
 
+    ngOnInit() {
+    }
+
+    ngAfterContentInit() {
         // Listen for changes to the exception, and do something with the UI
         this.ngRedux.select(['ui', 'exception'])
             .pipe(
@@ -50,9 +56,6 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
             });
     }
 
-    ngOnInit() {
-    }
-
     ngOnDestroy() {
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
@@ -66,6 +69,8 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
         if (this.isShowing) {
             // Code is calling this to dismiss the current alert programmatically.
             this.isShowing = false;
+            this.message = "";
+            this.showCloseButton = false;
         }
     }
 
@@ -92,6 +97,7 @@ export class ConnectionStateComponent implements OnInit, OnDestroy {
     createNewAlert(message: string, allowCreation: boolean) {
         this.showCloseButton = false;
         this.message = message;
+        this.changeDetector.detectChanges();
 
         if (!this.isShowing && allowCreation) {
             this.showCloseButton = true;
