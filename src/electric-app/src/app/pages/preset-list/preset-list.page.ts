@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
-import {List, NavController, Refresher, Spinner, ToastController} from '@ionic/angular';
+import {List, NavController, Refresher, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
 import {iChargerService} from '../../services/icharger.service';
 import {takeUntil} from 'rxjs/operators';
@@ -52,7 +52,7 @@ export class PresetListPage implements OnInit, OnDestroy {
                 /*
                  * Was used during testing, to move to a known preset and edit it.
                  */
-                let debugPresets = true;
+                let debugPresets = false;
                 if (debugPresets) {
                     if (this.presets.length) {
                         let old_preset = this.presets[9];
