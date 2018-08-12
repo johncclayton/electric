@@ -63,7 +63,7 @@
 
     <ion-list>
         <ion-list-header color="light">Task Options</ion-list-header>
-        <ion-item detail="true" *ngFor="let page of optionPagesForCurrentType()" [href]="page.url">
+        <ion-item detail="true" *ngFor="let page of optionPagesForCurrentType" [href]="page.url">
             {{page.title}}
         </ion-item>
     </ion-list>

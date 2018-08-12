@@ -1,9 +1,38 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>PresetCycle</ion-title>
-  </ion-toolbar>
+
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="Preset"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Cycle Options</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="savePreset()">Save</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+
 </ion-header>
 
-<ion-content padding>
 
+<ion-content *ngIf="preset">
+    <ion-list>
+        <ion-list-header color="light">Cycle Options</ion-list-header>
+        <ion-item>
+            <ion-label>Mode</ion-label>
+            <ion-select [(ngModel)]="preset.cycle_mode">
+                <ion-select-option [value]="opt.value" *ngFor="let opt of cycleModeOptions()">{{opt.text}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Count</ion-label>
+            <ion-select [(ngModel)]="preset.cycle_count">
+                <ion-select-option value="opt.value" *ngFor="let opt of cycleCountOptions()">{{opt.text}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Delay Time</ion-label>
+            <ion-input text-right type="number" no-right-padding [min]="0.00" [max]="1000"></ion-input>
+        </ion-item>
+    </ion-list>
 </ion-content>

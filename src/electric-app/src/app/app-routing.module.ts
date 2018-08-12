@@ -15,7 +15,6 @@ const routes: Routes = [
     {path: 'PresetCharge', loadChildren: './pages/preset-charge/preset-charge.module#PresetChargePageModule'},
     {path: 'PresetDischarge', loadChildren: './pages/preset-discharge/preset-discharge.module#PresetDischargePageModule'},
     {path: 'PresetStorage', loadChildren: './pages/preset-storage/preset-storage.module#PresetStoragePageModule'},
-    {path: 'PresetBalance', loadChildren: './pages/preset-balance/preset-balance.module#PresetBalancePageModule'},
     {path: 'PresetCycle', loadChildren: './pages/preset-cycle/preset-cycle.module#PresetCyclePageModule'},
 ];
 

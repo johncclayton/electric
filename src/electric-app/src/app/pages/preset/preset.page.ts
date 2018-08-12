@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {Observable, Subject} from 'rxjs';
 import {AlertController, NavController} from '@ionic/angular';
@@ -18,15 +18,15 @@ export interface SavePresetInterface {
     styleUrls: ['./preset.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PresetPage implements OnInit, ICanDeactivate {
+export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
     preset: Preset;
     unmodifiedpreset: Preset;
     confirmedExit: boolean = false;
     saving: boolean = false;
-    optionsPages;
 
     private __currentChoices;
     private __cellChoices;
+    private __optionsPages;
 
     private callback: (preset: Preset) => void;
 
@@ -39,14 +39,13 @@ export class PresetPage implements OnInit, ICanDeactivate {
 
     constructor(public navCtrl: NavController,
                 public alertController: AlertController,
+                public appRef: ApplicationRef,
                 public chargerService: iChargerService,
                 public dataBag: DataBagService) {
-
 
         const navParams = this.dataBag.get('preset');
         if (navParams === undefined) {
             this.navCtrl.goBack('PresetList');
-            return;
         } else {
             if (navParams['preset'] === undefined) {
                 this.navCtrl.goBack('PresetList');
@@ -55,39 +54,72 @@ export class PresetPage implements OnInit, ICanDeactivate {
             this.callback = navParams['callback'];
             this.preset = _.cloneDeep(navParams['preset']);
             this.unmodifiedpreset = _.cloneDeep(this.preset);
+
+            if (this.preset === undefined || this.preset === null) {
+                this.navCtrl.goBack('PresetList');
+                return;
+            }
         }
     }
 
     ngOnInit() {
+        this.confirmedExit = false;
 
+        this.__cellChoices = [];
+        this.__cellChoices.push({'value': 0, 'text': 'Auto'});
+        for (let i = 0; i < this.chargerService.getNumberOfChannels(); i++) {
+            this.__cellChoices.push({'value': i + 1, 'text': (i + 1).toString()});
+        }
+
+        this.__currentChoices = [{value: 0.25, text: '0.25A'}, {value: 0.5, text: '0.5A'}];
+        let maxChargeChoice = _.clamp(iChargerService.getMaxAmpsPerChannel() * 10, 10, 400);
+        for (let i = 10; i <= maxChargeChoice; i += 5) {
+            let real = i / 10;
+            this.__currentChoices.push({'value': real, 'text': (real).toString() + 'A'});
+        }
         // This was used for testing, to quickly get to a page I was working on
         // this.switchTo(PresetChargePage);
         // this.switchTo(PresetDischargePage);
         // this.switchTo(PresetStoragePage);
         // this.switchTo(PresetCyclePage);
 
-        this.confirmedExit = false;
+        if (this.preset) {
+            console.info(`Selected preset: ${JSON.stringify(this.preset)}`);
+        }
     }
 
-    optionPagesForCurrentType() {
-        if (this.optionsPages == null) {
-            this.optionsPages = [
-                {title: 'Charging', url: 'PresetCharge'},
-                {title: 'Discharging', url: 'PresetDischarge'},
-                {title: 'Cycle', url: 'PresetCycle'},
+    ngAfterContentInit() {
+    }
 
-                // Don't see options in the charger, so dunno what to do here
-                // {title: 'Balancing', component: PresetBalancePage},
-            ];
-
-            if (this.preset.type == ChemistryType.LiPo ||
-                this.preset.type == ChemistryType.LiFe) {
-                this.optionsPages.push(
-                    {title: 'Storage', url: 'PresetStorage'}
-                );
-            }
+    private derivePresetPages() {
+        if (this.preset === undefined) {
+            this.__optionsPages = [];
+            console.warn(`Preset is undefined. Odd. So... no options for you!`);
+            return;
         }
-        return this.optionsPages;
+        console.log(`Deriving preset options for type: ${this.preset.type}`);
+        this.__optionsPages = [
+            {title: 'Charging', url: 'PresetCharge'},
+            {title: 'Discharging', url: 'PresetDischarge'},
+            {title: 'Cycle', url: 'PresetCycle'},
+
+            // Don't see options in the charger, so dunno what to do here
+            // {title: 'Balancing', component: PresetBalancePage},
+        ];
+
+        if (this.preset.type == ChemistryType.LiPo ||
+            this.preset.type == ChemistryType.LiFe) {
+            this.__optionsPages.push(
+                {title: 'Storage', url: 'PresetStorage'}
+            );
+        }
+    }
+
+    get optionPagesForCurrentType() {
+        if (this.__optionsPages === undefined || this.__optionsPages == null) {
+            this.derivePresetPages();
+        }
+        return this.__optionsPages || [];
     }
 
     get presetType() {
@@ -98,8 +130,13 @@ export class PresetPage implements OnInit, ICanDeactivate {
     }
 
     set presetType(newType) {
-        this.optionsPages = null;
+        if (newType === undefined) {
+            return;
+        }
+        this.__optionsPages = null;
         this.preset.type = newType;
+        this.derivePresetPages();
+        this.appRef.tick();
     }
 
     isDisabled() {
@@ -224,31 +261,16 @@ export class PresetPage implements OnInit, ICanDeactivate {
     }
 
     cellChoices() {
-        if (this.__cellChoices == null) {
-            this.__cellChoices = [];
-            this.__cellChoices.push({'value': 0, 'text': 'Auto'});
-            for (let i = 0; i < this.chargerService.getNumberOfChannels(); i++) {
-                this.__cellChoices.push({'value': i + 1, 'text': (i + 1).toString()});
-            }
-        }
         return this.__cellChoices;
     }
 
     currentChoices() {
-        if (this.__cellChoices === undefined) {
-            this.__currentChoices = [{value: 0.25, text: '0.25A'}, {value: 0.5, text: '0.5A'}];
-            let maxChargeChoice = _.clamp(iChargerService.getMaxAmpsPerChannel() * 10, 10, 400);
-            for (let i = 10; i <= maxChargeChoice; i += 5) {
-                let real = i / 10;
-                this.__currentChoices.push({'value': real, 'text': (real).toString() + 'A'});
-            }
-        }
         return this.__currentChoices;
     }
 
     get ourAlertOptions() {
         return {
             'header': 'Select Current'
-        }
+        };
     }
 }

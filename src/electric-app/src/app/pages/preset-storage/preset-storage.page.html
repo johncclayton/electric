@@ -1,9 +1,35 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>PresetStorage</ion-title>
-  </ion-toolbar>
+    <ion-toolbar>
+        <ion-buttons>
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Storage Options</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="savePreset()">Save</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
-
+<ion-content>
+    <ion-list *ngIf="preset">
+        <ion-list-header color="light">Storage Options</ion-list-header>
+        <ion-item>
+            <ion-label>Cell Voltage</ion-label>
+            <ion-select [(ngModel)]="preset.storage_cell_voltage">
+                <ion-select-option [value]="opt.value" *ngFor="let opt of storageCellVoltOptions">{{opt.text}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Compensation</ion-label>
+            <ion-select [(ngModel)]="preset.storage_compensation_mv">
+                <ion-select-option [value]="opt.value" *ngFor="let opt of storageCompensationOptions">{{opt.text}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Accelerated</ion-label>
+            <ion-toggle [(ngModel)]="preset.storage_accelerated"></ion-toggle>
+        </ion-item>
+    </ion-list>
 </ion-content>

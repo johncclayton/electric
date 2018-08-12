@@ -16,8 +16,6 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
 
     private _currentChoices;
 
-    // regenerationGroup: FormGroup = null;
-
     constructor(navCtrl: NavController,
                 public chargerService: iChargerService,
                 dataBag: DataBagService) {
@@ -32,28 +30,11 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
     }
 
     ngOnInit() {
-        if(!this.preset) {
-            this.navCtrl.goBack();
+        if (!this.preset) {
+            this.navCtrl.goBack('Preset');
         }
     }
 
-    // ngOnInit() {
-    //     let dischargeVoltageMinMax = this.preset.dischargeVoltageMinMax();
-    //
-    //     this.regenerationGroup = this.formBuilder.group({
-    //         regenVoltLimit: [this.preset.regeneration_volt_limit,
-    //             ChargerValidator.number({
-    //                 min: 0.01,
-    //                 max: 33
-    //             })],
-    //         regenCurrentLimit: [this.preset.regeneration_current_limit,
-    //             ChargerValidator.number({
-    //                 min: 0.05,
-    //                 max: iChargerService.getMaxAmpsPerChannel()
-    //             })],
-    //     });
-    // }
-    //
     get regenVoltLimitMinMax() {
         return this.preset.dischargeVoltageMinMax();
     }

@@ -1,12 +1,10 @@
-import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {Observable, Subject, timer} from 'rxjs';
 import {Channel} from '../models/channel';
 import {MenuController, Platform} from '@ionic/angular';
 import {iChargerService} from '../services/icharger.service';
 import {UIActions} from '../models/state/actions/ui';
-import {ConfigurationActions} from '../models/state/actions/configuration';
-import {SystemActions} from '../models/state/actions/system';
 import {IAppState} from '../models/state/configure';
 import {take, takeUntil} from 'rxjs/operators';
 import {ConfigStoreService} from '../services/config-store.service';
@@ -15,6 +13,7 @@ import {ConfigStoreService} from '../services/config-store.service';
     selector: 'app-home',
     templateUrl: 'home.page.html',
     styleUrls: ['home.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePage implements OnInit, OnDestroy {
     @select('ui.exception') exception$: Observable<any>;
