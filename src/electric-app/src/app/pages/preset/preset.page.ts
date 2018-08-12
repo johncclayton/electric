@@ -84,7 +84,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
         // this.switchTo(PresetCyclePage);
 
         if (this.preset) {
-            console.info(`Selected preset: ${JSON.stringify(this.preset)}`);
+            // console.info(`Selected preset: ${JSON.stringify(this.preset)}`);
         }
     }
 
