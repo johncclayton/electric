@@ -6,9 +6,9 @@
             *ngFor="let cell of r; let x=index"
             text-center>
         <ion-row *ngIf="!isCellPadding(cell)">
-            <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
+            <ion-col size="2" class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
             <ion-col text-center>{{cell.v|number:'1.3-3'}}v</ion-col>
-            <ion-col width-20 class="cells-container">
+            <ion-col size="2" class="cells-container">
                 <div
                         *ngFor="let b of balanceRange(cell.balance)"
                         class="balance b{{b}}"

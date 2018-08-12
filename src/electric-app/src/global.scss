@@ -16,5 +16,12 @@ ion-spinner {
   width: 100%;
 }
 
+.warningToast {
+  .toast-wrapper {
+    background: var(--ion-color-warning-shade) !important;
+    color: var(--ion-color-warning-contrast) !important;
+  }
+}
+
 
 @import "channel.display.scss";

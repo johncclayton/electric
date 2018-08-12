@@ -208,21 +208,23 @@ channel {
 
     @include cellsMixin();
 
-    channel {
-      ion-grid {
-        padding-top: $padding-top * 4 !important;
-      }
+    ion-grid {
+      padding-top: $padding-top * 4 !important;
+    }
 
-      .channelNumber {
-        $size: 60px;
-        border-width: 3px;
+    .channelNumber {
+      $size: 60px;
+      border-width: 3px;
 
-        height: $size !important;
-        width: $size !important;
-        flex: 0 0 $size;
+      height: $size !important;
+      width: $size !important;
+      flex: 0 0 $size;
 
-        font-size: 3.6rem;
-      }
+      font-size: 2.8rem;
+    }
+
+    #title {
+      --ion-header-size: 2.5rem;
     }
   }
 }

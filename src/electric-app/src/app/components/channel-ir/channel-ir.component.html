@@ -6,7 +6,7 @@
             *ngFor="let cell of r; let x=index"
             text-center>
         <ion-row *ngIf="!isCellPadding(cell)">
-            <ion-col width-20 class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
+            <ion-col size="2" class="channelnum">{{1 + ((y * cellChunking()) + x)}}</ion-col>
             <ion-col text-center>{{cell.ir|number:'1.1-1'}}mΩ</ion-col>
         </ion-row>
     </ion-col>

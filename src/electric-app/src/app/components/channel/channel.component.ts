@@ -110,7 +110,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
     returnToShowingCellVolts(event) {
         // this.measureIRObservable == null means: if we're done with the measurement
         if (this.measureIRObservable == null) {
-            event.srcEvent.stopPropagation();
+            event.stopPropagation();
             this.showCellVoltage();
         }
     }
@@ -204,7 +204,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
         if (!this.channel.packConnected) {
             this.toastController.create({
                 'message': 'Pack not plugged in.',
-                'cssClass': 'redToast',
+                'cssClass': 'warningToast',
                 'position': 'bottom',
                 'duration': 2000,
             }).then(toast => {
@@ -235,7 +235,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
 
         if (this.channel.isChargeRunning) {
             let alert = this.actionController.create({
-                'header': 'Channel ' + (this.index + 1),
+                header: 'Channel ' + (this.index + 1),
                 buttons: [
                     {
                         text: 'Stop',

@@ -1,4 +1,4 @@
-<ion-grid class="overview" padding-left padding-right padding-top>
+<ion-grid class="overview" padding-top>
 
     <ion-row>
         <ion-col class="value" text-center>
@@ -10,7 +10,7 @@
         <ion-col class="value" text-center>
             {{charger?.total_capacity}}<br/>
         </ion-col>
-        <ion-col class="value" width-20 text-nowrap
+        <ion-col class="value" text-center text-nowrap
                  [ngClass]="{'warning':tempAtWarningLevel(), 'emergency':tempAtEmergencyLevel()}">
             {{charger?.charger_temp|temp|number:'1.1-1'}}{{unitOfMeasure()}}
         </ion-col>

@@ -57,9 +57,6 @@ p.searching {
     }
   }
 
-  .cannot-connect {
-  }
-
   .errors {
     ion-col {
       padding: 8px;
@@ -92,7 +89,7 @@ p.searching {
   }
 
   // iPhone 5S
-  @include media("<=widephone") {
+  @include media("<widephone") {
     .tag {
       display: none;
     }
@@ -103,7 +100,7 @@ p.searching {
 @include media(">=widephone") {
   .charger {
     // Make everything bigger in general
-    //font-size: $large_text_offset;
+    font-size: 1.2rem;
 
     .overview {
       .label {
