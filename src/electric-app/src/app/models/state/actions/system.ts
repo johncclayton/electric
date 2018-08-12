@@ -6,8 +6,8 @@ import {iChargerService} from '../../../services/icharger.service';
 import {UIActions} from './ui';
 import {compareTwoMaps} from '../../../utils/helpers';
 import {ISystem} from '../reducers/system';
-import {forkJoin, Observable, throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import {concat, forkJoin, interval, Observable, throwError} from 'rxjs';
+import {catchError, filter, last, map} from 'rxjs/operators';
 import {CaseFanService} from '../../../services/case-fan.service';
 
 @Injectable({
@@ -37,13 +37,18 @@ export class SystemActions {
 
         let chargerService = this.chargerService;
         if (chargerService) {
-                let system_request = chargerService.getSystem();
-                let case_request = this.caseFan.getCaseFan();
+            let system_request = chargerService.getSystem();
+            let case_request = this.caseFan.getCaseFan();
 
-                forkJoin(
-                    system_request,
-                    case_request
-                ).subscribe(v => {
+            let waitingForConnected = this.chargerService.waitForChargerConnected();
+            let statusOperations = forkJoin(
+                system_request,
+                case_request
+            );
+
+            concat(waitingForConnected, statusOperations)
+                .pipe(last())
+                .subscribe(v => {
                     // We get a LIST of responses.
                     // The case_fan response is dispatched to redux by the getCaseFan call.
                     let system_object = v[0] as System;
@@ -55,6 +60,8 @@ export class SystemActions {
                     }
                 }, (error) => {
                     this.uiActions.setErrorMessage(error);
+                }, () => {
+                    console.error('fetchSystemFromCharger complete');
                 });
         }
     }

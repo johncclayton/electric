@@ -23,6 +23,7 @@ import {
     TimeoutInterceptor,
     timeoutInterceptorDefaultTimeout
 } from './services/timeout.interceptor';
+import {LoggerModule, NgxLoggerLevel} from 'ngx-logger';
 
 @NgModule({
     declarations: [
@@ -37,7 +38,8 @@ import {
         UtilsModule,
         NgReduxModule,
         AppRoutingModule,
-        ComponentsModule
+        ComponentsModule,
+        LoggerModule.forRoot({level: NgxLoggerLevel.WARN})
     ],
     providers: [
         StatusBar,

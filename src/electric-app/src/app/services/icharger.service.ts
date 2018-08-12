@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable, NgZone} from '@angular/core';
-import {Observable, of, pipe, range, Subject, throwError, timer} from 'rxjs';
+import {interval, Observable, of, pipe, range, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';
 import {System} from '../models/system';
@@ -15,6 +15,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {
     catchError,
     delay,
+    filter,
     flatMap,
     map,
     mergeMap,
@@ -30,6 +31,7 @@ import {
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {URLService} from './url.service';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -72,7 +74,7 @@ ChargerMetadata[ChargerType.iCharger4010Duo] = {
 };
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class iChargerService {
     autoStopSubscriptions: any[] = [];
@@ -84,6 +86,7 @@ export class iChargerService {
 
     private lastUsedIPAddressIndex = 0;
     private haveReceivedSomeResponse: boolean;
+    private logger: NGXLogger;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -101,9 +104,11 @@ export class iChargerService {
                        private ngRedux: NgRedux<IAppState>,
                        private networkService: ElectricNetworkService,
                        private chargerActions: ChargerActions,
+                       private loggerSvc: CustomNGXLoggerService,
                        private configActions: ConfigurationActions,
                        private localNotifications: LocalNotifications,) {
 
+        this.logger = this.loggerSvc.create({level:NgxLoggerLevel.INFO});
         this.haveReceivedSomeResponse = true;
         this.lastUsedIPAddressIndex = 0;
 
@@ -114,14 +119,14 @@ export class iChargerService {
     }
 
     public stopAllPolling() {
-        console.log('Stopping all polling....');
+        this.logger.info('Stopping all polling....');
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
         this.ngUnsubscribe = new Subject<void>();
     }
 
     public startPollingCharger() {
-        console.log('Start polling for charger state...');
+        this.logger.info('Start polling for charger state...');
         this.uiActions.setConfiguringNetwork(false);
 
         this.runOutsideAngular(() => {
@@ -144,18 +149,19 @@ export class iChargerService {
                         tap((v) => {
                             numberErrors++;
                             if (v['name'] != 'TimeoutError') {
-                                if (numberErrors % 10 == 0)
-                                    console.error(`Error (retry) while polling for charger state: ${JSON.stringify(v)}...`);
+                                if (numberErrors % 10 == 0) {
+                                    this.logger.error(`Error (retry) while polling for charger state: ${JSON.stringify(v)}...`);
+                                }
                                 // Always set disconnected state if its not a timeout
                                 this.uiActions.setDisconnected();
                             } else {
                                 console.warn(`Timeout while getting status... will retry...`);
                                 if (numberErrors > 1) {
                                     // this will begin round robin
-                                    console.warn(`# of disconnected: ${numberErrors} ... show error`);
+                                    this.logger.warn(`# of disconnected: ${numberErrors} ... showing error`);
                                     this.uiActions.setDisconnected();
                                 } else {
-                                    console.warn(`# of disconnected: ${numberErrors} ... won't raise warn yet`);
+                                    this.logger.info(`# of disconnected: ${numberErrors} ... won't raise warn yet`);
                                 }
                             }
                         }),
@@ -167,25 +173,25 @@ export class iChargerService {
                 })
             ).subscribe(status => {
                 numberErrors = 0;
-                console.log('Refreshed status from charger...');
+                this.logger.debug('Refreshed status from charger...');
             }, (err) => {
-                console.error(`Error while polling for charger state: ${JSON.stringify(err)}. POLLING STOPPED.`);
+                this.logger.error(`Error while polling for charger state: ${JSON.stringify(err)}. POLLING STOPPED.`);
             }, () => {
-                console.log('Finished poll for charger state. Polling stopped.');
+                this.logger.warn('Finished poll for charger state. Polling stopped.');
             });
         });
     }
 
     public startPollingStatusServer() {
-        console.log('Starting polling for network status....');
+        this.logger.info('Starting polling for network status....');
         this.uiActions.setConfiguringNetwork(true);
         this.runOutsideAngular(() => {
             this.getServerStatus().pipe(
                 takeUntil(this.ngUnsubscribe)
             ).subscribe(status => {
-                // console.log("Network update from server...");
+                // this.logger.info("Network update from server...");
             }, null, () => {
-                console.log('Stopped polling for network/server status');
+                this.logger.info('Stopped polling for network/server status');
             });
         });
     }
@@ -216,7 +222,7 @@ export class iChargerService {
         let haveServer = this.isConnectedToServer();
         let result = !haveNetwork || !haveCharger || !haveServer;
         if (result) {
-            console.debug(`haveNetwork: ${haveNetwork}, haveCharger: ${haveCharger}, haveServer: ${haveServer}`);
+            this.logger.debug(`haveNetwork: ${haveNetwork}, haveCharger: ${haveCharger}, haveServer: ${haveServer}`);
         }
         return result;
     }
@@ -249,7 +255,7 @@ export class iChargerService {
                     return errors$.pipe(
                         flatMap(err => {
                             let terminate = numberOfErrors > retryTimes;
-                            console.error(`Presets error #${numberOfErrors}: ${JSON.stringify(err)}. ${!terminate ? 'will retry in 1s' : 'Terminating, at max num errors'}`);
+                            this.logger.error(`Presets error #${numberOfErrors}: ${JSON.stringify(err)}. ${!terminate ? 'will retry in 1s' : 'Terminating, at max num errors'}`);
                             numberOfErrors++;
                             if (terminate) {
                                 return throwError(err);
@@ -293,7 +299,7 @@ export class iChargerService {
     private logActionIfDisconnected(url, force: boolean = false) {
         let state = this.ngRedux.getState();
         if (state.ui.disconnected || force) {
-            console.log(`Trying ${url}`);
+            this.logger.debug(`Trying ${url}`);
         }
     }
 
@@ -341,7 +347,7 @@ export class iChargerService {
 
     stopCurrentTask(channel: Channel): Observable<any> {
         this.cancelAutoStopForChannel(channel.index);
-        console.log('Stopping current task...');
+        this.logger.info('Stopping current task...');
         let url = this.url.getChargerURL('/stop/' + channel.index);
         return this.runOutsideAngular(() => {
             return this.http.put(url, '', this.putJsonOptions);
@@ -365,7 +371,7 @@ export class iChargerService {
         let putURL = addingNewPreset ? this.url.getChargerURL('/addpreset') : this.url.getChargerURL('/preset/' + preset.index);
         let body = preset.json();
         let action = addingNewPreset ? 'Adding' : 'Saving';
-        console.log(action + ' Preset: ', body);
+        this.logger.info(action + ' Preset: ', body);
 
         return this.runOutsideAngular(() => {
             return this.http.put(putURL, body, this.putJsonOptions).pipe(
@@ -397,7 +403,7 @@ export class iChargerService {
     startCharge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/charge/' + channel.index + '/' + preset.index);
-        console.log('Beginning charge on channel ', channel.index, ' using preset at slot ', preset.index);
+        this.logger.info('Beginning charge on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
             return this.http.put(operationURL, null, this.putJsonOptions);
         });
@@ -406,7 +412,7 @@ export class iChargerService {
     startDischarge(channel: Channel, preset: Preset, operationPlan: string): Observable<any> {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/discharge/' + channel.index + '/' + preset.index);
-        console.log('Beginning discharge on channel ', channel.index, ' using preset at slot ', preset.index);
+        this.logger.info('Beginning discharge on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
             return this.http.put(operationURL, null, this.putJsonOptions);
         });
@@ -415,7 +421,7 @@ export class iChargerService {
     startStore(channel: Channel, preset: Preset, operationPlan: string) {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/store/' + channel.index + '/' + preset.index);
-        console.log('Beginning storage on channel ', channel.index, ' using preset at slot ', preset.index);
+        this.logger.info('Beginning storage on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
             return this.http.put(operationURL, '', this.putJsonOptions);
         });
@@ -424,7 +430,7 @@ export class iChargerService {
     startBalance(channel: Channel, preset: Preset, operationPlan: string) {
         this.autoStopOnRunStatus([40], channel, operationPlan);
         let operationURL = this.url.getChargerURL('/balance/' + channel.index + '/' + preset.index);
-        console.log('Beginning balance on channel ', channel.index, ' using preset at slot ', preset.index);
+        this.logger.info('Beginning balance on channel ', channel.index, ' using preset at slot ', preset.index);
         return this.runOutsideAngular(() => {
             return this.http.put(operationURL, '', this.putJsonOptions);
         });
@@ -432,10 +438,26 @@ export class iChargerService {
 
     measureIR(channel: Channel) {
         let operationURL = this.url.getChargerURL('/measureir/' + channel.index);
-        console.log('Beginning IR measurement on channel ', channel.index);
+        this.logger.info('Beginning IR measurement on channel ', channel.index);
         return this.runOutsideAngular(() => {
             return this.http.put(operationURL, '', this.putJsonOptions);
         });
+    }
+
+    waitForChargerConnected(checkInterval = 250, logging: boolean = false): Observable<any> {
+        let count = 0;
+        return interval(checkInterval).pipe(
+            filter(v => {
+                let ready: boolean = this.ngRedux.getState().ui.disconnected === false;
+                if (!ready) {
+                    if (logging) {
+                        this.logger.info(`Waiting for charger to be available... ${count}`);
+                    }
+                    count++;
+                }
+                return ready;
+            })
+        );
     }
 
     getSystem(): Observable<System> {
@@ -464,7 +486,7 @@ export class iChargerService {
 
     cancelAutoStopForChannel(index: number) {
         if (this.autoStopSubscriptions[index]) {
-            console.log('Cancelled auto-stop subscription for channel ', index);
+            this.logger.info('Cancelled auto-stop subscription for channel ', index);
             this.autoStopSubscriptions[index].unsubscribe();
             this.autoStopSubscriptions[index] = null;
         }
@@ -484,14 +506,14 @@ export class iChargerService {
                     takeUntil(this.ngUnsubscribe),
                     takeWhile(() => {
                         let ch: Channel = this.getCharger().channels[channel_index];
-                        // console.log("Channel ", ch.index, ", state: ", ch.runState);
+                        // this.logger.info("Channel ", ch.index, ", state: ", ch.runState);
                         return !states_to_stop_on.some((state) => {
                             return ch.runState == state;
                         });
                     }),
                 ).subscribe(() => {
                 }, (error) => {
-                    console.log('Error while waiting for the channel to change state:', error);
+                    this.logger.error('Error while waiting for the channel to change state:', error);
                     this.cancelAutoStopForChannel(channel_index);
                 }, () => {
                     let ch: Channel = this.getCharger().channels[channel_index];
@@ -508,7 +530,7 @@ export class iChargerService {
     }
 
     private sendCompletionNotifications(channel: Channel, operationName: string) {
-        console.log('Sending stop to channel ', channel.index, ' because auto-stop condition was met. Run state = ' + channel.runState, 'Operation: ' + operationName);
+        this.logger.info('Sending stop to channel ', channel.index, ' because auto-stop condition was met. Run state = ' + channel.runState, 'Operation: ' + operationName);
 
         if (this.getConfig().vibrateWhenDone) {
             this.vibrateTaskDone();
@@ -552,7 +574,7 @@ export class iChargerService {
                     'SSID': ssid,
                     'PWD': password
                 };
-                // console.log("Sending: ", body, "to", wifiURL);
+                // this.logger.info("Sending: ", body, "to", wifiURL);
                 return this.runOutsideAngular(() => {
                     return this.http.put(wifiURL, payload, this.putJsonOptions);
                 });
@@ -570,7 +592,7 @@ export class iChargerService {
                     this.networkService.fetchCurrentIPAddress();
 
                     let wifiURL = this.url.getManagementURL('/status');
-                    // console.log("Get status from " + wifiURL);
+                    // this.logger.info("Get status from " + wifiURL);
                     return this.http.get(wifiURL);
                 }),
                 map(json => {
@@ -637,7 +659,7 @@ export class iChargerService {
                     }
                 }),
                 catchError(e => {
-                    console.error('Error getting server status: ' + e);
+                    this.logger.error('Error getting server status: ' + e);
                     this.uiActions.setDisconnected();
                     return throwError(e);
                 }),
@@ -655,7 +677,7 @@ export class iChargerService {
         if (this.isDisconnected) {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
-            console.debug(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
+            this.logger.debug(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
             this.uiActions.setDisconnected();
         }
     }

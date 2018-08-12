@@ -4746,6 +4746,12 @@ next-tick@1:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
 
+ngx-logger@^3.0.5:
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/ngx-logger/-/ngx-logger-3.0.5.tgz#719f9220e35db5e0a8400b907bed18693a94e561"
+  dependencies:
+    tslib "^1.9.0"
+
 no-case@^2.2.0:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.2.tgz#60b813396be39b3f1288a4c1ed5d1e7d28b464ac"
