@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
-import {List, NavController, ToastController} from '@ionic/angular';
+import {List, NavController, Refresher, Spinner, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
 import {iChargerService} from '../../services/icharger.service';
-import {retry, takeUntil} from 'rxjs/operators';
+import {takeUntil} from 'rxjs/operators';
 import {DataBagService} from '../../services/data-bag.service';
 import {applyMixins} from 'rxjs/internal-compatibility';
 import {Chemistry} from '../../utils/mixins';
@@ -14,10 +14,11 @@ import {Chemistry} from '../../utils/mixins';
     styleUrls: ['./preset-list.page.scss'],
 })
 export class PresetListPage implements OnInit, OnDestroy {
-
-    firstLoad: boolean = true;
+    failedToGetPresets: boolean = false;
+    loadingPresets: boolean = true;
     public presets: Array<Preset>;
     @ViewChild(List) list: List;
+    @ViewChild(Refresher) refresher: Refresher;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
@@ -28,7 +29,7 @@ export class PresetListPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.refreshPresets(null);
+        this.refreshPresets();
     }
 
     ngOnDestroy() {
@@ -36,29 +37,42 @@ export class PresetListPage implements OnInit, OnDestroy {
         this.ngUnsubscribe.complete();
     }
 
-    refreshPresets(refresher) {
+    refreshPresets() {
+        this.loadingPresets = true;
+        this.failedToGetPresets = false;
         this.chargerService.getPresets(5)
             .pipe(
                 takeUntil(this.ngUnsubscribe),
-            ).subscribe(presetsList => {
-            this.presets = presetsList;
-            this.firstLoad = false;
-            if (refresher) {
-                refresher.complete();
-            }
+            )
+            .subscribe(presetsList => {
+                // console.warn(`Received presets: ${presetsList}`);
+                this.presets = presetsList;
+                this.finishedGettingPresets();
 
-            /*
-             * Was used during testing, to move to a known preset and edit it.
-             */
-            let debugPresets = false;
-            if (debugPresets) {
-                if (this.presets.length) {
-                    let old_preset = this.presets[7];
-                    this.setPresetAndCallback(old_preset);
-                    this.navCtrl.goForward('Preset');
+                /*
+                 * Was used during testing, to move to a known preset and edit it.
+                 */
+                let debugPresets = true;
+                if (debugPresets) {
+                    if (this.presets.length) {
+                        let old_preset = this.presets[9];
+                        this.setPresetAndCallback(old_preset);
+                        this.navCtrl.goForward('Preset');
+                    }
                 }
-            }
-        });
+            }, (err) => {
+                console.error(`Error getting presets: ${err}`);
+                this.finishedGettingPresets(true);
+            }, () => {
+            });
+    }
+
+    private finishedGettingPresets(failed: boolean = false) {
+        this.loadingPresets = false;
+        this.failedToGetPresets = failed;
+        if (this.refresher) {
+            this.refresher.complete();
+        }
     }
 
     async addPreset() {

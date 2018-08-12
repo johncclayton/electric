@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable, NgZone} from '@angular/core';
-import {Observable, Subject, throwError, timer} from 'rxjs';
+import {Observable, of, pipe, range, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';
 import {System} from '../models/system';
@@ -12,7 +12,21 @@ import {IChargerState} from '../models/state/reducers/charger';
 import {ConfigurationActions} from '../models/state/actions/configuration';
 import {ElectricNetworkService} from './network.service';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, flatMap, map, retry, takeUntil, takeWhile} from 'rxjs/operators';
+import {
+    catchError,
+    delay,
+    flatMap,
+    map,
+    mergeMap,
+    repeatWhen,
+    retry,
+    retryWhen,
+    take,
+    takeUntil,
+    takeWhile,
+    tap,
+    zip
+} from 'rxjs/operators';
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {URLService} from './url.service';
@@ -22,6 +36,17 @@ export enum ChargerType {
     iCharger308Duo = 66,
     iCharger406Duo = 67 // ??? probably not. We need to get the model number.
 }
+
+const backoff = (maxTries, ms) => {
+    return pipe(
+        retryWhen(attempts => range(1, maxTries)
+            .pipe(
+                zip(attempts, (i) => i),
+                map(i => i * i),
+                mergeMap(i => timer(i * ms))
+            ))
+    );
+};
 
 export let ChargerMetadata = {};
 ChargerMetadata[ChargerType.iCharger308Duo] = {
@@ -99,12 +124,47 @@ export class iChargerService {
         this.uiActions.setConfiguringNetwork(false);
 
         this.runOutsideAngular(() => {
-            this.getChargerStatus().pipe(
-                takeUntil(this.ngUnsubscribe)
+            /*
+            Poll. Try. Wait one second between requests, try again.
+            If don't get a response in T, cancel outstanding XHR, wait one second, try again.
+            If disconnected, do a round robbin between various known IP addresses. Try the previous address FIRST.
+             */
+            let numberErrors = 0;
+            timer(0, 1000).pipe(
+                flatMap(() => {
+                    return this.getChargerStatus();
+                }),
+                takeUntil(this.ngUnsubscribe),
+                retryWhen(errors => {
+                    return errors.pipe(
+                        tap((v) => {
+                            numberErrors++;
+                            if (v['name'] != 'TimeoutError') {
+                                if (numberErrors % 10 == 0)
+                                    console.error(`Error (retry) while polling for charger state: ${JSON.stringify(v)}...`);
+                                // Always set disconnected state if its not a timeout
+                                this.uiActions.setDisconnected();
+                            } else {
+                                console.warn(`Timeout while getting status... will retry...`);
+                                if (numberErrors > 1) {
+                                    // this will begin round robin
+                                    this.uiActions.setDisconnected();
+                                }
+                            }
+                        }),
+                        delay(numberErrors > 1 ? 2000 : 1000)
+                    );
+                }),
+                repeatWhen(thing => {
+                    return of(true).pipe(delay(1000));
+                })
             ).subscribe(status => {
-                // console.log("Refreshed from charger...");
-            }, null, () => {
-                console.log('Stopped polling for charger state');
+                console.log('Refreshed status from charger...');
+                numberErrors = 0;
+            }, (err) => {
+                console.error(`Error while polling for charger state: ${JSON.stringify(err)}. POLLING STOPPED.`);
+            }, () => {
+                console.log('Finished poll for charger state. Polling stopped.');
             });
         });
     }
@@ -164,62 +224,80 @@ export class iChargerService {
         return this.getCharger().channel_count;
     }
 
-    getPresets(retryTimes = 1): Observable<any> {
-        let url = this.url.getChargerURL('/preset');
+    getPresets(retryTimes = 5): Observable<any> {
+        let numberOfErrors = 0;
         return this.runOutsideAngular(() => {
-            return this.http.get(url).pipe(
+            return timer(0, 1000).pipe(
+                flatMap(() => {
+                    let url = this.url.getChargerURL('/preset');
+                    this.logActionIfDisconnected(url, true);
+                    return this.http.get(url, {headers: this.getHttpOptions()});
+                }),
+                retryWhen(errors$ => {
+                    return errors$.pipe(
+                        tap((err) => {
+                            numberOfErrors++;
+                            this.uiActions.setDisconnected();
+                            console.error(`Presets error #${numberOfErrors}: ${JSON.stringify(err)}`);
+                        }),
+                        flatMap(err => {
+                            if (numberOfErrors > retryTimes) {
+                                // fail
+                                console.error(`Terminating, at max num errors`);
+                                return throwError(err);
+                            }
+                            console.error(`presets will retry in 1s`);
+                            return of(true);
+                        }),
+                        delay(1000)
+                    );
+                }),
                 map((arrayOfPresets: any[]) => {
                     // This should be a list of presets
                     let presetList = [];
                     for (let presetDict of arrayOfPresets) {
                         presetList.push(new Preset(presetDict));
                     }
+                    numberOfErrors = 0;
                     return presetList;
-                }), retry(retryTimes));
+                }),
+                take(1)
+            );
         });
     }
 
-    getChargerStatus(): Observable<any> {
-        let interval = 1000;
+    getChargerStatus(timeout: number = 3000): Observable<any> {
+        return of(true).pipe(
+            flatMap(v => {
+                this.tryNextInterfaceIfDisconnected();
 
-        return this.runOutsideAngular(() => {
-            return timer(0, interval).pipe(
-                flatMap(v => {
-                    // If disconnected, do a round robbin between various known IP addresses
-                    this.tryNextInterfaceIfDisconnected();
+                let url = this.url.getChargerURL('/unified');
+                this.logActionIfDisconnected(url);
+                this.firstRun = false;
+                return this.http.get(url, {headers: this.getHttpOptions(timeout)});
+            }),
+            map(resp => {
+                // Update device ID
+                this.chargerActions.refreshStateFromCharger(resp);
+                this.notifyOfReconnection();
+            })
+        );
+    }
 
-                    let url = this.url.getChargerURL('/unified');
-                    let state = this.ngRedux.getState();
-                    if (state.ui.disconnected) {
-                        console.log(`Trying ${url}`);
-                    }
-                    this.firstRun = false;
-                    return this.http.get(url);
-                }),
-                map(resp => {
-                    let state = this.ngRedux.getState();
+    private logActionIfDisconnected(url, force: boolean = false) {
+        let state = this.ngRedux.getState();
+        if (state.ui.disconnected || force) {
+            console.log(`Trying ${url}`);
+        }
+    }
 
-                    // Update device ID
-                    this.chargerActions.refreshStateFromCharger(resp);
-                    iChargerService.device_id = state.charger.device_id;
-
-                    if (state.ui.disconnected) {
-                        this.uiActions.serverReconnected();
-                        this.serverReconnection.emit();
-                    }
-                }),
-                catchError(error => {
-                    console.error('Probably connection problem: ' + error);
-                    if (!this.isDisconnected) {
-                        this.uiActions.setDisconnected();
-                    }
-
-                    // I think I do this to force a 'retry'?
-                    return throwError(error);
-                }),
-                retry(),
-            );
-        });
+    private notifyOfReconnection() {
+        let state = this.ngRedux.getState();
+        iChargerService.device_id = state.charger.device_id;
+        if (state.ui.disconnected) {
+            this.uiActions.serverReconnected();
+            this.serverReconnection.emit();
+        }
     }
 
     static lookupChargerMetadata(deviceId = null, propertyName = 'name', defaultValue = null) {
@@ -360,6 +438,10 @@ export class iChargerService {
                 map(resp => new System(resp))
             );
         });
+    }
+
+    getHttpOptions(timeout: number = 3000) {
+        return new HttpHeaders({timeout: `${timeout}`});
     }
 
     get putJsonOptions() {
@@ -566,7 +648,7 @@ export class iChargerService {
         if (this.isDisconnected) {
             let config = this.getConfig();
             config.lastConnectionIndex = (config.lastConnectionIndex + 1) % 2 || 0;
-            console.log(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
+            console.debug(`Switch to connection index: ${config.lastConnectionIndex}. Next URL: ${this.url.getHostName()}`);
             this.uiActions.setDisconnected();
         }
     }

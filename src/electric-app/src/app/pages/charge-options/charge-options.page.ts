@@ -74,15 +74,6 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
     }
 
     ngOnInit() {
-    }
-
-
-    ngOnDestroy() {
-        this.ngUnsubscribe.next();
-        this.ngUnsubscribe.complete();
-    }
-
-    ionViewDidLoad() {
         this.chargerService.getPresets()
             .pipe(
                 takeUntil(this.ngUnsubscribe)
@@ -90,6 +81,11 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
             .subscribe((presetList) => {
                 this.presets = presetList;
             });
+    }
+
+    ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     chargeUsingPreset(preset: Preset) {

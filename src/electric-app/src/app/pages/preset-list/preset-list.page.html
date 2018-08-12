@@ -19,9 +19,10 @@
     <ion-refresher (ionRefresh)="refreshPresets($event)">
         <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
-    <ion-spinner *ngIf="firstLoad"></ion-spinner>
 
-    <ion-list>
+    <ion-spinner *ngIf="loadingPresets"></ion-spinner>
+
+    <ion-list *ngIf="presets !== undefined && !failedToGetPresets">
         <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
             <div class="item-left">{{preset.name}}</div>
             <!--<div class="item-left">{{preset.name}}</div>-->
@@ -31,5 +32,10 @@
             </div>
         </ion-item>
     </ion-list>
+
+    <div *ngIf="failedToGetPresets" class="error">
+        <h3>Failed to get presets.</h3>
+        <ion-button color="secondary" (click)="refreshPresets()">Retry</ion-button>
+    </div>
 </ion-content>
 

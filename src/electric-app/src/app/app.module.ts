@@ -13,11 +13,16 @@ import {Vibration} from '@ionic-native/vibration/ngx';
 import {ConfigurationEpics} from './models/state/epics/configuration';
 import {DevToolsExtension, NgRedux, NgReduxModule} from '@angular-redux/store';
 import {configureAppStateStore, IAppState} from './models/state/configure';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {IonicStorageModule} from '@ionic/storage';
 import {UtilsModule} from './utils/utils.module';
 import {ComponentsModule} from './components/components.module';
 import {Zeroconf} from '@ionic-native/zeroconf/ngx';
+import {
+    TIMEOUT_INTERCEPTOR_DEFAULT_TIMEOUT_TOKEN,
+    TimeoutInterceptor,
+    timeoutInterceptorDefaultTimeout
+} from './services/timeout.interceptor';
 
 @NgModule({
     declarations: [
@@ -40,7 +45,9 @@ import {Zeroconf} from '@ionic-native/zeroconf/ngx';
         LocalNotifications,
         Zeroconf,
         Vibration,
-        {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
+        {provide: RouteReuseStrategy, useClass: IonicRouteStrategy},
+        {provide: HTTP_INTERCEPTORS, useClass: TimeoutInterceptor, multi: true},
+        {provide: TIMEOUT_INTERCEPTOR_DEFAULT_TIMEOUT_TOKEN, useValue: timeoutInterceptorDefaultTimeout},
     ],
     bootstrap: [AppComponent]
 })

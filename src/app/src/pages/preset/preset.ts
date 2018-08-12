@@ -9,7 +9,6 @@ import {iChargerService} from "../../services/icharger.service";
 import * as _ from "lodash";
 import {Subject} from "rxjs/Subject";
 import {Observable} from "rxjs/Observable";
-import {observable} from "rxjs/symbol/observable";
 
 export interface SavePresetInterface {
     savePreset(whenDoneCall: (preset: Preset) => void): void;

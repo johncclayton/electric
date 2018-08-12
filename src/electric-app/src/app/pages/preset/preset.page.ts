@@ -8,6 +8,10 @@ import * as _ from 'lodash';
 import {ICanDeactivate} from '../../services/can-deactivate-guard.service';
 import {takeUntil} from 'rxjs/operators';
 
+export interface SavePresetInterface {
+    savePreset(whenDoneCall: (preset: Preset) => void): void;
+}
+
 @Component({
     selector: 'app-preset',
     templateUrl: './preset.page.html',

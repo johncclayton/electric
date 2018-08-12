@@ -12,6 +12,16 @@
   display: inline-block;
 }
 
+.error {
+  h3 {
+    background: var(--ion-color-danger);
+    padding: 10px;
+    color: white;
+    width: 100%;
+  }
+  text-align: center;
+}
+
 .chemistry-LiPo {
   background: var(--chemisty-color-lipo);
 }
