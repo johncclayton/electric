@@ -1,4 +1,5 @@
-import * as _ from "lodash";
+import * as _ from 'lodash';
+import {iChargerService} from '../services/icharger.service';
 
 export enum ChemistryType {
     LiPo = 0,
@@ -75,7 +76,11 @@ export class Preset {
         return newThing;
     }
 
-    dischargeVoltageMinMax() {
+    get getMaxAmpsPerChannel() {
+        return iChargerService.getMaxAmpsPerChannel();
+    }
+
+    dischargeVoltageMinMax(): { min: number, max: number } {
         let anOption = {min: 0.1, max: 33};
         if (_dischargeVoltageMinMax[this.type]) {
             anOption = _dischargeVoltageMinMax[this.type];
@@ -89,7 +94,7 @@ export class Preset {
             case ChemistryType.LiPo:
                 return {min: 370, max: 390};
             case ChemistryType.LiFe:
-                return {min: 310, max: 340}
+                return {min: 310, max: 340};
         }
         return {min: 0.0, max: 0};
     }
@@ -223,7 +228,7 @@ export class Preset {
             case ChemistryType.LiPo:
                 return this.data['lipo_charge_cell_voltage'];
             case ChemistryType.LiFe:
-                return this.data['life_charge_cell_voltage']
+                return this.data['life_charge_cell_voltage'];
         }
         return 0;
     }
@@ -266,7 +271,7 @@ export class Preset {
     }
 
     set discharge_current(value: number) {
-        console.log("Set discharge to ", value);
+        console.log('Set discharge to ', value);
         this.data['discharge_current'] = +value;
     }
 
@@ -598,23 +603,23 @@ export class Preset {
     public static chemistryPrefix(chemistry: ChemistryType) {
         switch (chemistry) {
             case ChemistryType.Anything:
-                return "All";
+                return 'All';
             case ChemistryType.LiPo:
-                return "LP";
+                return 'LP';
             case ChemistryType.LiLo:
-                return "LL";
+                return 'LL';
             case ChemistryType.LiFe:
-                return "LF";
+                return 'LF';
             case ChemistryType.NiCd:
-                return "NC";
+                return 'NC';
             case ChemistryType.NiMH:
-                return "NM";
+                return 'NM';
             case ChemistryType.Pb:
-                return "Pb";
+                return 'Pb';
             case ChemistryType.NiZn:
-                return "NZ";
+                return 'NZ';
         }
-        return "ER";
+        return 'ER';
     }
 
     smallButtonName(showChargeOption = true, useName: boolean = true) {
