@@ -19,7 +19,7 @@ export class PresetStoragePage extends PresetBasePage implements OnInit {
 
     ngOnInit() {
         if (this.preset === undefined) {
-            this.navCtrl.goBack('Preset');
+            this.navCtrl.navigateBack('Preset');
             return;
         }
         let list = [];

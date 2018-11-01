@@ -45,10 +45,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
 
         const navParams = this.dataBag.get('preset');
         if (navParams === undefined) {
-            this.navCtrl.goBack('PresetList');
+            this.navCtrl.navigateBack('PresetList');
         } else {
             if (navParams['preset'] === undefined) {
-                this.navCtrl.goBack('PresetList');
+                this.navCtrl.navigateBack('PresetList');
                 return;
             }
             this.callback = navParams['callback'];
@@ -56,7 +56,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
             this.unmodifiedpreset = _.cloneDeep(this.preset);
 
             if (this.preset === undefined || this.preset === null) {
-                this.navCtrl.goBack('PresetList');
+                this.navCtrl.navigateBack('PresetList');
                 return;
             }
         }
@@ -124,8 +124,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
 
     get presetType() {
         if (this.preset === undefined) {
+            console.log('Preset not set. Returning chemistry type "Anything"');
             return ChemistryType.Anything;
         }
+        console.log(`Preset has chemistry: ${this.preset.type}`);
         return this.preset.type;
     }
 

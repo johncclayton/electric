@@ -52,12 +52,12 @@ export class PresetListPage implements OnInit, OnDestroy {
                 /*
                  * Was used during testing, to move to a known preset and edit it.
                  */
-                let debugPresets = false;
+                const debugPresets = false;
                 if (debugPresets) {
                     if (this.presets.length) {
-                        let old_preset = this.presets[9];
+                        const old_preset = this.presets[9];
                         this.setPresetAndCallback(old_preset);
-                        this.navCtrl.goForward('Preset');
+                        this.navCtrl.navigateForward('Preset');
                     }
                 }
             }, (err) => {
@@ -105,14 +105,14 @@ export class PresetListPage implements OnInit, OnDestroy {
     async editPreset(preset) {
         if (preset) {
             console.log('Editing preset type: ', preset.type, 'usage: ', preset.data.use_flag);
-            if (preset.type == ChemistryType.LiPo ||
-                preset.type == ChemistryType.NiMH ||
-                preset.type == ChemistryType.LiFe) {
+            if (preset.type === ChemistryType.LiPo ||
+                preset.type === ChemistryType.NiMH ||
+                preset.type === ChemistryType.LiFe) {
 
                 this.setPresetAndCallback(preset);
-                this.navCtrl.goForward('Preset');
+                this.navCtrl.navigateForward('Preset');
             } else {
-                let toast = await this.toastController.create({
+                const toast = await this.toastController.create({
                     message: 'Only support editing Lipo/NiMH/LiFe for now',
                     duration: 2000,
                     // dismissOnPageChange: true, // causes an exception. meh.
@@ -121,7 +121,7 @@ export class PresetListPage implements OnInit, OnDestroy {
                 toast.present();
             }
         } else {
-            let toast = await this.toastController.create({
+            const toast = await this.toastController.create({
                 message: 'Bug: no preset sent to edit',
                 duration: 2000,
                 position: 'top'
@@ -131,7 +131,7 @@ export class PresetListPage implements OnInit, OnDestroy {
     }
 
     tagsForPreset(preset) {
-        let tags = [];
+        const tags = [];
         if (preset.type_str) {
             tags.push(preset.type_str);
         } else {

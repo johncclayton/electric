@@ -31,7 +31,7 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
 
     ngOnInit() {
         if (!this.preset) {
-            this.navCtrl.goBack('Preset');
+            this.navCtrl.navigateBack('Preset');
         }
     }
 

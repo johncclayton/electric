@@ -6,7 +6,7 @@ import {from, Observable, ReplaySubject, Subject} from 'rxjs';
     providedIn: 'root'
 })
 export class ConfigStoreService {
-    configurationLoaded: Subject<any> = new ReplaySubject(1);
+    configurationLoaded$: Subject<any> = new ReplaySubject(1);
 
     constructor(public storage: Storage) {
 
@@ -14,7 +14,7 @@ export class ConfigStoreService {
 
     loadConfiguration() {
         const observable = from(this.storage.get('config'));
-        observable.subscribe(this.configurationLoaded);
+        observable.subscribe(this.configurationLoaded$);
     }
 
     saveConfiguration(config): Observable<any> {

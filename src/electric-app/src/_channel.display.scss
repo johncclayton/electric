@@ -1,4 +1,4 @@
-@import "~@ionic/angular/dist/themes/ionic.globals.scss";
+//@import "~@ionic/angular/dist/themes/ionic.globals.scss";
 @import "./include-media";
 
 channel {
@@ -137,8 +137,8 @@ channel {
         margin-top: 22px; // no idea why we need this
         margin-right: 5px;
 
-        @include transform-origin(right top);
-        @include transform(scale(-1), translateY(-$balance-height));
+        transform-origin: right top;
+        transform: scale(-1), translateY(-$balance-height);
       }
       .b1 {
         right: ($balance-width / 2.0) + $balance-offset * 4;

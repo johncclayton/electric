@@ -93,7 +93,7 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
     }
 
     closePage(passObject) {
-        this.navCtrl.goBack(this.previousURL).then(() => {
+        this.navCtrl.navigateBack(this.previousURL).then(() => {
             this.callback(passObject);
         });
     }

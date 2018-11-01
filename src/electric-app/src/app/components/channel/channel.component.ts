@@ -76,7 +76,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
         // ChargingOptions will pull data from the bag
         this.dataBag.set('chargingOptions', pageData);
 
-        this.navCtrlr.goForward('/ChargingOptions');
+        this.navCtrlr.navigateForward('/ChargingOptions');
     }
 
     showMeasureIR() {

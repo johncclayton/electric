@@ -22,7 +22,7 @@ export class PresetBasePage {
             this.preset = navParams['preset'];
             this.saver = navParams['saver'];
         } else {
-            this.navCtrl.goBack('PresetList');
+            this.navCtrl.navigateBack('PresetList');
         }
     }
 

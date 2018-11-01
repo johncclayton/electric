@@ -45,15 +45,12 @@ export class AppComponent {
             this.statusBar.styleDefault();
             this.splashScreen.hide();
 
-            this.config.configurationLoaded
+            this.config.configurationLoaded$
                 .subscribe(r => {
                     this.logger.info('Configuration loaded, setting up app...');
                     if (r != null) {
                         if (r.network) {
-                            this.logger.debug('Clearing network transient state...');
-                            r.network.discoveredServers = [];
-                            r.network.interfaces = [];
-                            r.network.services = [];
+                            this.clearNetworkTransientState(r);
                         }
                         this.logger.debug(`Putting config ${JSON.stringify(r)} into redux store`);
                         this.ngRedux.dispatch({
@@ -62,7 +59,8 @@ export class AppComponent {
                         });
                         this.logger.debug('Pushed config into redux store.');
                     } else {
-                        this.logger.error(`Config is null? wtf?`);
+                        this.logger.error(`Config is null? wtf? Saving current as the default.`);
+                        this.config.saveConfiguration(this.ngRedux.getState().config);
                     }
                 }, null, () => {
                     this.logger.info(`Configuration loading completed`);
@@ -93,6 +91,13 @@ export class AppComponent {
                 },
             ];
         });
+    }
+
+    private clearNetworkTransientState(r) {
+        this.logger.debug('Clearing network transient state...');
+        r.network.discoveredServers = [];
+        r.network.interfaces = [];
+        r.network.services = [];
     }
 
     _afterConfigurationLoaded() {
