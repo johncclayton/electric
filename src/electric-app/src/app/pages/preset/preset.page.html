@@ -26,25 +26,30 @@
         </ion-item>
         <ion-item>
             <ion-label>Type</ion-label>
-            <ion-select [(ngModel)]="presetType" [disabled]="isDisabled() || isReadOnly()">
-                <ion-select-option [value]="opt.value" *ngFor="let opt of typeChoices()">{{opt.text}}
+            <ion-select [(value)]="presetType" [disabled]="isDisabled() || isReadOnly()">
+                <ion-select-option [selected]="opt.value == presetType" [value]="opt.value" *ngFor="let opt of typeChoices()">{{opt.text}}
                 </ion-select-option>
             </ion-select>
 
         </ion-item>
+
+        <!--
+        Ionicv4 bug.  Looks to be usages of === and probably conversions in the ion-select.
+        cannot get numeric values with textual/numeric labels to auto select properly
+        Only solution I found was to force the values to strings. Eww.
+        -->
         <ion-item *ngIf="showCells()">
             <ion-label>Cells</ion-label>
-            <ion-select [(ngModel)]="preset.cells" [disabled]="isDisabled()">
+            <ion-select [(value)]="'' + preset.cells" [disabled]="isDisabled()">
                 <ion-select-option
-                        [selected]="opt.value === preset.cells"
-                        [value]="opt.value"
+                        [value]="'' + opt.value"
                         *ngFor="let opt of cellChoices()">{{opt.text}}
                 </ion-select-option>
             </ion-select>
         </ion-item>
         <ion-item>
             <ion-label>Charge Current</ion-label>
-            <ion-select [(ngModel)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'" [interfaceOptions]="ourAlertOptions">
+            <ion-select [(value)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'" [interfaceOptions]="ourAlertOptions">
                 <ion-select-option
                         *ngFor="let opt of currentChoices()"
                         [value]="opt.value"

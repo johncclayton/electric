@@ -127,7 +127,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
             console.log('Preset not set. Returning chemistry type "Anything"');
             return ChemistryType.Anything;
         }
-        console.log(`Preset has chemistry: ${this.preset.type}`);
+        // console.log(`Preset has chemistry: ${this.preset.type}`);
         return this.preset.type;
     }
 
