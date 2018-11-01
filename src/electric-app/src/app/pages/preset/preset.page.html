@@ -7,6 +7,7 @@
         <ion-title>Edit {{preset?.name}}</ion-title>
         <ion-buttons slot="end">
             <ion-button (click)="savePreset()">Save</ion-button>
+            <!--<ion-button (click)="toggleSaving()">T</ion-button>-->
         </ion-buttons>
     </ion-toolbar>
 
@@ -17,17 +18,21 @@
     <ion-refresher (ionRefresh)="refreshPreset($event)">
         <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
-    <ion-spinner *ngIf="saving"></ion-spinner>
+    <div *ngIf="ui$|async as ui">
+        <ion-spinner *ngIf="ui.isSaving"></ion-spinner>
+    </div>
     <ion-list>
         <ion-list-header color="light">Settings</ion-list-header>
         <ion-item>
             <ion-label>Name</ion-label>
-            <ion-input text-right [(ngModel)]="preset.name" [disabled]="isDisabled() || isReadOnly()" no-right-padding></ion-input>
+            <ion-input text-right [(ngModel)]="preset.name" [disabled]="isDisabled() || isReadOnly()"
+                       no-right-padding></ion-input>
         </ion-item>
         <ion-item>
             <ion-label>Type</ion-label>
             <ion-select [(value)]="presetType" [disabled]="isDisabled() || isReadOnly()">
-                <ion-select-option [selected]="opt.value == presetType" [value]="opt.value" *ngFor="let opt of typeChoices()">{{opt.text}}
+                <ion-select-option [selected]="opt.value == presetType" [value]="opt.value"
+                                   *ngFor="let opt of typeChoices()">{{opt.text}}
                 </ion-select-option>
             </ion-select>
 
@@ -49,7 +54,8 @@
         </ion-item>
         <ion-item>
             <ion-label>Charge Current</ion-label>
-            <ion-select [(value)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'" [interfaceOptions]="ourAlertOptions">
+            <ion-select [(value)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'"
+                        [interfaceOptions]="ourAlertOptions">
                 <ion-select-option
                         *ngFor="let opt of currentChoices()"
                         [value]="opt.value"
@@ -61,7 +67,8 @@
         </ion-item>
         <ion-item>
             <ion-label>Capacity</ion-label>
-            <ion-input text-right placeholder="Ignored" [(ngModel)]="preset.capacity" [disabled]="isDisabled()" type="number"
+            <ion-input text-right placeholder="Ignored" [(ngModel)]="preset.capacity" [disabled]="isDisabled()"
+                       type="number"
                        no-right-padding></ion-input>
         </ion-item>
     </ion-list>
@@ -85,11 +92,13 @@
         </ion-item>
         <ion-item>
             <ion-label>Run counter</ion-label>
-            <ion-input text-right [(ngModel)]="preset.run_counter" [disabled]="isDisabled()" no-right-padding></ion-input>
+            <ion-input text-right [(ngModel)]="preset.run_counter" [disabled]="isDisabled()"
+                       no-right-padding></ion-input>
         </ion-item>
         <ion-item>
             <ion-label>Log interval (sec)</ion-label>
-            <ion-input text-right [(ngModel)]="preset.log_interval_sec" [disabled]="isDisabled()" no-right-padding></ion-input>
+            <ion-input text-right [(ngModel)]="preset.log_interval_sec" [disabled]="isDisabled()"
+                       no-right-padding></ion-input>
         </ion-item>
     </ion-list>
 </ion-content>

@@ -1,6 +1,6 @@
-import {AnyAction, Reducer} from "redux";
-import {UIActions} from "../actions/ui";
-import {error} from "util";
+import {AnyAction, Reducer} from 'redux';
+import {UIActions} from '../actions/ui';
+import {error} from 'util';
 
 export interface IUIState {
     exception: string;
@@ -8,6 +8,7 @@ export interface IUIState {
     isConfiguringNetwork: boolean,
     disconnected: boolean;
     disconnectionErrorCount: number;
+    isSaving: boolean;
 }
 
 let defaultUIState: IUIState = {
@@ -16,6 +17,7 @@ let defaultUIState: IUIState = {
     disconnected: true,
     disconnectionErrorCount: 0,
     isConfiguringNetwork: false,
+    isSaving: false
 };
 
 export const
@@ -30,6 +32,18 @@ export const
                 return {
                     ...state,
                     isConfiguringNetwork: action.payload
+                };
+
+            case UIActions.SET_SAVING:
+                return {
+                    ...defaultUIState,
+                    isSaving: true
+                };
+
+            case UIActions.SET_NOTSAVING:
+                return {
+                    ...defaultUIState,
+                    isSaving: false
                 };
 
             case UIActions.SERVER_RECONNECTED:
@@ -55,7 +69,7 @@ export const
                 if (errorObject.name) {
                     details.push(name);
                 }
-                let detail = details.join(", ");
+                let detail = details.join(', ');
 
                 return {
                     ...state,

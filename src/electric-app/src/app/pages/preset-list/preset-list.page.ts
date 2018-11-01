@@ -97,7 +97,7 @@ export class PresetListPage implements OnInit, OnDestroy {
 
     presetCallback(old_preset, new_preset) {
         if (new_preset) {
-            console.log('Got result ', new_preset, ' from the save call');
+            console.log(`Got result ${new_preset} from the save call`);
             old_preset.updateFrom(new_preset);
         }
     }

@@ -1,4 +1,4 @@
-import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, NgZone, OnInit} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {Observable, Subject} from 'rxjs';
 import {AlertController, NavController} from '@ionic/angular';
@@ -7,6 +7,10 @@ import {DataBagService} from '../../services/data-bag.service';
 import * as _ from 'lodash';
 import {ICanDeactivate} from '../../services/can-deactivate-guard.service';
 import {takeUntil} from 'rxjs/operators';
+import {NgRedux, select} from '@angular-redux/store';
+import {IUIState} from '../../models/state/reducers/ui';
+import {IAppState} from '../../models/state/configure';
+import {UIActions} from '../../models/state/actions/ui';
 
 export interface SavePresetInterface {
     savePreset(whenDoneCall: (preset: Preset) => void): void;
@@ -22,7 +26,8 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
     preset: Preset;
     unmodifiedpreset: Preset;
     confirmedExit: boolean = false;
-    saving: boolean = false;
+
+    @select() ui$: Observable<IUIState>;
 
     private __currentChoices;
     private __cellChoices;
@@ -40,6 +45,9 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
     constructor(public navCtrl: NavController,
                 public alertController: AlertController,
                 public appRef: ApplicationRef,
+                public uiActions: UIActions,
+                public ngRedux: NgRedux<IAppState>,
+                public zone: NgZone,
                 public chargerService: iChargerService,
                 public dataBag: DataBagService) {
 
@@ -78,10 +86,11 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
             this.__currentChoices.push({'value': real, 'text': (real).toString() + 'A'});
         }
         // This was used for testing, to quickly get to a page I was working on
-        // this.switchTo(PresetChargePage);
-        // this.switchTo(PresetDischargePage);
-        // this.switchTo(PresetStoragePage);
-        // this.switchTo(PresetCyclePage);
+
+        // this.switchTo('PresetCharge');
+        // this.switchTo('PresetDischarge');
+        // this.switchTo('PresetStorage');
+        // this.switchTo('PresetCycle');
 
         if (this.preset) {
             // console.info(`Selected preset: ${JSON.stringify(this.preset)}`);
@@ -142,7 +151,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
     }
 
     isDisabled() {
-        return this.saving;
+        return this.ngRedux.getState().ui.isSaving;
     }
 
     isReadOnly() {
@@ -178,6 +187,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
                             text: 'Save',
                             handler: () => {
                                 this.savePreset((preset) => {
+                                    this.appRef.tick();
                                     // Pass the result back to the caller.
                                     this.callback(preset);
                                     obs.next(true);
@@ -188,7 +198,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
                         {
                             text: 'Discard',
                             handler: () => {
-                                this.saving = false;
+                                this.uiActions.setIsNotSaving();
                                 obs.next(true);
                                 obs.complete();
                             }
@@ -196,7 +206,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
                         {
                             text: 'Cancel',
                             handler: () => {
-                                this.saving = false;
+                                this.uiActions.setIsNotSaving();
                                 obs.next(false);
                                 obs.complete();
                             }
@@ -216,18 +226,33 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
     // If there's an error, the charger service will fire an event.
     // It'll be picked up by the charger-status component, and an error shown as a toast
     savePreset(whenDoneCall: (preset: Preset) => void): void {
-        this.saving = true;
+        this.uiActions.setIsSaving();
         this.chargerService.savePreset(this.preset)
             .pipe(
                 takeUntil(this.ngUnsubscribe)
             ).subscribe((preset) => {
-            // When you save,  you are always given your preset back.
-            this.unmodifiedpreset = _.cloneDeep(preset);
-            this.saving = false;
-            if (whenDoneCall) {
-                whenDoneCall(preset);
-            }
-        });
+                // Because the chargerService runs and notifies us OUTSIDE of ng
+                this.zone.run(() => {
+                    // When you save,  you are always given your preset back.
+                    this.preset = _.cloneDeep(preset);
+                    this.unmodifiedpreset = _.cloneDeep(preset);
+                });
+            },
+            (error) => {
+                this.zone.run(() => {
+                    console.error(`Error saving preset: ${error}`);
+                    this.uiActions.setIsNotSaving();
+                });
+            }, () => {
+                this.zone.run(() => {
+                    console.log(`Finished saving preset ${this.preset.name}`);
+                    this.uiActions.setIsNotSaving();
+                    this.callback(this.preset);
+                    if (whenDoneCall) {
+                        whenDoneCall(this.preset);
+                    }
+                });
+            });
     }
 
     refreshPreset(refresher) {
@@ -274,5 +299,17 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
         return {
             'header': 'Select Current'
         };
+    }
+
+    private switchTo(page: string) {
+        this.navCtrl.navigateForward(page);
+    }
+
+    toggleSaving() {
+        if(this.ngRedux.getState().ui.isSaving) {
+            this.uiActions.setIsNotSaving();
+        } else {
+            this.uiActions.setIsSaving();
+        }
     }
 }

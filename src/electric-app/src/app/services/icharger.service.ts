@@ -354,25 +354,27 @@ export class iChargerService {
         this.logger.info(action + ' Preset: ', body);
 
         return this.runOutsideAngular(() => {
-            return this.http.put(putURL, body, this.putJsonOptions).pipe(
-                map(resp => {
-                    // Expect a copy of the modified preset?
-                    // If we were adding, the preset is returned. If we're saving, it isn't.
-                    // At the moment, it just returns "ok"
+            return this.http.put(putURL, body, this.putJsonOptions)
+                .pipe(
+                    map(resp => {
+                            // Expect a copy of the modified preset?
+                            // If we were adding, the preset is returned. If we're saving, it isn't.
+                            // At the moment, it just returns "ok"
 
-                    if (addingNewPreset) {
-                        // Return the newly saved preset, with its new memory slot (index)
-                        return new Preset(resp);
-                    } else {
-                        // Just return the modified preset, that the user just saved
-                        return preset;
-                    }
-                }),
-                catchError(error => {
-                    this.uiActions.setErrorMessage(`Can't save: ${error}`);
-                    return throwError(error);
-                })
-            );
+                            if (addingNewPreset) {
+                                // Return the newly saved preset, with its new memory slot (index)
+                                return new Preset(resp);
+                            } else {
+                                // Just return the modified preset, that the user just saved
+                                return preset;
+                            }
+                        }
+                    ),
+                    catchError(error => {
+                        this.uiActions.setErrorMessage(`Can't save: ${error}`);
+                        return throwError(error);
+                    })
+                );
         });
     }
 
