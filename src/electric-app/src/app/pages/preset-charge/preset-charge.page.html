@@ -19,8 +19,8 @@
             <ion-list-header color="light">Charging Options</ion-list-header>
             <ion-item>
                 <ion-label>Charge Mode</ion-label>
-                <ion-select [(ngModel)]="preset.charge_mode">
-                    <ion-select-option value="{{opt.value}}" *ngFor="let opt of chargeModeOptions()">{{opt.text}}
+                <ion-select [(value)]="preset.charge_mode">
+                    <ion-select-option [value]="opt.value" *ngFor="let opt of chargeModeOptions()">{{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -77,9 +77,10 @@
             <ion-list-header color="light">Charging Options</ion-list-header>
             <ion-item>
                 <ion-label>Balance Type</ion-label>
-                <ion-select [(ngModel)]="preset.balance_type">
-                    <ion-select-option value="{{opt.value}}" *ngFor="let opt of balanceOptions()">{{opt.text}}
-                    </ion-select-option>
+                <ion-select [(value)]="preset.balance_type">
+                    <ion-select-option [value]="opt.value"
+                                       [selected]="preset.balance_type == opt.value"
+                                       *ngFor="let opt of balanceOptions()">{{opt.text}}</ion-select-option>
                 </ion-select>
             </ion-item>
 

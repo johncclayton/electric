@@ -60,7 +60,9 @@ export class AppComponent {
                         this.logger.debug('Pushed config into redux store.');
                     } else {
                         this.logger.error(`Config is null? wtf? Saving current as the default.`);
-                        this.config.saveConfiguration(this.ngRedux.getState().config);
+                        this.config.saveConfiguration(this.ngRedux.getState().config).subscribe(null, null, () => {
+                            console.log('Default configuration saved');
+                        });
                     }
                 }, null, () => {
                     this.logger.info(`Configuration loading completed`);
@@ -102,6 +104,7 @@ export class AppComponent {
 
     _afterConfigurationLoaded() {
         // Wait until configuration is loaded before starting things.
+        this.chargerService.startPollingCharger();
         this.systemActions.fetchSystemFromCharger(() => {
             this.configActions.resetNetworkAtrributes();
         });

@@ -102,7 +102,7 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
             {'value': LipoBalanceType.Normal, 'text': 'Normal'},
             {'value': LipoBalanceType.Fast, 'text': 'Fast'},
             {'value': LipoBalanceType.User, 'text': 'User'},
-            {'value': LipoBalanceType.DontBalance, 'text': 'Dont Balance'},
+            {'value': LipoBalanceType.DontBalance, 'text': "Don't Balance"},
         ];
     }
 

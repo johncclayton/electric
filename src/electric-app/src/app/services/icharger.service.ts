@@ -17,6 +17,7 @@ import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {URLService} from './url.service';
 import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
+import {ConfigStoreService} from './config-store.service';
 
 export enum ChargerType {
     iCharger4010Duo = 64,
@@ -80,13 +81,15 @@ export class iChargerService {
                        private chargerActions: ChargerActions,
                        private loggerSvc: CustomNGXLoggerService,
                        private configActions: ConfigurationActions,
+                       private configStoreAction: ConfigStoreService,
                        private localNotifications: LocalNotifications,) {
 
         this.logger = this.loggerSvc.create({level: NgxLoggerLevel.INFO});
         this.haveReceivedSomeResponse = true;
         this.lastUsedIPAddressIndex = 0;
 
-        this.startPollingCharger();
+
+        // this.startPollingCharger();
 
         // NOTE:
         // do not access ngRedux here. It'll be nil.
@@ -122,6 +125,8 @@ export class iChargerService {
                     return errors.pipe(
                         tap((v) => {
                             numberErrors++;
+                            // let urlTried = this.url.getChargerURL('/unified');
+                            this.tryNextInterfaceIfDisconnected();
                             if (v['name'] != 'TimeoutError') {
                                 if (numberErrors % 10 == 0) {
                                     this.logger.error(`Error (retry/${numberErrors}) while polling for charger state: ${JSON.stringify(v)}...`);
@@ -255,10 +260,9 @@ export class iChargerService {
     getChargerStatus(timeout: number = 3000): Observable<any> {
         return of(true).pipe(
             flatMap(v => {
-                this.tryNextInterfaceIfDisconnected();
-
                 let url = this.url.getChargerURL('/unified');
                 this.logActionIfDisconnected(url);
+                // this.logger.info(`Trying ${url} with timeout ${timeout}`);
                 return this.http.get(url, {headers: this.getHttpOptions(timeout)});
             }),
             map(resp => {
@@ -281,6 +285,9 @@ export class iChargerService {
         let state = this.ngRedux.getState();
         iChargerService.device_id = state.charger.device_id;
         if (state.ui.disconnected) {
+            this.configStoreAction.saveConfiguration(this.getConfig()).subscribe(null, null, () => {
+                console.log('Saved connfiguration after successful reconnection');
+            });
             this.uiActions.serverReconnected();
             this.serverReconnection.emit();
         }
