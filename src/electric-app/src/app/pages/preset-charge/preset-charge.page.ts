@@ -29,7 +29,10 @@ export class PresetBasePage {
     }
 
     get preset(): Preset {
-        return this.saver.getPreset();
+        if(this.saver !== undefined) {
+            return this.saver.getPreset();
+        }
+        return null;
     }
 
     savePreset() {

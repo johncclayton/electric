@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {CanDeactivateGuardService} from './services/can-deactivate-guard.service';
+import {CanDeactivatePresetGuard} from './services/can-deactivate-preset-guard.service';
 
 const routes: Routes = [
     {path: '', redirectTo: 'home', pathMatch: 'full'},
@@ -21,7 +21,7 @@ const routes: Routes = [
 @NgModule({
     imports: [RouterModule.forRoot(routes)],
     exports: [RouterModule],
-    providers: [CanDeactivateGuardService]
+    providers: [CanDeactivatePresetGuard]
 })
 export class AppRoutingModule {
 }

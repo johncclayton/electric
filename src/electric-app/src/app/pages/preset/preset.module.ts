@@ -6,13 +6,13 @@ import {Routes, RouterModule} from '@angular/router';
 import {IonicModule} from '@ionic/angular';
 
 import {PresetPage} from './preset.page';
-import {CanDeactivateGuardService} from '../../services/can-deactivate-guard.service';
+import {CanDeactivatePresetGuard} from '../../services/can-deactivate-preset-guard.service';
 
 const routes: Routes = [
     {
         path: '',
         component: PresetPage,
-        canDeactivate: [CanDeactivateGuardService]
+        canDeactivate: [CanDeactivatePresetGuard]
     }
 ];
 

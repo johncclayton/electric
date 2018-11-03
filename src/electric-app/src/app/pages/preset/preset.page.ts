@@ -5,7 +5,7 @@ import {AlertController, NavController, ToastController} from '@ionic/angular';
 import {iChargerService} from '../../services/icharger.service';
 import {DataBagService} from '../../services/data-bag.service';
 import * as _ from 'lodash';
-import {ICanDeactivate} from '../../services/can-deactivate-guard.service';
+import {ICanDeactivate} from '../../services/can-deactivate-preset-guard.service';
 import {takeUntil} from 'rxjs/operators';
 import {NgRedux, select} from '@angular-redux/store';
 import {IUIState} from '../../models/state/reducers/ui';
