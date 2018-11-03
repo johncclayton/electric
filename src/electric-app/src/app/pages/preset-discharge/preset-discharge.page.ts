@@ -5,6 +5,7 @@ import {DataBagService} from '../../services/data-bag.service';
 import {PresetBasePage} from '../preset-charge/preset-charge.page';
 import {Subject} from 'rxjs';
 import {ChemistryType, RegenerativeMode, RegenerativeToChannelMethod} from '../../models/preset-class';
+import {iChargerPickLists} from '../../utils/picklists';
 
 @Component({
     selector: 'app-preset-discharge',
@@ -17,9 +18,9 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
     private _currentChoices;
 
     constructor(navCtrl: NavController,
-                public chargerService: iChargerService,
+                cs: iChargerPickLists,
                 dataBag: DataBagService) {
-        super(navCtrl, dataBag);
+        super(navCtrl, cs, dataBag);
     }
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
@@ -60,6 +61,7 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
     }
 
     joinDisabled() {
+        console.log(`Join disabled? regen mode: ${this.preset.regeneration_mode}`);
         return this.preset.regeneration_mode == RegenerativeMode.Off ||
             this.preset.regeneration_mode != RegenerativeMode.ToChannel;
     }
@@ -68,20 +70,4 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
         // Don't show limits if a) not enabled of b) resistance/bulbs not set
         return this.joinDisabled() || this.preset.regeneration_method != RegenerativeToChannelMethod.ResistanceOrBulbs;
     }
-
-    regenerationModeTypeOptions() {
-        return [
-            {'value': RegenerativeMode.Off, 'text': 'Off'},
-            {'value': RegenerativeMode.ToInput, 'text': 'To input'},
-            {'value': RegenerativeMode.ToChannel, 'text': 'To channel'},
-        ];
-    }
-
-    regenerationMethodOptions() {
-        return [
-            {'value': RegenerativeToChannelMethod.ResistanceOrBulbs, 'text': 'Resistance / Bulbs'},
-            {'value': RegenerativeToChannelMethod.ChargingBattery, 'text': 'Charging battery'},
-        ];
-    }
-
 }

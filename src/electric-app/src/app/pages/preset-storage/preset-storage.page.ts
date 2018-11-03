@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {PresetBasePage} from '../preset-charge/preset-charge.page';
 import {NavController} from '@ionic/angular';
 import {DataBagService} from '../../services/data-bag.service';
+import {iChargerPickLists} from '../../utils/picklists';
 
 @Component({
     selector: 'app-preset-storage',
@@ -13,8 +14,8 @@ export class PresetStoragePage extends PresetBasePage implements OnInit {
     private _voltageRanges;
     private _compensationOptions;
 
-    constructor(navCtrl: NavController, dataBag: DataBagService) {
-        super(navCtrl, dataBag);
+    constructor(navCtrl: NavController, cs: iChargerPickLists, dataBag: DataBagService) {
+        super(navCtrl, cs, dataBag);
     }
 
     ngOnInit() {

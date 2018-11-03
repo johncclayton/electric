@@ -8,6 +8,10 @@ import {UIActions} from '../models/state/actions/ui';
 import {IAppState} from '../models/state/configure';
 import {take, takeUntil} from 'rxjs/operators';
 import {ConfigStoreService} from '../services/config-store.service';
+import {BalanceEndCondition, Preset, RegenerativeMode} from '../models/preset-class';
+import {iChargerPickLists} from '../utils/picklists';
+import * as _ from 'lodash';
+import {ToastHelper} from '../utils/messaging';
 
 @Component({
     selector: 'app-home',
@@ -23,6 +27,11 @@ export class HomePage implements OnInit, OnDestroy {
     timeoutUp: boolean;
     showConfigureButton: boolean;
 
+    // for random testing (no other use)
+    regeneration_mode: RegenerativeMode = 0;
+    some_number: number = 5;
+    preset: Preset;
+
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(
@@ -30,8 +39,10 @@ export class HomePage implements OnInit, OnDestroy {
         private uiAction: UIActions,
         private config: ConfigStoreService,
         private platform: Platform,
+        public chargerLists: iChargerPickLists,
         private zone: NgZone,
         private menuController: MenuController,
+        public messaging: ToastHelper,
         public readonly ngRedux: NgRedux<IAppState>,
     ) {
         this.timeoutUp = false;
@@ -52,6 +63,18 @@ export class HomePage implements OnInit, OnDestroy {
             }, null, () => {
                 console.debug(`'timeout and its time to show some stuff' function completed.`);
             });
+
+        const loadAPreset = true;
+        if (loadAPreset) {
+            this.preset = new Preset({});
+            this.chargerService.getPresets(5)
+                .subscribe(presetsList => {
+                    if (presetsList.length > 10) {
+                        console.warn('Got test preset: #9');
+                        this.preset = presetsList[9];
+                    }
+                });
+        }
     }
 
     ngOnDestroy() {
@@ -123,4 +146,18 @@ export class HomePage implements OnInit, OnDestroy {
         }
         return tips;
     }
+
+    /*
+    Everything below for quicker testing. Copies of methods from other pages
+     */
+    regenerationModeTypeOptions() {
+        return this.chargerLists.regenerationModeTypeOptions();
+    }
+
+    chargeEndOptionUsesEndCurrent() {
+        let validValues = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_or_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
+        console.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
+        return _.includes(validValues, this.preset.balance_end_type);
+    }
+
 }

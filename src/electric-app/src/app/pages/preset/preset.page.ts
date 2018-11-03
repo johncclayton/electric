@@ -1,7 +1,7 @@
 import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, NgZone, OnInit} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {Observable, Subject} from 'rxjs';
-import {AlertController, NavController} from '@ionic/angular';
+import {AlertController, NavController, ToastController} from '@ionic/angular';
 import {iChargerService} from '../../services/icharger.service';
 import {DataBagService} from '../../services/data-bag.service';
 import * as _ from 'lodash';
@@ -11,6 +11,7 @@ import {NgRedux, select} from '@angular-redux/store';
 import {IUIState} from '../../models/state/reducers/ui';
 import {IAppState} from '../../models/state/configure';
 import {UIActions} from '../../models/state/actions/ui';
+import {ToastHelper} from '../../utils/messaging';
 
 export interface SavePresetInterface {
     savePreset(whenDoneCall: (preset: Preset) => void): void;
@@ -22,7 +23,7 @@ export interface SavePresetInterface {
     styleUrls: ['./preset.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
+export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, SavePresetInterface {
     preset: Preset;
     unmodifiedpreset: Preset;
     confirmedExit: boolean = false;
@@ -49,7 +50,8 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
                 public ngRedux: NgRedux<IAppState>,
                 public zone: NgZone,
                 public chargerService: iChargerService,
-                public dataBag: DataBagService) {
+                public dataBag: DataBagService,
+                private messaging: ToastHelper) {
 
         const navParams = this.dataBag.get('preset');
         if (navParams === undefined) {
@@ -87,10 +89,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
         }
         // This was used for testing, to quickly get to a page I was working on
 
-        // this.switchTo('PresetCharge');
-        // this.switchTo('PresetDischarge');
-        // this.switchTo('PresetStorage');
-        // this.switchTo('PresetCycle');
+        // this.goToSubpage('PresetCharge');
+        // this.goToSubpage('PresetDischarge');
+        // this.goToSubpage('PresetStorage');
+        // this.goToSubpage('PresetCycle');
 
         if (this.preset) {
             // console.info(`Selected preset: ${JSON.stringify(this.preset)}`);
@@ -106,7 +108,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
             console.warn(`Preset is undefined. Odd. So... no options for you!`);
             return;
         }
-        console.log(`Deriving preset options for type: ${this.preset.type}`);
+        // console.log(`Deriving preset options for type: ${this.preset.type}`);
         this.__optionsPages = [
             {title: 'Charging', url: 'PresetCharge'},
             {title: 'Discharging', url: 'PresetDischarge'},
@@ -241,11 +243,13 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
             (error) => {
                 this.zone.run(() => {
                     console.error(`Error saving preset: ${error}`);
+                    this.messaging.showMessage(error.toString(), true);
                     this.uiActions.setIsNotSaving();
                 });
             }, () => {
                 this.zone.run(() => {
                     console.log(`Finished saving preset ${this.preset.name}`);
+                    this.messaging.showMessage(`Saved ${this.preset.name}`);
                     this.uiActions.setIsNotSaving();
                     this.callback(this.preset);
                     if (whenDoneCall) {
@@ -301,15 +305,16 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit {
         };
     }
 
-    private switchTo(page: string) {
-        this.navCtrl.navigateForward(page);
-    }
-
     toggleSaving() {
-        if(this.ngRedux.getState().ui.isSaving) {
+        if (this.ngRedux.getState().ui.isSaving) {
             this.uiActions.setIsNotSaving();
         } else {
             this.uiActions.setIsSaving();
         }
+    }
+
+    goToSubpage(page) {
+        this.dataBag.set('preset-saver', this);
+        this.navCtrl.navigateForward(page.url);
     }
 }

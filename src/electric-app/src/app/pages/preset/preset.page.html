@@ -30,7 +30,7 @@
         </ion-item>
         <ion-item>
             <ion-label>Type</ion-label>
-            <ion-select [(value)]="presetType" [disabled]="isDisabled() || isReadOnly()">
+            <ion-select [(ngModel)]="presetType" [disabled]="isDisabled() || isReadOnly()">
                 <ion-select-option [selected]="opt.value == presetType" [value]="opt.value"
                                    *ngFor="let opt of typeChoices()">{{opt.text}}
                 </ion-select-option>
@@ -45,7 +45,7 @@
         -->
         <ion-item *ngIf="showCells()">
             <ion-label>Cells</ion-label>
-            <ion-select [(value)]="'' + preset.cells" [disabled]="isDisabled()">
+            <ion-select [(ngModel)]="'' + preset.cells" [disabled]="isDisabled()">
                 <ion-select-option
                         [value]="'' + opt.value"
                         *ngFor="let opt of cellChoices()">{{opt.text}}
@@ -54,7 +54,7 @@
         </ion-item>
         <ion-item>
             <ion-label>Charge Current</ion-label>
-            <ion-select [(value)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'"
+            <ion-select [(ngModel)]="preset.charge_current" [disabled]="isDisabled()" [interface]="'alert'"
                         [interfaceOptions]="ourAlertOptions">
                 <ion-select-option
                         *ngFor="let opt of currentChoices()"
@@ -75,7 +75,7 @@
 
     <ion-list>
         <ion-list-header color="light">Task Options</ion-list-header>
-        <ion-item detail="true" *ngFor="let page of optionPagesForCurrentType" [href]="page.url">
+        <ion-item detail="true" *ngFor="let page of optionPagesForCurrentType" (click)="goToSubpage(page)">
             {{page.title}}
         </ion-item>
     </ion-list>

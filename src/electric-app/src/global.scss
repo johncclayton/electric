@@ -3,14 +3,11 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-
 @import "~@ionic/angular/css/padding.css";
 @import "~@ionic/angular/css/float-elements.css";
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
-
-
 
 /// Center the spinner horizontally
 ion-spinner {
@@ -24,5 +21,19 @@ ion-spinner {
   }
 }
 
+.messaging.success {
+  .toast-wrapper {
+    background-color: var(--ion-color-success) !important;
+    color: white !important;
+  }
+}
 
+.messaging.error {
+  .toast-wrapper {
+    background-color: var(--ion-color-danger) !important;
+    color: white !important;
+  }
+}
+
+@import "fix-ion-ranges";
 @import "channel.display.scss";

@@ -61,6 +61,36 @@
                 <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
                 <charger-status [system]="system$|async" [charger]="charger$|async"></charger-status>
 
+                <!--<ion-button color="secondary" (click)="messaging.showMessage('YO YO YO')">-->
+                    <!--Show Message-->
+                <!--</ion-button>-->
+                <!--<ion-button color="danger" (click)="messaging.showMessage('eeek', true)">-->
+                    <!--Show Error-->
+                <!--</ion-button>-->
+
+                <!--<ion-list-header color="light">Regeneration</ion-list-header>-->
+                <!--<ion-item>-->
+                <!--<ion-label>End</ion-label>-->
+                <!--<ion-select [(ngModel)]="preset.balance_end_type">-->
+                <!--<ion-select-option [value]="opt.value" *ngFor="let opt of chargerLists.chargeEndOptions()">-->
+                <!--{{opt.text}}-->
+                <!--</ion-select-option>-->
+                <!--</ion-select>-->
+                <!--</ion-item>-->
+                <!--<ion-list class="charger-slider">-->
+                <!--<ion-item [lines]="'none'">-->
+                <!--<ion-label>End Current %</ion-label>-->
+                <!--</ion-item>-->
+                <!--<ion-item>-->
+                <!--<ion-range [disabled]="!chargeEndOptionUsesEndCurrent()" [(value)]="preset.charge_end_current"-->
+                <!--pin=true min="10" max="50">-->
+                <!--<ion-label slot="start">10%</ion-label>-->
+                <!--<ion-label slot="end">50%</ion-label>-->
+                <!--</ion-range>-->
+                <!--</ion-item>-->
+
+                <!--</ion-list>-->
+
                 <channel name="Channel 1" [charger]="charger$|async" [index]="0"></channel>
                 <channel name="Channel 2" [charger]="charger$|async" [index]="1"></channel>
                 <!--<ion-button (click)="chargerService.notificationWhenDone('Mooo')">DO SOMETHING</ion-button>-->

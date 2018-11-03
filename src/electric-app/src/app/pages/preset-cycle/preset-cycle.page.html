@@ -18,21 +18,22 @@
         <ion-list-header color="light">Cycle Options</ion-list-header>
         <ion-item>
             <ion-label>Mode</ion-label>
-            <ion-select [(ngModel)]="preset.cycle_mode">
-                <ion-select-option [value]="opt.value" *ngFor="let opt of cycleModeOptions()">{{opt.text}}
+            <ion-select slot="end" [(ngModel)]="''+preset.cycle_mode">
+                <ion-select-option [value]="''+opt.value" *ngFor="let opt of cycleModeOptions()">{{opt.text}}
                 </ion-select-option>
             </ion-select>
         </ion-item>
         <ion-item>
             <ion-label>Count</ion-label>
-            <ion-select [(ngModel)]="preset.cycle_count">
-                <ion-select-option value="opt.value" *ngFor="let opt of cycleCountOptions()">{{opt.text}}
+            <ion-select slot="end" [(ngModel)]="''+preset.cycle_count">
+                <ion-select-option [value]="''+opt.value" *ngFor="let opt of cycleCountOptions()">{{opt.text}}
                 </ion-select-option>
             </ion-select>
         </ion-item>
         <ion-item>
             <ion-label>Delay Time</ion-label>
-            <ion-input text-right type="number" no-right-padding [min]="0.00" [max]="1000"></ion-input>
+            <ion-input slot="end" text-right type="number" no-right-padding [min]="0.00" [max]="1000"
+                       [(ngModel)]="preset.cycle_delay"></ion-input>
         </ion-item>
     </ion-list>
 </ion-content>

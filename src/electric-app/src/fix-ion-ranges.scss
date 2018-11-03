@@ -1,0 +1,27 @@
+// This handles making horizontal sliders look acceptable
+// - Labels are made 100% width, so they center horizontally
+// - Labels within the ion-range are made flex:none so they don't act as equal columns
+ion-list.charger-slider {
+  ion-item {
+    width: 100% !important;
+    ion-label {
+      text-align: center;
+    }
+
+    ion-range {
+      padding: 0 !important;
+
+      ion-label {
+        flex: none !important;
+      }
+      ion-label:nth-child(1) {
+        // this provides some space between the knob and the left-hand-side label
+        padding-right: 8px !important;
+      }
+      ion-label:nth-child(2) {
+        // this provides some space between the knob and the right-hand-side label
+        padding-left: 18px !important;
+      }
+    }
+  }
+}

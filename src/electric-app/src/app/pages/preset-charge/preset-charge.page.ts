@@ -2,62 +2,34 @@ import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {NavController} from '@ionic/angular';
 import {BalanceEndCondition, ChemistryType, LipoBalanceType, Preset} from '../../models/preset-class';
 import {DataBagService} from '../../services/data-bag.service';
-import {celciusToF} from '../../utils/helpers';
-import {System} from '../../models/system';
 import {SavePresetInterface} from '../preset/preset.page';
-import * as _ from "lodash";
+import * as _ from 'lodash';
+import {iChargerPickLists} from '../../utils/picklists';
 
 export class PresetBasePage {
     public preset: Preset;
 
     private saver: SavePresetInterface;
 
-    private _safetyTemp;
-    private _safetyCapacity;
-
     constructor(public navCtrl: NavController,
+                public chargerLists: iChargerPickLists,
                 public dataBag: DataBagService) {
         const navParams = this.dataBag.get('preset');
-        if(navParams !== undefined) {
+        if (navParams !== undefined) {
             this.preset = navParams['preset'];
-            this.saver = navParams['saver'];
         } else {
-            this.navCtrl.navigateBack('PresetList');
+            this.navCtrl.navigateRoot('home');
         }
-    }
-
-    public safetyTempOptions() {
-        if(this._safetyTemp === undefined) {
-            let list = [];
-            for (let num = 200; num < 800; num += 5) {
-                let celcius = (num / 10);
-                let farenheight = celciusToF(celcius);
-                list.push({
-                    'value': celcius,
-                    'text': celcius.toString() + System.CELSIUS + " / " + farenheight + System.FARENHEIGHT
-                });
-            }
-            this._safetyTemp = list;
-        }
-        return this._safetyTemp;
-    }
-
-    public safetyCapacityOptions() {
-        if(this._safetyCapacity ===undefined) {
-            let list = [];
-            for (let num = 50; num < 200; num += 5) {
-                let capacity = num;
-                list.push({'value': capacity, 'text': capacity.toString() + "%"});
-            }
-            this._safetyCapacity = list;
-        }
-        return this._safetyCapacity;
+        this.saver = this.dataBag.get('preset-saver');
     }
 
     savePreset() {
         if (this.saver) {
             this.saver.savePreset((p) => {
+                console.log(`Saver saved ok`);
             });
+        } else {
+            console.warn('No preset saver set, cannot save');
         }
     }
 }
@@ -69,8 +41,8 @@ export class PresetBasePage {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PresetChargePage extends PresetBasePage implements OnInit {
-    constructor(navCtrl: NavController, dataBag: DataBagService) {
-        super(navCtrl, dataBag);
+    constructor(navCtrl: NavController, public chargerLists: iChargerPickLists, dataBag: DataBagService) {
+        super(navCtrl, chargerLists, dataBag);
     }
 
     ngOnInit() {
@@ -86,66 +58,72 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
     }
 
     chargeModeOptions() {
-        let modes = [];
         switch (this.preset.type) {
             case ChemistryType.NiMH:
-                modes = [
-                    {'value': 0, 'text': 'Normal'},
-                    {'value': 1, 'text': 'Reflex'}];
+                return this.chargerLists.listNamed('chargeModeOptions', () => {
+                    return [
+                        {'value': 0, 'text': 'Normal'},
+                        {'value': 1, 'text': 'Reflex'}
+                    ];
+                });
         }
-        return modes;
+        return [];
     }
 
     balanceOptions() {
-        return [
-            {'value': LipoBalanceType.Slow, 'text': 'Slow'},
-            {'value': LipoBalanceType.Normal, 'text': 'Normal'},
-            {'value': LipoBalanceType.Fast, 'text': 'Fast'},
-            {'value': LipoBalanceType.User, 'text': 'User'},
-            {'value': LipoBalanceType.DontBalance, 'text': "Don't Balance"},
-        ];
+        return this.chargerLists.listNamed('balanceOptions', () => {
+            return [
+                {'value': LipoBalanceType.Slow, 'text': 'Slow'},
+                {'value': LipoBalanceType.Normal, 'text': 'Normal'},
+                {'value': LipoBalanceType.Fast, 'text': 'Fast'},
+                {'value': LipoBalanceType.User, 'text': 'User'},
+                {'value': LipoBalanceType.DontBalance, 'text': 'Don\'t Balance'},
+            ];
+        });
     }
 
     chargeEndOptions() {
-        return [
-            {'value': BalanceEndCondition.EndCurrentOff_DetectBalanceOn, 'text': 'Detect Balance Only'},
-            {'value': BalanceEndCondition.EndCurrentOn_DetectBalanceOff, 'text': 'End Current Only'},
-            {'value': BalanceEndCondition.EndCurrent_or_DetectBalance, 'text': 'Balance or Current'},
-            {'value': BalanceEndCondition.EndCurrent_and_DetectBalance, 'text': 'Balance and Current'},
-        ]
+        return this.chargerLists.chargeEndOptions();
     }
 
     chargeEndOptionUsesEndCurrent() {
-        let valid_values = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
-        return _.includes(valid_values, this.preset.balance_end_type);
+        let validValues = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_or_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
+        console.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
+        return _.includes(validValues, this.preset.balance_end_type);
     }
 
     restoreVoltageOptions() {
-        let list = [];
-        for (let num = 5; num < 25; num++) {
-            let number = (num / 10);
-            list.push({'value': number, 'text': number.toString() + "V"});
-        }
-        return list;
+        return this.chargerLists.listNamed('restoreVoltageOptions', () => {
+            let list = [];
+            for (let num = 5; num < 25; num++) {
+                let number = (num / 10);
+                list.push({'value': number, 'text': number.toString() + 'V'});
+            }
+            return list;
+        });
     }
 
     restoreChargeTimeOptions() {
-        return [
-            {'value': 1, 'text': '1 min'},
-            {'value': 2, 'text': '2 min'},
-            {'value': 3, 'text': '3 min'},
-            {'value': 4, 'text': '4 min'},
-            {'value': 5, 'text': '5 min'},
-        ];
+        return this.chargerLists.listNamed('restoreChargeTimeOptions', () => {
+            return [
+                {'value': 1, 'text': '1 min'},
+                {'value': 2, 'text': '2 min'},
+                {'value': 3, 'text': '3 min'},
+                {'value': 4, 'text': '4 min'},
+                {'value': 5, 'text': '5 min'},
+            ];
+        });
     }
 
     restoreCurrentOptions() {
-        let list = [];
-        for (let num = 2; num < 50; num++) {
-            let number = (num / 100);
-            list.push({'value': number, 'text': number.toString() + "A"});
-        }
-        return list;
+        return this.chargerLists.listNamed('restoreCurrentOptions', () => {
+            let list = [];
+            for (let num = 2; num < 50; num++) {
+                let number = (num / 100);
+                list.push({'value': number, 'text': number.toString() + 'A'});
+            }
+            return list;
+        });
     }
 
     nimhTrickelEnabled() {
@@ -153,35 +131,43 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
     }
 
     nimhSensitivityOptions() {
-        let list = [];
-        for (let num = 1; num < 20; num++) {
-            list.push({'value': num, 'text': num.toString() + "mV"});
-        }
-        return list;
+        return this.chargerLists.listNamed('nimhSensitivityOptions', () => {
+            let list = [];
+            for (let num = 1; num < 20; num++) {
+                list.push({'value': num, 'text': num.toString() + 'mV'});
+            }
+            return list;
+        });
     }
 
     nimhDelayTimeOptions() {
-        let list = [];
-        for (let num = 0; num < 20; num++) {
-            list.push({'value': num, 'text': num.toString() + "min"});
-        }
-        return list;
+        return this.chargerLists.listNamed('nimhDelayTimeOptions', () => {
+            let list = [];
+            for (let num = 0; num < 20; num++) {
+                list.push({'value': num, 'text': num.toString() + 'min'});
+            }
+            return list;
+        });
     }
 
     nimhTrickleCurrentOptions() {
-        let list = [];
-        for (let num = 20; num < 100; num++) {
-            let actual = num / 100;
-            list.push({'value': actual, 'text': actual.toString() + "A"});
-        }
-        return list;
+        return this.chargerLists.listNamed('nimhTrickleCurrentOptions', () => {
+            let list = [];
+            for (let num = 20; num < 100; num++) {
+                let actual = num / 100;
+                list.push({'value': actual, 'text': actual.toString() + 'A'});
+            }
+            return list;
+        });
     }
 
     generalMinuteOptions(start: number, end: number) {
-        let list = [];
-        for (let num = start; num < end; num++) {
-            list.push({'value': num, 'text': num.toString() + "min"});
-        }
-        return list;
+        return this.chargerLists.listNamed('generalMinuteOptions', () => {
+            let list = [];
+            for (let num = start; num < end; num++) {
+                list.push({'value': num, 'text': num.toString() + 'min'});
+            }
+            return list;
+        });
     }
 }
