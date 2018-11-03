@@ -7,11 +7,13 @@ import {IonicModule} from '@ionic/angular';
 
 import {PresetDischargePage} from './preset-discharge.page';
 import {ComponentsModule} from '../../components/components.module';
+import {CanDeactivateGuardService} from '../../services/can-deactivate-guard.service';
 
 const routes: Routes = [
     {
         path: '',
-        component: PresetDischargePage
+        component: PresetDischargePage,
+        canDeactivate: [CanDeactivateGuardService]
     }
 ];
 

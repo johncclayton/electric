@@ -5,22 +5,31 @@ import {DataBagService} from '../../services/data-bag.service';
 import {SavePresetInterface} from '../preset/preset.page';
 import * as _ from 'lodash';
 import {iChargerPickLists} from '../../utils/picklists';
+import {Observable, of} from 'rxjs';
 
 export class PresetBasePage {
-    public preset: Preset;
-
     private saver: SavePresetInterface;
 
     constructor(public navCtrl: NavController,
                 public chargerLists: iChargerPickLists,
                 public dataBag: DataBagService) {
         const navParams = this.dataBag.get('preset');
-        if (navParams !== undefined) {
-            this.preset = navParams['preset'];
-        } else {
+        if (navParams === undefined) {
             this.navCtrl.navigateRoot('home');
         }
         this.saver = this.dataBag.get('preset-saver');
+    }
+
+    canDeactivate(): Observable<boolean> {
+        if (this.saver) {
+            return this.saver.canDeactivate();
+        }
+        console.warn('No preset saver set, cannot return intelligen canDeactivate, assuming "true"');
+        return of(true);
+    }
+
+    get preset(): Preset {
+        return this.saver.getPreset();
     }
 
     savePreset() {
@@ -88,7 +97,7 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
 
     chargeEndOptionUsesEndCurrent() {
         let validValues = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_or_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
-        console.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
+        // console.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
         return _.includes(validValues, this.preset.balance_end_type);
     }
 

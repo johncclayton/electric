@@ -236,12 +236,13 @@ export class Preset {
     }
 
     set charge_cell_voltage(value: number) {
+        value = +value;
         switch (this.type) {
             case ChemistryType.LiPo:
-                this.data['lipo_charge_cell_voltage'] = +value;
+                this.data['lipo_charge_cell_voltage'] = value;
                 break;
             case ChemistryType.LiFe:
-                this.data['life_charge_cell_voltage'] = +value;
+                this.data['life_charge_cell_voltage'] = value;
                 break;
         }
     }

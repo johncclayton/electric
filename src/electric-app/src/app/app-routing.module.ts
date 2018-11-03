@@ -11,7 +11,7 @@ const routes: Routes = [
     {path: 'NetworkWizard', loadChildren: './pages/network-wizard/network-wizard.module#NetworkWizardPageModule'},
     {path: 'SystemSettings', loadChildren: './pages/system-settings/system-settings.module#SystemSettingsPageModule'},
     {path: 'PresetList', loadChildren: './pages/preset-list/preset-list.module#PresetListPageModule'},
-    {path: 'Preset', canDeactivate: [CanDeactivateGuardService], loadChildren: './pages/preset/preset.module#PresetPageModule'},
+    {path: 'Preset', loadChildren: './pages/preset/preset.module#PresetPageModule'},
     {path: 'PresetCharge', loadChildren: './pages/preset-charge/preset-charge.module#PresetChargePageModule'},
     {path: 'PresetDischarge', loadChildren: './pages/preset-discharge/preset-discharge.module#PresetDischargePageModule'},
     {path: 'PresetStorage', loadChildren: './pages/preset-storage/preset-storage.module#PresetStoragePageModule'},

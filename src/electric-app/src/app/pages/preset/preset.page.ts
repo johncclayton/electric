@@ -15,6 +15,10 @@ import {ToastHelper} from '../../utils/messaging';
 
 export interface SavePresetInterface {
     savePreset(whenDoneCall: (preset: Preset) => void): void;
+
+    canDeactivate(): Observable<boolean>;
+
+    getPreset(): Preset;
 }
 
 @Component({
@@ -163,11 +167,23 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
         return this.preset.readonly;
     }
 
+    getPreset() {
+        return this.preset;
+    }
+
     canDeactivate(): Observable<boolean> {
         return Observable.create(obs => {
+            if (!this.preset) {
+                console.warn(`CanDeactivate for ${this.constructor.name} has no preset, returning true`);
+                obs.next(true);
+                obs.complete();
+                return;
+            }
             // If there are changes, we should prompt the user to save.
+            console.log(`${this.constructor.name} is checking to see if the preset has changed...`);
             let presetBeingEdited = this.preset;
             let modifiedProperties = _.reduce(this.unmodifiedpreset.data, function (result, value, key) {
+                // console.log(`checking key ${key}. Does ${value} != ${presetBeingEdited.data[key]} ? `);
                 return _.isEqual(value, presetBeingEdited.data[key]) ?
                     result : result.concat(key);
             }, []);
@@ -175,7 +191,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
             // let are_equal = _.isEqual(this.unmodifiedpreset.data, this.preset.data);
             let are_equal = modifiedProperties.length == 0;
             if (!are_equal) {
-                console.log('Preset modified:');
+                console.log(`Preset ${this.preset.name} is modified:`);
                 for (let property of modifiedProperties) {
                     console.log(property, ': ', this.unmodifiedpreset.data[property], ' (', typeof(this.unmodifiedpreset.data[property]),
                         ') now = ', presetBeingEdited.data[property], '(', typeof(presetBeingEdited.data[property]), ')');
@@ -218,6 +234,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
                     alert.present();
                 });
             } else {
+                console.log(`Preset ${this.preset.name} has no changes, fine to deactivate`);
                 obs.next(true);
                 obs.complete();
             }

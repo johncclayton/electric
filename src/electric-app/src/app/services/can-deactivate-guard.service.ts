@@ -15,10 +15,10 @@ export class CanDeactivateGuardService implements CanDeactivate<ICanDeactivate> 
     }
 
     canDeactivate(component: ICanDeactivate, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState?: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+        // console.log(`CanDeactivateGuardService called for: ${component}, route: ${currentRoute}`);
         if(component) {
-            console.log(`Component: ${component ? component.constructor.name : 'null'}`);
-            console.log(`ARS: ${currentRoute.component.constructor.name}`);
-
+            // console.log(`Component: ${component ? component.constructor.name : 'null'}`);
+            // console.log(`ARS: ${currentRoute.component.constructor.name}`);
             return component.canDeactivate();
         }
         return true;

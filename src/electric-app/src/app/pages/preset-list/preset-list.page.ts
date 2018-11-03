@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterContentInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {List, NavController, Refresher, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
@@ -13,7 +13,7 @@ import {Chemistry} from '../../utils/mixins';
     templateUrl: './preset-list.page.html',
     styleUrls: ['./preset-list.page.scss'],
 })
-export class PresetListPage implements OnInit, OnDestroy {
+export class PresetListPage implements OnDestroy, AfterContentInit {
     failedToGetPresets: boolean = false;
     loadingPresets: boolean = true;
     public presets: Array<Preset>;
@@ -28,8 +28,14 @@ export class PresetListPage implements OnInit, OnDestroy {
                 public toastController: ToastController) {
     }
 
-    ngOnInit() {
-        this.refreshPresets();
+    ngAfterContentInit() {
+        if(!this.chargerService.isConnectedToCharger()) {
+            setTimeout(() => {
+                this.navCtrl.navigateBack(['']);
+            }, 500);
+        } else {
+            this.refreshPresets();
+        }
     }
 
     ngOnDestroy() {

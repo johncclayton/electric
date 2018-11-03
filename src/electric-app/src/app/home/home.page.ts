@@ -150,14 +150,5 @@ export class HomePage implements OnInit, OnDestroy {
     /*
     Everything below for quicker testing. Copies of methods from other pages
      */
-    regenerationModeTypeOptions() {
-        return this.chargerLists.regenerationModeTypeOptions();
-    }
-
-    chargeEndOptionUsesEndCurrent() {
-        let validValues = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_or_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
-        console.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
-        return _.includes(validValues, this.preset.balance_end_type);
-    }
 
 }
