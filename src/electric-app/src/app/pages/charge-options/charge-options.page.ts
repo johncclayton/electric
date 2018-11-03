@@ -58,7 +58,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
                 public toastController: ToastController,
                 public ngRedux: NgRedux<IAppState>) {
 
-        this.filteredPresets$ = new BehaviorSubject<Array<Preset>>([]);
+        this.filteredPresets$ = new BehaviorSubject<Array<Preset>>(null);
 
         const options = this.dataBag.get('chargingOptions');
         if (!options) {
@@ -255,7 +255,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
             console.info(`Loaded the preset list... (${this._presets.length} items)`);
         } else {
             console.warn(`Got a ${list.constructor.name} for presets, expected a list`);
-            this.filteredPresets$.next([]);
+            this.filteredPresets$.next(null);
         }
     }
 
@@ -267,6 +267,9 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
         let presets = this._presets.filter((preset) => {
             // Ignore the specific IR measurement preset
             if (preset.name == iChargerService.irMeasurementPresetName) {
+                return false;
+            }
+            if (preset.name == ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME) {
                 return false;
             }
             if (chemistry == Preset.chemistryPrefix(ChemistryType.Anything)) {

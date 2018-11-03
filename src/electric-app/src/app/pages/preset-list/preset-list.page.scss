@@ -1,5 +1,7 @@
 
 .mini-badge {
+  // default to grey
+  --background: var(--chemisty-color-other);
   font-size: 0.7em;
   color: white;
   border-radius: 4px;
@@ -7,10 +9,12 @@
   padding-right: 5px;
   padding-top: 2px;
   padding-bottom: 2px;
-  background: var(--chemisty-color-other);
+  background: var(--background);
   margin-right: 5px;
   display: inline-block;
 }
+
+@import "../../../theme/chemistry";
 
 .error {
   h3 {
@@ -21,8 +25,6 @@
   }
   text-align: center;
 }
-
-@import "../../../theme/chemistry";
 
 [no-right-padding] {
   padding-right: 0 !important;

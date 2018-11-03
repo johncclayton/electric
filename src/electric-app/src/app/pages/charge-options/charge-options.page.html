@@ -27,7 +27,7 @@
                     <ion-segment-button value="NM">NiMh</ion-segment-button>
                 </ion-segment>
 
-                <ion-grid *ngIf="filteredPresets$|async as fp">
+                <ion-grid *ngIf="filteredPresets$|async as fp; else stillLoading">
                     <ion-row *ngFor="let some of fp" no-padding>
                         <ion-col *ngFor="let preset of some">
                             <ion-button [ngClass]="chemistryClass(preset)" size="small" expand="block"
@@ -37,6 +37,9 @@
                         </ion-col>
                     </ion-row>
                 </ion-grid>
+                <ng-template #stillLoading>
+                    <ion-spinner></ion-spinner>
+                </ng-template>
             </div>
             <div *ngSwitchCase="'capacity'">
                 <!--<h4 text-center>By Capacity & C</h4>-->
