@@ -1,8 +1,8 @@
-import {Injectable} from "@angular/core";
-import {IAppState} from "../configure";
-import {NgRedux} from "@angular-redux/store";
-import * as _ from "lodash";
-import {compareTwoMaps} from "../../../utils/helpers";
+import {Injectable} from '@angular/core';
+import {IAppState} from '../configure';
+import {NgRedux} from '@angular-redux/store';
+import * as _ from 'lodash';
+import {compareTwoMaps} from '../../../utils/helpers';
 
 
 @Injectable({
@@ -10,6 +10,7 @@ import {compareTwoMaps} from "../../../utils/helpers";
 })
 export class ConfigurationActions {
     static RESET_TO_DEFAULTS: string = 'RESET_TO_DEFAULTS';
+    static RESET_CHARGE_SETTINGS_TO_DEFAULTS: string = 'RESET_CHARGE_SETTINGS_TO_DEFAULTS';
     static UPDATE_CONFIG_KEYVALUE: string = 'UPDATE_CONFIG_KEYVALUE';
     static UPDATE_CHARGE_CONFIG_KEYVALUE: string = 'UPDATE_CHARGE_CONFIG_KEYVALUE';
     static CONFIG_SAVED_TO_STORE: string = 'CONFIG_SAVED_TO_STORE';
@@ -25,13 +26,19 @@ export class ConfigurationActions {
         });
     }
 
+    resetChargeSettingsToDefaults() {
+        this.ngRedux.dispatch({
+            type: ConfigurationActions.RESET_CHARGE_SETTINGS_TO_DEFAULTS
+        });
+    }
+
     addDiscoveredServer(ipAddress: string) {
-        if (!ipAddress || ipAddress == "") {
+        if (!ipAddress || ipAddress == '') {
             return;
         }
 
         // Filter our any discovery on the private subnet
-        if (ipAddress.startsWith("192.168.10")) {
+        if (ipAddress.startsWith('192.168.10')) {
             return;
         }
 
@@ -55,7 +62,7 @@ export class ConfigurationActions {
     }
 
     removeDiscoveredServer(ipAddress: string) {
-        console.log("Removing " + ipAddress + " from discovery list");
+        console.log('Removing ' + ipAddress + ' from discovery list');
         let existing = this.ngRedux.getState().config.network;
         let newState = existing.discoveredServers.filter((s) => {
             return s != ipAddress;
@@ -87,7 +94,7 @@ export class ConfigurationActions {
         let actual = {
             network: change
         };
-        this.updateConfiguration(actual)
+        this.updateConfiguration(actual);
     }
 
     updateConfiguration(change) {
@@ -98,7 +105,7 @@ export class ConfigurationActions {
             // Check to see if any values have changed
             let comparison_result = compareTwoMaps(change, config);
             if (comparison_result.length > 0) {
-                console.log("Keys differ: " + comparison_result.join(", "));
+                console.log('Keys differ: ' + comparison_result.join(', '));
                 this.ngRedux.dispatch({
                     type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
                     payload: change
@@ -125,7 +132,7 @@ export class ConfigurationActions {
             network: {
                 is_applying_change: false
             }
-        })
+        });
     }
 
     startWifiChange() {
@@ -133,7 +140,7 @@ export class ConfigurationActions {
             network: {
                 is_applying_change: true
             }
-        })
+        });
     }
 }
 

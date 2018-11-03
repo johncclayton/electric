@@ -1,54 +1,73 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, NgZone, OnInit} from '@angular/core';
 import {Chemistry} from '../../utils/mixins';
 import {applyMixins} from 'rxjs/internal-compatibility';
-import {IChargeSettings, IConfig} from '../../models/state/reducers/configuration';
+import {chargerSettingsDefaults, IChargeSettings, IConfig} from '../../models/state/reducers/configuration';
 import {IUIState} from '../../models/state/reducers/ui';
 import {Channel} from '../../models/channel';
-import {Subject} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {NavController, ToastController} from '@ionic/angular';
 import {iChargerService} from '../../services/icharger.service';
 import {UIActions} from '../../models/state/actions/ui';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {IAppState} from '../../models/state/configure';
 import {DataBagService} from '../../services/data-bag.service';
-import {takeUntil} from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {sprintf} from 'sprintf-js';
-import * as _ from "lodash";
+import * as _ from 'lodash';
+import {ConfigurationActions} from '../../models/state/actions/configuration';
 
 @Component({
     selector: 'app-charge-options',
     templateUrl: './charge-options.page.html',
     styleUrls: ['./charge-options.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChargeOptionsPage implements OnInit, Chemistry {
+export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
     private previousURL: string;
 
-    config: IConfig;
-    chargeSettings: IChargeSettings;
-    ui: IUIState;
+    filteredPresets$: Subject<Array<Preset>>;
+    @select() config$: Observable<IConfig>;
+    @select() ui$: Observable<IUIState>;
+    @select(['config', 'charge_settings']) charge_settings$: Observable<IConfig>;
 
     channel: Channel;
     title: string = 'Charge';
     showCapacityAndC: boolean = true;
     charging: boolean = true;
-    presets: Array<any> = [];
+    _presets: Array<any> = [];
 
     private callback: any;
     private simpleAlert: any;
 
     public static CHARGE_BY_PLAN_PRESET_NAME: string = 'Electric Charge Plan';
 
+    private chargeSettings: IChargeSettings;
+    private config: IConfig;
+    private ui: IUIState;
+
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public uiActions: UIActions,
+                public zone: NgZone,
+                public appRef: ApplicationRef,
+                public configActions: ConfigurationActions,
                 public dataBag: DataBagService,
                 public toastController: ToastController,
                 public ngRedux: NgRedux<IAppState>) {
 
+        this.filteredPresets$ = new BehaviorSubject<Array<Preset>>([]);
+
         const options = this.dataBag.get('chargingOptions');
+        if (!options) {
+            setTimeout(() => {
+                this.navCtrl.navigateRoot('');
+            }, 500);
+            return;
+        }
+
         this.channel = options['channel'];
         this.showCapacityAndC = options['showCapacityAndC'];
         this.charging = options['charging'];
@@ -57,29 +76,44 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
         this.config = null;
         this.previousURL = options['previousURL'];
         this.chargeSettings = null;
+    }
 
-        ngRedux.select<IConfig>('config')
+    ngOnInit() {
+        this.ngRedux.select<IConfig>('config')
             .pipe(
                 takeUntil(this.ngUnsubscribe)
             )
             .subscribe(c => {
-                this.config = c;
-                this.chargeSettings = this.config.charge_settings;
-
-                if (!this.showCapacityAndC) {
-                    // Force to presets (not computed)
-                    this.chargeSettings.chargeMethod = 'presets';
-                }
+                this.zone.run(() => {
+                    this.config = c;
+                    this.chargeSettings = this.config.charge_settings;
+                    if (this.chargeSettings == null || this.chargeSettings === undefined) {
+                        console.log(`No charger settings, reset to defaults`);
+                        this.configActions.resetChargeSettingsToDefaults();
+                    } else {
+                        console.warn(`Setup charge settings to: ${JSON.stringify(this.chargeSettings)}`);
+                    }
+                    if (!this.showCapacityAndC) {
+                        // Force to presets (not computed)
+                        this.chargeMethod = 'presets';
+                    }
+                });
             });
     }
 
-    ngOnInit() {
+    ngAfterContentInit() {
         this.chargerService.getPresets()
             .pipe(
                 takeUntil(this.ngUnsubscribe)
             )
             .subscribe((presetList) => {
-                this.presets = presetList;
+                this.zone.run(() => {
+                    if(presetList) {
+                        this.presets = presetList;
+                    } else {
+                        console.warn(`Got 'next' for loading preses, but list was null?`);
+                    }
+                });
             });
     }
 
@@ -99,7 +133,7 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
     }
 
     async chargeUsingPlan() {
-        let chargePlanPreset: Preset = this.presets.find((p: Preset) => {
+        let chargePlanPreset: Preset = this._presets.find((p: Preset) => {
             return p.name == ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME;
         });
 
@@ -153,11 +187,16 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
     }
 
     get chargeMethod(): string {
-        return this.chargeSettings.chargeMethod;
+        if (this.chargeSettings !== undefined && this.chargeSettings !== null) {
+            return this.chargeSettings.chargeMethod;
+        }
+        return '';
     }
 
     set chargeMethod(value) {
-        this.chargerService.setChargeConfiguration('chargeMethod', value);
+        if (this.chargeMethod != value) {
+            this.chargerService.setChargeConfiguration('chargeMethod', value);
+        }
     }
 
     get chemistryFilter(): string {
@@ -166,6 +205,7 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
 
     set chemistryFilter(value) {
         this.chargerService.setChargeConfiguration('chemistryFilter', value);
+        this.emitNewFilteredPresets();
     }
 
     get capacity() {
@@ -208,8 +248,27 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
         return 'Charge at ' + sprintf('%2.01fA', this.chargeSettings.safeAmpsForWantedChargeRate);
     }
 
-    filterByChemistryAndSort(chemistry: string) {
-        let presets = this.presets.filter((preset) => {
+    set presets(list: any) {
+        if(Array.isArray(list)) {
+            this._presets = list;
+            this.emitNewFilteredPresets();
+            console.info(`Loaded the preset list... (${this._presets.length} items)`);
+        } else {
+            console.warn(`Got a ${list.constructor.name} for presets, expected a list`);
+            this.filteredPresets$.next([]);
+        }
+    }
+
+    private emitNewFilteredPresets() {
+        this.filteredPresets$.next(this.filteredPresets());
+    }
+
+    private filterByChemistryAndSort(chemistry: string) {
+        let presets = this._presets.filter((preset) => {
+            // Ignore the specific IR measurement preset
+            if (preset.name == iChargerService.irMeasurementPresetName) {
+                return false;
+            }
             if (chemistry == Preset.chemistryPrefix(ChemistryType.Anything)) {
                 return true;
             }
@@ -226,7 +285,8 @@ export class ChargeOptionsPage implements OnInit, Chemistry {
         return presets;
     }
 
-    filteredPresets() {
+    private filteredPresets() {
+        // console.log(`Filter presets by this: ${this.chemistryFilter}`);
         let presets = this.filterByChemistryAndSort(this.chemistryFilter);
         return _.chunk(presets, 3);
     }

@@ -1,5 +1,6 @@
-import {AnyAction, Reducer} from "redux";
-import {ConfigurationActions} from "../actions/configuration";
+import {AnyAction, Reducer} from 'redux';
+import {ConfigurationActions} from '../actions/configuration';
+import {getDefaultSettings} from 'http2';
 
 export interface IChargeSettings {
     wantedChargeRateInC: number,
@@ -15,18 +16,18 @@ export interface IChargeSettings {
 }
 
 export const INetworkKeyNames = {
-    "ap_name": "Pi3 AP Name",
-    "ap_channel": "Pi3 Wifi Channel",
+    'ap_name': 'Pi3 AP Name',
+    'ap_channel': 'Pi3 Wifi Channel',
 
-    "wifi_ssid": "Home Wifi SSID",
-    "wifi_password": "Password",
+    'wifi_ssid': 'Home Wifi SSID',
+    'wifi_password': 'Password',
 
-    "docker_last_deploy": "Server Version"
+    'docker_last_deploy': 'Server Version'
 };
 
 export interface INetwork {
     last_status_update: Date,
-    is_applying_change:boolean;
+    is_applying_change: boolean;
 
     ap_associated: boolean, // synthetic, ip from wlan0, and channel + name
     ap_channel: number,
@@ -65,12 +66,12 @@ export interface IConfig {
     network: INetwork;
 }
 
-const chargerDefaults: IChargeSettings = {
+export const chargerSettingsDefaults: IChargeSettings = {
     wantedChargeRateInC: 1,
     capacity: 2000,
     numPacks: 4,
-    chemistryFilter: "All",
-    chargeMethod: "presets",
+    chemistryFilter: 'All',
+    chargeMethod: 'presets',
 
     // Synthetics
     channelLimitReached: false,
@@ -80,27 +81,27 @@ const chargerDefaults: IChargeSettings = {
 
 let defaultNetworkState: INetwork = {
     last_status_update: null,
-    is_applying_change:false,
+    is_applying_change: false,
 
     ap_associated: false,
     ap_channel: 0,
-    ap_name: "",
+    ap_name: '',
 
-    wifi_ssid: "",
-    wifi_password: "",
+    wifi_ssid: '',
+    wifi_password: '',
 
     docker_last_deploy: 0,
     web_running: false,
     worker_running: false,
 
-    current_ip_address: "",
+    current_ip_address: '',
     discoveredServers: [],
     interfaces: new Map<string, string>(),
     services: new Map<string, boolean>()
 };
 
 export const configurationDefaults: IConfig = {
-    ipAddress: "192.168.10.1",
+    ipAddress: '192.168.10.1',
     port: 5000,
     isnew: true,
     cellLimit: -1,
@@ -112,7 +113,7 @@ export const configurationDefaults: IConfig = {
     connectedToPrivateWLAN: false,
     lastConnectionIndex: 0,
 
-    charge_settings: chargerDefaults,
+    charge_settings: chargerSettingsDefaults,
     network: defaultNetworkState
 };
 
@@ -131,6 +132,11 @@ export const
             case ConfigurationActions.RESET_TO_DEFAULTS:
                 return configurationDefaults;
 
+            case ConfigurationActions.RESET_CHARGE_SETTINGS_TO_DEFAULTS:
+                return {
+                    ...state,
+                    charge_settings: chargerSettingsDefaults
+                };
 
             case ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE:
                 if (action.payload) {
@@ -147,7 +153,7 @@ export const
                     return {
                         ...state,
                         ...{charge_settings: new_charge_settings}
-                    }
+                    };
                 }
                 return state;
 
@@ -162,7 +168,7 @@ export const
                             ...state.network,
                             ...action.payload.network,
                             last_status_update: new Date()
-                        }
+                        };
                     }
 
                     return {
@@ -170,7 +176,7 @@ export const
                         ...action.payload,
                         network: new_network_tree
 
-                    }
+                    };
                 }
                 return state;
         }

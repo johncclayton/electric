@@ -21,6 +21,7 @@ export class ConfigurationEpics {
             ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
             ConfigurationActions.UPDATE_CHARGE_CONFIG_KEYVALUE,
             ConfigurationActions.RESET_TO_DEFAULTS,
+            ConfigurationActions.RESET_CHARGE_SETTINGS_TO_DEFAULTS,
         ).pipe(
             debounceTime(1000),
             mergeMap(payload => {

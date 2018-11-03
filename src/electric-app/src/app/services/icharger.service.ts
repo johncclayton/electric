@@ -95,6 +95,10 @@ export class iChargerService {
         // do not access ngRedux here. It'll be nil.
     }
 
+    public static get irMeasurementPresetName(): string {
+        return 'IR Measurement';
+    }
+
     public stopAllPolling() {
         this.logger.info('Stopping all polling....');
         this.ngUnsubscribe.next();
