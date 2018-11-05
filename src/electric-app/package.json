@@ -54,7 +54,7 @@
     "redux": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-observable": "^1.0.0",
-    "rxjs": "^6.2.2",
+    "rxjs": "6.3.3",
     "sprintf-js": "^1.1.1",
     "zone.js": "^0.8.26"
   },
