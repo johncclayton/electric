@@ -13,8 +13,8 @@
   ion-list-header.note {
     p {
       font-size: 0.8em;
-    }
-    .below {
+      padding-top: 0;
+      padding-bottom: 5px;
     }
 
     .above {
@@ -25,6 +25,7 @@
 
   .sections {
     color: black;
+
     .wifi {
       background-color: rgba(purple, 0.1);
     }

@@ -129,8 +129,6 @@ export class iChargerService {
                     return errors.pipe(
                         tap((v) => {
                             numberErrors++;
-                            // let urlTried = this.url.getChargerURL('/unified');
-                            this.tryNextInterfaceIfDisconnected();
                             if (v['name'] != 'TimeoutError') {
                                 if (numberErrors % 10 == 0) {
                                     this.logger.error(`Error (retry/${numberErrors}) while polling for charger state: ${JSON.stringify(v)}...`);
@@ -146,6 +144,8 @@ export class iChargerService {
                                     this.logger.info(`Timeout: # of disconnected: ${numberErrors} ... won't raise warn yet`);
                                 }
                             }
+                            // let urlTried = this.url.getChargerURL('/unified');
+                            this.tryNextInterfaceIfDisconnected();
                         }),
                         delay(numberErrors > 1 ? 2000 : 1000)
                     );
@@ -569,12 +569,10 @@ export class iChargerService {
     }
 
     private getServerStatus(): Observable<any> {
-        let interval = 1500;
+        let interval = 3000;
         return this.runOutsideAngular(() => {
             return timer(10, interval).pipe(
                 flatMap(v => {
-                    // If disconnected, do a round robbin between various known IP addresses
-                    this.tryNextInterfaceIfDisconnected();
                     this.networkService.fetchCurrentIPAddress();
 
                     let wifiURL = this.url.getManagementURL('/status');
@@ -582,6 +580,7 @@ export class iChargerService {
                     return this.http.get(wifiURL);
                 }),
                 map(json => {
+                    // this.logger.debug(`Status response: ${JSON.stringify(json)}`);
                     let access_point = json['access_point'];
                     let interfaces = json['interfaces'];
                     let docker = json['docker'];
@@ -595,7 +594,7 @@ export class iChargerService {
                     };
 
                     let current_network = this.ngRedux.getState().config.network;
-                    let havnt_had_update_yet = current_network.last_status_update == null;
+                    let havnt_had_update_yet = current_network.last_status_update !== null && current_network.last_status_update !== undefined;
                     let update_is_old = false;
                     if (havnt_had_update_yet == false) {
                         let right_now: Date = new Date();
@@ -647,6 +646,8 @@ export class iChargerService {
                 catchError(e => {
                     this.logger.error('Error getting server status: ' + e);
                     this.uiActions.setDisconnected();
+                    // If disconnected, do a round robbin between various known IP addresses
+                    this.tryNextInterfaceIfDisconnected();
                     return throwError(e);
                 }),
                 retry()

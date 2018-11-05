@@ -4,6 +4,7 @@ import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../models/state/configure";
 import {INetwork} from "../models/state/reducers/configuration";
 import {Subject} from 'rxjs';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 declare const networkinterface;
 
@@ -12,6 +13,7 @@ declare const networkinterface;
 })
 export class ElectricNetworkService {
     private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private logger: NGXLogger;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -19,23 +21,25 @@ export class ElectricNetworkService {
     }
 
     public constructor(private configActions: ConfigurationActions,
+                       private loggerSvc: CustomNGXLoggerService,
                        private ngRedux: NgRedux<IAppState>) {
-
+        this.logger = this.loggerSvc.create({level: NgxLoggerLevel.INFO});
     }
 
     fetchCurrentIPAddress() {
         let config = this.ngRedux.getState().config;
         if (config == null) {
+            this.logger.warn(`Not fetching IP Address, no configuration`);
             return;
         }
 
         let network = config.network;
 
         try {
-            // console.log("Detecting network interface...");
+            // this.logger.log("Detecting network interface...");
             networkinterface.getWiFiIPAddress((ip) => {
                 if (ip != network.current_ip_address) {
-                    // console.log("Detected network interface: " + ip);
+                    this.logger.log("Detected new network interface: " + ip);
                     let change = {
                         'network': {
                             'current_ip_address': ip
@@ -76,7 +80,7 @@ export class ElectricNetworkService {
         if (network && network.interfaces) {
             if (network.interfaces.hasOwnProperty("wlan0")) {
                 let addr = network.interfaces["wlan0"];
-                // console.log("wlan0 addr: " + addr);
+                // this.logger.log("wlan0 addr: " + addr);
                 return addr.length > 1;
             }
         }

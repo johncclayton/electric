@@ -1,15 +1,44 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {IConfig, INetworkKeyNames} from '../../models/state/reducers/configuration';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {IConfig, INetwork, INetworkKeyNames} from '../../models/state/reducers/configuration';
 import {iChargerService} from '../../services/icharger.service';
 import {ConfigurationActions} from '../../models/state/actions/configuration';
-import * as _ from "lodash";
+import * as _ from 'lodash';
+import {BehaviorSubject, Subject} from 'rxjs';
+import {NgRedux} from '@angular-redux/store';
+import {IAppState} from '../../models/state/configure';
+import {takeUntil} from 'rxjs/operators';
+
+class Section {
+    key: string;
+    title: string;
+    items: {};
+
+    constructor(key: string, title: string) {
+        this.key = key;
+        this.title = title;
+        this.items = {};
+    }
+
+    get itemsKeys(): Array<string> {
+        return Object.keys(this.items);
+    }
+
+    titleForItemKey(itemKey: string): string {
+        // noinspection JSMethodCanBeStatic
+        if (INetworkKeyNames.hasOwnProperty(itemKey)) {
+            return INetworkKeyNames[itemKey];
+        }
+        return itemKey;
+    }
+}
 
 @Component({
     selector: 'network-config',
     templateUrl: './network-config.component.html',
-    styleUrls: ['./network-config.component.scss']
+    styleUrls: ['./network-config.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NetworkConfigComponent implements OnInit {
+export class NetworkConfigComponent implements OnInit, OnDestroy {
     @Input() config?: IConfig;
     @Input() showAutoButton: boolean;
     @Input() current_ip_address: string;
@@ -17,13 +46,27 @@ export class NetworkConfigComponent implements OnInit {
     @Output() networkWizard: EventEmitter<any> = new EventEmitter();
     @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
 
+    sections$: Subject<Array<Section>>;
     private lastUsedDiscoveryIndex = 0;
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public chargerService: iChargerService,
+                public ngRedux: NgRedux<IAppState>,
                 public configActions: ConfigurationActions) {
     }
 
     ngOnInit() {
+        this.sections$ = new BehaviorSubject<any>([]);
+        this.ngRedux.select(['config', 'network']).pipe(
+            takeUntil(this.ngUnsubscribe)
+        ).subscribe((network: INetwork) => {
+            this.parseNewSections(network);
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
     }
 
     autoDetect() {
@@ -45,7 +88,7 @@ export class NetworkConfigComponent implements OnInit {
     change(keyName, value) {
         let change = [];
         change[keyName] = value;
-        console.warn(`Change ${keyName} to ${JSON.stringify(value)}`);
+        // console.warn(`Change ${keyName} to ${JSON.stringify(value)}`);
         this.updateConfiguration.emit(change);
     }
 
@@ -57,70 +100,46 @@ export class NetworkConfigComponent implements OnInit {
         return parseInt(value);
     }
 
-    wifiStateFor(heading: string, key: string) {
-        return this.sectionState(heading)[key];
-    }
+    parseNewSections(network: INetwork) {
+        let wifiSection = new Section('wifi', 'Wifi Association');
+        let networkSection = new Section('network', 'Network / IPs');
+        let serverSection = new Section('server', 'Server Status');
+        let sections: Array<Section> = [wifiSection, networkSection, serverSection];
 
-    // noinspection JSMethodCanBeStatic
-    wifiStateKeyFor(heading: string, key: string) {
-        if (INetworkKeyNames.hasOwnProperty(key)) {
-            return INetworkKeyNames[key];
-        }
-        return key;
-    }
-
-    sectionNames() {
-        return Object.keys(this.wifiState());
-    }
-
-    sectionName(key: string) {
-        return this.wifiState()[key].name;
-    }
-
-    sectionState(key: string) {
-        return this.wifiState()[key].items;
-    }
-
-    wifiState() {
-        let sections = {
-            'wifi': {name: 'Wifi Association', items: {}},
-            'network': {name: 'Network / IPs', items: {}},
-            'server': {name: 'Server Status', items: {}}
-        };
-
-        let network = this.config.network;
+        // console.warn(`NETWORK: ${JSON.stringify(network)}`);
         if (network) {
-            sections['wifi'].items = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid']);
+
+            wifiSection.items = _.pick(network, ['ap_name', 'ap_channel', 'wifi_ssid']);
 
             if (network.interfaces) {
                 if (network.interfaces.hasOwnProperty('wlan0')) {
                     let wlan0interface = network.interfaces['wlan0'];
                     if (wlan0interface) {
-                        sections['network'].items['Home Wifi IP'] = wlan0interface;
+                        networkSection.items['Home Wifi IP'] = wlan0interface;
                         this.configActions.addDiscoveredServer(wlan0interface);
                     }
                 }
                 if (network.interfaces.hasOwnProperty('wlan1')) {
-                    sections['network'].items['Static IP'] = network.interfaces['wlan1'];
+                    networkSection.items['Static IP'] = network.interfaces['wlan1'];
                 }
             }
             if (network.discoveredServers != null) {
                 let i = 1;
                 for (let srv in network.discoveredServers) {
-                    sections['server'].items['Discovery #' + i] = network.discoveredServers[srv];
+                    serverSection.items['Discovery #' + i] = network.discoveredServers[srv];
                     i++;
                 }
             }
             if (network.services) {
-                sections['server'].items['Server Version'] = network['docker_last_deploy'];
-                sections['server'].items['DNS Masq'] = network.services['dnsmasq'];
-                sections['server'].items['Hostapd'] = network.services['hostapd'];
-                sections['server'].items['Docker'] = network.services['docker'];
-                sections['server'].items['Electric PI'] = network.services['electric-pi.service'];
+                serverSection.items['Server Version'] = network['docker_last_deploy'];
+                serverSection.items['DNS Masq'] = network.services['dnsmasq'];
+                serverSection.items['Hostapd'] = network.services['hostapd'];
+                serverSection.items['Docker'] = network.services['docker'];
+                serverSection.items['Electric PI'] = network.services['electric-pi.service'];
             }
-            return sections;
         }
-        return {'Fetching': '...'};
+
+        this.sections$.next(sections);
     }
 
 
