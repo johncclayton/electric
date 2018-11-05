@@ -138,7 +138,8 @@ channel {
         margin-right: 5px;
 
         transform-origin: right top;
-        transform: scale(-1), translateY(-$balance-height);
+        transform: scale(-1) translateY(-$balance-height);
+        background: red;
       }
       .b1 {
         right: ($balance-width / 2.0) + $balance-offset * 4;
@@ -201,8 +202,8 @@ channel {
 
   @include media(">=tablet") {
     $balance-width: 6px;
-    $balance-height: 22px;
-    $balance-baseline: -7px;
+    $balance-height: 25px;
+    $balance-baseline: -10px;
     $balance-offset: $balance-width + 2;
     $balance-right-margin: 3px;
 
