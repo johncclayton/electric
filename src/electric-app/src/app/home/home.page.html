@@ -12,64 +12,66 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content class="charger" [ngClass]="{'no-scroll': config?.preventChargerVerticalScrolling}">
-    <div *ngIf="anyNetworkOrConnectivityProblems()">
-        <p text-center class="searching">Looking for your charger...</p>
-        <div class="searching" text-center>
-            <ion-spinner></ion-spinner>
-        </div>
+<ion-content *ngIf="config$|async as config">
+    <div class="charger" [ngClass]="{'no-scroll': config.preventChargerVerticalScrolling}">
+        <div *ngIf="anyNetworkOrConnectivityProblems()">
+            <p text-center class="searching">Looking for your charger...</p>
+            <div class="searching" text-center>
+                <ion-spinner></ion-spinner>
+            </div>
 
-        <ion-grid>
-            <ion-row>
-                <ion-col size="6" offset="3">
-                    <div class="configButton">
-                        <ion-button expand="block" color="secondary" href="NetworkConfig" *ngIf="showConfigureButton">
-                            <ion-icon name="hammer"></ion-icon>
-                            Network Settings
-                        </ion-button>
-                    </div>
-                </ion-col>
-            </ion-row>
-        </ion-grid>
-
-        <div class="cannot-connect" *ngIf="timeoutUp">
-            <!--<ion-item-->
-            <ion-grid class="errors">
-                <ion-row align-items-start>
-                    <ion-col size="12" [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
-                        <span>{{serverText()}}</span>
-                    </ion-col>
-                    <ion-col size="12" [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
-                        <span>{{chargerText()}}</span>
+            <ion-grid>
+                <ion-row>
+                    <ion-col size="6" offset="3">
+                        <div class="configButton">
+                            <ion-button expand="block" color="secondary" href="NetworkConfig"
+                                        *ngIf="showConfigureButton">
+                                <ion-icon name="hammer"></ion-icon>
+                                Network Settings
+                            </ion-button>
+                        </div>
                     </ion-col>
                 </ion-row>
             </ion-grid>
 
-            <div *ngIf="exception$|async" class="tryme">
-                <ion-list>
-                    <ion-list-header>The Server Said:</ion-list-header>
-                    <h4 padding color="danger">{{exception$|async}}</h4>
-                </ion-list>
+            <div class="cannot-connect" *ngIf="timeoutUp">
+                <!--<ion-item-->
+                <ion-grid class="errors">
+                    <ion-row align-items-start>
+                        <ion-col size="12" [ngClass]="{'good':isConnectedToServer(), 'bad':!isConnectedToServer()}">
+                            <span>{{serverText()}}</span>
+                        </ion-col>
+                        <ion-col size="12" [ngClass]="{'good':isConnectedToCharger(), 'bad':!isConnectedToCharger()}">
+                            <span>{{chargerText()}}</span>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+
+                <div *ngIf="exception$|async" class="tryme">
+                    <ion-list>
+                        <ion-list-header>The Server Said:</ion-list-header>
+                        <h4 padding color="danger">{{exception$|async}}</h4>
+                    </ion-list>
+                </div>
             </div>
         </div>
-    </div>
 
 
-    <div *ngIf="system$|async as system">
-        <div *ngIf="charger$|async as charger">
-            <div *ngIf="!anyNetworkOrConnectivityProblems()">
-                <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
-                <charger-status [system]="system$|async" [charger]="charger$|async"></charger-status>
+        <div *ngIf="system$|async as system">
+            <div *ngIf="charger$|async as charger">
+                <div *ngIf="!anyNetworkOrConnectivityProblems()">
+                    <!-- need the charger status (sensible), and channel (not so sensible) so we can get the 'input' volts -->
+                    <charger-status [system]="system$|async" [charger]="charger$|async"></charger-status>
 
-                <channel name="Channel 1" [charger]="charger$|async" [index]="0"></channel>
-                <channel name="Channel 2" [charger]="charger$|async" [index]="1"></channel>
-                <!--<ion-button (click)="chargerService.notificationWhenDone('Mooo')">DO SOMETHING</ion-button>-->
+                    <channel name="Channel 1" [charger]="charger$|async" [index]="0"></channel>
+                    <channel name="Channel 2" [charger]="charger$|async" [index]="1"></channel>
+                    <!--<ion-button (click)="chargerService.notificationWhenDone('Mooo')">DO SOMETHING</ion-button>-->
+                </div>
             </div>
+
+            <!--<ion-button text-center (click)="makeError()">Error</ion-button>-->
+
+            <connection-state></connection-state>
         </div>
-
-        <!--<ion-button text-center (click)="makeError()">Error</ion-button>-->
-
-        <connection-state></connection-state>
     </div>
 </ion-content>
-

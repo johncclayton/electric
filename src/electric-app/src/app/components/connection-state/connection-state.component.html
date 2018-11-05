@@ -1,10 +1,11 @@
 <ion-grid *ngIf="isShowing" class="red">
     <ion-row>
-        <ion-col>
-            <ion-label text-center>{{message}}</ion-label>
+        <ion-col class="message">
+            <!--<ion-label text-center>{{message}}</ion-label>-->
+            {{message}}
         </ion-col>
         <ion-col size="auto">
-            <ion-button size="small" (click)="closeBox()">Close</ion-button>
+            <ion-button size="small" fill="outline" (click)="closeBox()">Close</ion-button>
         </ion-col>
     </ion-row>
 </ion-grid>

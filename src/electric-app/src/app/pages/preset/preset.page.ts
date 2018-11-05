@@ -244,7 +244,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
 
     // If there's an error, the charger service will fire an event.
     // It'll be picked up by the charger-status component, and an error shown as a toast
-    savePreset(whenDoneCall: (preset: Preset) => void): void {
+    savePreset(whenDoneCall: (preset: Preset) => void = null): void {
         this.uiActions.setIsSaving();
         this.chargerService.savePreset(this.preset)
             .pipe(

@@ -23,6 +23,7 @@ export class HomePage implements OnInit, OnDestroy {
     @select('ui.exception') exception$: Observable<any>;
     @select() charger$: Observable<Channel>;
     @select() system$: Observable<Channel>;
+    @select() config$: Observable<Channel>;
 
     timeoutUp: boolean;
     showConfigureButton: boolean;
@@ -37,7 +38,7 @@ export class HomePage implements OnInit, OnDestroy {
     constructor(
         public readonly chargerService: iChargerService,
         private uiAction: UIActions,
-        private config: ConfigStoreService,
+        public configService: ConfigStoreService,
         private platform: Platform,
         public chargerLists: iChargerPickLists,
         private zone: NgZone,
@@ -77,7 +78,8 @@ export class HomePage implements OnInit, OnDestroy {
                 });
         }
 
-        this.config.configurationLoaded$.subscribe(r => {
+        this.configService.configurationLoaded$.subscribe(r => {
+            // this.uiAction.setErrorMessage("Huzzah");
             // this.showNetworkConfigPage();
             // this.showiChargerSettingsPage();
         });
