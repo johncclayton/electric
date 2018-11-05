@@ -26,7 +26,7 @@ export class SystemComponent implements OnInit {
 
     set system(value: ISystem) {
         this._system = value;
-        console.debug(`*** New system value was provided to the system UI component: ${JSON.stringify(this._system)}`);
+        // console.debug(`*** New system value was provided to the system UI component: ${JSON.stringify(this._system)}`);
     }
 
     constructor() {

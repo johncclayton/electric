@@ -437,7 +437,7 @@ export class iChargerService {
                 let ready: boolean = this.ngRedux.getState().ui.disconnected === false;
                 if (!ready) {
                     if (logging) {
-                        this.logger.info(`Waiting for charger to be available... ${count}`);
+                        this.logger.info(`Waiting for charger to be available... ${count} (saw: ${this.ngRedux.getState().ui.disconnected})`);
                     }
                     count++;
                 }
@@ -449,8 +449,12 @@ export class iChargerService {
     getSystem(): Observable<System> {
         let operationURL = this.url.getChargerURL('/system');
         return this.runOutsideAngular(() => {
+            // this.logger.info(`Getting system state from ${operationURL}...`);
             return this.http.get(operationURL).pipe(
-                map(resp => new System(resp))
+                map(resp => {
+                    // this.logger.info(`System is: ${JSON.stringify(resp)}`);
+                    return new System(resp);
+                })
             );
         });
     }

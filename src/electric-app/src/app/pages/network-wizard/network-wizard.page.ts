@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {IConfig} from '../../models/state/reducers/configuration';
 import {Observable, Subject} from 'rxjs';
@@ -12,6 +12,7 @@ import {takeUntil} from 'rxjs/operators';
     selector: 'network-wizard-page',
     templateUrl: './network-wizard.page.html',
     styleUrls: ['./network-wizard.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NetworkWizardPage implements OnInit, OnDestroy {
     @select() config$: Observable<IConfig>;

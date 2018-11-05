@@ -44,7 +44,7 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
             if (v.fetching == true) {
             }
             if (v.fetching == false) {
-                console.debug(`New system object, I've made a clone...`);
+                // console.debug(`New system object, I've made a clone...`);
                 // This'll make a deep clone
                 this.originalUnmodified = cloneDeep(v);
             }
@@ -97,7 +97,7 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
         let keys = Object.keys(modifiedProperties);
 
         if (keys.length > 0) {
-            console.debug('Modified System: ' + JSON.stringify(modifiedProperties));
+            // console.debug('Modified System: ' + JSON.stringify(modifiedProperties));
         }
         return keys.length > 0;
     }

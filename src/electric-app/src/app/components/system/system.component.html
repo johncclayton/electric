@@ -40,7 +40,7 @@
 <ion-list>
     <ion-item>
         <ion-label>Enabled</ion-label>
-        <ion-toggle [disabled]="!can_do_case_fan" [(value)]="case_fan.control"></ion-toggle>
+        <ion-toggle [disabled]="!can_do_case_fan" [(ngModel)]="case_fan.control"></ion-toggle>
     </ion-item>
     <temp-range label="Turn fans On"
                 [disabled]="!case_fan.control"

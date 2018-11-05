@@ -6,9 +6,10 @@ import {iChargerService} from '../../../services/icharger.service';
 import {UIActions} from './ui';
 import {compareTwoMaps} from '../../../utils/helpers';
 import {ISystem} from '../reducers/system';
-import {concat, forkJoin, interval, Observable, throwError} from 'rxjs';
-import {catchError, filter, last, map} from 'rxjs/operators';
+import {forkJoin, Observable, throwError} from 'rxjs';
+import {catchError, map, take, tap} from 'rxjs/operators';
 import {CaseFanService} from '../../../services/case-fan.service';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 @Injectable({
     providedIn: 'root'
@@ -21,13 +22,16 @@ export class SystemActions {
     static UPDATE_SETTINGS_VALUE: string = 'UPDATE_SETTINGS_VALUE';
     static FETCH_CASE_FAN: string = 'FETCH_CASE_FAN';
     static UPDATE_CASE_FAN: string = 'UPDATE_CASE_FAN';
+    private logger: NGXLogger;
 
     constructor(
         private ngRedux: NgRedux<IAppState>,
         private caseFan: CaseFanService,
+        private loggingSvc: CustomNGXLoggerService,
         private chargerService: iChargerService,
         private uiActions: UIActions
     ) {
+        this.logger = loggingSvc.create({level: NgxLoggerLevel.INFO});
     }
 
     fetchSystemFromCharger(callback = null) {
@@ -37,18 +41,26 @@ export class SystemActions {
 
         let chargerService = this.chargerService;
         if (chargerService) {
+            // let system_request = chargerService.getSystem().pipe(tap(r => this.logger.info(`System result: ${JSON.stringify(r)}`)));
+            // let case_request = this.caseFan.getCaseFan().pipe(tap(r => this.logger.info(`Case fan result: ${JSON.stringify(r)}`)));
             let system_request = chargerService.getSystem();
             let case_request = this.caseFan.getCaseFan();
 
-            let waitingForConnected = this.chargerService.waitForChargerConnected();
-            let statusOperations = forkJoin(
-                system_request,
-                case_request
-            );
 
-            concat(waitingForConnected, statusOperations)
-                .pipe(last())
-                .subscribe(v => {
+            let waitingForConnected = this.chargerService.waitForChargerConnected(250, true);
+
+            this.logger.debug(`Waiting for casefan and system fetch to complete...`);
+            waitingForConnected.pipe(take(1)).subscribe(r => {
+                // Looks like we're connected. Do the other options.
+                this.logger.debug(`Connected to the charger. Getting status/casefan`);
+
+                let statusOperations = forkJoin(
+                    system_request,
+                    case_request
+                );
+
+                statusOperations.subscribe(v => {
+                    this.logger.debug(`Both completed, with ${JSON.stringify(v)}`);
                     // We get a LIST of responses.
                     // The case_fan response is dispatched to redux by the getCaseFan call.
                     let system_object = v[0] as System;
@@ -60,9 +72,13 @@ export class SystemActions {
                     }
                 }, (error) => {
                     this.uiActions.setErrorMessage(error);
+                    this.logger.error(error);
                 }, () => {
-                    console.error('fetchSystemFromCharger complete');
+                    this.logger.info('fetchSystemFromCharger complete');
                 });
+            });
+        } else {
+            // this.ngRedux.dispatch(this.endFetchAction({}));
         }
     }
 
@@ -114,11 +130,11 @@ export class SystemActions {
     }
 
     updateCaseFan(case_fan_state: any) {
-        // console.log(`See case fan state: ${JSON.stringify(case_fan_state)}`);
+        // this.logger.info(`See case fan state: ${JSON.stringify(case_fan_state)}`);
         let existing = this.ngRedux.getState().system.case_fan;
         let comparison_result = compareTwoMaps(existing, case_fan_state);
         if (comparison_result.length > 0) {
-            console.log('Case fan state differs: ' + comparison_result.join(', '));
+            this.logger.info('Case fan state differs: ' + comparison_result.join(', '));
             this.ngRedux.dispatch({
                 type: SystemActions.UPDATE_CASE_FAN,
                 payload: case_fan_state

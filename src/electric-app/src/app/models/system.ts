@@ -20,10 +20,10 @@ export class System {
     }
 
     constructor(private system_data: {}) {
-        console.debug(`System object created. Data: ${JSON.stringify(this.system_data)}`);
+        // console.debug(`System object created. Data: ${JSON.stringify(system_data)}`);
         if (this.has_capabilities) {
             let keys = Object.keys(this.system_data['capabilities']);
-            console.warn(`System Capabilities: ${keys.join(",")}. Env: ${System.environment.ionicEnvName}`);
+            console.debug(`System Capabilities: ${keys.join(",")}. Env: ${System.environment.ionicEnvName}`);
         }
     }
 
@@ -68,6 +68,7 @@ export class System {
     }
 
     get has_case_fan() : boolean {
+        // console.log(`Capabilities: ${this.has_capabilities}, and: ${this.system_data['capabilities']}`);
         return this.has_capability('case_fan')
     }
 

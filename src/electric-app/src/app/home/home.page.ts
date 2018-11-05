@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit} from '@an
 import {NgRedux, select} from '@angular-redux/store';
 import {Observable, Subject, timer} from 'rxjs';
 import {Channel} from '../models/channel';
-import {MenuController, Platform} from '@ionic/angular';
+import {MenuController, NavController, Platform} from '@ionic/angular';
 import {iChargerService} from '../services/icharger.service';
 import {UIActions} from '../models/state/actions/ui';
 import {IAppState} from '../models/state/configure';
@@ -41,6 +41,7 @@ export class HomePage implements OnInit, OnDestroy {
         private platform: Platform,
         public chargerLists: iChargerPickLists,
         private zone: NgZone,
+        private navCtrl: NavController,
         private menuController: MenuController,
         public messaging: ToastHelper,
         public readonly ngRedux: NgRedux<IAppState>,
@@ -75,6 +76,11 @@ export class HomePage implements OnInit, OnDestroy {
                     }
                 });
         }
+
+        this.config.configurationLoaded$.subscribe(r => {
+            // this.showNetworkConfigPage();
+            // this.showiChargerSettingsPage();
+        });
     }
 
     ngOnDestroy() {
@@ -150,5 +156,14 @@ export class HomePage implements OnInit, OnDestroy {
     /*
     Everything below for quicker testing. Copies of methods from other pages
      */
+
+    private showiChargerSettingsPage() {
+        this.navCtrl.navigateForward('SystemSettings');
+    }
+
+    private showNetworkConfigPage() {
+        this.navCtrl.navigateForward('NetworkConfig');
+    }
+
 
 }

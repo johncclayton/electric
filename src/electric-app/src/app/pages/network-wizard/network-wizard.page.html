@@ -21,17 +21,17 @@
         <!--<ion-item>{{current_ip_address$|async}}</ion-item>-->
         <ion-item [stepstate]="stateFor(0)">
             <ion-icon name="flash" slot="start"></ion-icon>
-            Get on the <b>Electric</b> network
+            <ion-label>Get on the <b>Electric</b> network</ion-label>
         </ion-item>
 
         <ion-item [stepstate]="stateFor(1)">
             <ion-icon name="wifi" slot="start"></ion-icon>
-            Connect to home WiFi
+            <ion-label>Connect to home WiFi</ion-label>
         </ion-item>
 
         <ion-item [stepstate]="stateFor(2)">
             <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-            Verify connectivity
+            <ion-label>Verify connectivity</ion-label>
         </ion-item>
     </ion-list>
 
