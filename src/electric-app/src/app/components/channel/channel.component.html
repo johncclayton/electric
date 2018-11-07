@@ -1,19 +1,19 @@
 <!--suppress XmlDuplicatedId -->
-<ion-grid>
+<ion-grid no-padding>
     <ion-row id="heading" align-items-baseline>
         <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel?.runState > 0}">
             {{index + 1}}
         </ion-col>
-        <ion-col id="title" class="userInitiated" *ngIf="channel?.hasUserInitiatedCommandText" col-auto>
-            <h4 class="channelColor operation">{{channel?.userCommandText}}</h4>
-            <h4 class="channelColor action">{{channel?.actionText}}</h4>
+        <ion-col size="auto" id="title" class="userInitiated" *ngIf="channel?.hasUserInitiatedCommandText">
+            <p class="channelColor operation">{{channel?.userCommandText}}</p>
+            <p class="channelColor action">{{channel?.actionText}}</p>
         </ion-col>
-        <ion-col id="title" *ngIf="!channel?.hasUserInitiatedCommandText" col-auto>
-            <h4 class="channelColor" [ngClass]="{actionError:channel?.lastActionResultedInError}">
-                {{channel?.actionText}}</h4>
+        <ion-col size="auto" id="title" *ngIf="!channel?.hasUserInitiatedCommandText">
+            <p class="channelColor" [ngClass]="{actionError:channel?.lastActionResultedInError}">
+                {{channel?.actionText}}</p>
         </ion-col>
         <!--<ion-col id="title">-->
-        <!--<h4 class="channelColor">{{channel.actionText}}</h4>-->
+        <!--<p class="channelColor">{{channel.actionText}}</p>-->
         <!--</ion-col>-->
         <ion-col>
             <ion-row justify-content-end no-padding>

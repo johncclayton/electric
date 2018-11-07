@@ -9,10 +9,6 @@
         bottom: 1px;
       }
     }
-
-    @include media(">=widephone") {
-      padding-bottom: 12px;
-    }
   }
 }
 

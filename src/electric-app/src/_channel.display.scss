@@ -185,7 +185,6 @@ channel {
     font-size: 0.8em;
     // Force a little more spacing where we have it
     ion-grid {
-      padding-top: $padding-top * 2 !important;
     }
 
     .cells {
@@ -210,7 +209,7 @@ channel {
     @include cellsMixin();
 
     ion-grid {
-      padding-top: $padding-top * 4 !important;
+      padding-top: $padding-top * 2 !important;
     }
 
     .channelNumber {
