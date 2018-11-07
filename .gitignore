@@ -12,3 +12,4 @@ build.json
 main.js.map
 wireless/temp
 src/app/.sourcemaps
+test

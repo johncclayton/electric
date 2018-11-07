@@ -8,17 +8,20 @@ import * as _ from 'lodash';
     styleUrls: ['./channel-volts.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChannelVoltsComponent implements OnInit {
+export class ChannelVoltsComponent {
     public maxBalanceSeen: number = 8;
     public balanceScale: number;
 
     @Input() channel: Channel;
-    @Input() index: number;
 
     constructor() {
     }
 
-    ngOnInit() {
+    get channelDump(): string {
+        if (this.channel) {
+            return JSON.stringify(this.chunkedCells());
+        }
+        return 'no channel';
     }
 
     cellChunking() {

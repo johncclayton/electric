@@ -7,17 +7,13 @@ import {Channel} from '../../models/channel';
     templateUrl: './channel-ir.component.html',
     styleUrls: ['./channel-ir.component.scss']
 })
-export class ChannelIRComponent extends ChannelVoltsComponent implements OnInit {
+export class ChannelIRComponent extends ChannelVoltsComponent {
 
     constructor() {
         super();
     }
 
-    ngOnInit() {
-    }
-
     @Input() channel: Channel;
-    @Input() index: number;
 
     @Output() back = new EventEmitter();
 
