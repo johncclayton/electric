@@ -115,19 +115,16 @@ export class iChargerService {
     }
 
     public stopAllPolling() {
-        if(this.isPollingCharger) {
-            this.logger.info('Stopping all polling....');
-            this.ngUnsubscribe.next();
-            this.ngUnsubscribe.complete();
-            this.ngUnsubscribe = new Subject<void>();
-            this._isPollingCharger = false;
-        }
+        this.logger.warn('Stopping all polling....');
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+        this.logger.info('Put new ngUnsubscribe in place');
+        this.ngUnsubscribe = new Subject<void>();
     }
 
     public startPollingCharger() {
-        this.logger.info('Start polling for charger state...');
+        this.logger.warn('Start polling for charger state...');
         this.uiActions.setConfiguringNetwork(false);
-        this._isPollingCharger = true;
 
         this.runOutsideAngular(() => {
             /*
@@ -142,11 +139,13 @@ export class iChargerService {
             of(true).pipe(
                 takeUntil(this.ngUnsubscribe),
                 flatMap(() => {
+                    this._isPollingCharger = true;
                     return this.getChargerStatus();
                 }),
                 retryWhen(errors => {
                     return errors.pipe(
                         tap((v) => {
+
                             numberErrors++;
                             if (v['name'] != 'TimeoutError') {
                                 if (numberErrors % 10 == 0) {
@@ -163,6 +162,7 @@ export class iChargerService {
                                     this.logger.info(`Timeout: # of disconnected: ${numberErrors} ... won't raise warn yet`);
                                 }
                             }
+
                             // let urlTried = this.url.getChargerURL('/unified');
                             this.tryNextInterfaceIfDisconnected();
                         }),
@@ -170,9 +170,11 @@ export class iChargerService {
                     );
                 }),
                 repeatWhen(completed => {
-                    return completed.pipe(delay(1000));
+                    return completed.pipe(
+                        delay(1000)
+                    );
                 }),
-                takeUntil(this.ngUnsubscribe)
+                takeUntil(this.ngUnsubscribe),
             ).subscribe(status => {
                 numberErrors = 0;
                 this.logger.debug('Refreshed status from charger...');
@@ -458,7 +460,7 @@ export class iChargerService {
         });
     }
 
-    waitForChargerConnected(checkInterval = 1000, timeoutInSeconds=10, logging: boolean = false): Observable<any> {
+    waitForChargerConnected(checkInterval = 1000, timeoutInSeconds = 10, logging: boolean = false): Observable<any> {
         let count = 0;
         return interval(checkInterval).pipe(
             timeout(timeoutInSeconds * 1000),

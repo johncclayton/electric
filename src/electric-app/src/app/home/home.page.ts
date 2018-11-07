@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit} from '@an
 import {NgRedux, select} from '@angular-redux/store';
 import {Observable, Subject, TimeoutError, timer} from 'rxjs';
 import {Channel} from '../models/channel';
-import {MenuController, NavController, Platform} from '@ionic/angular';
+import {NavController, Platform} from '@ionic/angular';
 import {iChargerService} from '../services/icharger.service';
 import {UIActions} from '../models/state/actions/ui';
 import {IAppState} from '../models/state/configure';
@@ -42,7 +42,6 @@ export class HomePage implements OnInit, OnDestroy {
         public chargerLists: iChargerPickLists,
         private zone: NgZone,
         private navCtrl: NavController,
-        private menuController: MenuController,
         public messaging: ToastHelper,
         public readonly ngRedux: NgRedux<IAppState>,
     ) {
@@ -65,13 +64,13 @@ export class HomePage implements OnInit, OnDestroy {
                 console.debug(`'timeout and its time to show some stuff' function completed.`);
             });
 
-        const loadAPreset = true;
+        const loadAPreset = false;
         if (loadAPreset) {
             this.preset = new Preset({});
             this.chargerService.getPresets(5)
                 .subscribe(presetsList => {
                     if (presetsList.length > 10) {
-                        console.warn('Got test preset: #9');
+                        // console.warn('Got test preset: #9');
                         this.preset = presetsList[9];
                     }
                 });
@@ -87,7 +86,7 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        console.warn(`Stopping all subscribers...`);
+        // console.warn(`Stopping all home page subscribers...`);
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
     }
