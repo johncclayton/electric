@@ -2,9 +2,13 @@ import {AfterContentInit, ChangeDetectorRef, Component, OnDestroy, OnInit} from 
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from '../../models/state/configure';
 import {Subject} from 'rxjs';
-import {Platform} from '@ionic/angular';
+import {Platform, PopoverController} from '@ionic/angular';
 import {isDefined} from '@angular/compiler/src/util';
 import {takeUntil} from 'rxjs/operators';
+import {UIActions} from '../../models/state/actions/ui';
+import {ErrorDisplayComponent} from '../error-display/error-display.component';
+import {cloneDeep} from 'lodash';
+import {IUIState} from '../../models/state/reducers/ui';
 
 @Component({
     selector: 'connection-state',
@@ -14,14 +18,17 @@ import {takeUntil} from 'rxjs/operators';
 export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDestroy {
     message: string;
     isShowing: boolean = false;
+    hasErrorObject: boolean = false;
     showCloseButton: boolean = false;
+    uiCopy: IUIState;
 
     private alertShownBecauseOfConnectionError: boolean = false;
-    private lastConnectionFailureCount: number = 0;
     private ngUnsubscribe: Subject<void> = new Subject<void>();
 
     constructor(public platform: Platform,
                 public changeDetector: ChangeDetectorRef,
+                private popupController: PopoverController,
+                private uiAction: UIActions,
                 public ngRedux: NgRedux<IAppState>) {
     }
 
@@ -46,11 +53,13 @@ export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDes
             .pipe(
                 takeUntil(this.ngUnsubscribe)
             )
-            .subscribe((thing) => {
+            .subscribe(() => {
                 let uiState = this.ngRedux.getState().ui;
                 if (uiState.disconnected) {
+                    // increment the count and maybe show an error after a bit
                     this.incrementDisconnectionCount();
                 } else {
+                    // if showing a disconnection error, hide it
                     this.serverReconnected();
                 }
             });
@@ -69,12 +78,13 @@ export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDes
         if (this.isShowing) {
             // Code is calling this to dismiss the current alert programmatically.
             this.isShowing = false;
-            this.message = "";
+            this.message = '';
             this.showCloseButton = false;
         }
     }
 
     closeBox() {
+        this.uiAction.clearError();
         this.dismissAlertMessage(true);
     }
 
@@ -91,6 +101,9 @@ export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDes
             message = 'Unknown problem?!';
         }
 
+        this.uiCopy = cloneDeep(this.ngRedux.getState().ui);
+        this.hasErrorObject = this.uiCopy.errorObject !== null;
+
         this.createNewAlert(message, allowCreation);
     }
 
@@ -106,14 +119,12 @@ export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDes
     }
 
     private incrementDisconnectionCount() {
-        this.lastConnectionFailureCount = this.connectionFailureCount;
-
         if (this.ngRedux.getState().ui.isConfiguringNetwork) {
             return;
         }
 
         // If we get to three, begin showing the dialog.
-        let message = 'Reconnecting (' + this.connectionFailureCount + ')';
+        let message = `Reconnecting (${this.connectionFailureCount})`;
         let numberOfWarningsToSkip = 2;
         if (this.connectionFailureCount == numberOfWarningsToSkip) {
             // Show a new warning. Low failure counts mean "new connection failure".
@@ -123,5 +134,15 @@ export class ConnectionStateComponent implements OnInit, AfterContentInit, OnDes
             // This will update the message, but it won't show a NEW message if that has already been dismissed
             this.showGeneralError(message);
         }
+    }
+
+    showDetail() {
+        this.popupController.create({
+            component: ErrorDisplayComponent,
+            componentProps: {'ui': this.uiCopy}
+        }).then(popover => {
+            popover.present();
+        });
+
     }
 }

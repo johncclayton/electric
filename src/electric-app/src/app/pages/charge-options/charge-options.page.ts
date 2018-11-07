@@ -11,7 +11,7 @@ import {UIActions} from '../../models/state/actions/ui';
 import {NgRedux, select} from '@angular-redux/store';
 import {IAppState} from '../../models/state/configure';
 import {DataBagService} from '../../services/data-bag.service';
-import {take, takeUntil} from 'rxjs/operators';
+import {takeUntil} from 'rxjs/operators';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {sprintf} from 'sprintf-js';
 import * as _ from 'lodash';
@@ -112,7 +112,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
             )
             .subscribe((presetList) => {
                 this.zone.run(() => {
-                    if(presetList) {
+                    if (presetList) {
                         this.presets = presetList;
                     } else {
                         console.warn(`Got 'next' for loading preses, but list was null?`);
@@ -151,7 +151,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
             // Meaning: it'll be ADDED when saved.
             chargePlanPreset = toClone.clone();
             if (chargePlanPreset.index != -1) {
-                this.uiActions.setErrorMessage('Oh oh! New preset doesn\'t have -1 index');
+                this.uiActions.setErrorMessageFromString(`Oh oh! New preset doesn't have -1 index`);
                 return;
             }
 
@@ -185,7 +185,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
                 });
             }, (error) => {
                 this.simpleAlert.dismiss().then(() => {
-                    this.uiActions.setErrorMessage(error);
+                    this.uiActions.setErrorFromErrorObject(`Error starting plan`, error);
                 });
             });
     }
@@ -253,7 +253,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
     }
 
     set presets(list: any) {
-        if(Array.isArray(list)) {
+        if (Array.isArray(list)) {
             this._presets = list;
             this.emitNewFilteredPresets();
             console.info(`Loaded the preset list... (${this._presets.length} items)`);

@@ -1,0 +1,36 @@
+<div>
+    <ion-grid>
+        <ion-row>
+            <ion-col>
+                <h3>{{ui?.exception}}</h3>
+            </ion-col>
+        </ion-row>
+        <div *ngIf="ui.errorObject; else noDetail">
+            <ion-row>
+                <ion-col size="4">
+                    Name
+                </ion-col>
+                <ion-col>
+                    {{ui.errorObject.name}}
+                </ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col size="4">
+                    Message
+                </ion-col>
+                <ion-col>
+                    {{ui.errorObject.message}}
+                </ion-col>
+            </ion-row>
+            <ion-row *ngIf="ui.errorObject.stack">
+                <ion-col size="4">
+                    Trace
+                </ion-col>
+                <ion-col>
+                    {{ui.errorObject.stack}}
+                </ion-col>
+            </ion-row>
+        </div>
+        <ng-template #noDetail>No further detail</ng-template>
+    </ion-grid>
+</div>

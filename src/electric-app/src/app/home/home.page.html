@@ -12,7 +12,7 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content *ngIf="config$|async as config">
+<ion-content *ngIf="config$|async as config" class="home">
     <div class="charger" [ngClass]="{'no-scroll': config.preventChargerVerticalScrolling}">
         <div *ngIf="anyNetworkOrConnectivityProblems()">
             <p text-center class="searching">Looking for your charger...</p>
@@ -69,9 +69,10 @@
                 </div>
             </div>
 
-            <!--<ion-button text-center (click)="makeError()">Error</ion-button>-->
-
-            <connection-state></connection-state>
+            <!--<ion-button text-center (click)="toggleError()">Toggle Error</ion-button>-->
         </div>
     </div>
 </ion-content>
+<ion-footer>
+    <connection-state></connection-state>
+</ion-footer>

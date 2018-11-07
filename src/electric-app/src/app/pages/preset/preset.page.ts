@@ -264,7 +264,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
             (error) => {
                 this.zone.run(() => {
                     this.logger.error(`Error saving preset: ${error}`);
-                    this.messaging.showMessage(error.toString(), true);
+                    this.uiActions.setErrorFromErrorObject(`Error during save`, error);
                     this.uiActions.setIsNotSaving();
                 });
             }, () => {

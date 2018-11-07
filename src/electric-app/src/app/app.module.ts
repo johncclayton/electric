@@ -24,12 +24,14 @@ import {
     timeoutInterceptorDefaultTimeout
 } from './services/timeout.interceptor';
 import {LoggerModule, NgxLoggerLevel} from 'ngx-logger';
+import {ErrorDisplayComponent} from './components/error-display/error-display.component';
 
 @NgModule({
     declarations: [
         AppComponent,
+        ErrorDisplayComponent
     ],
-    entryComponents: [],
+    entryComponents: [ErrorDisplayComponent],
     imports: [
         BrowserModule,
         IonicModule.forRoot(),

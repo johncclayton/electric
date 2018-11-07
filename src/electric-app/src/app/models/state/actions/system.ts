@@ -47,7 +47,7 @@ export class SystemActions {
             let case_request = this.caseFan.getCaseFan();
 
 
-            let waitingForConnected = this.chargerService.waitForChargerConnected(250, true);
+            let waitingForConnected = this.chargerService.waitForChargerConnected(500, 10, true);
 
             this.logger.debug(`Waiting for casefan and system fetch to complete...`);
             waitingForConnected.pipe(take(1)).subscribe(r => {
@@ -71,7 +71,7 @@ export class SystemActions {
                         callback();
                     }
                 }, (error) => {
-                    this.uiActions.setErrorMessage(error);
+                    this.uiActions.setErrorFromErrorObject(`Cannot fetch system info`, error);
                     this.logger.error(error);
                 }, () => {
                     this.logger.info('fetchSystemFromCharger complete');

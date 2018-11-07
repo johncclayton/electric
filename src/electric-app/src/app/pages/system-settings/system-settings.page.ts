@@ -75,7 +75,7 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
             )
             .subscribe(ignored_value => {
             }, err => {
-                this.uiActions.setErrorMessage(err);
+                this.uiActions.setErrorFromErrorObject('Failed to save settings', err);
             }, () => {
                 console.warn(`Settings save completed!`);
                 alert.dismiss();

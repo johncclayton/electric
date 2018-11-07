@@ -14,6 +14,7 @@ import {SystemComponent} from './system/system.component';
 import {TempRangeComponent} from './temp-range/temp-range.component';
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {FormsModule} from '@angular/forms';
+import {ErrorDisplayComponent} from './error-display/error-display.component';
 
 @NgModule({
     declarations: [
@@ -46,7 +47,7 @@ import {FormsModule} from '@angular/forms';
         NetworkConfigComponent,
         SystemComponent,
         TempRangeComponent,
-        WifiSettingsComponent
+        WifiSettingsComponent,
     ]
 })
 export class ComponentsModule {

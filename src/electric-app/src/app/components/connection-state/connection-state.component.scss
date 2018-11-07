@@ -7,6 +7,7 @@
 
   ion-grid {
     background: var(--ion-color-danger);
+
     color: white;
 
     .message {
@@ -15,10 +16,11 @@
     }
 
     ion-button {
-      //--color: var(--ion-color-danger-tint);
       --background: var(--ion-color-danger-tint);
       --border-color: white;
+      --background-activated: var(--ion-color-danger-tint);
       color: white;
+      align-items: center;
     }
   }
 }

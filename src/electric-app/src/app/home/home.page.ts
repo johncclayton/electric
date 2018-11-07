@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
-import {Observable, Subject, timer} from 'rxjs';
+import {Observable, Subject, TimeoutError, timer} from 'rxjs';
 import {Channel} from '../models/channel';
 import {MenuController, NavController, Platform} from '@ionic/angular';
 import {iChargerService} from '../services/icharger.service';
@@ -8,9 +8,8 @@ import {UIActions} from '../models/state/actions/ui';
 import {IAppState} from '../models/state/configure';
 import {take, takeUntil} from 'rxjs/operators';
 import {ConfigStoreService} from '../services/config-store.service';
-import {BalanceEndCondition, Preset, RegenerativeMode} from '../models/preset-class';
+import {Preset, RegenerativeMode} from '../models/preset-class';
 import {iChargerPickLists} from '../utils/picklists';
-import * as _ from 'lodash';
 import {ToastHelper} from '../utils/messaging';
 
 @Component({
@@ -79,9 +78,11 @@ export class HomePage implements OnInit, OnDestroy {
         }
 
         this.configService.configurationLoaded$.subscribe(r => {
-            // this.uiAction.setErrorMessage("Huzzah");
+            // this.uiAction.setErrorMessageFromString("Huzzah");
             // this.showNetworkConfigPage();
             // this.showiChargerSettingsPage();
+
+            // this.toggleError();
         });
     }
 
@@ -115,14 +116,6 @@ export class HomePage implements OnInit, OnDestroy {
 
     isConnectedToCharger() {
         return this.chargerService.isConnectedToCharger();
-    }
-
-    loadFirstPageDoingDebugging() {
-    }
-
-    makeError() {
-        this.uiAction.setErrorMessage('BOOM');
-        this.uiAction.setDisconnected();
     }
 
     chargerText() {
@@ -168,4 +161,49 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
 
+    makeError() {
+        this.chargerService.stopAllPolling();
+        this.uiAction.setErrorMessageFromString('BOOM');
+        this.uiAction.setDisconnected();
+    }
+
+    toggleError() {
+        // for this test, ignore charger
+        this.chargerService.stopAllPolling();
+
+        const ui = this.ngRedux.getState().ui;
+        if(ui.exception || ui.disconnectionErrorCount > 0) {
+            this.uiAction.clearError();
+            this.uiAction.serverReconnected();
+        } else {
+
+            // rxjs TimeoutError
+            if(0) {
+                let te = new TimeoutError();
+                this.uiAction.setErrorFromErrorObject('BAM', te);
+            }
+
+            // Normal string message
+            if(0) {
+                this.uiAction.setErrorMessageFromString(`Well, FAIL`);
+            }
+
+            // Disconnection
+            if(0) {
+                this.uiAction.setDisconnected();
+                this.uiAction.setDisconnected();
+                this.uiAction.setDisconnected();
+            }
+
+            // thrown error
+            if(1) {
+                try {
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw new TimeoutError();
+                } catch(e) {
+                    this.uiAction.setErrorFromErrorObject(`Kaboom, cant do it`, e);
+                }
+            }
+        }
+    }
 }

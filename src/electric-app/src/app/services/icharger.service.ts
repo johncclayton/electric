@@ -12,7 +12,21 @@ import {IChargerState} from '../models/state/reducers/charger';
 import {ConfigurationActions} from '../models/state/actions/configuration';
 import {ElectricNetworkService} from './network.service';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, delay, filter, flatMap, map, repeatWhen, retry, retryWhen, take, takeUntil, takeWhile, tap} from 'rxjs/operators';
+import {
+    catchError,
+    delay,
+    filter,
+    flatMap,
+    map,
+    repeatWhen,
+    retry,
+    retryWhen,
+    take,
+    takeUntil,
+    takeWhile,
+    tap,
+    timeout
+} from 'rxjs/operators';
 import {Vibration} from '@ionic-native/vibration/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {URLService} from './url.service';
@@ -62,6 +76,7 @@ export class iChargerService {
     private lastUsedIPAddressIndex = 0;
     private haveReceivedSomeResponse: boolean;
     private logger: NGXLogger;
+    private _isPollingCharger: boolean;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -100,15 +115,19 @@ export class iChargerService {
     }
 
     public stopAllPolling() {
-        this.logger.info('Stopping all polling....');
-        this.ngUnsubscribe.next();
-        this.ngUnsubscribe.complete();
-        this.ngUnsubscribe = new Subject<void>();
+        if(this.isPollingCharger) {
+            this.logger.info('Stopping all polling....');
+            this.ngUnsubscribe.next();
+            this.ngUnsubscribe.complete();
+            this.ngUnsubscribe = new Subject<void>();
+            this._isPollingCharger = false;
+        }
     }
 
     public startPollingCharger() {
         this.logger.info('Start polling for charger state...');
         this.uiActions.setConfiguringNetwork(false);
+        this._isPollingCharger = true;
 
         this.runOutsideAngular(() => {
             /*
@@ -121,10 +140,10 @@ export class iChargerService {
             // of() would normally execute just once.
             // We use a 'repeatWhen' to keep it going, with a delay of our choosing
             of(true).pipe(
+                takeUntil(this.ngUnsubscribe),
                 flatMap(() => {
                     return this.getChargerStatus();
                 }),
-                takeUntil(this.ngUnsubscribe),
                 retryWhen(errors => {
                     return errors.pipe(
                         tap((v) => {
@@ -136,7 +155,7 @@ export class iChargerService {
                                 // Always set disconnected state if its not a timeout
                                 this.uiActions.setDisconnected();
                             } else {
-                                if (numberErrors > 1) {
+                                if (numberErrors > 2) {
                                     // this will begin round robin
                                     this.logger.warn(`Timeout: # of disconnected: ${numberErrors} ... setting disconnected flag`);
                                     this.uiActions.setDisconnected();
@@ -152,7 +171,8 @@ export class iChargerService {
                 }),
                 repeatWhen(completed => {
                     return completed.pipe(delay(1000));
-                })
+                }),
+                takeUntil(this.ngUnsubscribe)
             ).subscribe(status => {
                 numberErrors = 0;
                 this.logger.debug('Refreshed status from charger...');
@@ -160,8 +180,13 @@ export class iChargerService {
                 this.logger.error(`Error while polling for charger state: ${JSON.stringify(err)}. POLLING STOPPED.`);
             }, () => {
                 this.logger.warn('Finished poll for charger state. Polling stopped.');
+                this._isPollingCharger = false;
             });
         });
+    }
+
+    get isPollingCharger(): boolean {
+        return this._isPollingCharger;
     }
 
     public startPollingStatusServer() {
@@ -375,7 +400,10 @@ export class iChargerService {
                         }
                     ),
                     catchError(error => {
-                        this.uiActions.setErrorMessage(`Can't save: ${error}`);
+                        // Logging only here, as we assume callers handle sending to uiActions as needed
+                        this.logger.error(`Can't save ${preset.name}, ${error}`);
+                        // this.uiActions.setErrorFromErrorObject(`Can't save ${preset.name}`, error);
+                        // this.uiActions.setErrorFromErrorObject(`Can't save ${preset.name}`, error);
                         return throwError(error);
                     })
                 );
@@ -430,9 +458,10 @@ export class iChargerService {
         });
     }
 
-    waitForChargerConnected(checkInterval = 250, logging: boolean = false): Observable<any> {
+    waitForChargerConnected(checkInterval = 1000, timeoutInSeconds=10, logging: boolean = false): Observable<any> {
         let count = 0;
         return interval(checkInterval).pipe(
+            timeout(timeoutInSeconds * 1000),
             filter(v => {
                 let ready: boolean = this.ngRedux.getState().ui.disconnected === false;
                 if (!ready) {
