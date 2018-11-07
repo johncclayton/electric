@@ -1,7 +1,7 @@
 import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, NgZone, OnInit} from '@angular/core';
 import {Chemistry} from '../../utils/mixins';
 import {applyMixins} from 'rxjs/internal-compatibility';
-import {chargerSettingsDefaults, IChargeSettings, IConfig} from '../../models/state/reducers/configuration';
+import {IChargeSettings, IConfig} from '../../models/state/reducers/configuration';
 import {IUIState} from '../../models/state/reducers/ui';
 import {Channel} from '../../models/channel';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
@@ -16,6 +16,7 @@ import {ChemistryType, Preset} from '../../models/preset-class';
 import {sprintf} from 'sprintf-js';
 import * as _ from 'lodash';
 import {ConfigurationActions} from '../../models/state/actions/configuration';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 @Component({
     selector: 'app-charge-options',
@@ -47,11 +48,13 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
     private ui: IUIState;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private logger: NGXLogger;
 
     constructor(public navCtrl: NavController,
                 public chargerService: iChargerService,
                 public uiActions: UIActions,
                 public zone: NgZone,
+                private loggingSvc: CustomNGXLoggerService,
                 public appRef: ApplicationRef,
                 public configActions: ConfigurationActions,
                 public dataBag: DataBagService,
@@ -59,6 +62,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
                 public ngRedux: NgRedux<IAppState>) {
 
         this.filteredPresets$ = new BehaviorSubject<Array<Preset>>(null);
+        this.logger = this.loggingSvc.create({level: NgxLoggerLevel.INFO});
 
         const options = this.dataBag.get('chargingOptions');
         if (!options) {
@@ -88,10 +92,10 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
                     this.config = c;
                     this.chargeSettings = this.config.charge_settings;
                     if (this.chargeSettings == null || this.chargeSettings === undefined) {
-                        console.log(`No charger settings, reset to defaults`);
+                        this.logger.info(`No charger settings, reset to defaults`);
                         this.configActions.resetChargeSettingsToDefaults();
                     } else {
-                        console.warn(`Setup charge settings to: ${JSON.stringify(this.chargeSettings)}`);
+                        this.logger.warn(`Setup charge settings to: ${JSON.stringify(this.chargeSettings)}`);
                     }
                     if (!this.showCapacityAndC) {
                         // Force to presets (not computed)
@@ -153,7 +157,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
 
             chargePlanPreset.charge_current = this.chargeSettings.safeAmpsForWantedChargeRate;
             chargePlanPreset.name = ChargeOptionsPage.CHARGE_BY_PLAN_PRESET_NAME;
-            console.log('No charge plan preset. Creating one for:', chargePlanPreset.charge_current, 'amps');
+            this.logger.info('No charge plan preset. Creating one for:', chargePlanPreset.charge_current, 'amps');
         } else {
             chargePlanPreset.charge_current = this.chargeSettings.safeAmpsForWantedChargeRate;
         }
@@ -289,7 +293,7 @@ export class ChargeOptionsPage implements OnInit, AfterContentInit, Chemistry {
     }
 
     private filteredPresets() {
-        // console.log(`Filter presets by this: ${this.chemistryFilter}`);
+        // this.logger.info(`Filter presets by this: ${this.chemistryFilter}`);
         let presets = this.filterByChemistryAndSort(this.chemistryFilter);
         return _.chunk(presets, 3);
     }

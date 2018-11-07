@@ -109,7 +109,7 @@ export class SystemActions {
                     return systemObject;
                 }),
                 catchError((error) => {
-                    console.error(error);
+                    this.logger.error(error);
                     return throwError(error);
                 })
             );

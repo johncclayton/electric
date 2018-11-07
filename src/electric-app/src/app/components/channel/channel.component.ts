@@ -8,6 +8,7 @@ import {takeUntil, takeWhile} from 'rxjs/operators';
 import {Channel} from '../../models/channel';
 import {DataBagService} from '../../services/data-bag.service';
 import {Router} from '@angular/router';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 enum ChannelDisplay {
     ChannelDisplayNothingPluggedIn,
@@ -41,15 +42,18 @@ export class ChannelComponent implements OnInit, OnDestroy {
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
     private currentOperationSubscription: Subscription = null;
+    private logger: NGXLogger;
 
     constructor(public chargerService: iChargerService,
                 public navCtrlr: NavController,
                 public router: Router,
                 public dataBag: DataBagService,
+                private loggerSvc: CustomNGXLoggerService,
                 public toastController: ToastController,
                 public actionController: ActionSheetController) {
         this.channelMode = ChannelDisplay.ChannelDisplayNothingPluggedIn;
         this.firstTime = true;
+        this.logger = this.loggerSvc.create({level: NgxLoggerLevel.INFO});
     }
 
     ngOnInit() {
@@ -84,7 +88,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
             .pipe(
                 takeUntil(this.ngUnsubscribe)
             ).subscribe((result) => {
-            console.log('Measure IR done. Result: ', result);
+            this.logger.info('Measure IR done. Result: ', result);
         });
         this.channelMode = ChannelDisplay.ChannelDisplayShowIR;
 
@@ -92,7 +96,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
         this.measureIRObservable = timer(1000, 1000).pipe(
             takeWhile(() => {
                 let less_than_one_amp = Math.abs(this.channel.output_amps) < 1.0;
-                console.log('At: ', this.channel.output_amps, 'ltoa: ', less_than_one_amp);
+                this.logger.info('At: ', this.channel.output_amps, 'ltoa: ', less_than_one_amp);
                 return less_than_one_amp;
             })).subscribe(() => {
         }, (error) => {
@@ -100,7 +104,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
             this.measureIRObservable.unsubscribe();
             this.measureIRObservable = null;
         }, () => {
-            console.log('Stopping discharge because Measure IR has seen some amps');
+            this.logger.info('Stopping discharge because Measure IR has seen some amps');
             this.measureIRObservable.unsubscribe();
             this.measureIRObservable = null;
             this.stopCurrentTask();
@@ -117,19 +121,19 @@ export class ChannelComponent implements OnInit, OnDestroy {
 
     startOperation(preset: Preset, operation: Operation) {
         let operationPlan = this.operationPlanFor(preset, operation, this.channel);
-        console.log('Begin ', operationPlan, ' on channel ', this.channel.index, ' using ', preset.name);
+        this.logger.info('Begin ', operationPlan, ' on channel ', this.channel.index, ' using ', preset.name);
 
         if (this.currentOperationSubscription != null) {
             this.currentOperationSubscription.unsubscribe();
         }
 
         this.currentOperationSubscription = this.createOperation(preset, operation).subscribe((v) => {
-            console.log('Started ', operationPlan, ' on channel ' + this.channel.index + ', using preset: ' + preset.name);
-            console.log('Response: ', v.json());
+            this.logger.info('Started ', operationPlan, ' on channel ' + this.channel.index + ', using preset: ' + preset.name);
+            this.logger.info('Response: ', v.json());
         }, (error) => {
-            console.error('Error doing ' + operationPlan + ', ' + error);
+            console.error(`Error doing ${operationPlan}, ${error} of type ${error.constructor.name}`);
         }, () => {
-            console.log('Operation ' + operationPlan + ' completed');
+            this.logger.info(`Operation ${operationPlan} completed`);
         });
     }
 
@@ -147,7 +151,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
             case Operation.Balance:
                 return this.chargerService.startBalance(this.channel, preset, operationPlan);
             default:
-                console.log('Um. Dunno what to do here, with operation ', operation, ' named \'', named, '\'');
+                this.logger.info('Um. Dunno what to do here, with operation ', operation, ' named \'', named, '\'');
         }
         return null;
     }
@@ -195,7 +199,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
                 takeUntil(this.ngUnsubscribe)
             )
             .subscribe(null, null, () => {
-                    console.log('Stopped!');
+                    this.logger.info('Stopped!');
                 }
             );
     }
@@ -231,7 +235,7 @@ export class ChannelComponent implements OnInit, OnDestroy {
         //     this.masterHeight = elementById.offsetHeight;
         // }
         //
-        // console.log("Switch mode to ", this.channelMode);
+        // this.logger.info("Switch mode to ", this.channelMode);
 
         if (this.channel.isChargeRunning) {
             let alert = this.actionController.create({

@@ -290,7 +290,7 @@ export class iChargerService {
         iChargerService.device_id = state.charger.device_id;
         if (state.ui.disconnected) {
             this.configStoreAction.saveConfiguration(this.getConfig()).subscribe(null, null, () => {
-                console.log('Saved connfiguration after successful reconnection');
+                this.logger.log('Saved configuration after successful reconnection');
             });
             this.uiActions.serverReconnected();
             this.serverReconnection.emit();

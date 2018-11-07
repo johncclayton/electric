@@ -4,6 +4,7 @@ import {DataBagService} from '../../services/data-bag.service';
 import {Cycle} from '../../models/preset-class';
 import {NavController} from '@ionic/angular';
 import {iChargerPickLists} from '../../utils/picklists';
+import {CustomNGXLoggerService} from 'ngx-logger';
 
 @Component({
     selector: 'app-preset-cycle',
@@ -12,8 +13,8 @@ import {iChargerPickLists} from '../../utils/picklists';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PresetCyclePage extends PresetBasePage implements OnInit {
-    constructor(navCtrl: NavController, cs: iChargerPickLists, dataBag: DataBagService) {
-        super(navCtrl, cs, dataBag);
+    constructor(navCtrl: NavController, cs: iChargerPickLists, dataBag: DataBagService, logSvc: CustomNGXLoggerService) {
+        super(navCtrl, cs, logSvc, dataBag);
     }
 
     ngOnInit() {

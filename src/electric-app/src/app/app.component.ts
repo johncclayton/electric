@@ -61,7 +61,7 @@ export class AppComponent {
                     } else {
                         this.logger.error(`Config is null? wtf? Saving current as the default.`);
                         this.config.saveConfiguration(this.ngRedux.getState().config).subscribe(null, null, () => {
-                            console.log('Default configuration saved');
+                            this.logger.info('Default configuration saved');
                         });
                     }
                 }, null, () => {

@@ -3,6 +3,7 @@ import {PresetBasePage} from '../preset-charge/preset-charge.page';
 import {NavController} from '@ionic/angular';
 import {DataBagService} from '../../services/data-bag.service';
 import {iChargerPickLists} from '../../utils/picklists';
+import {CustomNGXLoggerService} from 'ngx-logger';
 
 @Component({
     selector: 'app-preset-storage',
@@ -14,8 +15,8 @@ export class PresetStoragePage extends PresetBasePage implements OnInit {
     private _voltageRanges;
     private _compensationOptions;
 
-    constructor(navCtrl: NavController, cs: iChargerPickLists, dataBag: DataBagService) {
-        super(navCtrl, cs, dataBag);
+    constructor(navCtrl: NavController, cs: iChargerPickLists, dataBag: DataBagService, logSvc: CustomNGXLoggerService) {
+        super(navCtrl, cs, logSvc, dataBag);
     }
 
     ngOnInit() {

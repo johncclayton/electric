@@ -7,6 +7,7 @@ import {ElectricNetworkService} from '../../services/network.service';
 import {iChargerService} from '../../services/icharger.service';
 import {ConfigurationActions} from '../../models/state/actions/configuration';
 import {takeUntil} from 'rxjs/operators';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 @Component({
     selector: 'network-wizard-page',
@@ -24,12 +25,15 @@ export class NetworkWizardPage implements OnInit, OnDestroy {
     currentState: number;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private logger: NGXLogger;
 
     constructor(public ngRedux: NgRedux<IAppState>,
                 private networkService: ElectricNetworkService,
                 private chargerService: iChargerService,
+                private logSvc: CustomNGXLoggerService,
                 public actions: ConfigurationActions
     ) {
+        this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
         this.resetState();
     }
 
@@ -133,13 +137,13 @@ export class NetworkWizardPage implements OnInit, OnDestroy {
             return;
         }
 
-        console.log('Sending WiFi settings...');
+        this.logger.info('Sending WiFi settings...');
         this.actions.startWifiChange();
         this.chargerService.updateWifi(network.wifi_ssid, network.wifi_password)
             .pipe(
                 takeUntil(this.ngUnsubscribe)
             ).subscribe(() => {
-                console.log('We\'re done with Wifi change');
+                this.logger.info('We\'re done with Wifi change');
             }, null,
             () => {
                 this.actions.endWifiChange();

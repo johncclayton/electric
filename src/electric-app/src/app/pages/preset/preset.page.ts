@@ -1,7 +1,7 @@
 import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, NgZone, OnInit} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {Observable, Subject} from 'rxjs';
-import {AlertController, NavController, ToastController} from '@ionic/angular';
+import {AlertController, NavController} from '@ionic/angular';
 import {iChargerService} from '../../services/icharger.service';
 import {DataBagService} from '../../services/data-bag.service';
 import * as _ from 'lodash';
@@ -12,6 +12,7 @@ import {IUIState} from '../../models/state/reducers/ui';
 import {IAppState} from '../../models/state/configure';
 import {UIActions} from '../../models/state/actions/ui';
 import {ToastHelper} from '../../utils/messaging';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 export interface SavePresetInterface {
     savePreset(whenDoneCall: (preset: Preset) => void): void;
@@ -41,6 +42,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
     private callback: (preset: Preset) => void;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private logger: NGXLogger;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -55,8 +57,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
                 public zone: NgZone,
                 public chargerService: iChargerService,
                 public dataBag: DataBagService,
+                private logSvc: CustomNGXLoggerService,
                 private messaging: ToastHelper) {
 
+        this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
         const navParams = this.dataBag.get('preset');
         if (navParams === undefined) {
             this.navCtrl.navigateBack('PresetList');
@@ -99,7 +103,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
         // this.goToSubpage('PresetCycle');
 
         if (this.preset) {
-            // console.info(`Selected preset: ${JSON.stringify(this.preset)}`);
+            // this.logger.info(`Selected preset: ${JSON.stringify(this.preset)}`);
         }
     }
 
@@ -109,10 +113,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
     private derivePresetPages() {
         if (this.preset === undefined) {
             this.__optionsPages = [];
-            console.warn(`Preset is undefined. Odd. So... no options for you!`);
+            this.logger.warn(`Preset is undefined. Odd. So... no options for you!`);
             return;
         }
-        // console.log(`Deriving preset options for type: ${this.preset.type}`);
+        // this.logger.log(`Deriving preset options for type: ${this.preset.type}`);
         this.__optionsPages = [
             {title: 'Charging', url: 'PresetCharge'},
             {title: 'Discharging', url: 'PresetDischarge'},
@@ -139,10 +143,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
 
     get presetType() {
         if (this.preset === undefined) {
-            console.log('Preset not set. Returning chemistry type "Anything"');
+            this.logger.log('Preset not set. Returning chemistry type "Anything"');
             return ChemistryType.Anything;
         }
-        // console.log(`Preset has chemistry: ${this.preset.type}`);
+        // this.logger.log(`Preset has chemistry: ${this.preset.type}`);
         return this.preset.type;
     }
 
@@ -174,16 +178,16 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
     canDeactivate(): Observable<boolean> {
         return Observable.create(obs => {
             if (!this.preset) {
-                console.warn(`CanDeactivate for ${this.constructor.name} has no preset, returning true`);
+                this.logger.warn(`CanDeactivate for ${this.constructor.name} has no preset, returning true`);
                 obs.next(true);
                 obs.complete();
                 return;
             }
             // If there are changes, we should prompt the user to save.
-            console.log(`${this.constructor.name} is checking to see if the preset has changed...`);
+            this.logger.log(`${this.constructor.name} is checking to see if the preset has changed...`);
             let presetBeingEdited = this.preset;
             let modifiedProperties = _.reduce(this.unmodifiedpreset.data, function (result, value, key) {
-                // console.log(`checking key ${key}. Does ${value} != ${presetBeingEdited.data[key]} ? `);
+                // this.logger.log(`checking key ${key}. Does ${value} != ${presetBeingEdited.data[key]} ? `);
                 return _.isEqual(value, presetBeingEdited.data[key]) ?
                     result : result.concat(key);
             }, []);
@@ -191,9 +195,9 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
             // let are_equal = _.isEqual(this.unmodifiedpreset.data, this.preset.data);
             let are_equal = modifiedProperties.length == 0;
             if (!are_equal) {
-                console.log(`Preset ${this.preset.name} is modified:`);
+                this.logger.log(`Preset ${this.preset.name} is modified:`);
                 for (let property of modifiedProperties) {
-                    console.log(property, ': ', this.unmodifiedpreset.data[property], ' (', typeof(this.unmodifiedpreset.data[property]),
+                    this.logger.log(property, ': ', this.unmodifiedpreset.data[property], ' (', typeof(this.unmodifiedpreset.data[property]),
                         ') now = ', presetBeingEdited.data[property], '(', typeof(presetBeingEdited.data[property]), ')');
                 }
                 this.confirmedExit = false;
@@ -234,7 +238,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
                     alert.present();
                 });
             } else {
-                console.log(`Preset ${this.preset.name} has no changes, fine to deactivate`);
+                this.logger.log(`Preset ${this.preset.name} has no changes, fine to deactivate`);
                 obs.next(true);
                 obs.complete();
             }
@@ -259,13 +263,13 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
             },
             (error) => {
                 this.zone.run(() => {
-                    console.error(`Error saving preset: ${error}`);
+                    this.logger.error(`Error saving preset: ${error}`);
                     this.messaging.showMessage(error.toString(), true);
                     this.uiActions.setIsNotSaving();
                 });
             }, () => {
                 this.zone.run(() => {
-                    console.log(`Finished saving preset ${this.preset.name}`);
+                    this.logger.log(`Finished saving preset ${this.preset.name}`);
                     this.messaging.showMessage(`Saved ${this.preset.name}`);
                     this.uiActions.setIsNotSaving();
                     this.callback(this.preset);

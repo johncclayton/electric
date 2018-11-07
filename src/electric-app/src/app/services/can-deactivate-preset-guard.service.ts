@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {CanDeactivate} from '@angular/router';
 import {ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router/src/router_state';
 import {from, Observable} from 'rxjs';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 export interface ICanDeactivate {
     canDeactivate(): Observable<boolean>;
@@ -11,18 +12,20 @@ export interface ICanDeactivate {
     providedIn: 'root'
 })
 export class CanDeactivatePresetGuard implements CanDeactivate<ICanDeactivate> {
-    constructor() {
+    private logger: NGXLogger;
+    constructor(private logSvc:CustomNGXLoggerService) {
+        this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
     }
 
     canDeactivate(component: ICanDeactivate, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState?: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-        // console.log(`Current state: ${currentState}`);
-        // console.log(`Next state: ${nextState}`);
+        // this.logger.log(`Current state: ${currentState}`);
+        // this.logger.log(`Next state: ${nextState}`);
 
         if (component) {
-            console.log(`CanDeactivateGuardService called for: ${component}, current route: ${currentRoute} going to: ${nextState.url}`);
+            this.logger.log(`CanDeactivateGuardService called for: ${component}, current route: ${currentRoute} going to: ${nextState.url}`);
             if (nextState.url == '/PresetList') {
-                console.log(`Component: ${component ? component.constructor.name : 'null'} checking via canDeactivate()`);
-                // console.log(`ARS: ${currentRoute.component.constructor.name}`);
+                this.logger.log(`Component: ${component ? component.constructor.name : 'null'} checking via canDeactivate()`);
+                // this.logger.log(`ARS: ${currentRoute.component.constructor.name}`);
                 return component.canDeactivate();
             }
 

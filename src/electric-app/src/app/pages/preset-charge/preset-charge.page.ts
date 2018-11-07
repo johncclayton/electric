@@ -6,13 +6,17 @@ import {SavePresetInterface} from '../preset/preset.page';
 import * as _ from 'lodash';
 import {iChargerPickLists} from '../../utils/picklists';
 import {Observable, of} from 'rxjs';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 export class PresetBasePage {
     private saver: SavePresetInterface;
+    logger: NGXLogger;
 
     constructor(public navCtrl: NavController,
                 public chargerLists: iChargerPickLists,
+                private logSvc: CustomNGXLoggerService,
                 public dataBag: DataBagService) {
+        this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
         const navParams = this.dataBag.get('preset');
         if (navParams === undefined) {
             this.navCtrl.navigateRoot('home');
@@ -24,12 +28,12 @@ export class PresetBasePage {
         if (this.saver) {
             return this.saver.canDeactivate();
         }
-        console.warn('No preset saver set, cannot return intelligen canDeactivate, assuming "true"');
+        this.logger.warn('No preset saver set, cannot return intelligen canDeactivate, assuming "true"');
         return of(true);
     }
 
     get preset(): Preset {
-        if(this.saver !== undefined) {
+        if (this.saver !== undefined) {
             return this.saver.getPreset();
         }
         return null;
@@ -38,10 +42,10 @@ export class PresetBasePage {
     savePreset() {
         if (this.saver) {
             this.saver.savePreset((p) => {
-                console.log(`Saver saved ok`);
+                this.logger.log(`Saver saved ok`);
             });
         } else {
-            console.warn('No preset saver set, cannot save');
+            this.logger.warn('No preset saver set, cannot save');
         }
     }
 }
@@ -53,8 +57,8 @@ export class PresetBasePage {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PresetChargePage extends PresetBasePage implements OnInit {
-    constructor(navCtrl: NavController, public chargerLists: iChargerPickLists, dataBag: DataBagService) {
-        super(navCtrl, chargerLists, dataBag);
+    constructor(navCtrl: NavController, public chargerLists: iChargerPickLists, dataBag: DataBagService, logSvc: CustomNGXLoggerService) {
+        super(navCtrl, chargerLists, logSvc, dataBag);
     }
 
     ngOnInit() {
@@ -100,7 +104,7 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
 
     chargeEndOptionUsesEndCurrent() {
         let validValues = [BalanceEndCondition.EndCurrent_and_DetectBalance, BalanceEndCondition.EndCurrent_or_DetectBalance, BalanceEndCondition.EndCurrentOn_DetectBalanceOff];
-        // console.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
+        // this.logger.log(`Valid values: ${validValues}, current value: ${this.preset.balance_end_type}`);
         return _.includes(validValues, this.preset.balance_end_type);
     }
 

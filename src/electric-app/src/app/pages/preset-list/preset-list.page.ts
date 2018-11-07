@@ -1,4 +1,4 @@
-import {AfterContentInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterContentInit, Component, OnDestroy, ViewChild} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {List, NavController, Refresher, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
@@ -7,6 +7,7 @@ import {takeUntil} from 'rxjs/operators';
 import {DataBagService} from '../../services/data-bag.service';
 import {applyMixins} from 'rxjs/internal-compatibility';
 import {Chemistry} from '../../utils/mixins';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 @Component({
     selector: 'app-preset-list',
@@ -21,15 +22,18 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
     @ViewChild(Refresher) refresher: Refresher;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
+    private logger: NGXLogger;
 
     constructor(public navCtrl: NavController,
                 private dataBag: DataBagService,
                 public chargerService: iChargerService,
+                private logSvc: CustomNGXLoggerService,
                 public toastController: ToastController) {
+        this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
     }
 
     ngAfterContentInit() {
-        if(!this.chargerService.isConnectedToCharger()) {
+        if (!this.chargerService.isConnectedToCharger()) {
             setTimeout(() => {
                 this.navCtrl.navigateBack(['']);
             }, 500);
@@ -51,7 +55,7 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
                 takeUntil(this.ngUnsubscribe),
             )
             .subscribe(presetsList => {
-                // console.warn(`Received presets: ${presetsList}`);
+                // this.logger.warn(`Received presets: ${presetsList}`);
                 this.presets = presetsList;
                 this.finishedGettingPresets();
 
@@ -67,7 +71,7 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
                     }
                 }
             }, (err) => {
-                console.error(`Error getting presets: ${err}`);
+                this.logger.error(`Error getting presets: ${err}`);
                 this.finishedGettingPresets(true);
             }, () => {
             });
@@ -103,14 +107,14 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
 
     presetCallback(old_preset, new_preset) {
         if (new_preset) {
-            console.log(`Got result ${new_preset} from the save call`);
+            this.logger.log(`Got result ${new_preset} from the save call`);
             old_preset.updateFrom(new_preset);
         }
     }
 
     async editPreset(preset) {
         if (preset) {
-            console.log('Editing preset type: ', preset.type, 'usage: ', preset.data.use_flag);
+            this.logger.log('Editing preset type: ', preset.type, 'usage: ', preset.data.use_flag);
             if (preset.type === ChemistryType.LiPo ||
                 preset.type === ChemistryType.NiMH ||
                 preset.type === ChemistryType.LiFe) {

@@ -3,6 +3,7 @@ import {IAppState} from '../configure';
 import {NgRedux} from '@angular-redux/store';
 import * as _ from 'lodash';
 import {compareTwoMaps} from '../../../utils/helpers';
+import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 
 @Injectable({
@@ -15,8 +16,10 @@ export class ConfigurationActions {
     static UPDATE_CHARGE_CONFIG_KEYVALUE: string = 'UPDATE_CHARGE_CONFIG_KEYVALUE';
     static CONFIG_SAVED_TO_STORE: string = 'CONFIG_SAVED_TO_STORE';
     static SET_FULL_CONFIG: string = 'SET_FULL_CONFIG';
+    private logger: NGXLogger;
 
-    constructor(private ngRedux: NgRedux<IAppState>) {
+    constructor(private ngRedux: NgRedux<IAppState>, private loggerSvc: CustomNGXLoggerService) {
+        this.logger = this.loggerSvc.create({level: NgxLoggerLevel.INFO});
     }
 
     resetToDefaults() {
@@ -62,7 +65,7 @@ export class ConfigurationActions {
     }
 
     removeDiscoveredServer(ipAddress: string) {
-        console.log('Removing ' + ipAddress + ' from discovery list');
+        this.logger.info(`Removing ${ipAddress} from discovery list`);
         let existing = this.ngRedux.getState().config.network;
         let newState = existing.discoveredServers.filter((s) => {
             return s != ipAddress;
@@ -105,7 +108,7 @@ export class ConfigurationActions {
             // Check to see if any values have changed
             let comparison_result = compareTwoMaps(change, config);
             if (comparison_result.length > 0) {
-                console.log('Keys differ: ' + comparison_result.join(', '));
+                this.logger.info(`Keys differ: ${comparison_result.join(', ')}`);
                 this.ngRedux.dispatch({
                     type: ConfigurationActions.UPDATE_CONFIG_KEYVALUE,
                     payload: change
