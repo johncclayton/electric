@@ -1,0 +1,196 @@
+<ion-header>
+
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="Preset"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Charge Settings</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="savePreset()" [disabled]="!canSubmit">Save</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content *ngIf="preset; else noPreset">
+    <div *ngIf="isNiMH()">
+        <ion-list>
+            <ion-list-header color="light">Charging Options</ion-list-header>
+            <ion-item>
+                <ion-label>Charge Mode</ion-label>
+                <ion-select [(ngModel)]="''+preset.charge_mode">
+                    <ion-select-option
+                            name="charge-mode"
+                            *ngFor="let opt of chargeModeOptions()"
+                            [selected]="preset.charge_mode == opt.value"
+                            [value]="''+opt.value">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Allow 0v charging</ion-label>
+                <ion-toggle [(ngModel)]="preset.allow_zero_volt_charging" name="allow_zero_volt_charging"></ion-toggle>
+            </ion-item>
+        </ion-list>
+        <ion-list>
+            <ion-list-header color="light">Delta Detection</ion-list-header>
+            <ion-item>
+                <ion-label>Sensitivity</ion-label>
+                <ion-select [(ngModel)]="preset.ni_sensitivity">
+                    <ion-select-option [value]="opt.value" name="ni_sensitivity"
+                                       *ngFor="let opt of nimhSensitivityOptions()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Peak Delay Time</ion-label>
+                <ion-select [(ngModel)]="''+preset.ni_peak_delay_time">
+                    <ion-select-option [value]="''+opt.value"
+                                       name="ni_peak_delay_time"
+                                       [selected]="preset.ni_peak_delay_time == opt.value"
+                                       *ngFor="let opt of nimhDelayTimeOptions()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+        </ion-list>
+        <ion-list>
+            <ion-list-header color="light">Trickle Charge</ion-list-header>
+            <ion-item>
+                <ion-label>Enabled</ion-label>
+                <ion-toggle [(ngModel)]="preset.trickle_enabled"></ion-toggle>
+            </ion-item>
+            <ion-item>
+                <ion-label>Current</ion-label>
+                <ion-select [(ngModel)]="''+preset.trickle_current" [disabled]="!nimhTrickelEnabled()">
+                    <ion-select-option [value]="''+opt.value"
+                                       [selected]="preset.trickle_current == opt.value"
+                                       *ngFor="let opt of nimhTrickleCurrentOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Timeout (min)
+                </ion-label>
+                <ion-select [(ngModel)]="''+preset.trickle_timeout" [disabled]="!nimhTrickelEnabled()">
+                    <ion-select-option [value]="''+opt.value"
+                                       [selected]="preset.trickle_timeout == opt.value"
+                                       *ngFor="let opt of generalMinuteOptions(1, 60)">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+        </ion-list>
+    </div>
+
+    <div *ngIf="isLipo()">
+        <ion-list no-margin>
+            <ion-list-header color="light">Charging Options</ion-list-header>
+            <ion-item>
+                <ion-label>Balance Type</ion-label>
+                <ion-select [(ngModel)]="preset.balance_type">
+                    <ion-select-option [value]="opt.value"
+                                       [selected]="preset.balance_type == opt.value"
+                                       *ngFor="let opt of balanceOptions()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+
+            <ion-item>
+                <ion-label>Cell Volts
+                    <ion-icon color="warning" text-right *ngIf="preset.showChargeVoltageWarning"
+                              name="warning"></ion-icon>
+                </ion-label>
+                <ion-input text-right no-right-padding [(ngModel)]="preset.charge_cell_voltage">
+                </ion-input>
+            </ion-item>
+
+            <ion-item>
+                <ion-label>End</ion-label>
+                <ion-select [(ngModel)]="''+preset.balance_end_type">
+                    <ion-select-option [value]="''+opt.value" *ngFor="let opt of chargerLists.chargeEndOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+        </ion-list>
+
+        <ion-list class="charger-slider">
+            <ion-item [lines]="'none'">
+                <ion-label>End Current %</ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-range [disabled]="!chargeEndOptionUsesEndCurrent()" [(value)]="preset.charge_end_current"
+                           pin=true min="10" max="50">
+                    <ion-label slot="start">10%</ion-label>
+                    <ion-label slot="end">50%</ion-label>
+                </ion-range>
+            </ion-item>
+
+        </ion-list>
+
+        <ion-list>
+            <ion-list-header color="light">Low Voltage Options</ion-list-header>
+            <ion-item>
+                <ion-label>Restore lowest voltage</ion-label>
+                <ion-select slot="end" [(ngModel)]="preset.restore_voltage">
+                    <ion-select-option [value]="opt.value" *ngFor="let opt of restoreVoltageOptions()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Restore charge time (s)</ion-label>
+                <ion-select slot="end" [(ngModel)]="preset.restore_charge_time">
+                    <ion-select-option [value]="opt.value" *ngFor="let opt of restoreChargeTimeOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Restore charge current</ion-label>
+                <ion-select slot="end" [(ngModel)]="''+preset.restore_charge_current">
+                    <ion-select-option [value]="''+opt.value" *ngFor="let opt of restoreCurrentOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Keep charging after done</ion-label>
+                <ion-toggle slot="end" [(ngModel)]="preset.keep_charging_after_done"></ion-toggle>
+            </ion-item>
+        </ion-list>
+
+        <ion-list>
+            <ion-list-header color="light">Safety</ion-list-header>
+            <ion-item>
+                <ion-label>Cuttoff Temp</ion-label>
+                <ion-select slot="end" [(ngModel)]="preset.safety_charge_cutoff_temp">
+                    <ion-select-option [value]="opt.value"
+                                       *ngFor="let opt of this.chargerLists.safetyTempOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Max Capacity</ion-label>
+                <ion-select slot="end" [(ngModel)]="''+preset.safety_charge_capacity">
+                    <ion-select-option [value]="''+opt.value"
+                                       *ngFor="let opt of this.chargerLists.safetyCapacityOptions()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Safety Timer</ion-label>
+                <ion-toggle slot="end" [(ngModel)]="preset.safety_charge_timer_enabled"></ion-toggle>
+            </ion-item>
+            <ion-item *ngIf="preset.safety_charge_timer_enabled">
+                <ion-label>Safety Timer Time (s)</ion-label>
+                <ion-input slot="end" text-right no-right-padding [(ngModel)]="preset.safety_charge_timer_time"
+                           disabled="{{!preset.safety_charge_timer_enabled}}"></ion-input>
+            </ion-item>
+        </ion-list>
+    </div>
+</ion-content>
+<ng-template #noPreset>No preset provided</ng-template>

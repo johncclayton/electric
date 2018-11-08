@@ -1,0 +1,20 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Config</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <app-config
+            [config]="config$|async"
+            [charger]="charger$|async"
+            [ui]="ui$|async"
+            (updateConfiguration)="actions.updateConfigurationFromEmit($event)"
+            (resetToDefaults)="actions.resetToDefaults()"
+            (testFunc)="testFunc()"
+    >
+    </app-config>
+</ion-content>

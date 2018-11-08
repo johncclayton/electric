@@ -1,0 +1,55 @@
+<div>
+    <ion-list class="network">
+        <ion-list-header class="note" color="light" no-margin>
+            Home WiFi
+        </ion-list-header>
+        <ion-list-header class="note" color="light" no-margin>
+            <p class="below">These settings are used when you're at home.<br/>
+                They are <b>not</b> used when you're at the field.
+            </p>
+        </ion-list-header>
+        <ion-item>
+            <ion-label position="stacked">IP Address of Pi (on home wifi)</ion-label>
+            <ion-input type="text" [ngModel]="config.ipAddress"
+                       (ngModelChange)="change('ipAddress', $event)"></ion-input>
+            <ion-button slot="end" fill="outline" size="small" (click)="autoDetect()" color="secondary" *ngIf="showAutoButton"
+                        [class.button-disabled]="config.network.discoveredServers?.length == 0">
+                <ion-icon slot="start" name="wifi"></ion-icon>
+                Auto Detect
+            </ion-button>
+        </ion-item>
+        <ion-item>
+            <ion-label position="stacked">Port of Pi (on home wifi)</ion-label>
+            <ion-input type="text" [ngModel]="config.port"
+                       (ngModelChange)="change('port', num($event))">
+
+            </ion-input>
+        </ion-item>
+        <ion-item detail="true" (click)="networkWizard.emit()">
+            Network Settings Wizard
+        </ion-item>
+
+        <div class="sections">
+            <ion-list-header class="current" color="secondary" lines="none" *ngIf="current_ip_address != null">
+                Current IP Address: {{current_ip_address}}
+            </ion-list-header>
+            <div *ngIf="sections$|async as sections">
+                <div *ngFor="let section of sections">
+                    <ion-list-header color="light">
+                        {{section.title}}
+                    </ion-list-header>
+                    <ion-grid class="sections">
+                        <ion-row *ngFor="let key of section.itemsKeys">
+                            <ion-col size="4">{{section.titleForItemKey(key)}}</ion-col>
+                            <ion-col size="auto">{{section.items[key]}}</ion-col>
+                        </ion-row>
+                    </ion-grid>
+                    <br/>
+                </div>
+            </div>
+        </div>
+    </ion-list>
+
+</div>
+
+

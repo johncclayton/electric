@@ -1,0 +1,16 @@
+:host {
+  .steps {
+
+    .bad {
+      color: red;
+    }
+
+    .good {
+      color: green;
+    }
+
+    .unknown {
+      color: gray;
+    }
+  }
+}

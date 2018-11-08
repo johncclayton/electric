@@ -3,11 +3,13 @@
         <ion-col class="channelNumber channelColor" [ngClass]="{channelColorInverted:channel?.runState > 0}">
             {{index + 1}}
         </ion-col>
-        <ion-col id="title" class="userInitiated" *ngIf="channel?.hasUserInitiatedCommandText" col-auto>
+        <!--suppress XmlDuplicatedId -->
+      <ion-col id="title" class="userInitiated" *ngIf="channel?.hasUserInitiatedCommandText" col-auto>
             <h4 class="channelColor operation">{{channel?.userCommandText}}</h4>
             <h4 class="channelColor action">{{channel?.actionText}}</h4>
         </ion-col>
-        <ion-col id="title" *ngIf="!channel?.hasUserInitiatedCommandText" col-auto>
+        <!--suppress XmlDuplicatedId -->
+      <ion-col id="title" *ngIf="!channel?.hasUserInitiatedCommandText" col-auto>
             <h4 class="channelColor" [ngClass]="{actionError:channel?.lastActionResultedInError}">{{channel?.actionText}}</h4>
         </ion-col>
         <!--<ion-col id="title">-->

@@ -75,7 +75,7 @@ STATUS_CELL_VOLTAGE = 0x20
 STATUS_BALANCE = 0x40
 
 DEVICEID_4010_DUO = 64
-DEVICEID_406_DUO = 67  # TODO: Update to the real device number
+DEVICEID_406_DUO = 67
 DEVICEID_308_DUO = 66
 
 
@@ -353,7 +353,7 @@ class ChannelStatus(Model):
         self.channel = channel
 
         self.timestamp = data[0] / 1000.0
-        self.curr_out_power = data[1] / 1000.0
+        self.curr_out_power = data[1] / 100.0
         self.curr_out_amps = data[2] / 100.0
         self.curr_inp_volts = data[3] / 1000.0
         self.curr_out_volts = data[4] / 1000.0

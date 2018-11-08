@@ -11,14 +11,14 @@ import {ConfigurationActions} from "../../models/state/actions/configuration";
 })
 export class NetworkConfigComponent {
 
-    @Input() config?: IConfig;
-    @Input() showAutoButton: boolean;
-    @Input() current_ip_address: string;
+  @Input() config?: IConfig;
+  @Input() showAutoButton: boolean;
+  @Input() current_ip_address: string;
 
-    @Output() networkWizard: EventEmitter<any> = new EventEmitter();
-    @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
+  @Output() networkWizard: EventEmitter<any> = new EventEmitter();
+  @Output() updateConfiguration: EventEmitter<any> = new EventEmitter();
 
-    private lastUsedDiscoveryIndex = 0;
+  private lastUsedDiscoveryIndex = 0;
 
     constructor(public chargerService: iChargerService,
                 public configActions: ConfigurationActions) {

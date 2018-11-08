@@ -1,0 +1,17 @@
+<ion-item lines="none" text-center *ngIf="label">
+    <ion-label>{{label}}</ion-label>
+</ion-item>
+<ion-item>
+    <ion-range [ngModel]="displayableValue"
+               (ngModelChange)="displayableValue=$event"
+               pin="{{pin}}"
+               disabled="{{disabled}}"
+               [min]="min * multiplier"
+               [max]="max * multiplier"
+    >
+        <ion-label class="label" *ngIf="left_label" slot="start" padding-end>{{left_label}}</ion-label>
+        <ion-label class="label" *ngIf="right_label" slot="end" text-right margin-start margin-vertical padding-start>{{right_label}}</ion-label>
+    </ion-range>
+</ion-item>
+
+

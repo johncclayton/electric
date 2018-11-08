@@ -1,0 +1,12 @@
+@import "../../../include-media";
+
+:host {
+  .cellcontainer {
+    ion-icon {
+      vertical-align: text-bottom;
+      position: relative;
+      bottom: 1px;
+    }
+  }
+}
+

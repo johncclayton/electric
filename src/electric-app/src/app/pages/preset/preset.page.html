@@ -1,0 +1,119 @@
+<ion-header>
+
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Edit {{preset?.name}}</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="savePreset()" [disabled]="!canSubmit">Save</ion-button>
+            <!--<ion-button (click)="toggleSaving()">T</ion-button>-->
+        </ion-buttons>
+    </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content *ngIf="preset">
+    <form>
+        <ion-refresher (ionRefresh)="refreshPreset($event)">
+            <ion-refresher-content></ion-refresher-content>
+        </ion-refresher>
+        <div *ngIf="ui$|async as ui">
+            <div class="searching" text-center *ngIf="ui.isSaving">
+                <ion-spinner></ion-spinner>
+            </div>
+        </div>
+        <ion-list>
+            <ion-list-header color="light">Settings</ion-list-header>
+            <ion-item>
+                <ion-label>Name</ion-label>
+                <ion-input text-right [(ngModel)]="preset.name"
+                           name="presetname"
+                           [disabled]="isDisabled() || isReadOnly()"
+                           no-right-padding></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label>Type</ion-label>
+                <ion-select [(ngModel)]="presetType"
+                            name="presettype"
+                            [disabled]="isDisabled() || isReadOnly()">
+                    <ion-select-option [selected]="opt.value == presetType" [value]="opt.value"
+                                       *ngFor="let opt of typeChoices()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+
+            </ion-item>
+
+            <!--
+            Ionicv4 bug.  Looks to be usages of === and probably conversions in the ion-select.
+            cannot get numeric values with textual/numeric labels to auto select properly
+            Only solution I found was to force the values to strings. Eww.
+            -->
+            <ion-item *ngIf="showCells()">
+                <ion-label>Cells</ion-label>
+                <ion-select [(ngModel)]="'' + preset.cells"
+                            name="presetcells"
+                            [disabled]="isDisabled()">
+                    <ion-select-option
+                            [value]="'' + opt.value"
+                            *ngFor="let opt of cellChoices()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Charge Current</ion-label>
+                <ion-select [(ngModel)]="preset.charge_current"
+                            name="presetchargecurrent"
+                            [disabled]="isDisabled()" [interface]="'alert'"
+                            [interfaceOptions]="ourAlertOptions">
+                    <ion-select-option
+                            *ngFor="let opt of currentChoices()"
+                            [value]="opt.value"
+                            [selected]="opt.value === preset.charge_current"
+                    >
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Capacity</ion-label>
+                <ion-input text-right placeholder="Ignored"
+                           name="presetcapacity"
+                           [(ngModel)]="preset.capacity" [disabled]="isDisabled()"
+                           type="number"
+                           no-right-padding></ion-input>
+            </ion-item>
+        </ion-list>
+
+        <ion-list>
+            <ion-list-header color="light">Task Options</ion-list-header>
+            <ion-item detail="true" *ngFor="let page of optionPagesForCurrentType"
+                      (click)="goToSubpage(page.url)">
+                {{page.title}}
+            </ion-item>
+        </ion-list>
+
+        <ion-list>
+            <ion-list-header>Options</ion-list-header>
+            <ion-item>
+                <ion-label>Synchronous Mode</ion-label>
+                <ion-toggle [(ngModel)]="preset.channel_mode" [disabled]="isDisabled()" name="synchronous"></ion-toggle>
+            </ion-item>
+            <ion-item>
+                <ion-label>Log to SD card</ion-label>
+                <ion-toggle [(ngModel)]="preset.save_to_sd" [disabled]="isDisabled()" name="save_to_sd"></ion-toggle>
+            </ion-item>
+            <ion-item>
+                <ion-label>Run counter</ion-label>
+                <ion-input text-right [(ngModel)]="preset.run_counter" [disabled]="isDisabled()" name="run_counter"
+                           no-right-padding></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label>Log interval (sec)</ion-label>
+                <ion-input text-right [(ngModel)]="preset.log_interval_sec" [disabled]="isDisabled()" name="log_interval_sec"
+                           no-right-padding></ion-input>
+            </ion-item>
+        </ion-list>
+    </form>
+</ion-content>

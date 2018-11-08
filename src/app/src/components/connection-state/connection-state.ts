@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, Platform, ToastController} from "ionic-angular";
+import {Platform, ToastController} from "ionic-angular";
 import {iChargerService} from "../../services/icharger.service";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";

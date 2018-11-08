@@ -1,0 +1,42 @@
+<ion-header>
+
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Presets</ion-title>
+        <ion-buttons slot="end">
+            <ion-button slot="icon-only" (click)="addPreset()">
+                <ion-icon name="add"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+
+</ion-header>
+
+
+<ion-content class="presets">
+    <ion-refresher (ionRefresh)="refreshPresets()">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <div class="searching" *ngIf="loadingPresets">
+        <ion-spinner></ion-spinner>
+    </div>
+
+    <ion-list *ngIf="presets !== undefined && !failedToGetPresets">
+        <ion-item *ngFor="let preset of presets" (click)="editPreset(preset)">
+            <div class="item-left">{{preset.name}}</div>
+            <div slot="end">
+                <div class="mini-badge {{chemistryClass(preset)}}" *ngFor="let tag of tagsForPreset(preset)">{{tag}}
+                </div>
+            </div>
+        </ion-item>
+    </ion-list>
+
+    <div *ngIf="failedToGetPresets" class="error">
+        <h3>Failed to get presets.</h3>
+        <ion-button color="secondary" (click)="refreshPresets()">Retry</ion-button>
+    </div>
+</ion-content>
+

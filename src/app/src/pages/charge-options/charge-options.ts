@@ -11,7 +11,6 @@ import {applyMixins} from "rxjs/util/applyMixins";
 import {NgRedux} from "@angular-redux/store";
 import {IAppState} from "../../models/state/configure";
 import {IChargeSettings, IConfig} from "../../models/state/reducers/configuration";
-import {ConfigurationActions} from "../../models/state/actions/configuration";
 import {IUIState} from "../../models/state/reducers/ui";
 import {UIActions} from "../../models/state/actions/ui";
 import {Subject} from "rxjs/Subject";

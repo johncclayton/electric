@@ -1,23 +1,23 @@
 import {ChannelVoltsComponent} from "./channel-volts";
-import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from "@angular/core";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
 import {Channel} from "../../models/channel";
 
 @Component({
-    selector: 'channel-ir',
-    templateUrl: 'channel-ir.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'channel-ir',
+  templateUrl: 'channel-ir.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChannelIRComponent extends ChannelVoltsComponent {
-    @Input() channel: Channel;
-    @Input() index: number;
+  @Input() channel: Channel;
+  @Input() index: number;
 
-    @Output() back = new EventEmitter();
+  @Output() back = new EventEmitter();
 
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 
-    goBack() {
-        this.back.next();
-    }
+  goBack() {
+    this.back.next();
+  }
 }

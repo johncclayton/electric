@@ -1,0 +1,27 @@
+// Make the toast show up red
+:host {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  left: 0;
+
+  ion-grid {
+    background: var(--ion-color-danger);
+
+    color: white;
+
+    .message {
+      display: flex;
+      align-items: center;
+    }
+
+    ion-button {
+      --background: var(--ion-color-danger-tint);
+      --border-color: white;
+      --background-activated: var(--ion-color-danger-tint);
+      color: white;
+      align-items: center;
+    }
+  }
+}
+

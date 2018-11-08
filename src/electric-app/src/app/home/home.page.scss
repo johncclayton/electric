@@ -1,0 +1,117 @@
+//@import "~@ionic/angular/dist/themes/ionic.globals.scss";
+/*
+This is a customized version of the include-media.scss.
+It has an additional breakpoint, 'widephone'
+The file begins (on disk) with a _, meaning: "don't compile me to CSS when importing"
+ */
+@import "../../include-media";
+
+// This prevents the "charger" view from being vertically scrolled.
+.no-scroll .scroll-content {
+  overflow: hidden;
+}
+
+$large_text_offset: 1.5rem;
+
+p.searching {
+  padding-top: 10px;
+}
+
+.folding-cube-spinner {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+// This is the CSS for the charger, as a whole.
+.charger {
+  // This controls what you see at the top of the dashboard
+  // The main amps, volts area...
+
+  div.configButton {
+    alignment: center;
+  }
+
+  .overview {
+    ion-col:nth-child(4) {
+      text-align: center;
+    }
+
+    ion-col:nth-child(5) {
+      text-align: left;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+
+    .label {
+      opacity: 0.6;
+    }
+  }
+
+  .errors {
+    ion-col {
+      padding: 8px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    padding: 15px;
+
+    .bad {
+      background-color: var(--ion-color-danger);
+    }
+
+    .good {
+      background-color: var(--ion-color-secondary);
+    }
+  }
+}
+
+.chargername {
+  .tag {
+    display: inline-block;
+    background: white;
+    border-radius: 2px;
+    color: var(--ion-color-primary);
+    margin-left: 5px;
+    padding: 0 4px 0 4px;
+    transform: skewX(-5deg);
+  }
+
+  // iPhone 5S
+  @include media("<widephone") {
+    .tag {
+      display: none;
+    }
+  }
+}
+
+// Size overrides!
+@include media(">=widephone") {
+  .charger {
+    // Make everything bigger in general
+    font-size: 1.2rem;
+
+    .overview {
+      .label {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+@include media(">=tablet") {
+  .charger {
+    // Make everything bigger in general
+    font-size: 2.0rem;
+
+    .overview {
+      .label {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
