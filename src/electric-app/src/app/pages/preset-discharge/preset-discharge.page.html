@@ -6,7 +6,7 @@
         </ion-buttons>
         <ion-title>Discharge Options</ion-title>
         <ion-buttons slot="end">
-            <ion-button (click)="savePreset()">Save</ion-button>
+            <ion-button (click)="savePreset()" [disabled]="!canSubmit">Save</ion-button>
         </ion-buttons>
     </ion-toolbar>
 
@@ -14,132 +14,139 @@
 
 
 <ion-content *ngIf="preset">
-    <ion-list class="charger-slider">
-        <ion-list-header color="light">Discharging Options</ion-list-header>
-        <ion-item lines="none">
-            <ion-label>Discharge Current -
-                <ion-badge>{{preset.discharge_current}}A</ion-badge>
-            </ion-label>
-        </ion-item>
-        <ion-item>
-            <better-range [(value)]="preset.discharge_current"
-                          [min]="0.05"
-                          [max]="preset.getMaxAmpsPerChannel"
-                          [multiplier]="100"
-                          left_label="0.05A"
-                          right_label="{{preset.getMaxAmpsPerChannel}}A"
-            ></better-range>
-        </ion-item>
-        <ion-item lines="none">
-            <ion-label>Discharge Voltage -
-                <ion-badge>{{preset.discharge_voltage}}V</ion-badge>
-            </ion-label>
-        </ion-item>
-        <ion-item>
-            <better-range [(value)]="preset.discharge_voltage"
-                          [multiplier]="10"
-                          [min]="this.preset.dischargeVoltageMinMax().min"
-                          [max]="this.preset.dischargeVoltageMinMax().max"
-                          left_label="{{this.preset.dischargeVoltageMinMax().min}}V"
-                          right_label="{{this.preset.dischargeVoltageMinMax().max}}V"
-            ></better-range>
-        </ion-item>
+    <form>
+        <ion-list class="charger-slider">
+            <ion-list-header color="light">Discharging Options</ion-list-header>
+            <ion-item lines="none">
+                <ion-label>Discharge Current -
+                    <ion-badge>{{preset.discharge_current}}A</ion-badge>
+                </ion-label>
+            </ion-item>
+            <ion-item>
+                <better-range [(value)]="preset.discharge_current"
+                              [min]="0.05"
+                              [max]="preset.getMaxAmpsPerChannel"
+                              [multiplier]="100"
+                              left_label="0.05A"
+                              right_label="{{preset.getMaxAmpsPerChannel}}A"
+                ></better-range>
+            </ion-item>
+            <ion-item lines="none">
+                <ion-label>Discharge Voltage -
+                    <ion-badge>{{preset.discharge_voltage}}V</ion-badge>
+                </ion-label>
+            </ion-item>
+            <ion-item>
+                <better-range [(value)]="preset.discharge_voltage"
+                              [multiplier]="10"
+                              [min]="this.preset.dischargeVoltageMinMax().min"
+                              [max]="this.preset.dischargeVoltageMinMax().max"
+                              left_label="{{this.preset.dischargeVoltageMinMax().min}}V"
+                              right_label="{{this.preset.dischargeVoltageMinMax().max}}V"
+                ></better-range>
+            </ion-item>
 
-        <ion-item lines="none">
-            <ion-label>End Current -
-                <ion-badge>{{preset.discharge_end_current}}%</ion-badge>
-            </ion-label>
-        </ion-item>
-        <ion-item>
-            <ion-range [(ngModel)]="preset.discharge_end_current" min="1" max="100">
-                <ion-label slot="start">1%</ion-label>
-                <ion-label slot="end">100%</ion-label>
-            </ion-range>
-        </ion-item>
-    </ion-list>
-    <ion-list>
-        <ion-list-header color="light">Regeneration</ion-list-header>
-        <ion-item>
-            <ion-label>Mode</ion-label>
-            <ion-select [(ngModel)]="''+preset.regeneration_mode">
-                <ion-select-option [value]="''+opt.value"
-                                   *ngFor="let opt of chargerLists.regenerationModeTypeOptions()">{{opt.text}}
-                </ion-select-option>
-            </ion-select>
-        </ion-item>
-        <ion-item>
-            <ion-label>Channel Join</ion-label>
-            <ion-select [(ngModel)]="''+preset.regeneration_method" [disabled]="joinDisabled()">
-                <ion-select-option [value]="''+opt.value" *ngFor="let opt of chargerLists.regenerationMethodOptions()">
-                    {{opt.text}}
-                </ion-select-option>
-            </ion-select>
-        </ion-item>
-        <ion-item>
-            <ion-label>Voltage Limit</ion-label>
-            <ion-input #voltLimit="ngModel" slot="end" text-right type="number" no-right-padding
-                       minMaxValues="{{regenVoltLimitMinMax.min}},{{regenVoltLimitMinMax.max}}"
-                       [inputmode]="numeric"
-                       [(ngModel)]="preset.regeneration_volt_limit"
-                       [disabled]="limitsDisabled()"></ion-input>
-        </ion-item>
-        <ion-item class="validationError" *ngIf="!limitsDisabled() && voltLimit.invalid && (voltLimit.dirty || voltLimit.touched)">
-            <small>{{voltLimit.errors.message}}</small>
-        </ion-item>
+            <ion-item lines="none">
+                <ion-label>End Current -
+                    <ion-badge>{{preset.discharge_end_current}}%</ion-badge>
+                </ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-range [(ngModel)]="preset.discharge_end_current" min="1" max="100" name="discharge_end_current">
+                    <ion-label slot="start">1%</ion-label>
+                    <ion-label slot="end">100%</ion-label>
+                </ion-range>
+            </ion-item>
+        </ion-list>
+        <ion-list>
+            <ion-list-header color="light">Regeneration</ion-list-header>
+            <ion-item>
+                <ion-label>Mode</ion-label>
+                <ion-select [(ngModel)]="''+preset.regeneration_mode" name="regeneration_mode">
+                    <ion-select-option [value]="''+opt.value"
+                                       *ngFor="let opt of chargerLists.regenerationModeTypeOptions()">{{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Channel Join</ion-label>
+                <ion-select [(ngModel)]="''+preset.regeneration_method" [disabled]="joinDisabled()" name="regeneration_method">
+                    <ion-select-option [value]="''+opt.value"
+                                       *ngFor="let opt of chargerLists.regenerationMethodOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Voltage Limit</ion-label>
+                <ion-input #voltLimit="ngModel" slot="end" text-right type="number" no-right-padding
+                           name="regeneration_volt_limit"
+                           minMaxValues="{{regenVoltLimitMinMax.min}},{{regenVoltLimitMinMax.max}}"
+                           [inputmode]="numeric"
+                           [(ngModel)]="preset.regeneration_volt_limit"
+                           [disabled]="limitsDisabled()"></ion-input>
+            </ion-item>
+            <ion-item class="validationError"
+                      *ngIf="!limitsDisabled() && voltLimit.invalid && (voltLimit.dirty || voltLimit.touched)">
+                <small>{{voltLimit.errors.message}}</small>
+            </ion-item>
 
-        <ion-item>
-            <ion-label>Current Limit</ion-label>
-            <ion-input #currentLimit="ngModel" slot="end" text-right type="number" no-right-padding
-                       minMaxValues="{{regenCurrentMinMax.min}},{{regenCurrentMinMax.max}}"
-                       [inputmode]="numeric"
-                       [(ngModel)]="preset.regeneration_current_limit"
-                       [disabled]="limitsDisabled()"></ion-input>
-        </ion-item>
-        <ion-item class="validationError" *ngIf="!limitsDisabled() && currentLimit.invalid && (currentLimit.dirty || currentLimit.touched)">
-            <small>{{currentLimit.errors.message}}</small>
-        </ion-item>
-    </ion-list>
+            <ion-item>
+                <ion-label>Current Limit</ion-label>
+                <ion-input #currentLimit="ngModel" slot="end" text-right type="number" no-right-padding
+                           name="regeneration_current_limit"
+                           minMaxValues="{{regenCurrentMinMax.min}},{{regenCurrentMinMax.max}}"
+                           [inputmode]="numeric"
+                           [(ngModel)]="preset.regeneration_current_limit"
+                           [disabled]="limitsDisabled()"></ion-input>
+            </ion-item>
+            <ion-item class="validationError"
+                      *ngIf="!limitsDisabled() && currentLimit.invalid && (currentLimit.dirty || currentLimit.touched)">
+                <small>{{currentLimit.errors.message}}</small>
+            </ion-item>
+        </ion-list>
 
-    <ion-list *ngIf="showAdvanced()">
-        <ion-list-header color="light">Advanced</ion-list-header>
-        <ion-item>
-            <ion-label>Extra discharge enabled</ion-label>
-            <ion-toggle [(ngModel)]="preset.discharge_extra_discharge_enabled"></ion-toggle>
-        </ion-item>
-        <ion-item>
-            <ion-label>Balance enable</ion-label>
-            <ion-toggle [(ngModel)]="preset.discharge_balance_enabled"></ion-toggle>
-        </ion-item>
-    </ion-list>
+        <ion-list *ngIf="showAdvanced()">
+            <ion-list-header color="light">Advanced</ion-list-header>
+            <ion-item>
+                <ion-label>Extra discharge enabled</ion-label>
+                <ion-toggle [(ngModel)]="preset.discharge_extra_discharge_enabled" name="discharge_extra_discharge_enabled"></ion-toggle>
+            </ion-item>
+            <ion-item>
+                <ion-label>Balance enable</ion-label>
+                <ion-toggle [(ngModel)]="preset.discharge_balance_enabled" name="discharge_balance_enabled"></ion-toggle>
+            </ion-item>
+        </ion-list>
 
-    <ion-list>
-        <ion-list-header color="light">Safety</ion-list-header>
-        <ion-item>
-            <ion-label>Cuttoff Temp</ion-label>
-            <ion-select slot="end" [(ngModel)]="''+preset.safety_discharge_cutoff_temp">
-                <ion-select-option [value]="''+opt.value" *ngFor="let opt of chargerLists.safetyTempOptions()">
-                    {{opt.text}}
-                </ion-select-option>
-            </ion-select>
-        </ion-item>
-        <ion-item>
-            <ion-label>Max Capacity</ion-label>
-            <ion-select slot="end" [(ngModel)]="''+preset.safety_discharge_capacity">
-                <ion-select-option [value]="''+opt.value" *ngFor="let opt of chargerLists.safetyCapacityOptions()">
-                    {{opt.text}}
-                </ion-select-option>
-            </ion-select>
-        </ion-item>
-        <ion-item>
-            <ion-label>Safety Timer</ion-label>
-            <ion-toggle slot="end" [(ngModel)]="preset.safety_discharge_timer_enabled"></ion-toggle>
-        </ion-item>
-        <ion-item *ngIf="preset.safety_discharge_timer_enabled">
-            <ion-label>Safety Timer Time (s)</ion-label>
-            <ion-input slot="end" no-right-padding [(ngModel)]="preset.safety_discharge_timer_time"
-                       [disabled]="!preset.safety_discharge_timer_enabled"></ion-input>
-        </ion-item>
-    </ion-list>
-
+        <ion-list>
+            <ion-list-header color="light">Safety</ion-list-header>
+            <ion-item>
+                <ion-label>Cuttoff Temp</ion-label>
+                <ion-select slot="end" [(ngModel)]="''+preset.safety_discharge_cutoff_temp" name="safety_discharge_cutoff_temp">
+                    <ion-select-option [value]="''+opt.value" *ngFor="let opt of chargerLists.safetyTempOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Max Capacity</ion-label>
+                <ion-select slot="end" [(ngModel)]="''+preset.safety_discharge_capacity" name="safety_discharge_capacity">
+                    <ion-select-option [value]="''+opt.value" *ngFor="let opt of chargerLists.safetyCapacityOptions()">
+                        {{opt.text}}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Safety Timer</ion-label>
+                <ion-toggle slot="end" [(ngModel)]="preset.safety_discharge_timer_enabled" name="safety_discharge_timer_enabled"></ion-toggle>
+            </ion-item>
+            <ion-item *ngIf="preset.safety_discharge_timer_enabled">
+                <ion-label>Safety Timer Time (s)</ion-label>
+                <ion-input slot="end" no-right-padding [(ngModel)]="preset.safety_discharge_timer_time"
+                           name="safety_discharge_timer_time"
+                           [disabled]="!preset.safety_discharge_timer_enabled"></ion-input>
+            </ion-item>
+        </ion-list>
+    </form>
 
 </ion-content>

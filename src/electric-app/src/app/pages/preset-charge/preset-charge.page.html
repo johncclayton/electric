@@ -6,7 +6,7 @@
         </ion-buttons>
         <ion-title>Charge Settings</ion-title>
         <ion-buttons slot="end">
-            <ion-button (click)="savePreset()">Save</ion-button>
+            <ion-button (click)="savePreset()" [disabled]="!canSubmit">Save</ion-button>
         </ion-buttons>
     </ion-toolbar>
 
@@ -21,6 +21,7 @@
                 <ion-label>Charge Mode</ion-label>
                 <ion-select [(ngModel)]="''+preset.charge_mode">
                     <ion-select-option
+                            name="charge-mode"
                             *ngFor="let opt of chargeModeOptions()"
                             [selected]="preset.charge_mode == opt.value"
                             [value]="''+opt.value">
@@ -30,7 +31,7 @@
             </ion-item>
             <ion-item>
                 <ion-label>Allow 0v charging</ion-label>
-                <ion-toggle [(ngModel)]="preset.allow_zero_volt_charging"></ion-toggle>
+                <ion-toggle [(ngModel)]="preset.allow_zero_volt_charging" name="allow_zero_volt_charging"></ion-toggle>
             </ion-item>
         </ion-list>
         <ion-list>
@@ -38,7 +39,8 @@
             <ion-item>
                 <ion-label>Sensitivity</ion-label>
                 <ion-select [(ngModel)]="preset.ni_sensitivity">
-                    <ion-select-option [value]="opt.value" *ngFor="let opt of nimhSensitivityOptions()">{{opt.text}}
+                    <ion-select-option [value]="opt.value" name="ni_sensitivity"
+                                       *ngFor="let opt of nimhSensitivityOptions()">{{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -46,6 +48,7 @@
                 <ion-label>Peak Delay Time</ion-label>
                 <ion-select [(ngModel)]="''+preset.ni_peak_delay_time">
                     <ion-select-option [value]="''+opt.value"
+                                       name="ni_peak_delay_time"
                                        [selected]="preset.ni_peak_delay_time == opt.value"
                                        *ngFor="let opt of nimhDelayTimeOptions()">{{opt.text}}
                     </ion-select-option>
@@ -140,14 +143,16 @@
             <ion-item>
                 <ion-label>Restore charge time (s)</ion-label>
                 <ion-select slot="end" [(ngModel)]="preset.restore_charge_time">
-                    <ion-select-option [value]="opt.value" *ngFor="let opt of restoreChargeTimeOptions()">{{opt.text}}
+                    <ion-select-option [value]="opt.value" *ngFor="let opt of restoreChargeTimeOptions()">
+                        {{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
             <ion-item>
                 <ion-label>Restore charge current</ion-label>
                 <ion-select slot="end" [(ngModel)]="''+preset.restore_charge_current">
-                    <ion-select-option [value]="''+opt.value" *ngFor="let opt of restoreCurrentOptions()">{{opt.text}}
+                    <ion-select-option [value]="''+opt.value" *ngFor="let opt of restoreCurrentOptions()">
+                        {{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -162,7 +167,8 @@
             <ion-item>
                 <ion-label>Cuttoff Temp</ion-label>
                 <ion-select slot="end" [(ngModel)]="preset.safety_charge_cutoff_temp">
-                    <ion-select-option [value]="opt.value" *ngFor="let opt of this.chargerLists.safetyTempOptions()">
+                    <ion-select-option [value]="opt.value"
+                                       *ngFor="let opt of this.chargerLists.safetyTempOptions()">
                         {{opt.text}}
                     </ion-select-option>
                 </ion-select>
@@ -186,6 +192,5 @@
             </ion-item>
         </ion-list>
     </div>
-
 </ion-content>
 <ng-template #noPreset>No preset provided</ng-template>

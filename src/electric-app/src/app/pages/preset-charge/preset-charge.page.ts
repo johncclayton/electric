@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit, ViewChild} from '@angular/core';
 import {NavController} from '@ionic/angular';
 import {BalanceEndCondition, ChemistryType, LipoBalanceType, Preset} from '../../models/preset-class';
 import {DataBagService} from '../../services/data-bag.service';
@@ -7,10 +7,13 @@ import * as _ from 'lodash';
 import {iChargerPickLists} from '../../utils/picklists';
 import {Observable, of} from 'rxjs';
 import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
+import {NgForm} from '@angular/forms';
 
 export class PresetBasePage {
     private saver: SavePresetInterface;
     logger: NGXLogger;
+
+    @ViewChild(NgForm) ngForm;
 
     constructor(public navCtrl: NavController,
                 public chargerLists: iChargerPickLists,
@@ -37,6 +40,17 @@ export class PresetBasePage {
             return this.saver.getPreset();
         }
         return null;
+    }
+
+    get canSubmit(): boolean {
+        if (this.ngForm) {
+            let formGroup = this.ngForm.form;
+            // this.logger.info(`Form is a ${this.ngForm.constructor.name}. Valid: ${formGroup.valid}`);
+            return formGroup.valid;
+            // } else {
+            //     this.logger.warn(`No form, can't decide`);
+        }
+        return true;
     }
 
     savePreset() {

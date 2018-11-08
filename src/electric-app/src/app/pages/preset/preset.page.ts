@@ -1,4 +1,13 @@
-import {AfterContentInit, ApplicationRef, ChangeDetectionStrategy, Component, NgZone, OnInit} from '@angular/core';
+import {
+    AfterContentInit,
+    AfterViewInit,
+    ApplicationRef,
+    ChangeDetectionStrategy,
+    Component,
+    NgZone,
+    OnInit,
+    ViewChild
+} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {Observable, Subject} from 'rxjs';
 import {AlertController, NavController} from '@ionic/angular';
@@ -13,6 +22,7 @@ import {IAppState} from '../../models/state/configure';
 import {UIActions} from '../../models/state/actions/ui';
 import {ToastHelper} from '../../utils/messaging';
 import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
+import {NgForm} from '@angular/forms';
 
 export interface SavePresetInterface {
     savePreset(whenDoneCall: (preset: Preset) => void): void;
@@ -28,7 +38,7 @@ export interface SavePresetInterface {
     styleUrls: ['./preset.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, SavePresetInterface {
+export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, AfterViewInit, SavePresetInterface {
     preset: Preset;
     unmodifiedpreset: Preset;
     confirmedExit: boolean = false;
@@ -43,6 +53,8 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
     private logger: NGXLogger;
+
+    @ViewChild(NgForm) ngForm;
 
     ngOnDestroy() {
         this.ngUnsubscribe.next();
@@ -79,6 +91,18 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
         }
     }
 
+    get canSubmit(): boolean {
+        if (this.ngForm) {
+            let formGroup = this.ngForm.form;
+            // this.logger.info(`Form is a ${this.ngForm.constructor.name}. Valid: ${formGroup.valid}`);
+            return formGroup.valid;
+        // } else {
+        //     this.logger.warn(`No form, can't decide`);
+        }
+        return true;
+    }
+
+
     copyPresetToSelf(preset: Preset) {
         this.preset = _.cloneDeep(preset);
         this.unmodifiedpreset = _.cloneDeep(preset);
@@ -99,19 +123,32 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
             let real = i / 10;
             this.__currentChoices.push({'value': real, 'text': (real).toString() + 'A'});
         }
-        // This was used for testing, to quickly get to a page I was working on
+    }
 
-        // this.goToSubpage('PresetCharge');
-        // this.goToSubpage('PresetDischarge');
-        // this.goToSubpage('PresetStorage');
-        // this.goToSubpage('PresetCycle');
-
-        if (this.preset) {
-            // this.logger.info(`Selected preset: ${JSON.stringify(this.preset)}`);
-        }
+    ngAfterViewInit() {
+        // this.logger.info('ngAfterViewInit');
+        // this.canSubmit;
     }
 
     ngAfterContentInit() {
+        // This was used for testing, to quickly get to a page I was working on
+        if (0) {
+            if (this.preset) {
+                // this.logger.info(`Selected preset: ${JSON.stringify(this.preset)}`);
+                setTimeout(() => {
+                    // this.goToSubpage('PresetCharge');
+                    // this.goToSubpage('PresetDischarge');
+                    // this.goToSubpage('PresetStorage');
+                    // this.goToSubpage('PresetCycle');
+                }, 500);
+            }
+        }
+        if (this.preset == null) {
+            setTimeout(() => {
+                this.logger.warn(`No preset, navigating back to the root`);
+                this.navCtrl.navigateRoot('');
+            }, 500);
+        }
     }
 
     private derivePresetPages() {
@@ -375,8 +412,8 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
         }
     }
 
-    goToSubpage(page) {
+    goToSubpage(pageName: string) {
         this.dataBag.set('preset-saver', this);
-        this.navCtrl.navigateForward(page.url);
+        this.navCtrl.navigateForward(pageName);
     }
 }

@@ -77,11 +77,13 @@ export class HomePage implements OnInit, OnDestroy {
         }
 
         this.configService.configurationLoaded$.subscribe(r => {
-            // this.uiAction.setErrorMessageFromString("Huzzah");
-            // this.showNetworkConfigPage();
-            // this.showiChargerSettingsPage();
-            // this.toggleError();
-            // this.showPresetList();
+            setTimeout(() => {
+                // this.uiAction.setErrorMessageFromString("Huzzah");
+                // this.showNetworkConfigPage();
+                // this.showiChargerSettingsPage();
+                // this.toggleError();
+                // this.showPresetList();
+            }, 500);
         });
     }
 
