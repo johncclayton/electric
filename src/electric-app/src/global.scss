@@ -14,29 +14,12 @@ ion-spinner {
   width: 100%;
 }
 
-ion-toast {
-  &.warningToast {
-    --background: var(--ion-color-warning-shade) !important;
-    color: var(--ion-color-warning-contrast) !important;
-  }
-
-  &.messaging.success {
-    --background: var(--ion-color-success) !important;
-    --button-color: white !important;
-    color: white !important;
-  }
-
-  &.messaging.error {
-    --background: var(--ion-color-danger) !important;
-    -button-color: white !important;
-    color: white !important;
-  }
-}
 
 .validationError {
   color: var(--ion-color-danger);
 }
 
-@import "spinners.scss";
+@import "toast_colours";
+@import "spinners";
 @import "fix-ion-ranges";
-@import "channel.display.scss";
+@import "channel.display";

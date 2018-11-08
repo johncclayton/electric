@@ -1,0 +1,19 @@
+ion-toast {
+  &.warningToast {
+    --background: var(--ion-color-tertiary) !important;
+    --button-color: var(--ion-color-tertiary-contrast) !important;
+    --color: var(--ion-color-tertiary-contrast) !important;
+  }
+
+  &.messaging.success {
+    --background: var(--ion-color-success) !important;
+    --button-color: var(--ion-color-success-contrast) !important;
+    --color: var(--ion-color-success-contrast) !important;
+  }
+
+  &.messaging.error {
+    --background: var(--ion-color-danger) !important;
+    --button-color: var(--ion-color-danger-contrast) !important;
+    --color: var(--ion-color-danger-contrast) !important;
+  }
+}
