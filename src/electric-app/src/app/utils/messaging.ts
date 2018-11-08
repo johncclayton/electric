@@ -8,14 +8,28 @@ export class ToastHelper {
     constructor(private toast: ToastController) {
     }
 
-    async showMessage(message: string, isError: boolean = false) {
-        let toast = await this.toast.create({
+    async showErrorMessage(message: string, showClose = false) {
+        return this._showMessage(message, true, showClose);
+    }
+
+    async showMessage(message: string, showClose = false) {
+        return this._showMessage(message, false, showClose);
+    }
+
+    private async _showMessage(message: string, isError: boolean = false, showClose = false) {
+        let opts = {
             message: message,
             cssClass: `messaging ${isError ? 'error' : 'success'}`,
-            duration: 2000,
-            // showCloseButton: true,
+            showCloseButton: showClose,
             position: 'bottom'
-        });
+        };
+
+        if (!showClose) {
+            opts['duration'] = 2000;
+        }
+
+        // @ts-ignore
+        let toast = await this.toast.create(opts);
         toast.present();
     }
 }

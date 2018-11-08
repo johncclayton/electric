@@ -83,6 +83,8 @@ export class HomePage implements OnInit, OnDestroy {
                 // this.showiChargerSettingsPage();
                 // this.toggleError();
                 // this.showPresetList();
+
+                // this.messaging.showMessage('Hello', true);
             }, 500);
         });
     }

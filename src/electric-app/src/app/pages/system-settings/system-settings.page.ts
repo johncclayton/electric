@@ -14,6 +14,7 @@ import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {IAppState} from '../../models/state/configure';
 import {ICanDeactivate} from '../../services/can-deactivate-preset-guard.service';
 import {fromPromise} from 'rxjs/internal-compatibility';
+import {ToastHelper} from '../../utils/messaging';
 
 @Component({
     selector: 'system-settings-page',
@@ -32,6 +33,7 @@ export class SystemSettingsPage implements OnInit, OnDestroy, ICanDeactivate {
         private uiActions: UIActions,
         private charger: iChargerService,
         private toastController: ToastController,
+        private messaging: ToastHelper,
         private localNotifications: LocalNotifications,
         private alertController: AlertController,
         private ngRedux: NgRedux<IAppState>) {
@@ -79,8 +81,10 @@ export class SystemSettingsPage implements OnInit, OnDestroy, ICanDeactivate {
             }, err => {
                 this.uiActions.setErrorFromErrorObject('Failed to save settings', err);
             }, () => {
-                console.warn(`Settings save completed!`);
-                alert.dismiss();
+                // console.warn(`Settings save completed!`);
+                alert.dismiss().then(() => {
+                    this.messaging.showMessage('Settings saved');
+                });
             });
     }
 

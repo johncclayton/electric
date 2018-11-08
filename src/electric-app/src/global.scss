@@ -14,23 +14,21 @@ ion-spinner {
   width: 100%;
 }
 
-.warningToast {
-  .toast-wrapper {
-    background: var(--ion-color-warning-shade) !important;
+ion-toast {
+  &.warningToast {
+    --background: var(--ion-color-warning-shade) !important;
     color: var(--ion-color-warning-contrast) !important;
   }
-}
 
-.messaging.success {
-  .toast-wrapper {
-    background-color: var(--ion-color-success) !important;
+  &.messaging.success {
+    --background: var(--ion-color-success) !important;
+    --button-color: white !important;
     color: white !important;
   }
-}
 
-.messaging.error {
-  .toast-wrapper {
-    background-color: var(--ion-color-danger) !important;
+  &.messaging.error {
+    --background: var(--ion-color-danger) !important;
+    -button-color: white !important;
     color: white !important;
   }
 }
