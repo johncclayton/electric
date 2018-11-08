@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {ISystem} from '../../models/state/reducers/system';
-import {Observable, Subject} from 'rxjs';
+import {Observable, of, Subject} from 'rxjs';
 import {IUIState} from '../../models/state/reducers/ui';
 import {AlertController, ToastController} from '@ionic/angular';
 import {SystemActions} from '../../models/state/actions/system';
@@ -12,13 +12,15 @@ import {takeUntil} from 'rxjs/operators';
 import {cloneDeep} from 'lodash';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {IAppState} from '../../models/state/configure';
+import {ICanDeactivate} from '../../services/can-deactivate-preset-guard.service';
+import {fromPromise} from 'rxjs/internal-compatibility';
 
 @Component({
     selector: 'system-settings-page',
     templateUrl: './system-settings.page.html',
     styleUrls: ['./system-settings.page.scss'],
 })
-export class SystemSettingsPage implements OnInit, OnDestroy {
+export class SystemSettingsPage implements OnInit, OnDestroy, ICanDeactivate {
     @select() system$: Observable<ISystem>;
     @select() ui$: Observable<IUIState>;
 
@@ -102,35 +104,52 @@ export class SystemSettingsPage implements OnInit, OnDestroy {
         return keys.length > 0;
     }
 
-    ionViewCanLeave() {
+    canDeactivate(): Observable<boolean> {
         if (this.settingsAreModified) {
-            return this.changeAlert(this.ngRedux.getState().system);
+            return this.changeAlert();
+        } else {
+            return of(true);
         }
     }
 
-    private async changeAlert(system: ISystem) {
-        let alert = await this.alertController.create({
-            header: 'Save settings',
-            message: 'Do you want to save to the charger?',
-            buttons: [
-                {
-                    text: 'Save',
-                    handler: () => {
-                        this.saveSettings();
+    guardOnlyTheseURLs(): Array<string> | null {
+        return null;
+    }
+
+
+    private changeAlert(): Observable<boolean> {
+        return Observable.create(obs => {
+            this.alertController.create({
+                header: 'Save settings',
+                message: 'Do you want to save to the charger?',
+                buttons: [
+                    {
+                        text: 'Save',
+                        handler: () => {
+                            this.saveSettings().then(r => {
+                                obs.next(true);
+                                obs.complete();
+                            });
+                        }
+                    },
+                    {
+                        text: 'Discard',
+                        handler: () => {
+                            obs.next(true);
+                            obs.complete();
+                        }
+                    },
+                    {
+                        text: 'Cancel',
+                        handler: () => {
+                            obs.next(false);
+                            obs.complete();
+                        }
                     }
-                },
-                {
-                    text: 'Discard',
-                    handler: () => {
-                    }
-                },
-                {
-                    text: 'Cancel',
-                    handler: () => {
-                    }
-                }
-            ]
+                ]
+            }).then(r => {
+                r.present();
+            });
         });
-        alert.present();
     }
 }

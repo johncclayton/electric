@@ -7,11 +7,13 @@ import {IonicModule} from '@ionic/angular';
 
 import {SystemSettingsPage} from './system-settings.page';
 import {ComponentsModule} from '../../components/components.module';
+import {GenericDeactivateGuard} from '../../services/can-deactivate-preset-guard.service';
 
 const routes: Routes = [
     {
         path: '',
-        component: SystemSettingsPage
+        component: SystemSettingsPage,
+        canDeactivate: [GenericDeactivateGuard]
     }
 ];
 

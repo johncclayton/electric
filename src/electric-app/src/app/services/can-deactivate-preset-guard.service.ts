@@ -1,19 +1,21 @@
 import {Injectable} from '@angular/core';
-import {CanDeactivate} from '@angular/router';
+import {CanActivate, CanDeactivate} from '@angular/router';
 import {ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router/src/router_state';
-import {from, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
 
 export interface ICanDeactivate {
     canDeactivate(): Observable<boolean>;
+    guardOnlyTheseURLs():Array<string> | null;
 }
 
 @Injectable({
     providedIn: 'root'
 })
-export class CanDeactivatePresetGuard implements CanDeactivate<ICanDeactivate> {
-    private logger: NGXLogger;
-    constructor(private logSvc:CustomNGXLoggerService) {
+export class GenericDeactivateGuard implements CanDeactivate<ICanDeactivate> {
+    public logger: NGXLogger;
+
+    constructor(private logSvc: CustomNGXLoggerService) {
         this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
     }
 
@@ -22,10 +24,15 @@ export class CanDeactivatePresetGuard implements CanDeactivate<ICanDeactivate> {
         // this.logger.log(`Next state: ${nextState}`);
 
         if (component) {
-            this.logger.log(`CanDeactivateGuardService called for: ${component}, current route: ${currentRoute} going to: ${nextState.url}`);
-            if (nextState.url == '/PresetList') {
-                this.logger.log(`Component: ${component ? component.constructor.name : 'null'} checking via canDeactivate()`);
-                // this.logger.log(`ARS: ${currentRoute.component.constructor.name}`);
+            this.logger.log(`${this.constructor.name}.canDeactivate called for: ${component}, current route: ${currentRoute} going to: ${nextState.url}`);
+
+            const guardOnlyTheseURLs = component.guardOnlyTheseURLs();
+            if(guardOnlyTheseURLs) {
+                if(nextState.url in guardOnlyTheseURLs) {
+                    this.logger.log(`Component: ${component ? component.constructor.name : 'null'} checking via canDeactivate()`);
+                    return component.canDeactivate();
+                }
+            } else {
                 return component.canDeactivate();
             }
 
@@ -33,3 +40,4 @@ export class CanDeactivatePresetGuard implements CanDeactivate<ICanDeactivate> {
         return true;
     }
 }
+

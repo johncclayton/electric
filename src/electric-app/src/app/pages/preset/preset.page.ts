@@ -175,6 +175,10 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
         return this.preset;
     }
 
+    guardOnlyTheseURLs(): Array<string> | null {
+        return ['/PresetList'];
+    }
+
     canDeactivate(): Observable<boolean> {
         return Observable.create(obs => {
             if (!this.preset) {
