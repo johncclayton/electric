@@ -70,14 +70,18 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
                 return;
             }
             this.callback = navParams['callback'];
-            this.preset = _.cloneDeep(navParams['preset']);
-            this.unmodifiedpreset = _.cloneDeep(this.preset);
+            this.copyPresetToSelf(navParams['preset']);
 
             if (this.preset === undefined || this.preset === null) {
                 this.navCtrl.navigateBack('PresetList');
                 return;
             }
         }
+    }
+
+    copyPresetToSelf(preset: Preset) {
+        this.preset = _.cloneDeep(preset);
+        this.unmodifiedpreset = _.cloneDeep(preset);
     }
 
     ngOnInit() {
@@ -179,6 +183,17 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
         return ['/PresetList'];
     }
 
+    get modifiedPresetProperties(): Array<string> {
+        // If there are changes, we should prompt the user to save.
+        this.logger.log(`${this.constructor.name} is checking to see if the preset has changed...`);
+        let presetBeingEdited = this.preset;
+        return _.reduce(this.unmodifiedpreset.data, function (result, value, key) {
+            // this.logger.log(`checking key ${key}. Does ${value} != ${presetBeingEdited.data[key]} ? `);
+            return _.isEqual(value, presetBeingEdited.data[key]) ?
+                result : result.concat(key);
+        }, []);
+    }
+
     canDeactivate(): Observable<boolean> {
         return Observable.create(obs => {
             if (!this.preset) {
@@ -188,24 +203,17 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
                 return;
             }
             // If there are changes, we should prompt the user to save.
-            this.logger.log(`${this.constructor.name} is checking to see if the preset has changed...`);
-            let presetBeingEdited = this.preset;
-            let modifiedProperties = _.reduce(this.unmodifiedpreset.data, function (result, value, key) {
-                // this.logger.log(`checking key ${key}. Does ${value} != ${presetBeingEdited.data[key]} ? `);
-                return _.isEqual(value, presetBeingEdited.data[key]) ?
-                    result : result.concat(key);
-            }, []);
-
+            let modifiedProperties = this.modifiedPresetProperties;
             // let are_equal = _.isEqual(this.unmodifiedpreset.data, this.preset.data);
             let are_equal = modifiedProperties.length == 0;
             if (!are_equal) {
                 this.logger.log(`Preset ${this.preset.name} is modified:`);
                 for (let property of modifiedProperties) {
                     this.logger.log(property, ': ', this.unmodifiedpreset.data[property], ' (', typeof(this.unmodifiedpreset.data[property]),
-                        ') now = ', presetBeingEdited.data[property], '(', typeof(presetBeingEdited.data[property]), ')');
+                        ') now = ', this.preset.data[property], '(', typeof(this.preset.data[property]), ')');
                 }
                 this.confirmedExit = false;
-                let alert = this.alertController.create({
+                this.alertController.create({
                     header: 'Preset modified',
                     subHeader: 'Do you want to save your changes?',
                     buttons: [
@@ -261,8 +269,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
                 // Because the chargerService runs and notifies us OUTSIDE of ng
                 this.zone.run(() => {
                     // When you save,  you are always given your preset back.
-                    this.preset = _.cloneDeep(preset);
-                    this.unmodifiedpreset = _.cloneDeep(preset);
+                    this.copyPresetToSelf(preset);
                 });
             },
             (error) => {
@@ -284,19 +291,49 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
             });
     }
 
-    refreshPreset(refresher) {
-        // TODO: what if there are unsaved changes?
-        // TODO: Causes a bug where the preset list itself isnt refreshed
-        this.chargerService.getPresets()
-            .pipe(
-                takeUntil(this.ngUnsubscribe)
-            ).subscribe((presetList) => {
-            let wantedPreset = presetList[this.preset.index];
-            if (wantedPreset) {
-                this.preset = wantedPreset;
-            }
-            refresher.complete();
-        });
+    refreshPreset(event) {
+        // This gets the preset from the charger, overwrites local state and also updates the PresetList
+        let refreshFunc = () => {
+            this.chargerService.getPresets()
+                .pipe(
+                    takeUntil(this.ngUnsubscribe)
+                ).subscribe((presetList) => {
+                this.zone.run(() => {
+                    let wantedPreset = presetList[this.preset.index];
+                    if (wantedPreset) {
+                        this.copyPresetToSelf(wantedPreset);
+                        this.callback(this.preset);
+                        this.messaging.showMessage('Preset refreshed');
+                    }
+                    event.target.complete();
+                });
+            });
+        };
+
+        // Unsaved changes? Prompt the user first.
+        let modifiedProperties = this.modifiedPresetProperties;
+        if (modifiedProperties.length > 0) {
+            this.alertController.create({
+                header: 'Preset modified',
+                subHeader: 'Refreshing will discard any changes. Sure?',
+                buttons: [
+                    {
+                        text: 'Yes',
+                        handler: refreshFunc
+                    },
+                    {
+                        text: 'No',
+                        handler: () => {
+                            event.target.complete();
+                        }
+                    }
+                ]
+            }).then(alert => {
+                alert.present();
+            });
+        } else {
+            refreshFunc();
+        }
     }
 
     showCells() {
