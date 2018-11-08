@@ -15,6 +15,7 @@ import {TempRangeComponent} from './temp-range/temp-range.component';
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {FormsModule} from '@angular/forms';
 import {ErrorDisplayComponent} from './error-display/error-display.component';
+import {ChargerValidator} from '../utils/validators';
 
 @NgModule({
     declarations: [
@@ -28,7 +29,8 @@ import {ErrorDisplayComponent} from './error-display/error-display.component';
         NetworkConfigComponent,
         SystemComponent,
         TempRangeComponent,
-        WifiSettingsComponent
+        WifiSettingsComponent,
+        ChargerValidator
     ],
     imports: [
         CommonModule,
@@ -48,6 +50,7 @@ import {ErrorDisplayComponent} from './error-display/error-display.component';
         SystemComponent,
         TempRangeComponent,
         WifiSettingsComponent,
+        ChargerValidator
     ]
 })
 export class ComponentsModule {

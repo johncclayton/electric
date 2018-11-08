@@ -35,5 +35,9 @@ ion-spinner {
   }
 }
 
+.validationError {
+  color: var(--ion-color-danger);
+}
+
 @import "fix-ion-ranges";
 @import "channel.display.scss";

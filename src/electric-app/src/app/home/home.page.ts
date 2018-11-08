@@ -171,38 +171,61 @@ export class HomePage implements OnInit, OnDestroy {
         this.chargerService.stopAllPolling();
 
         const ui = this.ngRedux.getState().ui;
-        if(ui.exception || ui.disconnectionErrorCount > 0) {
+        if (ui.exception || ui.disconnectionErrorCount > 0) {
             this.uiAction.clearError();
             this.uiAction.serverReconnected();
         } else {
 
             // rxjs TimeoutError
-            if(0) {
+            if (0) {
                 let te = new TimeoutError();
                 this.uiAction.setErrorFromErrorObject('BAM', te);
             }
 
             // Normal string message
-            if(0) {
+            if (0) {
                 this.uiAction.setErrorMessageFromString(`Well, FAIL`);
             }
 
             // Disconnection
-            if(0) {
+            if (0) {
                 this.uiAction.setDisconnected();
                 this.uiAction.setDisconnected();
                 this.uiAction.setDisconnected();
             }
 
             // thrown error
-            if(1) {
+            if (1) {
                 try {
                     // noinspection ExceptionCaughtLocallyJS
                     throw new TimeoutError();
-                } catch(e) {
+                } catch (e) {
                     this.uiAction.setErrorFromErrorObject(`Kaboom, cant do it`, e);
                 }
             }
         }
     }
+
+    get regenVoltLimitMinMax() {
+        return this.preset.dischargeVoltageMinMax();
+    }
+
+    /*
+    This was used to examine the
+        @ViewChild('ngm') ngm;
+    to see what the ngModel contained.
+     */
+    // errorsFor() {
+    //     if (this.ngm) {
+    //         if('errors' in this.ngm) {
+    //             let theErrors = this.ngm['errors'];
+    //             console.log(`Errors has: ${SWBSafeJSON.stringify(theErrors)}`);
+    //             if('message' in theErrors) {
+    //                 return theErrors['message'];
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
+
 }

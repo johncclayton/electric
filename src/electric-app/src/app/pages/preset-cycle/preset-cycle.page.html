@@ -32,8 +32,12 @@
         </ion-item>
         <ion-item>
             <ion-label>Delay Time</ion-label>
-            <ion-input slot="end" text-right type="number" no-right-padding [min]="0.00" [max]="1000"
+            <ion-input #delayTime="ngModel" slot="end" text-right type="number" no-right-padding
+                       minMaxValues="0,1000"
                        [(ngModel)]="preset.cycle_delay"></ion-input>
+        </ion-item>
+        <ion-item class="validationError" *ngIf="delayTime.invalid && (delayTime.dirty || delayTime.touched)">
+            <small>{{delayTime.errors.message}}</small>
         </ion-item>
     </ion-list>
 </ion-content>

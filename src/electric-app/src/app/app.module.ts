@@ -29,9 +29,11 @@ import {ErrorDisplayComponent} from './components/error-display/error-display.co
 @NgModule({
     declarations: [
         AppComponent,
-        ErrorDisplayComponent
+        ErrorDisplayComponent,
     ],
-    entryComponents: [ErrorDisplayComponent],
+    entryComponents: [
+        ErrorDisplayComponent,
+    ],
     imports: [
         BrowserModule,
         IonicModule.forRoot(),
@@ -41,7 +43,7 @@ import {ErrorDisplayComponent} from './components/error-display/error-display.co
         NgReduxModule,
         AppRoutingModule,
         ComponentsModule,
-        LoggerModule.forRoot({level: NgxLoggerLevel.WARN})
+        LoggerModule.forRoot({level: NgxLoggerLevel.WARN}),
     ],
     providers: [
         StatusBar,

@@ -1,3 +1,24 @@
+Item Validation using Template Forms
+<ion-list>
+    <ion-item *ngIf="preset">
+        <ion-label>Voltage Limit</ion-label>
+        <ion-input #ngm="ngModel"
+                   slot="end"
+                   type="number"
+                   no-right-padding
+                   text-right
+                   minMaxValues="{{regenVoltLimitMinMax.min}},{{regenVoltLimitMinMax.max}}"
+                   [inputmode]="numeric"
+                   [(ngModel)]="preset.regeneration_volt_limit"
+        >
+        </ion-input>
+    </ion-item>
+    <ion-item class="validationError" *ngIf="!limitsDisabled() && ngm.invalid && (ngm.dirty || ngm.touched)">
+        <small>{{ngm.errors.message}}</small>
+    </ion-item>
+</ion-list>
+
+
 Enabling other control based on balance end type
 <ion-item>
     <ion-label>End</ion-label>

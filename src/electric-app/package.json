@@ -49,6 +49,7 @@
     "cordova-sqlite-storage": "^2.5.0",
     "core-js": "^2.5.3",
     "include-media": "^1.4.9",
+    "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.10",
     "ngx-logger": "^3.0.5",
     "redux": "^4.0.0",

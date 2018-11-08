@@ -21,7 +21,7 @@ import {ComponentsModule} from '../components/components.module';
         ComponentsModule,
     ],
     declarations: [
-        HomePage
+        HomePage,
     ]
 })
 export class HomePageModule {

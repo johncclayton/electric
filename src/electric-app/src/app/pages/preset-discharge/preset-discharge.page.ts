@@ -6,7 +6,7 @@ import {PresetBasePage} from '../preset-charge/preset-charge.page';
 import {Subject} from 'rxjs';
 import {ChemistryType, RegenerativeMode, RegenerativeToChannelMethod} from '../../models/preset-class';
 import {iChargerPickLists} from '../../utils/picklists';
-import {CustomNGXLoggerService, NgxLoggerLevel} from 'ngx-logger';
+import {CustomNGXLoggerService} from 'ngx-logger';
 
 @Component({
     selector: 'app-preset-discharge',
@@ -63,7 +63,7 @@ export class PresetDischargePage extends PresetBasePage implements OnInit {
     }
 
     joinDisabled() {
-        this.logger.log(`Join disabled? regen mode: ${this.preset.regeneration_mode}`);
+        // this.logger.log(`Join disabled? regen mode: ${this.preset.regeneration_mode}`);
         return this.preset.regeneration_mode == RegenerativeMode.Off ||
             this.preset.regeneration_mode != RegenerativeMode.ToChannel;
     }
