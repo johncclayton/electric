@@ -65,7 +65,9 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
                 const debugPresets = false;
                 if (debugPresets) {
                     if (this.presets.length) {
-                        const old_preset = this.presets[9];
+                        // 9 a Lipo of some kind
+                        // 3 NiMH
+                        const old_preset = this.presets[3];
                         this.setPresetAndCallback(old_preset);
                         this.navCtrl.navigateForward('Preset');
                     }

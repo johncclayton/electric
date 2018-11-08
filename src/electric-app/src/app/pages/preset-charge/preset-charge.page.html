@@ -19,8 +19,12 @@
             <ion-list-header color="light">Charging Options</ion-list-header>
             <ion-item>
                 <ion-label>Charge Mode</ion-label>
-                <ion-select [(ngModel)]="preset.charge_mode">
-                    <ion-select-option [value]="opt.value" *ngFor="let opt of chargeModeOptions()">{{opt.text}}
+                <ion-select [(ngModel)]="''+preset.charge_mode">
+                    <ion-select-option
+                            *ngFor="let opt of chargeModeOptions()"
+                            [selected]="preset.charge_mode == opt.value"
+                            [value]="''+opt.value">
+                        {{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -34,14 +38,16 @@
             <ion-item>
                 <ion-label>Sensitivity</ion-label>
                 <ion-select [(ngModel)]="preset.ni_sensitivity">
-                    <ion-select-option value="{{opt.value}}" *ngFor="let opt of nimhSensitivityOptions()">{{opt.text}}
+                    <ion-select-option [value]="opt.value" *ngFor="let opt of nimhSensitivityOptions()">{{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
             <ion-item>
                 <ion-label>Peak Delay Time</ion-label>
-                <ion-select [(ngModel)]="preset.ni_peak_delay_time">
-                    <ion-select-option value="{{opt.value}}" *ngFor="let opt of nimhDelayTimeOptions()">{{opt.text}}
+                <ion-select [(ngModel)]="''+preset.ni_peak_delay_time">
+                    <ion-select-option [value]="''+opt.value"
+                                       [selected]="preset.ni_peak_delay_time == opt.value"
+                                       *ngFor="let opt of nimhDelayTimeOptions()">{{opt.text}}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -54,8 +60,10 @@
             </ion-item>
             <ion-item>
                 <ion-label>Current</ion-label>
-                <ion-select [(ngModel)]="preset.trickle_current" disabled="{{!nimhTrickelEnabled()}}">
-                    <ion-select-option value="{{opt.value}}" *ngFor="let opt of nimhTrickleCurrentOptions()">
+                <ion-select [(ngModel)]="''+preset.trickle_current" [disabled]="!nimhTrickelEnabled()">
+                    <ion-select-option [value]="''+opt.value"
+                                       [selected]="preset.trickle_current == opt.value"
+                                       *ngFor="let opt of nimhTrickleCurrentOptions()">
                         {{opt.text}}
                     </ion-select-option>
                 </ion-select>
@@ -63,8 +71,10 @@
             <ion-item>
                 <ion-label>Timeout (min)
                 </ion-label>
-                <ion-select [(ngModel)]="preset.trickle_timeout" disabled="{{!nimhTrickelEnabled()}}">
-                    <ion-select-option value="{{opt.value}}" *ngFor="let opt of generalMinuteOptions(1, 60)">
+                <ion-select [(ngModel)]="''+preset.trickle_timeout" [disabled]="!nimhTrickelEnabled()">
+                    <ion-select-option [value]="''+opt.value"
+                                       [selected]="preset.trickle_timeout == opt.value"
+                                       *ngFor="let opt of generalMinuteOptions(1, 60)">
                         {{opt.text}}
                     </ion-select-option>
                 </ion-select>

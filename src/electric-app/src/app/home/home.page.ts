@@ -80,8 +80,8 @@ export class HomePage implements OnInit, OnDestroy {
             // this.uiAction.setErrorMessageFromString("Huzzah");
             // this.showNetworkConfigPage();
             // this.showiChargerSettingsPage();
-
             // this.toggleError();
+            // this.showPresetList();
         });
     }
 
@@ -150,6 +150,10 @@ export class HomePage implements OnInit, OnDestroy {
     /*
     Everything below for quicker testing. Copies of methods from other pages
      */
+
+    private showPresetList() {
+        this.navCtrl.navigateForward('PresetList');
+    }
 
     private showiChargerSettingsPage() {
         this.navCtrl.navigateForward('SystemSettings');

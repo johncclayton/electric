@@ -160,7 +160,7 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
         return this.chargerLists.listNamed('nimhDelayTimeOptions', () => {
             let list = [];
             for (let num = 0; num < 20; num++) {
-                list.push({'value': num, 'text': num.toString() + 'min'});
+                list.push({'value': num, 'text': num.toString() + ' min'});
             }
             return list;
         });
@@ -169,7 +169,7 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
     nimhTrickleCurrentOptions() {
         return this.chargerLists.listNamed('nimhTrickleCurrentOptions', () => {
             let list = [];
-            for (let num = 20; num < 100; num++) {
+            for (let num = 5; num < 100; num++) {
                 let actual = num / 100;
                 list.push({'value': actual, 'text': actual.toString() + 'A'});
             }
@@ -181,7 +181,7 @@ export class PresetChargePage extends PresetBasePage implements OnInit {
         return this.chargerLists.listNamed('generalMinuteOptions', () => {
             let list = [];
             for (let num = start; num < end; num++) {
-                list.push({'value': num, 'text': num.toString() + 'min'});
+                list.push({'value': num, 'text': num.toString() + ' min'});
             }
             return list;
         });

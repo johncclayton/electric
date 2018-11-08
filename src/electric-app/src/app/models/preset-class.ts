@@ -269,6 +269,14 @@ export class Preset {
         }
     }
 
+    get ni_peak_delay_time(): number {
+        return this.data['ni_peak_delay'];
+    }
+
+    set ni_peak_delay_time(val: number) {
+        this.data['ni_peak_delay'] = +val;
+    }
+
     get discharge_current(): number {
         return +this.data['discharge_current'];
     }
