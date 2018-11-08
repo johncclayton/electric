@@ -85,7 +85,7 @@ export class PresetPage implements OnInit, ICanDeactivate, AfterContentInit, Sav
 
         this.__cellChoices = [];
         this.__cellChoices.push({'value': 0, 'text': 'Auto'});
-        for (let i = 0; i < this.chargerService.getNumberOfChannels(); i++) {
+        for (let i = 0; i < iChargerService.getMaxCells(); i++) {
             this.__cellChoices.push({'value': i + 1, 'text': (i + 1).toString()});
         }
 
