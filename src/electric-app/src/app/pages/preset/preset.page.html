@@ -19,7 +19,9 @@
         <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
     <div *ngIf="ui$|async as ui">
-        <ion-spinner *ngIf="ui.isSaving"></ion-spinner>
+        <div class="searching" text-center *ngIf="ui.isSaving">
+            <ion-spinner></ion-spinner>
+        </div>
     </div>
     <ion-list>
         <ion-list-header color="light">Settings</ion-list-header>

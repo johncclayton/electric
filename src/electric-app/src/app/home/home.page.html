@@ -16,7 +16,7 @@
     <div class="charger" [ngClass]="{'no-scroll': config.preventChargerVerticalScrolling}">
         <div *ngIf="anyNetworkOrConnectivityProblems()">
             <p text-center class="searching">Looking for your charger...</p>
-            <div class="searching" text-center>
+            <div class="searching">
                 <ion-spinner></ion-spinner>
             </div>
 

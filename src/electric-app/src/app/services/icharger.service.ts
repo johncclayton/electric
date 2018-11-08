@@ -36,7 +36,7 @@ import {ConfigStoreService} from './config-store.service';
 export enum ChargerType {
     iCharger4010Duo = 64,
     iCharger308Duo = 66,
-    iCharger406Duo = 67 
+    iCharger406Duo = 67
 }
 
 export let ChargerMetadata = {};

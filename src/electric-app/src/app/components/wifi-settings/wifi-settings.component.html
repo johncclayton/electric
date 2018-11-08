@@ -30,5 +30,7 @@
     <ion-button slot="end" [disabled]="!networkService.wifiSettingsValid || networkService.isApplyingNetworkChange()"
                 (click)="sendWifiSettings.emit()">Apply
     </ion-button>
-    <ion-spinner *ngIf="networkService.isApplyingNetworkChange()"></ion-spinner>
+    <div class="searching" *ngIf="networkService.isApplyingNetworkChange()">
+        <ion-spinner></ion-spinner>
+    </div>
 </ion-list>
