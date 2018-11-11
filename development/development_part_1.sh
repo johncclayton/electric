@@ -2,7 +2,10 @@
 
 [ "root" != "$USER" ] && exec sudo $0 "$@"
 
-BRANCH=master
+if [ -z "${BRANCH}" ]; then
+    echo "You must set a BRANCH env to something, e.g. master"
+    exit 5
+fi
 
 apt-get update
 apt-get upgrade

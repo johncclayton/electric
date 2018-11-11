@@ -1,7 +1,10 @@
 #!/bin/bash
 [ "root" != "$USER" ] && exec sudo $0 "$@"
 
-BRANCH=master
+if [ -z "${BRANCH}" ]; then
+    echo "You must set a BRANCH env to something, e.g. master"
+    exit 5
+fi
 
 source /usr/local/bin/virtualenvwrapper.sh
 cd ~/
@@ -57,7 +60,7 @@ fi
 echo
 echo "Installing required packages"
 echo "Will ask for sudo privs..."
-sudo apt-get install linux-headers-rpi libusb-1.0-0-dev libudev-dev python-pip gcc cython
+sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython
 
 echo "Switching to 'electric' virtualenv..."
 workon electric
@@ -70,10 +73,5 @@ echo
 echo "Installing other required packages..."
 pip install -r "$SRV_CODE/requirements-all.txt"
 
-# get the script to setup the wireless
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/install-wlan.sh
-chmod +x install-wlan.sh
-./install-wlan.sh
-
-echo "***************************************************************"
-echo "Part 2 done, ready to run!"
+echo "***********************************************************************"
+echo "Part 2 done, ready to run! (or use development_part_3.sh to setup WLAN)"

@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+[ "root" != "$USER" ] && exec sudo $0 "$@"
+
+if [ -z "${BRANCH}" ]; then
+    echo "You must set a BRANCH env to something, e.g. master"
+    exit 5
+fi
 
 set -e
 
@@ -32,7 +38,7 @@ if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
 fi
 
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/wireless.tar.gz
+curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/wireless.tar.gz
 tar xzf wireless.tar.gz
 
 find ${TEMP}/scripts -type f | xargs chmod +x
