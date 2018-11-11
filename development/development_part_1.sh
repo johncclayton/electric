@@ -13,7 +13,7 @@ sudo pip install virtualenv virtualenvwrapper
 
 # and the udev rules?
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
-cp -f 10-icharger.rules /etc/udev/rules.d/ 
+sudo cp -f 10-icharger.rules /etc/udev/rules.d/ 
 sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
 sudo udevadm control --reload
 
