@@ -15,8 +15,8 @@ electric_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 # and will be re-generated using the latest values when --generate is used.
 config = {
     'version': {
-        'pypi': '0.8.7',
-        'testpypi': '0.8.10'
+        'pypi': '0.8.10',
+        'testpypi': '0.8.11'
     },
     'files': {
         'setup.py': {

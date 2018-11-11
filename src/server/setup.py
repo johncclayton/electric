@@ -6,12 +6,12 @@ from distutils.core import setup
 setup(
     name = 'electric',
     packages = ['electric', 'electric.worker'],
-    version = "0.8.10",
+    version = "0.8.11",
     description = "iCharger integration services",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/0.8.10',
+    download_url = 'https://github.com/johncclayton/electric/tarball/0.8.11',
     keywords = [ 'icharger', 'hobby', 'charger', 'heli', 'plane', 'rc' ],
     license = "GPLv3",
     classifiers = [

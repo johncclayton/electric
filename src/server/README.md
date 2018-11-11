@@ -35,21 +35,18 @@ Install the OS, and log into it via terminal / SSH.
 
        $ sudo apt-get update 
        $ sudo apt-get upgrade
-       $ sudo apt-get install gcc g++ python-dev
 
-## Install the Electric codebase using PyPi 
+## Install the Electric codebase using PyPi (Raspbian Jessie / Nov 2018)
 
-1. pull down pip
+1. install all the dependancies
        
-       $ wget https://bootstrap.pypa.io/get-pip.py
-       $ sudo python get-pip.py
+       $ sudo apt-get install linux-headers-rpi libusb-1.0-0-dev libudev-dev python-pip gcc cython
 
 1. install electric from PyPi 
 
        $ sudo pip install electric
        
-**WARNING** this can take about 45 minutes - because it will cause hidapi and zeromq compilation jobs.  And the Pi 
-is very slow with compiling.  Very very slow.  
+**WARNING** this can take about 45 minutes - because it will cause hidapi and zeromq compilation jobs.  And the Pi is very slow with compiling.  Very very slow.  
 
 ## To run the server
 
