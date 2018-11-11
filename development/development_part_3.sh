@@ -13,4 +13,4 @@ chmod +x get-wlan.sh
 ./get-wlan.sh
 
 echo "*************************"
-echo "Part 3 done, ready to go!
+echo "Part 3 done, ready to go!"
