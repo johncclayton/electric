@@ -14,9 +14,6 @@ shutdown_existing() {
 
 set -e
 
-# go get the docker-compose.yml file
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/docker-compose.yml
-
 # get the script to fetch the latest build # from travis
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/master/development/get-latest-build-number.py
 

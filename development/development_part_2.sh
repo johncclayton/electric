@@ -3,7 +3,7 @@
 source /usr/local/bin/virtualenvwrapper.sh
 cd ~/
 
-ELEC_INSTALL="/home/pirate/electric"
+ELEC_INSTALL="$HOME/electric"
 SRV_CODE="$ELEC_INSTALL/src/server"
 
 echo
@@ -43,8 +43,8 @@ echo 'cd ~/electric/src/server' >> ~/.virtualenvs/electric/bin/postactivate
 echo
 echo "Checking for requirements files ..."
 
-if [ ! -f "$SRV_CODE/requirements-worker.txt" ]; then
-    echo "Something is wrong. There's no requirements-worker.txt. This should exist at $SRV_CODE"
+if [ ! -f "$SRV_CODE/requirements-all.txt" ]; then
+    echo "Something is wrong. There's no requirements-all.txt. This should exist at $SRV_CODE"
     echo "- Did something break with the git checkout?"
     echo "- Are you on the right branch?"
     echo "- Is the earth still round?"
@@ -54,7 +54,7 @@ fi
 echo
 echo "Installing required packages"
 echo "Will ask for sudo privs..."
-sudo apt-get install libudev-dev libusb-1.0-0-dev gcc cython cython-dbg
+sudo apt-get install linux-headers-rpi libusb-1.0-0-dev libudev-dev python-pip gcc cython
 
 echo "Switching to 'electric' virtualenv..."
 workon electric
@@ -64,9 +64,8 @@ echo "Installation of hidapi will take about 30m..."
 pip install hidapi
 
 echo
-echo "Installing worker and web packages..."
-pip install -r "$SRV_CODE/requirements-worker.txt"
-pip install -r "$SRV_CODE/requirements-web.txt"
+echo "Installing other required packages..."
+pip install -r "$SRV_CODE/requirements-all.txt"
 
 echo "***************************************************************"
 echo "Part 2 done, ready to run!"
