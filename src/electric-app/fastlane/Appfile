@@ -1,0 +1,11 @@
+# Android
+# Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+json_key_file("../electric-certs/google_play/api-something.json")
+package_name("com.electric.icharger.app") # e.g. com.krausefx.app
+
+
+# iOS
+# app_identifier("com.electric.icharger.app")
+# apple_id("build@shinywhitebox.com")
+# itc_team_id("291361")
+# team_id("PMJ275ZTUX")
