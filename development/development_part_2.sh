@@ -1,4 +1,7 @@
 #!/bin/bash
+[ "root" != "$USER" ] && exec sudo $0 "$@"
+
+BRANCH=master
 
 source /usr/local/bin/virtualenvwrapper.sh
 cd ~/
@@ -66,6 +69,11 @@ pip install hidapi
 echo
 echo "Installing other required packages..."
 pip install -r "$SRV_CODE/requirements-all.txt"
+
+# get the script to setup the wireless
+curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/install-wlan.sh
+chmod +x install-wlan.sh
+./install-wlan.sh
 
 echo "***************************************************************"
 echo "Part 2 done, ready to run!"
