@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-[ "root" != "$USER" ] && exec sudo $0 "$@"
+
+[ "root" != "$USER" ] && exec sudo -E $0 "$@"
 
 if [ -z "${BRANCH}" ]; then
     echo "You must set a BRANCH env to something, e.g. master"
@@ -48,8 +49,10 @@ find ${TEMP}/scripts -type f | xargs chmod +x
 
 echo "Ready to configure."
 echo "Please modify the wlan.conf, to specify a WLAN SSID and password. Suitable command follows..."
+echo
 echo "sudo nano /opt/wireless/config/wlan.conf"
 echo "Then run sudo /opt/wireless/scripts/install-wlan.sh"
+echo
 
 if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz

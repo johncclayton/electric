@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-[ "root" != "$USER" ] && exec sudo $0 "$@"
 
 if [ -z "${BRANCH}" ]; then
     echo "You must set a BRANCH env to something, e.g. master"
