@@ -1,6 +1,6 @@
 # Android
 # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
-json_key_file("../electric-certs/google_play/api-something.json")
+json_key_file("../../../electric-certs/google_play/api-7931301279085043261-383559-ec2fd2149d73.json")
 package_name("com.electric.icharger.app") # e.g. com.krausefx.app
 
 
