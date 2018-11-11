@@ -8,6 +8,6 @@ username:johncclayton
 password:
 
 [testpypi]
-repository: https://testpypi.python.org/pypi
+repository: https://test.pypi.org/legacy/
 username:johncclayton
 password:

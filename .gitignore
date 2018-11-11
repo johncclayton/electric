@@ -1,6 +1,6 @@
 .idea/
 *.pyc
-
+venv
 src/server/dist/
 src/server/MANIFEST
 main
@@ -12,3 +12,5 @@ build.json
 main.js.map
 wireless/temp
 src/app/.sourcemaps
+electric-worker.service
+electric-web.service

@@ -1,5 +1,5 @@
 [Unit]
-Description=Electric {{service_name}}
+Description={{service_name}}
 
 [Service]
 Environment=PYTHONPATH=/home/{{user}}/electric/src/server/

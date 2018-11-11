@@ -6,71 +6,101 @@ from distutils.core import setup
 setup(
     name = 'electric',
     packages = ['electric', 'electric.worker'],
-    version = "0.7.7",
+    version = "0.8.10",
     description = "iCharger integration services",
     author = "John Clayton",
     author_email = "electric_charge@icloud.com",
     url = 'https://github.com/johncclayton/electric',
-    download_url = 'https://github.com/johncclayton/electric/tarball/0.7.7',
-    keywords = [ 'icharger', 'hobby', 'charger' ],
+    download_url = 'https://github.com/johncclayton/electric/tarball/0.8.10',
+    keywords = [ 'icharger', 'hobby', 'charger', 'heli', 'plane', 'rc' ],
     license = "GPLv3",
     classifiers = [
     ],
     install_requires = [
         
-            'aniso8601==1.2.1',
+            'aniso8601==4.0.1',
         
-            'click==6.7',
+            'argh==0.26.2',
+        
+            'bleach==3.0.2',
+        
+            'certifi==2018.10.15',
+        
+            'chardet==3.0.4',
+        
+            'Click==7.0',
         
             'configparser==3.5.0',
         
-            'Flask==0.12.2',
+            'docutils==0.14',
         
-            'Flask-Cors==3.0.3',
+            'Flask==1.0.2',
+        
+            'Flask-Cors==3.0.7',
         
             'Flask-RESTful==0.3.6',
         
-            'gunicorn==19.7.1',
+            'funcsigs==1.0.2',
         
-            'itsdangerous==0.24',
+            'gunicorn==19.9.0',
         
-            'Jinja2==2.9.6',
+            'hidapi==0.7.99.post21',
         
-            'MarkupSafe==1.0',
+            'idna==2.7',
         
-            'python-dateutil==2.6.1',
+            'itsdangerous==1.1.0',
         
-            'pytz==2017.2',
+            'Jinja2==2.10',
         
-            'pyzmq==16.0.2',
+            'mock==2.0.0',
         
-            'schematics==1.1.1',
+            'modbus-tk==0.5.8',
         
-            'six==1.10.0',
+            'pathtools==0.1.2',
         
-            'watchdog==0.8.3',
+            'pbr==5.1.1',
         
-            'Werkzeug==0.12.2',
+            'pkginfo==1.4.2',
         
-            'hidapi==0.7.99.post20',
+            'Pygments==2.2.0',
         
-            'modbus-tk==0.5.4',
+            'pyserial==3.4',
         
-            'pyserial==3.1',
+            'python-dateutil==2.7.5',
         
-            'pyzmq==16.0.2',
+            'pytz==2018.7',
         
-            'schematics==1.1.1',
+            'PyYAML==3.13',
         
-            'six==1.10.0',
+            'pyzmq==17.1.2',
         
-            'watchdog==0.8.3',
+            'readme-renderer==24.0',
+        
+            'requests==2.20.1',
+        
+            'requests-toolbelt==0.8.0',
+        
+            'schematics==2.1.0',
+        
+            'six==1.11.0',
+        
+            'tqdm==4.28.1',
+        
+            'twine==1.12.1',
+        
+            'urllib3==1.24.1',
+        
+            'watchdog==0.9.0',
+        
+            'webencodings==0.5.1',
+        
+            'Werkzeug==0.14.1',
         
     ],
     entry_points = {
         'console_scripts': [
-            'electric-server=electric.main:run_server',
-            'electric-worker=electric.worker.worker:run_worker'
+            'electric-server-cmd=electric.main:run_server',
+            'electric-worker-cmd=electric.worker.worker:run_worker'
             ]
     }
 )
