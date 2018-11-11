@@ -53,19 +53,9 @@ is very slow with compiling.  Very very slow.
 
 1. Run a Terminal then type:
 
-       $ electric-worker
+       $ electric-worker-cmd
     
 1. Run another Terminal and type: 
 
-       $ electric-server
+       $ electric-server-cmd
 
-## Get Ionic View 
-
-We distribute testing versions of the iOS/Android apps using Ionic View.  Head on over to https://ionic.io/ and sign
-up then pull down the Ionic View app from the appropriate app store. 
-
-You will need to add our app to your Ionic View installation, use the menu option "Preview an app" and type in the 
-following app ID:
-
-       f944cad8
-       

@@ -1,9 +1,0 @@
-[Unit]
-Description=Electric Server
-
-[Service]
-Environment=PYTHONPATH=/home/pirate/electric/src/server/
-ExecStart=/home/pirate/.virtualenvs/electric/bin/python /home/pirate/electric/src/server/electric/main.py
-
-[Install]
-WantedBy=multi-user.target
