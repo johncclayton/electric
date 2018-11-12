@@ -1,4 +1,4 @@
-import {ApplicationRef, EventEmitter, Injectable, NgZone} from '@angular/core';
+import {EventEmitter, Injectable, NgZone} from '@angular/core';
 import {interval, Observable, of, Subject, throwError, timer} from 'rxjs';
 import {Preset} from '../models/preset-class';
 import {Channel} from '../models/channel';

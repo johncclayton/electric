@@ -10,7 +10,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "lint4": "npx tslint -c ionic-migration.json -p tsconfig.json",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "bump:build": "node scripts/increment-build-number.js",
+    "bump:build:version": "node scripts/increment-build-number.js version",
+    "copy:version": "node scripts/copy-version-to-www.js"
   },
   "private": true,
   "dependencies": {

@@ -12,6 +12,7 @@ import {System} from './models/system';
 import {ConfigStoreService} from './services/config-store.service';
 import {SystemActions} from './models/state/actions/system';
 import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
+import {VersionInfoService} from './services/version-info.service';
 
 @Component({
     selector: 'app-root',
@@ -33,17 +34,21 @@ export class AppComponent {
         private configActions: ConfigurationActions,
         private chargerService: iChargerService,
         private config: ConfigStoreService,
+        private version: VersionInfoService,
         private ngRedux: NgRedux<IAppState>,
     ) {
         this.logger = logSvc.create({level: NgxLoggerLevel.INFO});
         this.initializeApp();
-
     }
 
     initializeApp() {
         this.platform.ready().then(() => {
             this.statusBar.styleDefault();
             this.splashScreen.hide();
+
+            this.version.ready$.subscribe(flag => {
+                console.log(`Version service ready: ${flag}. Ver: ${this.version.version}`);
+            });
 
             this.config.configurationLoaded$
                 .subscribe(r => {
@@ -112,6 +117,14 @@ export class AppComponent {
 
     get isProduction(): boolean {
         return System.isProduction;
+    }
+
+    get versionNumber(): string {
+        return this.version.version;
+    }
+
+    get buildNumber(): string {
+        return this.version.build;
     }
 
     platformsString(): string {

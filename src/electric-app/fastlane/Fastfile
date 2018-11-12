@@ -17,14 +17,17 @@ default_platform(:android)
 
 desc "Build the Ionic App"
 private_lane :build_ionic do |options|
-    # TODO: Bump versions
-
+    if options[:bump]
+        sh("npm", "run", "bump:build:version")
+    else
+        sh("npm", "run", "bump:build")
+    end
     ionic(
         platform: lane_context[SharedValues::PLATFORM_NAME].to_s,
         prod: (options[:prod] ? true : false),
-        keystore_path: '../../../electric-certs/google_play/android-release-keys.keystore',
-        keystore_alias: 'alias_name',
-        keystore_password: 'electric'
+        keystore_path: '../../../electric-certs/google_play/electric-release.keystore',
+        keystore_alias: 'electric-charger',
+        keystore_password: ENV["ELECTRIC_KEYSTORE_PWD"]
     )
 end
 
@@ -36,7 +39,7 @@ platform :android do
 
   desc "Deploy a new beta version"
   lane :alpha do
-    build_ionic(prod: true)
+    build_ionic
     gradle(task: "clean assembleRelease", project_dir: './platforms/android')
     upload_to_play_store(track: 'alpha')
   end
