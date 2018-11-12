@@ -17,7 +17,7 @@ Well, that's pretty easy to explain - here's our list of unique selling points:
 More detailed instructions are below; but if you have shell access to a Raspberry Pi, you can install all of this 
 by using the following command - beware the scripts WILL update / upgrade your system, and will *assume* sudo access.
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/unified-server/development/bootstrap.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/unified-server/development/bootstrap.sh)
 
 # Installation
 [Instructions to help you install the software on your Raspberry Pi 3.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
