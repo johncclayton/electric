@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+# temporary, this will be removed later when it all works. 
 export BRANCH=unified-server
+
 T=/tmp/electric-bootstrap
 
 if [ ! -d $T ]; then
@@ -10,7 +12,7 @@ fi
 cd $T
 
 if [ -z "${BRANCH}" ]; then
-    echo "You must set a BRANCH env to something, e.g. master"
+    echo "You must set a BRANCH env to something, e.g. master or unified-server"
     exit 5
 fi
 
@@ -34,8 +36,6 @@ sudo chmod g+rw /dev/gpiomem
 
 echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
 source /usr/local/bin/virtualenvwrapper.sh
-
-#!/bin/bash
 
 if [ -z "${BRANCH}" ]; then
     echo "You must set a BRANCH env to something, e.g. master"
