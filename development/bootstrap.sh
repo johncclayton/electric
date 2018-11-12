@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BRANCH=unified-server
+export BRANCH=unified-server
 T=/tmp/electric-bootstrap
 
 if [ ! -d $T ];
