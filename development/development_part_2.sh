@@ -32,6 +32,7 @@ if [ ! -d 'electric' ]; then
     echo "Getting the code... this'll take a bit of time. Go make some tea."
     echo
     git clone https://github.com/johncclayton/electric.git
+    git checkout -t origin/${BRANCH}
 fi
 
 echo
@@ -64,6 +65,11 @@ sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython
 
 echo "Switching to 'electric' virtualenv..."
 workon electric
+
+echo 
+echo "Setting up /opt/prefs directory"
+mkdir -p /opt/prefs
+sudo chown `whoamni`:`whoami` /opt/prefs
 
 echo
 echo "Installation of hidapi will take about 30m..."
