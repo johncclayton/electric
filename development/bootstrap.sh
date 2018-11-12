@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-BRANCH=master
-TMP=/tmp/bootstrap
-cd $TMP
+BRANCH=unified-server
+T=$TEMP/bootstrap
+cd $T
 
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/development/development_part_1.sh
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/development/development_part_2.sh
