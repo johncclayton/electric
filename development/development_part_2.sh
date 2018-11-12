@@ -27,12 +27,15 @@ fi
 echo
 echo "Checking for code ..."
 
-if [ ! -d 'electric' ]; then
+if [ ! -d "$ELEC_INSTALL" ]; then
     echo
     echo "Getting the code... this'll take a bit of time. Go make some tea."
     echo
-    git clone https://github.com/johncclayton/electric.git
+    pushd .
+    cd $HOME
+    git clone https://github.com/johncclayton/electric.git 
     git checkout -t origin/${BRANCH}
+    popd
 fi
 
 echo
@@ -69,7 +72,7 @@ workon electric
 echo 
 echo "Setting up /opt/prefs directory"
 mkdir -p /opt/prefs
-sudo chown `whoamni`:`whoami` /opt/prefs
+sudo chown `whoami`:`whoami` /opt/prefs
 
 echo
 echo "Installation of hidapi will take about 30m..."
