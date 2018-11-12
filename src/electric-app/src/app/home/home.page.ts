@@ -61,7 +61,7 @@ export class HomePage implements OnInit, OnDestroy {
                 this.timeoutUp = true;
                 this.showConfigureButton = true;
             }, null, () => {
-                console.debug(`'timeout and its time to show some stuff' function completed.`);
+                // console.debug(`'timeout and its time to show some stuff' function completed.`);
             });
 
         const loadAPreset = false;

@@ -5,32 +5,37 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.001095">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.001216">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: Switch to android build_ionic lane" time="0.0009">
+      <testcase classname="fastlane.lanes" name="1: Switch to android build_ionic lane" time="0.000961">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: npm run bump:build" time="0.398345">
+      <testcase classname="fastlane.lanes" name="2: npm run bump:build" time="0.501288">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: ionic" time="54.16309">
+      <testcase classname="fastlane.lanes" name="3: npm run copy:version" time="0.382174">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: gradle" time="30.920474">
+      <testcase classname="fastlane.lanes" name="4: ionic" time="55.855232">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: upload_to_play_store" time="27.771923">
+      <testcase classname="fastlane.lanes" name="5: gradle" time="31.999605">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="6: upload_to_play_store" time="35.567475">
         
       </testcase>
     

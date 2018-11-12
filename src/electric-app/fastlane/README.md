@@ -16,9 +16,14 @@ or alternatively using `brew cask install fastlane`
 
 # Available Actions
 ## Android
-### android alpha
+### android internal
 ```
-fastlane android alpha
+fastlane android internal
+```
+Deploy a new internal version
+### android beta
+```
+fastlane android beta
 ```
 Deploy a new beta version
 ### android prod

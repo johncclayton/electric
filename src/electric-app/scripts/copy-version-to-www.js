@@ -35,7 +35,7 @@ function replace_string_in_file(filename, to_replace, replace_with) {
 }
 
 var configXMLPath = "config.xml";
-var outputJSONPath = "www/assets/version.json";
+var outputJSONPath = "src/assets/version.json";
 var rawJSON = loadConfigXMLDoc(configXMLPath);
 var version = rawJSON.widget.$.version;
 console.log(`Version: ${rawJSON.widget.$.version}, Build: ${rawJSON.widget.$['ios-CFBundleVersion']}`);

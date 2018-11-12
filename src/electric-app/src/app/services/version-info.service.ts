@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, Subject} from 'rxjs';
+import {SWBSafeJSON} from '../utils/safe-json';
 
 @Injectable({
     providedIn: 'root'
@@ -17,7 +18,7 @@ export class VersionInfoService {
         this.ready$ = new BehaviorSubject<boolean>(false);
         this.http.get('assets/version.json').subscribe(r => {
 
-            console.log(`GOT ${r}`);
+            console.log(`GOT ${SWBSafeJSON.stringify(r)}`);
 
             if (r['version']) {
                 this.version = r['version'];

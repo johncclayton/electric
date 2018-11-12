@@ -22,6 +22,7 @@ private_lane :build_ionic do |options|
     else
         sh("npm", "run", "bump:build")
     end
+    sh("npm", "run", "copy:version")
     ionic(
         platform: lane_context[SharedValues::PLATFORM_NAME].to_s,
         prod: (options[:prod] ? true : false),
@@ -37,11 +38,18 @@ platform :android do
 #    gradle(task: "test")
 #  end
 
-  desc "Deploy a new beta version"
-  lane :alpha do
+  desc "Deploy a new internal version"
+  lane :internal do
     build_ionic
     gradle(task: "clean assembleRelease", project_dir: './platforms/android')
-    upload_to_play_store(track: 'alpha')
+    upload_to_play_store(track: 'internal')
+  end
+
+  desc "Deploy a new beta version"
+  lane :beta do
+    build_ionic(prod: true)
+    gradle(task: "clean assembleRelease", project_dir: './platforms/android')
+    upload_to_play_store(track: 'beta')
   end
 
   desc "Deploy a new version to the Google Play"
