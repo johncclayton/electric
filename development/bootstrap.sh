@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
 BRANCH=unified-server
-T=$TEMP/bootstrap
+T=/tmp/electric-bootstrap
+
+if [ ! -d $T ];
+    mkdir -p "$T"
+fi
+
 cd $T
 
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/development/development_part_1.sh
