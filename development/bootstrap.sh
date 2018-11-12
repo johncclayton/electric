@@ -3,7 +3,7 @@
 export BRANCH=unified-server
 T=/tmp/electric-bootstrap
 
-if [ ! -d $T ];
+if [ ! -d $T ]; then
     mkdir -p "$T"
 fi
 
