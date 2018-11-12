@@ -37,13 +37,6 @@ sudo chmod g+rw /dev/gpiomem
 echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
 source /usr/local/bin/virtualenvwrapper.sh
 
-if [ -z "${BRANCH}" ]; then
-    echo "You must set a BRANCH env to something, e.g. master"
-    exit 5
-fi
-
-source /usr/local/bin/virtualenvwrapper.sh
-
 ELEC_INSTALL="$HOME/electric"
 SRV_CODE="$ELEC_INSTALL/src/server"
 
