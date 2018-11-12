@@ -1,10 +1,11 @@
-import {Injectable} from "@angular/core";
-import {ConfigurationActions} from "../models/state/actions/configuration";
-import {NgRedux} from "@angular-redux/store";
-import {IAppState} from "../models/state/configure";
-import {INetwork} from "../models/state/reducers/configuration";
+import {Injectable} from '@angular/core';
+import {ConfigurationActions} from '../models/state/actions/configuration';
+import {NgRedux} from '@angular-redux/store';
+import {IAppState} from '../models/state/configure';
+import {INetwork} from '../models/state/reducers/configuration';
 import {Subject} from 'rxjs';
 import {CustomNGXLoggerService, NGXLogger, NgxLoggerLevel} from 'ngx-logger';
+import {SWBSafeJSON} from '../utils/safe-json';
 
 declare const networkinterface;
 
@@ -37,22 +38,29 @@ export class ElectricNetworkService {
 
         try {
             // this.logger.log("Detecting network interface...");
-            networkinterface.getWiFiIPAddress((ip) => {
-                if (ip != network.current_ip_address) {
-                    this.logger.log("Detected new network interface: " + ip);
-                    let change = {
-                        'network': {
-                            'current_ip_address': ip
+            networkinterface.getWiFiIPAddress((ipObject) => {
+                    if (ipObject != network.current_ip_address) {
+                        this.logger.log(`Detected new network interface: ${SWBSafeJSON.stringify(ipObject)}`);
+                        let ipAddress = ipObject;
+                        if (typeof ipObject === 'object') {
+                            if ('ip' in ipObject) {
+                                ipAddress = ipObject['ip'];
+                            }
                         }
-                    };
-                    this.configActions.updateConfiguration(change);
+                        let change = {
+                            'network': {
+                                'current_ip_address': ipAddress
+                            }
+                        };
+                        this.configActions.updateConfiguration(change);
+                    }
                 }
-            });
+            );
 
         } catch (ReferenceError) {
             let change = {
                 'network': {
-                    'current_ip_address': "192.168.10.122"
+                    'current_ip_address': '192.168.10.122'
                 }
             };
             this.configActions.updateConfiguration(change);
@@ -72,14 +80,14 @@ export class ElectricNetworkService {
         if (!network) {
             return false;
         }
-        return network.current_ip_address.startsWith("192.168.10");
+        return network.current_ip_address.startsWith('192.168.10');
     }
 
     haveWLAN0IPAddress() {
         let network = this.getNetwork();
         if (network && network.interfaces) {
-            if (network.interfaces.hasOwnProperty("wlan0")) {
-                let addr = network.interfaces["wlan0"];
+            if (network.interfaces.hasOwnProperty('wlan0')) {
+                let addr = network.interfaces['wlan0'];
                 // this.logger.log("wlan0 addr: " + addr);
                 return addr.length > 1;
             }
