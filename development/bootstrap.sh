@@ -101,8 +101,9 @@ workon electric
 
 echo 
 echo "Setting up /opt/prefs directory"
-mkdir -p /opt/prefs
-sudo chown `whoami`:`whoami` /opt/prefs
+sudo mkdir -p /opt/prefs
+sudo chown root:root /opt/prefs
+sudo chmod 777 /opt/prefs
 
 echo
 echo "Installation of hidapi will take about 30m..."
