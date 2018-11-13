@@ -34,7 +34,13 @@ sudo adduser `whoami` gpio
 sudo chown root.gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
 
-echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
+# check if the virtualenv wrapper line is already in .bashrc and add if required.
+grep 'source /usr/local/bin/virtualenvwrapper.sh' ~/.bashrc
+R=$?
+if [ $R -ne 0 ]; then 
+    echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
+fi
+
 source /usr/local/bin/virtualenvwrapper.sh
 
 ELEC_INSTALL="$HOME/electric"
