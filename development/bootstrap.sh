@@ -94,7 +94,7 @@ fi
 echo
 echo "Installing required packages"
 echo "Will ask for sudo privs..."
-sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython
+sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython dnsmasq hostapd gawk
 
 echo "Switching to 'electric' virtualenv..."
 workon electric
