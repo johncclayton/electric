@@ -85,11 +85,11 @@ resource "aws_instance" "buildkit" {
     create_before_destroy = true
   }
 
-#   provisioner "local-exec" {
-#     command = <<FOO123
-#     /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/unified-server/src/sd-image/setup-buildkit.sh)
-# FOO123
-#   }
+  provisioner "local-exec" {
+    command = <<FOO123
+    /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/unified-server/src/sd-image/setup-buildkit.sh)
+FOO123
+  }
 }
 
 resource "aws_security_group_rule" "allow_all" {

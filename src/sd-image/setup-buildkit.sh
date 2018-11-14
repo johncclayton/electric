@@ -2,7 +2,7 @@
 sudo apt-get -y update
 sudo apt-get install -y unzip binfmt-support qemu qemu-user-static make g++ curl git libparted0-dev
 
-if [ ! -d "piimg"]; then
+if [ ! -d "piimg" ]; then
     git clone https://github.com/alexchamberlain/piimg
 
     pushd .
@@ -15,15 +15,27 @@ if [ ! -x /usr/local/bin/piimg ]; then
     exit 4
 fi
 
-# just in case you run this again, clean out the old stuff
-rm *.zip
+# just in case you run this again, clean out the old stuff, retaining the
+# ZIP file as this is unlikely to change all that often.  
 rm *.img
 
-# download from here, following redirects.  
-curl -O -J -L "https://downloads.raspberrypi.org/raspbian_lite_latest" 
-export ZIP_FILENAME=`ls -1 *.zip`
-unzip $ZIP_FILENAME && rm $ZIP_FILENAME
-export IMG_FILENAME=`ls -1 *.img`
+# find any existing file - potentially nothing of course.
+ZIP_FILENAME=`ls -1 *.zip`
+
+if [ -z "$ZIP_FILENAME" ]; then
+    # download from here, following redirects.  
+    curl -O -J -L "https://downloads.raspberrypi.org/raspbian_lite_latest" 
+    ZIP_FILENAME=`ls -1 *.zip`
+fi
+
+if [ ! -f $"ZIP_FILENAME" ]; then
+    echo "Failure to detect the ZIP file from Raspbian - was looking for $ZIP_FILENAME"
+    exit 5
+fi
+
+unzip -o $ZIP_FILENAME 
+IMG_FILENAME=`ls -1 *raspbian*.img`
+
 cp $IMG_FILENAME test.img
 
 if [ ! -d electric ]; then
