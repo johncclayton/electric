@@ -43,7 +43,6 @@ IMG_FILENAME=`ls -1 *raspbian*.img`
 
 WORKING_IMAGE=image.img
 cp $IMG_FILENAME $WORKING_IMAGE
-truncate -s +1G $WORKING_IMAGE
 
 if [ ! -d electric ]; then
     git clone https://github.com/johncclayton/electric.git
@@ -84,6 +83,9 @@ if [ $LOOPBACK -eq -1 ]; then
     echo "Unable to find a suitable/available loopback device - which is needed to manipulate the partition table of the raw Raspbian image"
     exit 5
 fi
+
+# adds 2gig to the working image, should be enough extra space to install bins/code/etc.
+truncate -s +2G $WORKING_IMAGE
 
 sudo losetup /dev/loop${LOOPBACK} $WORKING_IMAGE
 R=$?
