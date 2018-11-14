@@ -46,6 +46,7 @@ unzip -o $ZIP_FILENAME
 IMG_FILENAME=`ls -1 *raspbian*.img`
 
 echo "Copying latest image to a working image so we can resize the partitions..."
+export WORKING_IMAGE=$SETUP_ROOT/template-image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 
 echo "Checking if our setup directory contains a copy of the code..."
@@ -85,7 +86,7 @@ if [ $LOOPBACK -eq -1 ]; then
     exit 6
 fi
 
-export SECTOR_SIZE=`fdisk -l $SETUP_ROOT/$WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
+export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
 
 # simple validation; if this isn't true then parsing is likely wrong
 if [ 512 -ne $SECTOR_SIZE ]; then
