@@ -10,17 +10,10 @@ How I'd like it to work
 
 Process / Inputs
 
-1. Source image (or URL to get it)
+fdisk -l $WORKING_IMAGE 
 
-1. Script to resize the image so we've enough space to install stuff onto it.  (2gb for now)
 
-1. Branch name to use
-
-How I prepared:
-
-1. take the image
-
-2. copy it to /tmp/john.img
+--------------------
 
 read all of https://raspberrypi.stackexchange.com/questions/4943/resize-image-file-before-writing-to-sd-card?noredirect=1&lq=1
 
@@ -43,10 +36,13 @@ Disk identifier: 0x000c4661
       Device Boot      Start         End      Blocks   Id  System
 /dev/loop0p1            8192      122879       57344    c  W95 FAT32 (LBA)
 /dev/loop0p2          122880     5785599     2831360   83  Linux
-Now we'll remake the last partition by deleting it, then recreating it at the same start location, same type but different end location. So make note of the "Start" column for loop0p2 (partition 2 - the Linux partition) - we'll use it later - its 122880 here.
+Now we'll remake the last partition by deleting it, then recreating it at the same start 
+location, same type but different end location. So make note of the "Start" column for 
+loop0p2 (partition 2 - the Linux partition) - we'll use it later - its 122880 here.
 
 sudo fdisk /dev/loop0
-Enter the following - they are safe to enter - nothing permanent happens until you've read my explanation that follows:
+Enter the following - they are safe to enter - nothing permanent happens until you've read my 
+explanation that follows:
 
 p
 d
@@ -59,15 +55,19 @@ just hit enter to accept the default
 p
 Step 1 - print current table. Steps 2-3 - delete partition 2, Steps 4-8 - recreate partition 2 with new end point (default is end of image), Step 9 - print out the new table.
 
-Assuming your newly printed table is identical to the original table except for the End value and Blocks value (ie the size has changed) you're ready to commit.
+Assuming your newly printed table is identical to the original table except for 
+the End value and Blocks value (ie the size has changed) you're ready to commit.
 
 Enter w to commit your change, then enter q to quit.
 
-You can delete that loopback device, we'll make another for the second partition. Remember the start offset you noted and used above - we'll use it again:
+You can delete that loopback device, we'll make another for the second partition. Remember 
+the start offset you noted and used above - we'll use it again:
 
 sudo losetup -d /dev/loop0     # delete the old loop setup
 sudo losetup -o $((122880*512)) /dev/loop0 ./image.img
-That will create a new mapping on /dev/loop0 pointing just at partition 2 - for reference 512 is the sector-size you can see in the first fdisk output.
+
+That will create a new mapping on /dev/loop0 pointing just at partition 2 - for reference 512 is
+the sector-size you can see in the first fdisk output.
 
 Now resize the partition to fill the available space:
 
@@ -77,5 +77,4 @@ Done - now clean up:
 
 sudo losetup -d /dev/loop0
 
-
-and then copy /tmp/john.img back to the hypriot inmage :-)
+YOU ARE FINALLY DONE

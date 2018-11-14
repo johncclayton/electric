@@ -49,4 +49,16 @@ else
     popd
 fi
 
-echo "Should be ready to go, check that $WORKING_IMAGE is 1g larger than the original"
+function find_loopback() {
+    N=0
+    FOUND=0
+    while [ $FOUND -ne 0 ]; do
+        sudo losetup /dev/loop$N
+        FOUND=$?
+        N=eval 
+    done
+}
+
+export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
+
+echo "Should be ready to go, check that $WORKING_IMAGE is 1G larger than the original"
