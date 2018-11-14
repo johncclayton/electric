@@ -41,13 +41,13 @@ WORKING_IMAGE=image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 truncate -s +1G $WORKING_IMAGE
 
-# if [ ! -d electric ]; then
-#     git clone https://github.com/johncclayton/electric.git
-# else
-#     pushd .
-#     cd electric && git pull
-#     popd
-# fi
+if [ ! -d electric ]; then
+    git clone https://github.com/johncclayton/electric.git
+else
+    pushd .
+    cd electric && git pull
+    popd
+fi
 
 export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
 export LOOPBACK=-1
@@ -85,3 +85,4 @@ sudo losetup /dev/loop${LOOPBACK} $WORKING_IMAGE
 R=$?
 
 # commands to delete the partition and create a new one, then resize it. 
+#

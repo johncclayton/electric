@@ -1,10 +1,10 @@
 Creating a Build Box
 ====================
 The build box is constructed using Terraform.  To deploy your own sd-image build system, you will need an 
-AWS account, and the access keys to it.  More documentation for this is available on the Terraform website. 
+AWS account, and the access keys to it.  More documentation for this is available on the Terraform website.
 
 Checklist: 
-1.  An AWS account with appropriate access
+1.  An AWS account with appropriate access for using Terraform.
 1.  The latest Terraform binary for your platform.
 1.  A .tfvars file called anything you like; I will assume buildkit.tfvars for this documentation.
 
