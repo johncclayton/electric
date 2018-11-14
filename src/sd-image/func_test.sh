@@ -1,18 +1,20 @@
 #!/bin/bash
 
+LOOPBACK=0
 function find_loopback() {
-    N=0
+    N=-1
     FOUND=0
-    while [ $FOUND -ne 0 ]; do
-        echo "trying $N..."
-        sudo losetup /dev/loop$N
-        FOUND=$?
+    while [ $FOUND -eq 0 ]; do
         N=$((N + 1))
-        echo "will try $N now..."
-        sleep 1
+        sudo losetup /dev/loop${N}
+        FOUND=$?
     done
 
-    echo $N
+    if [ $FOUND -eq 1 ]; then
+        LOOPBACK=$N
+    else
+        LOOPBACK=-1
+    fi
 }
 
-echo `find_loopback`
+echo "Got it: try /dev/loop${LOOPBACK}"
