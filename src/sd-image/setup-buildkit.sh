@@ -96,7 +96,8 @@ fi
 # this will ask sfdisk to expand the last parition
 echo ", +" | sudo sfdisk -N 2 /dev/loop${LOOPBACK}
 
-# dump current part table
+# dump current part table, and find the start sector - this is most notably a shaky part of the 
+# whole deal.  
 sudo sfdisk -d /dev/loop${LOOPBACK} > part_table.txt
 START_SECTOR=`grep type=83 part_table.txt | awk '{print $4;}' | tr -d ','`
 
