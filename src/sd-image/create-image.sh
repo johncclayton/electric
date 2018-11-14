@@ -6,8 +6,8 @@ set -x
 PIIMG=`which piimg`
 QEMU_ARM="/usr/bin/qemu-arm-static"
 ROOT="/buildkit"
-SOURCE_IMG=/buildkit/template-image.img
-MNT="/$ROOT/mnt"
+SOURCE_IMG=$ROOT/template-image.img
+MNT="$ROOT/mnt"
 OPT="$MNT/opt"
 
 BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
