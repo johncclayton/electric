@@ -22,6 +22,7 @@ rm *.img
 # find any existing file - potentially nothing of course.
 ZIP_FILENAME=`ls -1 *.zip`
 
+# only download if the ZIP file isn't there.
 if [ -z "$ZIP_FILENAME" ]; then
     # download from here, following redirects.  
     curl -O -J -L "https://downloads.raspberrypi.org/raspbian_lite_latest" 
