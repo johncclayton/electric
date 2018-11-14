@@ -77,6 +77,11 @@ resource "aws_instance" "buildkit" {
 
   associate_public_ip_address = true
 
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "20"
+  }
+
   tags {
     ProjectName = "${var.project_name}"
   }
@@ -85,11 +90,10 @@ resource "aws_instance" "buildkit" {
     create_before_destroy = true
   }
 
-  provisioner "local-exec" {
-    command = <<FOO123
-    /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/src/sd-image/setup-buildkit.sh)
-FOO123
-  }
+  user_data = <<-EOF
+     #!/bin/bash
+     /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/src/sd-image/setup-buildkit.sh)
+     EOF
 }
 
 resource "aws_security_group_rule" "allow_all" {

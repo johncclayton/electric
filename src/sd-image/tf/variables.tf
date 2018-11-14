@@ -3,8 +3,9 @@ variable "aws_secret_key" {}
 
 variable "branch_name" {
   description = "The name of the branch you want to use; this of course impacts the code that is used to initialize the build system."
-  default = "master"
+  default     = "master"
 }
+
 variable "aws_vpc_cidr" {
   description = "CIDR for the VPC"
   default     = "10.0.0.0/16"

@@ -2,6 +2,10 @@
 sudo apt-get -y update
 sudo apt-get install -y unzip binfmt-support qemu qemu-user-static make g++ curl git libparted0-dev
 
+SETUP_ROOT=/buildkit
+sudo mkdir -p ${SETUP_ROOT} && sudo chmod 777 ${SETUP_ROOT} 
+cd ${SETUP_ROOT}
+
 if [ ! -d "piimg" ]; then
     git clone https://github.com/alexchamberlain/piimg
 
@@ -84,5 +88,36 @@ fi
 sudo losetup /dev/loop${LOOPBACK} $WORKING_IMAGE
 R=$?
 
-# commands to delete the partition and create a new one, then resize it. 
-#
+if [ $R -ne 0 ]; the
+    echo "Failed to find the appropriate loopback device"
+    exit 6
+fi
+
+# this will ask sfdisk to expand the last parition
+echo ", +" | sudo sfdisk -N 2 /dev/loop${LOOPBACK}
+
+# dump current part table
+sudo sfdisk -d /dev/loop${LOOPBACK} > part_table.txt
+START_SECTOR=`grep type=83 part_table.txt | awk '{print $4;}' | tr -d ','`
+
+# delete the old loop setup
+sudo losetup -d /dev/loop${LOOPBACK}     
+
+# then we want to resize 
+sudo losetup -o $((START_SECTOR * SECTOR_SIZE)) /dev/loop${LOOPBACK} $WORKING_IMAGE
+R=$?
+if [ $R -ne 0 ]; then
+    echo "Oh no, wasn't able to mount partition 2 of the working image"
+    echo "Working image: $WORKING_IMAGE"
+    echo "Loopback number: $LOOPBACK"
+    exit 7
+fi
+
+# do the resize!
+sudo e2fsck -f /dev/loop${LOOPBACK}
+sudo resize2fs /dev/loop${LOOPBACK}
+
+# and dismount, our job is done!
+sudo losetup -d /dev/loop${LOOPBACK}
+
+echo "All done - the image called ${WORKING_IMAGE} is ready to accept the build process"
