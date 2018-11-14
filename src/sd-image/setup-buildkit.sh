@@ -41,24 +41,47 @@ WORKING_IMAGE=image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 truncate -s +1G $WORKING_IMAGE
 
-if [ ! -d electric ]; then
-    git clone https://github.com/johncclayton/electric.git
-else
-    pushd .
-    cd electric && git pull
-    popd
-fi
-
-function find_loopback() {
-    N=0
-    FOUND=0
-    while [ $FOUND -ne 0 ]; do
-        sudo losetup /dev/loop$N
-        FOUND=$?
-        N=eval 
-    done
-}
+# if [ ! -d electric ]; then
+#     git clone https://github.com/johncclayton/electric.git
+# else
+#     pushd .
+#     cd electric && git pull
+#     popd
+# fi
 
 export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
+export LOOPBACK=-1
 
-echo "Should be ready to go, check that $WORKING_IMAGE is 1G larger than the original"
+function find_loopback() {
+    N=-1
+    FOUND=0
+    while [ $FOUND -eq 0 ]; do
+        N=$((N + 1))
+        sudo losetup /dev/loop${N}
+        FOUND=$?
+    done
+
+    if [ $FOUND -eq 1 ]; then
+        LOOPBACK=$N
+    else
+        LOOPBACK=-1
+    fi
+}
+
+find_loopback
+
+# simple validation; if this isn't true then parsing is likely wrong
+if [ 512 -ne $SECTOR_SIZE ]; then
+    echo "Parsing the sector size didn't seem to work - aborting through abject fear"
+    exit 4
+fi
+
+if [ $LOOPBACK -eq -1 ]; then
+    echo "Unable to find a suitable/available loopback device - which is needed to manipulate the partition table of the raw Raspbian image"
+    exit 5
+fi
+
+sudo losetup /dev/loop${LOOPBACK} $WORKING_IMAGE
+R=$?
+
+# commands to delete the partition and create a new one, then resize it. 

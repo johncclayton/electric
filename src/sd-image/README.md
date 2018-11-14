@@ -1,6 +1,7 @@
-Setup
-=====
-Install the following support binaries that provide QEMU support
+Creating a Build Box
+====================
+The build box is constructed using Terraform.  To deploy your own sd-image build system, you will need an 
+AWS account, in particular the AWS_SECRET_
 
     sudo apt-get install binfmt-support qemu qemu-user-static make g++ libparted0-dev
     

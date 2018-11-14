@@ -18,7 +18,7 @@ fi
 
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y gcc python-dev python-pip git g++
+sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon 
 
 sudo pip install virtualenv virtualenvwrapper
 

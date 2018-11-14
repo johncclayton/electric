@@ -87,7 +87,7 @@ resource "aws_instance" "buildkit" {
 
   provisioner "local-exec" {
     command = <<FOO123
-    /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/unified-server/src/sd-image/setup-buildkit.sh)
+    /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/src/sd-image/setup-buildkit.sh)
 FOO123
   }
 }
