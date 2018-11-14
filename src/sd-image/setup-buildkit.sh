@@ -28,7 +28,7 @@ if [ -z "$ZIP_FILENAME" ]; then
     ZIP_FILENAME=`ls -1 *.zip`
 fi
 
-if [ ! -f $"ZIP_FILENAME" ]; then
+if [ ! -f "$ZIP_FILENAME" ]; then
     echo "Failure to detect the ZIP file from Raspbian - was looking for $ZIP_FILENAME"
     exit 5
 fi
