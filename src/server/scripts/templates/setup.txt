@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup(
     name = 'electric',
-    packages = ['electric', 'electric.worker'],
+    packages = ['electric', 'electric.worker', 'status'],
     version = "{{ version }}",
     description = "iCharger integration services",
     author = "John Clayton",
@@ -23,8 +23,9 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'electric-server-cmd=electric.main:run_server',
-            'electric-worker-cmd=electric.worker.worker:run_worker'
+            'electric-server=electric.main:run_server',
+            'electric-worker=electric.worker.worker:run_worker',
+            'electric-status=status.main:run_server'
             ]
     }
 )

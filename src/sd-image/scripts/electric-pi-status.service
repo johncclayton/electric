@@ -5,11 +5,10 @@ Requires=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/status/run_server.sh
+ExecStart=electric-status
 User=pirate
 Restart=on-failure
 RestartSec=8
-WorkingDirectory=/opt/status
 
 [Install]
 WantedBy=multi-user.target

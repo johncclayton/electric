@@ -5,7 +5,7 @@ Requires=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/bootstrap_docker_images.sh
+ExecStart=electric-s
 User=pirate
 Restart=on-failure
 RestartSec=8

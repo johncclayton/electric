@@ -9,7 +9,8 @@ try: # for pip >= 10
 except ImportError: # for pip <= 9.0.3
     from pip.req import parse_requirements
     
-electric_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+electric_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+server_root_path = os.path.join(electric_root_path, 'server')
 
 # Provides configuration for template generation.  Any template file is described here
 # and will be re-generated using the latest values when --generate is used.
@@ -34,6 +35,13 @@ config = {
             "meta": {
                 "user": "pi",
                 "service_name": "Electric Worker Service"
+            }
+        },
+        'electric-status.service': {
+            "template": "electric-status.service.txt",
+            "meta": {
+                "user": "pi",
+                "service_name": "Electric Status Service"
             }
         }
     }
@@ -62,7 +70,7 @@ def run_these(args):
 
     try:
         proc = subprocess.Popen(args,
-                                cwd=electric_root_path,
+                                cwd=server_root_path,
                                 stderr=subprocess.STDOUT,
                                 stdout=subprocess.PIPE,
                                 bufsize=0)
@@ -91,7 +99,7 @@ if __name__ == '__main__':
 
     rendered = False
     repo = "pypi" if args.prod else "testpypi"
-    setup_filename = os.path.join(electric_root_path, 'setup.py')
+    setup_filename = os.path.join(server_root_path, 'setup.py')
 
     if args.generate:
         print("Generating new setup...")
@@ -117,8 +125,8 @@ if __name__ == '__main__':
                 print("Meta data incorrect; need template for {0}".format(dest_file))
                 sys.exit(1)
 
-            input_filename = os.path.join(electric_root_path, "scripts", "templates", config['files'][dest_file]["template"])
-            output_filename = os.path.join(electric_root_path, dest_file)
+            input_filename = os.path.join(server_root_path, "scripts", "templates", config['files'][dest_file]["template"])
+            output_filename = os.path.join(server_root_path, dest_file)
 
             if "meta" in config['files'][dest_file]:
                 meta.update(config['files'][dest_file]["meta"])
@@ -130,7 +138,7 @@ if __name__ == '__main__':
 
         run_these([
             sys.executable,
-            os.path.join(electric_root_path, "setup.py"),
+            os.path.join(server_root_path, "setup.py"),
             "sdist",
             "--formats=zip"
         ])
@@ -140,7 +148,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if rendered and args.publish:
-        to_publish = os.path.join(electric_root_path, "dist", "electric-{0}.zip".format(meta["version"]))
+        to_publish = os.path.join(server_root_path, "dist", "electric-{0}.zip".format(meta["version"]))
         
         if not os.path.exists(to_publish):
             print("Simple check to see if {0} exists has failed, aborting".format(to_publish))

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#
+# Purpose: to install everything required to run Electric on a Raspberry Pi. 
+# 
+
 # temporary, this will be removed later when it all works. 
 export BRANCH=unified-server
 
@@ -18,7 +22,7 @@ fi
 
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon 
+sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk
 
 sudo pip install virtualenv virtualenvwrapper
 
@@ -44,14 +48,15 @@ fi
 source /usr/local/bin/virtualenvwrapper.sh
 
 ELEC_INSTALL="$HOME/electric"
-SRV_CODE="$ELEC_INSTALL/src/server"
+REQUIREMENTS_DIR="$ELEC_INSTALL/src"
+REQUIREMENTS_FILE="$REQUIREMENTS_DIR/requirements-all.txt"
 
 echo
 echo "electric will be installed to : $ELEC_INSTALL"
-echo "The server will reside at     : $SRV_CODE"
 echo
 
 cd $HOME
+
 PY=".virtualenvs/electric/bin/python"
 
 if [ ! -e "$PY" ]; then
@@ -74,24 +79,14 @@ if [ ! -d "$ELEC_INSTALL" ]; then
     popd
 fi
 
-echo
-echo "Checking for server folder ..."
-
-if [ ! -d "$SRV_CODE" ]; then
-    echo "Something is wrong. There's no '$SRV_CODE' folder. "
-    echo "- Did something break with the git checkout?"
-    echo "- Do you have an '~/electric' folder at all?"
-    exit
-fi
-
 echo 'cd ~/electric/src/server' >> ~/.virtualenvs/electric/bin/postactivate
 
 echo
 echo "Checking for requirements files ..."
 
-if [ ! -f "$SRV_CODE/requirements-all.txt" ]; then
-    echo "Something is wrong. There's no requirements-all.txt. This should exist at $SRV_CODE"
-    echo "- Did something break with the git checkout?"
+if [ ! -f "$REQUIREMENTS_FILE" ]; then
+    echo "Something is wrong. There's no requirements file. This should exist at $REQUIREMENTS_FILE"
+    echo "- Did sg break with the git checkout?"
     echo "- Are you on the right branch?"
     echo "- Is the earth still round?"
     exit
@@ -100,7 +95,7 @@ fi
 echo
 echo "Installing required packages"
 echo "Will ask for sudo privs..."
-sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython dnsmasq hostapd gawk
+sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
 
 echo "Switching to 'electric' virtualenv..."
 workon electric
@@ -117,9 +112,7 @@ pip install hidapi
 
 echo
 echo "Installing other required packages..."
-pip install -r "$SRV_CODE/requirements-all.txt"
-
-# get the script to setup the wireless
+pip install -r "$REQUIREMENTS_FILE"
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/get-wlan.sh
 chmod +x get-wlan.sh
 ./get-wlan.sh

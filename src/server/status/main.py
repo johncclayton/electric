@@ -25,5 +25,8 @@ api.add_resource(StatusResource, "/status", endpoint="status")
 api.add_resource(DeploymentResource, "/deploy", endpoint="deploy")
 api.add_resource(WiFiConnectionResource, "/wifi", endpoint="wifi")
 
-if __name__ == "__main__":
+def run_server():
     application.run(debug=debug_mode, host='0.0.0.0', port=4999)
+ 
+if __name__ == "__main__":
+    run_server()
