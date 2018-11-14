@@ -1,10 +1,11 @@
 #!/bin/bash
-sudo apt-get -y update
-sudo apt-get install -y unzip binfmt-support qemu qemu-user-static make g++ curl git libparted0-dev
 
 SETUP_ROOT=/buildkit
-sudo mkdir -p ${SETUP_ROOT} && sudo chmod 777 ${SETUP_ROOT} 
+sudo mkdir -p ${SETUP_ROOT} && sudo chmod 777 ${SETUP_ROOT}
 cd ${SETUP_ROOT}
+
+sudo apt-get -y update
+sudo apt-get install -y unzip binfmt-support qemu qemu-user-static make g++ curl git libparted0-dev
 
 if [ ! -d "piimg" ]; then
     git clone https://github.com/alexchamberlain/piimg
@@ -21,12 +22,14 @@ fi
 
 # just in case you run this again, clean out the old stuff, retaining the
 # ZIP file as this is unlikely to change all that often.  
+echo "Removing existing .img files in $SETUP_ROOT"
 rm *.img
 
 # find any existing file - potentially nothing of course.
 ZIP_FILENAME=`ls -1 *.zip`
 
 # only download if the ZIP file isn't there.
+echo "Downloading the Raspbian release..."
 if [ -z "$ZIP_FILENAME" ]; then
     # download from here, following redirects.  
     curl -O -J -L "https://downloads.raspberrypi.org/raspbian_lite_latest" 
@@ -38,13 +41,17 @@ if [ ! -f "$ZIP_FILENAME" ]; then
     exit 5
 fi
 
+echo "Unzipping Raspbian release..."
 unzip -o $ZIP_FILENAME 
 IMG_FILENAME=`ls -1 *raspbian*.img`
 
-WORKING_IMAGE=image.img
+echo "Copying latest image to a working image so we can resize the partitions..."
+WORKING_IMAGE=template-image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 
-if [ ! -d electric ]; then
+echo "Checking if our setup directory contains a copy of the code..."
+if [ ! -d ${SETUP_ROOT}/electric ]; then
+    echo "Downloading a copy of the electric git repo"
     git clone https://github.com/johncclayton/electric.git
 else
     pushd .
@@ -52,8 +59,7 @@ else
     popd
 fi
 
-export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
-export LOOPBACK=-1
+echo "Beginning adjustment of the working image: $WORKING_IMAGE"
 
 function find_loopback() {
     N=-1
@@ -73,6 +79,9 @@ function find_loopback() {
 
 find_loopback
 
+export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
+export LOOPBACK=-1
+
 # simple validation; if this isn't true then parsing is likely wrong
 if [ 512 -ne $SECTOR_SIZE ]; then
     echo "Parsing the sector size didn't seem to work - aborting through abject fear"
@@ -84,9 +93,16 @@ if [ $LOOPBACK -eq -1 ]; then
     exit 5
 fi
 
+echo "Sector size: ${SECTOR_SIZE}"
+echo "Using loopback: ${LOOPBACK}"
+echo
+
 # adds 2gig to the working image, should be enough extra space to install bins/code/etc.
+echo "Adding extra space to the working image"
 truncate -s +2G $WORKING_IMAGE
 
+echo
+echo "Expanding the 2nd partition"
 sudo losetup /dev/loop${LOOPBACK} $WORKING_IMAGE
 R=$?
 
@@ -98,13 +114,19 @@ fi
 # this will ask sfdisk to expand the last parition
 echo ", +" | sudo sfdisk -N 2 /dev/loop${LOOPBACK}
 
+
 # dump current part table, and find the start sector - this is most notably a shaky part of the 
 # whole deal.  
+echo
+echo "Dumping current partition table to work out the start sector"
 sudo sfdisk -d /dev/loop${LOOPBACK} > part_table.txt
 START_SECTOR=`grep type=83 part_table.txt | awk '{print $4;}' | tr -d ','`
 
 # delete the old loop setup
 sudo losetup -d /dev/loop${LOOPBACK}     
+
+echo 
+echo "Start sector: ${START_SECTOR}"
 
 # then we want to resize 
 sudo losetup -o $((START_SECTOR * SECTOR_SIZE)) /dev/loop${LOOPBACK} $WORKING_IMAGE
@@ -117,6 +139,8 @@ if [ $R -ne 0 ]; then
 fi
 
 # do the resize!
+echo 
+echo "Mounted the second partition, checking & resizing now"
 sudo e2fsck -f /dev/loop${LOOPBACK}
 sudo resize2fs /dev/loop${LOOPBACK}
 

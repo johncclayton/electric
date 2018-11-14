@@ -90,10 +90,10 @@ resource "aws_instance" "buildkit" {
     create_before_destroy = true
   }
 
-  user_data = <<-EOF
-     #!/bin/bash
-     /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/src/sd-image/setup-buildkit.sh)
-     EOF
+  # user_data = <<-EOF
+  #    #!/bin/bash
+  #    /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/src/sd-image/setup-buildkit.sh)
+  #    EOF
 }
 
 resource "aws_security_group_rule" "allow_all" {
