@@ -90,7 +90,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 
 # TODO: make sure this goes into the development area.
 # sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
-sudo ../../development/bootstrap.sh "$MNT/opt/bootstrap.sh"
+sudo ../../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 

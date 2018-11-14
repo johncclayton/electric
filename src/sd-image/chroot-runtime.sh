@@ -3,30 +3,12 @@
 set -e
 set -u
 
-
-/usr/local/bin/pip install -r /opt/status/requirements.txt
-
-# curl -sSL https://get.docker.com | sh
-
-# already done as part of v1.8 user-data (cloud-init)
-usermod -aG docker pirate
+# this runs the entire dev bootstrapping experience from within
+# the chroot jail.  All the same benefits, all the same style.
+/opt/rpi3-bootstrap.sh
 
 # compile the enumeration_interfaces.c code for raspberry pi
-pushd . && cd /opt/status && gcc -o enumerate_interfaces enumerate_interfaces.c && popd
-
-# install the wireless /etc config to the right directory in the dest image, don't do this BEFORE 
-# the call to apt-get above, as otherwise apt-get installation falls over when it encounters duplicates
-sudo cp -avR /opt/wireless/etc/* /etc/
-
-# owned by the right user
-sudo chown -R root:users /opt
-
-. /opt/wireless/scripts/functions.sh
-. /opt/wireless/config/wlan.conf
-
-# ensure scripts are executable
-sudo chmod +x /opt/wireless/scripts/*
-sudo chmod +x /opt/*.sh
+pushd . && cd /home/pi/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
 
 # ensure SSH is enabled
 touch /boot/ssh

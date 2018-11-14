@@ -1,6 +1,7 @@
 # Development
-* Useful if you want *really* fast debugging because you can setup remote debugging directly to a connected charger. That means you can code + set breakpoints. Whew! 
+* Useful if you want *really* fast debugging because you can setup remote debugging directly to a connected RPI3/charger combo. That means you can code + set breakpoints. Whew! 
 * Unit tests can only be run on a Raspberry PI 3 with a charger connected to it.
+* You get to code on a real computer, sync that to the RPI3 and still stay sane.
 
 # The easy(ish) way
 
@@ -8,15 +9,16 @@
 
 First, you need to install the code and Python packages into their own virtualenv. This is done for you with some scripts.
 
-  1. Flash with a bog standard Raspbian image. 
-  1. log into the pi 
-  1. bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/master/development/bootstrap.sh)
+  1. Flash an SD card with a standard Raspbian Lite image. 
+  1. log into the pi (user: pi, password: raspberry)
+  1. then get the ball rolling by bootstrapping the whole thing... run the command below
+  
+    $ bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
 
 
-## Install the Packages
-
-This will install the public packages - when you dev, you'll want to have these packages use your
-cloned repo.  We'll get to that in a moment, first switch to the right python env and get the packages. 
+## Install the PyPi Packages
+This will install the public Electric code plus some helper commands to make running the services a little easier - when your dev, you'll want to have these PIP packages use your
+cloned repo source instead of the source located within the package.  We'll get to that in a moment, first switch to the right python env and get the packages. 
 
   1. workon electric 
   1. pip install electric 

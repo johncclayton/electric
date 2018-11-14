@@ -89,11 +89,6 @@ resource "aws_instance" "buildkit" {
   lifecycle {
     create_before_destroy = true
   }
-
-  # user_data = <<-EOF
-  #    #!/bin/bash
-  #    /bin/bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/src/sd-image/setup-buildkit.sh)
-  #    EOF
 }
 
 resource "aws_security_group_rule" "allow_all" {
@@ -114,7 +109,7 @@ resource "aws_security_group_rule" "allow_ssh" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
-output "aws_uildkit_public_dns" {
+output "aws_buildkit_public_dns" {
   value = "${aws_instance.buildkit.public_dns}"
 }
 
