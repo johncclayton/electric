@@ -14,3 +14,6 @@ wireless/temp
 src/app/.sourcemaps
 electric-worker.service
 electric-web.service
+.terraform
+terraform.tfstate
+terraform.tfstate.backup

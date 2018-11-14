@@ -1,6 +1,24 @@
+How I'd like it to work
+
+1. Construct the buildkit anywhere, configuration is automatically included. 
+
+1. Provide a branch for it to build an image from.
+
+1. The output filename will include branch name and a reference to the sha1 used to build it.
+
+1. The output filename should be available automatically if required; so that others can download it.  
+
+Process / Inputs
+
+1. Source image (or URL to get it)
+
+1. Script to resize the image so we've enough space to install stuff onto it.  (2gb for now)
+
+1. Branch name to use
+
 How I prepared:
 
-1. take the hypriot image
+1. take the image
 
 2. copy it to /tmp/john.img
 
