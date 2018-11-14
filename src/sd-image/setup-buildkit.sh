@@ -37,7 +37,9 @@ fi
 unzip -o $ZIP_FILENAME 
 IMG_FILENAME=`ls -1 *raspbian*.img`
 
-cp $IMG_FILENAME test.img
+WORKING_IMAGE=image.img
+cp $IMG_FILENAME $WORKING_IMAGE
+truncate -s +1G $WORKING_IMAGE
 
 if [ ! -d electric ]; then
     git clone https://github.com/johncclayton/electric.git
@@ -47,4 +49,4 @@ else
     popd
 fi
 
-echo "Should be ready to go..."
+echo "Should be ready to go, check that $WORKING_IMAGE is 1g larger than the original"
