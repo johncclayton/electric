@@ -58,7 +58,7 @@ The preparation steps are automated; and roughly speaking do the following:
 
 Run the following command: 
 
-    $ curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/src/sd-image/buildkit-bootstrap.sh > setup.sh
+    $ curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/src/sd-image/build-bootstrap.sh > setup.sh
     $ chmod +x setup.sh
     $ bash -x ./setup.sh
 

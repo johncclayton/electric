@@ -46,7 +46,6 @@ unzip -o $ZIP_FILENAME
 IMG_FILENAME=`ls -1 *raspbian*.img`
 
 echo "Copying latest image to a working image so we can resize the partitions..."
-WORKING_IMAGE=template-image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 
 echo "Checking if our setup directory contains a copy of the code..."
@@ -60,6 +59,8 @@ else
 fi
 
 echo "Beginning adjustment of the working image: $WORKING_IMAGE"
+
+export LOOPBACK=-1
 
 function find_loopback() {
     N=-1
@@ -79,8 +80,12 @@ function find_loopback() {
 
 find_loopback
 
-export SECTOR_SIZE=`fdisk -l $WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
-export LOOPBACK=-1
+if [ $LOOPBACK -eq -1 ]; then
+    echo "Unable to find a suitable/available loopback device - which is needed to manipulate the partition table of the raw Raspbian image"
+    exit 6
+fi
+
+export SECTOR_SIZE=`fdisk -l $SETUP_ROOT/$WORKING_IMAGE | grep 'Sector size' | awk '{print $7;}'`
 
 # simple validation; if this isn't true then parsing is likely wrong
 if [ 512 -ne $SECTOR_SIZE ]; then
@@ -88,10 +93,10 @@ if [ 512 -ne $SECTOR_SIZE ]; then
     exit 4
 fi
 
-if [ $LOOPBACK -eq -1 ]; then
-    echo "Unable to find a suitable/available loopback device - which is needed to manipulate the partition table of the raw Raspbian image"
-    exit 5
-fi
+if [ -z "$SECTOR_SIZE" ]; then                                                                 
+    echo "Parsing the sector size didn't seem to work - aborting through abject fear"          
+    exit 5                                                                                     
+fi                                                                                             
 
 echo "Sector size: ${SECTOR_SIZE}"
 echo "Using loopback: ${LOOPBACK}"
@@ -106,14 +111,13 @@ echo "Expanding the 2nd partition"
 sudo losetup /dev/loop${LOOPBACK} $WORKING_IMAGE
 R=$?
 
-if [ $R -ne 0 ]; the
+if [ $R -ne 0 ]; then
     echo "Failed to find the appropriate loopback device"
-    exit 6
+    exit 7
 fi
 
 # this will ask sfdisk to expand the last parition
 echo ", +" | sudo sfdisk -N 2 /dev/loop${LOOPBACK}
-
 
 # dump current part table, and find the start sector - this is most notably a shaky part of the 
 # whole deal.  
@@ -135,7 +139,7 @@ if [ $R -ne 0 ]; then
     echo "Oh no, wasn't able to mount partition 2 of the working image"
     echo "Working image: $WORKING_IMAGE"
     echo "Loopback number: $LOOPBACK"
-    exit 7
+    exit 8
 fi
 
 # do the resize!
