@@ -1,6 +1,7 @@
 #!/bin/bash
 
 LOOPBACK=0
+
 function find_loopback() {
     N=-1
     FOUND=0
@@ -16,5 +17,7 @@ function find_loopback() {
         LOOPBACK=-1
     fi
 }
+
+find_loopback
 
 echo "Got it: try /dev/loop${LOOPBACK}"
