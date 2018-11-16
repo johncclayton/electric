@@ -104,9 +104,9 @@ echo "$VERSION_NUM" > ./LAST_DEPLOY
 sudo mv ./LAST_DEPLOY "$OPT"
 
 # TODO: publish the build to Google Drive or somewhere.
+
 # TODO: make sure this goes into the development area, and that the GPIO user/group is correctly done
 #       on startup as well.
-# sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 sudo HOME=/home/pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot "$MNT" < ./chroot-runtime.sh
 RES=$?

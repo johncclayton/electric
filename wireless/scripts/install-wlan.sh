@@ -26,12 +26,6 @@ TEMP=${INSTALL_ROOT}/wireless
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
 
-# Remove /boot/device-init.yaml. It interferes with wpa supplicant
-# and prevents wlan1 from coming up properly.
-if [ -f "/boot/device-init.yaml" ]; then
-    mv "/boot/device-init.yaml" "/boot/device-init.yaml.no-longer-needed"
-fi
-
 # Allow override
 if [ -f "${HOME}/.wlan.conf" ]; then
     echo "Using values from ${HOME}/.wlan.conf..."

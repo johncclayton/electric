@@ -37,7 +37,6 @@ So what's happening here?
 Troubleshooting (hopefully in order)
 ------------------------------------
 - Check /opt/wireless/config/wlan.conf. Are you **sure** **sure** **sure** that the SSID and password are correct? If not, wlan0 won't connect.
-- You did remove /boot/device-init.yaml right? Check it's not there. If it is preset, wlan0 won't connect because the default hypriot "device-init" will overwrite wlan0, ruining all my hard work :-(
 - /etc/rc.local **should not call a script**, /opt/wireless/scripts/... (it did in a past version. it should not now)
 - Check /etc/network/interfaces.d/wlan0. If should look like this:
     ```
@@ -136,7 +135,6 @@ Full configuration files are included (within the /etc/ folder).  They are what 
 
 - sudo apt-get update
 - sudo apt-get install dnsmasq hostapd
-- [this may not matter any more?  wlan0 can be connected to a local Wifi, with DHCP] ... Remove the /boot/device-init.yaml. That’ll kill our wlan0 on startup if it’s there.
 - Setup config
   - Copy wlan0 and wlan1 to /etc/network/interfaces.d/
   - Copy hostapd.conf to /etc/hostapd/

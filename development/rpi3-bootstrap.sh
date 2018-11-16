@@ -5,8 +5,7 @@
 # Assumptions: this is run on a Raspberry Pi (GPIO packages will be installed).
 # 
 
-# TODO: upgrades - how do these work in dev? 
-# TODO: upgrades - how do these work in production?  presently using /LAST_VERSION 
+# TODO: upgrades - how do these work in dev & production?  presently using /LAST_VERSION 
 
 T=/tmp/electric-bootstrap
 
@@ -33,11 +32,15 @@ sudo cp -f 10-icharger.rules /etc/udev/rules.d/
 sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
 sudo udevadm control --reload
 
-# So that we can access GPIO of the pi3 (was already the case on Jessie)
+MY_USER=`whoami`
+echo <<-EOF > /opt/gpio.sh
 sudo groupadd gpio
-sudo adduser `whoami` gpio
+sudo adduser $MY_USER gpio
 sudo chown root.gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
+EOF
+
+sudo chmod +x /opt/gpio.sh
 
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ~/.bashrc

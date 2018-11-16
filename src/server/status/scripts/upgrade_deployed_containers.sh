@@ -25,6 +25,6 @@ echo Running with VERSION_TAG=$1, and execute docker-compose up
 export VERSION_TAG=":$1"
 docker-compose up -d
 
-# TODO: fix this so that update of last deploy only happens if the docker-compose succeeds
+# TODO: fix this - where was the upgrade_deployed_contaainers fired from?
 echo >/opt/LAST_DEPLOY $1
 

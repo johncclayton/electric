@@ -22,10 +22,4 @@ touch /boot/ssh
 systemctl enable electric-pi-status.service
 systemctl enable electric-pi.service
 
-# TODO: still need this? remove /boot/device-init.yaml. It interferes with wpa supplicant
-# and prevents wlan1 from coming up properly.
-if [ -f "/boot/device-init.yaml" ]; then
-    mv "/boot/device-init.yaml" "/boot/device-init.yaml.no-longer-needed"
-fi
-
 exit 0

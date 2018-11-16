@@ -23,14 +23,6 @@ Install the OS, and log into it via terminal / SSH.
 
 ## Configure WIFI and Update via APT
 
-1. Enable WIFI, log in and edit /boot/device-init.yaml
-
-       wifi:
-         interfaces:
-           wlan0:
-             ssid: "MyNetwork"
-             password: "secret_password"
-
 1. get the system updated
 
        $ sudo apt-get update 
