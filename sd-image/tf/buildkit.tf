@@ -82,11 +82,6 @@ resource "aws_instance" "sdimage" {
     volume_size = "20"
   }
 
-  user_data = <<-EOF
-    sleep 30
-    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/sd-image/build-bootstrap.sh)
-    EOF
-
   tags {
     ProjectName = "${var.project_name}"
   }
