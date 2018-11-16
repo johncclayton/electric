@@ -73,7 +73,7 @@ fi
 
 function cleanup_piimg() {
 	if [ -f "$PIIMG_STATE" ]; then
-		DEV1=`egrep -v /dev/loop $PIIMG_STATE`
+		DEV1=`sed s,/dev/loop,,/ $PIIMG_STATE`
 		echo "Attempting cleanup on /dev/loop${DEV}"
 		sudo losetup -d /dev/loop${DEV}
 		NEXT_DEV=$((DEV + 1))
