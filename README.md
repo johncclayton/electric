@@ -22,25 +22,27 @@ TODO: Need to link to the latest download + instructions for installing / contro
 
 # Quickstart Reference
 
-Read the other docs if none of this makes sense.  
+Makes it easier to find the bootstrapping code, these are all in the appropriate README.md files in other
+subdrectories of the repo. 
 
 ## Bootstrap the build machine
 
-    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh)
+    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh)
 
 ## Create an SD Image
 
-    $ export BRANCH=master
-    $ export TRAVIS_BUILD_NUMBER=683
-    $ cd /buildkit/electric/sd-image
-    $ git checkout -t origin/${BRANCH}
-    $ ./create-image.sh 
+    export BRANCH=master
+    export TRAVIS_BUILD_NUMBER=683
+    cd /buildkit/electric/sd-image
+    git checkout -t origin/${BRANCH}
+    ./create-image.sh
 
 ## Bootstrap a RPI3 directly
 
-    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
+    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
 
 ## Pictures or it never happened!
+
 ![Demo](/docs/images/teaser.gif "Charge Demo!")
 
 
