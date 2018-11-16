@@ -108,7 +108,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 #       on startup as well.
 # sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
-sudo chroot "$MNT" bash -c "BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM}" < ./chroot-runtime.sh
+sudo HOME=/home/pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x

@@ -35,7 +35,7 @@ subdrectories of the repo.
 
 ## Create an SD Image
 
-    export BRANCH=master
+    export BRANCH=unified-server
     export TRAVIS_BUILD_NUMBER=683
     cd /buildkit/electric
     git checkout -t origin/${BRANCH}

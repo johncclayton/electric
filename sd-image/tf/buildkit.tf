@@ -36,7 +36,7 @@ resource "aws_internet_gateway" "gw" {
 }
 
 # and to allow traffic through the gateway we need a route table
-resource "aws_route_table" "buildkit-public-rt" {
+resource "aws_route_table" "public-rt" {
   vpc_id = "${aws_vpc.main.id}"
 
   route {
@@ -51,12 +51,12 @@ resource "aws_route_table" "buildkit-public-rt" {
 
 resource "aws_route_table_association" "web-public-rt" {
   subnet_id      = "${aws_subnet.public-subnet.id}"
-  route_table_id = "${aws_route_table.buildkit-public-rt.id}"
+  route_table_id = "${aws_route_table.public-rt.id}"
 }
 
 resource "aws_security_group" "instance-sg" {
   vpc_id = "${aws_vpc.main.id}"
-  name   = "buildkit-sg-${var.project_name}"
+  name   = "sdimage-sg-${var.project_name}"
 
   tags {
     ProjectName = "${var.project_name}"
@@ -67,7 +67,7 @@ resource "aws_security_group" "instance-sg" {
   }
 }
 
-resource "aws_instance" "buildkit" {
+resource "aws_instance" "sdimage" {
   ami           = "${var.aws_ami}"
   instance_type = "${var.aws_instance_type}"
 
@@ -81,6 +81,11 @@ resource "aws_instance" "buildkit" {
     volume_type = "gp2"
     volume_size = "20"
   }
+
+  user_data = <<-EOF
+    sleep 30
+    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/${var.branch_name}/sd-image/build-bootstrap.sh)
+    EOF
 
   tags {
     ProjectName = "${var.project_name}"
@@ -110,9 +115,9 @@ resource "aws_security_group_rule" "allow_ssh" {
 }
 
 output "aws_buildkit_public_dns" {
-  value = "${aws_instance.buildkit.public_dns}"
+  value = "${aws_instance.sdimage.public_dns}"
 }
 
 output "aws_buildkit_public_ip" {
-  value = "${aws_instance.buildkit.public_ip}"
+  value = "${aws_instance.sdimage.public_ip}"
 }

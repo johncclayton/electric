@@ -8,7 +8,7 @@ sudo apt-get -y update
 sudo apt-get install -y unzip binfmt-support qemu qemu-user-static make g++ curl git libparted0-dev
 
 if [ ! -d "piimg" ]; then
-    git clone https://github.com/alexchamberlain/piimg
+    git clone https://github.com/johncclayton/piimg.git
 
     pushd .
     cd piimg && make && sudo cp src/piimg /usr/local/bin/

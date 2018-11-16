@@ -4,6 +4,7 @@ variable "aws_secret_key" {}
 variable "aws_key_name" {
   description = "The name of the SSH key/pair you want to use to log into the instance - this key pair must already exist in the region you want to deploy to."
 }
+
 variable "branch_name" {
   description = "The name of the branch you want to use; this of course impacts the code that is used to initialize the build system."
   default     = "master"
