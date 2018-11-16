@@ -58,12 +58,12 @@ The variable *project_name* will be applied as a tag to all the resources that a
 
 Initialise Terraform once - this downloads the required provider plugins.
 
-    $ cd src/electric/sd-image/tf
+    $ cd sd-image/tf
     $ terraform init
 
 To deploy the instance:
 
-    $ cd src/electric/sd-image/tf
+    $ cd sd-image/tf
     $ terraform apply -var-file=<location of buildkit.tfvars>
 
 Eventually you'll be greeted with output similar to the following:
@@ -87,9 +87,9 @@ Using the above output as an example, heres how you use the identity file to log
 
     $ ssh ubuntu@34.249.193.177 -i ../../name-of-keyfile.pem
 
-_NOTE_: this of course assumes the file you saved from your Amazon console was called _name-of-keyfile.pem_. 
+_NOTE_: this of course assumes the file you saved from your Amazon console was called _name-of-keyfile.pem_.
 
-## Buildbox Preparation 
+## Buildbox Preparation
 
 If you are not using Terraform, this is where you start on a linux host of your choice.  
 
@@ -104,13 +104,13 @@ Preparation is intended to be a one-off step that installs a bunch of open sourc
 
 To kick off the preparation script - run the following command (_hint_: change the word _master_ in the curl command below to target a different branch):
 
-    $ curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/src/sd-image/build-bootstrap.sh > setup.sh
+    $ curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh > setup.sh
     $ chmod +x setup.sh
     $ bash -x ./setup.sh
 
 Or for the adventurous this is the same script but it's not stored on disk:
 
-    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/src/sd-image/build-bootstrap.sh)
+    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh)
 
 You'll see [quite a lot of stuff happen](https://google.com&q=understatement).  If there are problems, look at the script - its well documented  - because I will absolutely forget what it's doing in 1 month.
 
@@ -127,7 +127,7 @@ You'll need to tell the build system which branch and which build number you wan
 
 The build process will use these details in the resulting filename, as a way of ensuring that its clear where the image came from and it's place in the grand scheme of events in the timeline of development - you know, it's place in the world.
 
-Something like this would do it - create_image.sh is used to initial the SD image build process:
+Something like this would do it - create_image.sh is used to run the SD image build process:
 
     $ export BRANCH=master
     $ export TRAVIS_BUILD_NUMBER=683
