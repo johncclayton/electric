@@ -57,7 +57,7 @@ echo "Destination image: $DEST_IMAGE"
 if [ -f "$DEST_IMAGE" ]; then
 	if [ -f "$MNT/bin/dash" ]; then
 		echo "UNMOUNTING existing image..."
-		$PIIMG umount "$MNT"
+		sudo $PIIMG umount "$MNT"
 	fi
 
 	echo "Removing destination before re-creating it"
