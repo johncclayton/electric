@@ -61,27 +61,8 @@ fi
 
 echo "Beginning adjustment of the working image: $WORKING_IMAGE"
 
-export LOOPBACK=-1
-
-function find_loopback() {
-    N=-1
-    FOUND=0
-    while [ $FOUND -eq 0 ]; do
-        N=$((N + 1))
-        sudo losetup /dev/loop${N}
-        FOUND=$?
-    done
-
-    if [ $FOUND -eq 1 ]; then
-        LOOPBACK=$N
-    else
-        LOOPBACK=-1
-    fi
-}
-
-find_loopback
-
-if [ $LOOPBACK -eq -1 ]; then
+export LOOPBACK=`losetup -f | sed s,/dev/loop,,`
+if [ 0 -le ${LOOPBACK} -o ${LOOPBACK} > 99 ]; then
     echo "Unable to find a suitable/available loopback device - which is needed to manipulate the partition table of the raw Raspbian image"
     exit 6
 fi
@@ -104,7 +85,7 @@ echo "Using loopback: ${LOOPBACK}"
 echo
 
 # adds 2gig to the working image, should be enough extra space to install bins/code/etc.
-echo "Adding extra space to the working image"
+echo "Adding 2G extra space to the working image"
 truncate -s +2G $WORKING_IMAGE
 
 echo

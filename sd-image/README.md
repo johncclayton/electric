@@ -10,7 +10,7 @@ If you want to use your own Ubuntu server jump to the "Buildbox Preparation" sec
 
 Building the SD image is a non-trivial process - using Terraform allows us to lock the best configuration in place, maintain this configuration in 'code' resulting in a repeatable experience with less surprises - all _GREAT_ things when it comes to infrastructure.
 
-When it comes to creating infrastructure boring is good.
+When it comes to creating and running infrastructure boring and predictable is good.
 
 We use AWS - you will need the following:
 

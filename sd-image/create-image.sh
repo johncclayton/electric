@@ -5,22 +5,23 @@ set -x
 
 PIIMG=`which piimg`
 QEMU_ARM="/usr/bin/qemu-arm-static"
-ROOT="/buildkit"
+VERSION_NUM="$TRAVIS_BUILD_NUMBER"
 SOURCE_IMG=$ROOT/template-image.img
-MNT="$ROOT/mnt"
-OPT="$MNT/opt"
 
-mkdir -p "$MNT"
+if [ ! -f "$SOURCE_IMG" ]; then
+	echo "Source img does not exist - was looking for: $SOURCE_IMG"
+	exit 12
+fi
 
 # TRAVIS_BRANCH actually overrides the BRANCH setting.
 if [ ! -z ${TRAVIS_BRANCH} ]; then
 	BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
 fi
 
-if [ ! -d "$MNT" ]; then
-	echo "$MNT directory does not exist - we need this to run - go create it please"
-	exit 15
-fi	
+if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
+	echo "I can't detect the TRAVIS_BUILD_NUMBER - aborting..."
+	exit 13
+fi
 
 if [ ! -f "$QEMU_ARM" ]; then
 	echo "Whoa - expected to find $QEMU_ARM binary... and didn't"
@@ -32,23 +33,24 @@ if [ -z "$PIIMG" ]; then
 	exit 11
 fi
 
-if [ ! -f "$SOURCE_IMG" ]; then
-	echo "Source img does not exist - was looking for: $SOURCE_IMG"
-	exit 12
-fi
-
 if [ -z "$BRANCH" ]; then
 	echo "I can't detect the name of the branch - aborting..."
 	exit 13
 fi
 
-if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
-	echo "I can't detect the TRAVIS_BUILD_NUMBER - aborting..."
-	exit 13
-fi
+ROOT="/buildkit/${BRANCH}/${VERSION_NUMBER}"
+MNT="$ROOT/mnt"
+OPT="$MNT/opt"
+PIIMG_STATE="$ROOT/piimg.state"
 
-VERSION_NUM="$TRAVIS_BUILD_NUMBER"
-DEST_IMAGE="/tmp/electric-${BRANCH}-${VERSION_NUM}.img"
+mkdir -p "$MNT"
+
+if [ ! -d "$MNT" ]; then
+	echo "$MNT directory does not exist - we need this to run - go create it please"
+	exit 15
+fi	
+
+DEST_IMAGE="$ROOT/electric-${BRANCH}-${VERSION_NUM}.img"
 
 echo "Branch is: $BRANCH"
 echo "Latest version is: $VERSION_NUM"
@@ -69,16 +71,29 @@ if [ -f "$DEST_IMAGE" ]; then
 	fi
 fi
 
+function cleanup_piimg() {
+	if [ -f "$PIIMG_STATE" ]; then
+		DEV1=`egrep -v /dev/loop $PIIMG_STATE`
+		echo "Attempting cleanup on /dev/loop${DEV}"
+		sudo losetup -d /dev/loop${DEV}
+		NEXT_DEV=$((DEV + 1))
+		echo "Attempting cleanup on /dev/loop${NEXT_DEV}"
+		sudo losetup -d /dev/loop${NEXT_DEV}
+	fi
+}
+
 #############################
 ## THE PROCESS STARTS HERE ##
 #############################
+cleanup_piimg
 
 # copy source -> dest so we don't change the original image
 cp "$SOURCE_IMG" "$DEST_IMAGE"
 
 # store the output from PIIMG, because we can use it to scan for the loopback devices
 # that we're allocated - and thus we can free them up too (piimg doesnt do this properly?)
-sudo $PIIMG mount "$DEST_IMAGE" "$MNT" > $ROOT/piimg-mount.txt
+sudo losetup -f > $PIIMG_STATE
+sudo $PIIMG mount "$DEST_IMAGE" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 
 # TODO: and where this comes from for both production and dev builds.
@@ -99,8 +114,10 @@ sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
 
 sudo $PIIMG umount "$MNT"
 
-# TODO: clean up the /dev/loop devices - there are two of them, stored in $ROOT/piimg-mount.txt
+cleanup_piimg
 
+# TODO: clean up the /dev/loop devices - there are two of them, stored in $ROOT/piimg-mount.txt
+LO_DEVICE=`cat $ROOT/`
 echo "Your SD Image build was a complete success, huzzzah!"
 echo "Burn this image to an SD card: $DEST_IMAGE"
 

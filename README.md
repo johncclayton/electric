@@ -20,6 +20,26 @@ TODO: Need to link to the latest download + instructions for installing / contro
 # Installation
 [Instructions to help you install the software on your Raspberry Pi 3.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
 
+# Quickstart Reference
+
+Read the other docs if none of this makes sense.  
+
+## Bootstrap the build machine
+
+    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh)
+
+## Create an SD Image
+
+    $ export BRANCH=master
+    $ export TRAVIS_BUILD_NUMBER=683
+    $ cd /buildkit/electric/sd-image
+    $ git checkout -t origin/${BRANCH}
+    $ ./create-image.sh 
+
+## Bootstrap a RPI3 directly
+
+    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
+
 ## Pictures or it never happened!
 ![Demo](/docs/images/teaser.gif "Charge Demo!")
 
