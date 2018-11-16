@@ -6,12 +6,6 @@ set -x
 PIIMG=`which piimg`
 QEMU_ARM="/usr/bin/qemu-arm-static"
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
-SOURCE_IMG=$ROOT/template-image.img
-
-if [ ! -f "$SOURCE_IMG" ]; then
-	echo "Source img does not exist - was looking for: $SOURCE_IMG"
-	exit 12
-fi
 
 # TRAVIS_BRANCH actually overrides the BRANCH setting.
 if [ ! -z ${TRAVIS_BRANCH} ]; then
@@ -49,6 +43,13 @@ if [ ! -d "$MNT" ]; then
 	echo "$MNT directory does not exist - we need this to run - go create it please"
 	exit 15
 fi	
+
+SOURCE_IMG=$ROOT/template-image.img
+
+if [ ! -f "$SOURCE_IMG" ]; then
+	echo "Source img does not exist - was looking for: $SOURCE_IMG"
+	exit 12
+fi
 
 DEST_IMAGE="$ROOT/electric-${BRANCH}-${VERSION_NUM}.img"
 
