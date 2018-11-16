@@ -74,7 +74,7 @@ fi
 
 function cleanup_piimg() {
 	if [ -f "$PIIMG_STATE" ]; then
-		DEV1=`sed s,/dev/loop,,/ $PIIMG_STATE`
+		DEV=`sed s,/dev/loop,, $PIIMG_STATE`
 		echo "Attempting cleanup on /dev/loop${DEV}"
 		sudo losetup -d /dev/loop${DEV}
 		NEXT_DEV=$((DEV + 1))
@@ -108,7 +108,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 #       on startup as well.
 # sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
-sudo chroot "$MNT" < ./chroot-runtime.sh
+sudo chroot "$MNT" bash -c "BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM}" < ./chroot-runtime.sh
 RES=$?
 
 sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
