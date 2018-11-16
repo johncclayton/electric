@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 add_wlan1_if_not_there() {
-    # Add the wlan1 interface if it's not there
     HAVE_WLAN1=$(iw dev | grep 'wlan1')
     if [ "${HAVE_WLAN1}x" = "x" ]; then
         echo "Adding in wlan1 AP interface..."
