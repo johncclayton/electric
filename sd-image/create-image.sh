@@ -44,7 +44,7 @@ if [ ! -d "$MNT" ]; then
 	exit 15
 fi	
 
-SOURCE_IMG=$ROOT/template-image.img
+SOURCE_IMG=/buildkit/template-image.img
 
 if [ ! -f "$SOURCE_IMG" ]; then
 	echo "Source img does not exist - was looking for: $SOURCE_IMG"
