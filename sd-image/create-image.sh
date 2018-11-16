@@ -117,8 +117,6 @@ sudo $PIIMG umount "$MNT"
 
 cleanup_piimg
 
-# TODO: clean up the /dev/loop devices - there are two of them, stored in $ROOT/piimg-mount.txt
-LO_DEVICE=`cat $ROOT/`
 echo "Your SD Image build was a complete success, huzzzah!"
 echo "Burn this image to an SD card: $DEST_IMAGE"
 
