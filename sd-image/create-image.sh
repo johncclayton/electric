@@ -91,7 +91,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 # TODO: make sure this goes into the development area, and that the GPIO user/group is correctly done
 #       on startup as well.
 # sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
-sudo ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
+sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
