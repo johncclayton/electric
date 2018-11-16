@@ -32,7 +32,7 @@ if [ -z "$BRANCH" ]; then
 	exit 13
 fi
 
-ROOT="/buildkit/${BRANCH}/${VERSION_NUMBER}"
+ROOT="/buildkit/${BRANCH}/${VERSION_NUM}"
 MNT="$ROOT/mnt"
 OPT="$MNT/opt"
 PIIMG_STATE="$ROOT/piimg.state"

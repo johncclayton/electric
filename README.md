@@ -20,6 +20,10 @@ TODO: Need to link to the latest download + instructions for installing / contro
 # Installation
 [Instructions to help you install the software on your Raspberry Pi 3.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
 
+## Pictures or it never happened!
+
+![Demo](/docs/images/teaser.gif "Charge Demo!")
+
 # Quickstart Reference
 
 Makes it easier to find the bootstrapping code, these are all in the appropriate README.md files in other
@@ -41,10 +45,3 @@ subdrectories of the repo.
 ## Bootstrap a RPI3 directly
 
     bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
-
-## Pictures or it never happened!
-
-![Demo](/docs/images/teaser.gif "Charge Demo!")
-
-
-
