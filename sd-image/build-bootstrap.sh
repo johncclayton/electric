@@ -86,8 +86,8 @@ echo "Using loopback: ${LOOPBACK}"
 echo
 
 # adds 2gig to the working image, should be enough extra space to install bins/code/etc.
-echo "Adding 2G extra space to the working image"
-truncate -s +2G $WORKING_IMAGE
+echo "Adding 1.5 Gb extra space to the working image..."
+truncate -s +1500MB $WORKING_IMAGE
 
 echo
 echo "Expanding the 2nd partition"
