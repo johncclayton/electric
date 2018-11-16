@@ -117,6 +117,8 @@ sudo $PIIMG umount "$MNT"
 
 cleanup_piimg
 
+sudo rm -rf "$MNT"
+
 echo "Your SD Image build was a complete success, huzzzah!"
 echo "Burn this image to an SD card: $DEST_IMAGE"
 
