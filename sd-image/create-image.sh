@@ -10,8 +10,12 @@ SOURCE_IMG=$ROOT/template-image.img
 MNT="$ROOT/mnt"
 OPT="$MNT/opt"
 
+mkdir -p "$MNT"
+
 # TRAVIS_BRANCH actually overrides the BRANCH setting.
-BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
+if [ ! -z ${TRAVIS_BRANCH} ]; then
+	BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
+fi
 
 if [ ! -d "$MNT" ]; then
 	echo "$MNT directory does not exist - we need this to run - go create it please"
