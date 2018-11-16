@@ -73,7 +73,7 @@ resource "aws_instance" "buildkit" {
 
   vpc_security_group_ids = ["${aws_security_group.instance-sg.id}"]
   subnet_id              = "${aws_subnet.public-subnet.id}"
-  key_name               = "buildkit-eu-west-1"
+  key_name               = "${var.aws_key_name}"
 
   associate_public_ip_address = true
 

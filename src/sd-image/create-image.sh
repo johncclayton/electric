@@ -10,12 +10,8 @@ SOURCE_IMG=$ROOT/template-image.img
 MNT="$ROOT/mnt"
 OPT="$MNT/opt"
 
+# TRAVIS_BRANCH actually overrides the BRANCH setting.
 BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
-
-# TEMPORARY - overrides while I test this on a machine.
-BRANCH=unified-server
-TRAVIS_BUILD_NUMBER=11
-# END OF TEMPORARY
 
 if [ ! -d "$MNT" ]; then
 	echo "$MNT directory does not exist - we need this to run - go create it please"
@@ -42,6 +38,11 @@ if [ -z "$BRANCH" ]; then
 	exit 13
 fi
 
+if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
+	echo "I can't detect the TRAVIS_BUILD_NUMBER - aborting..."
+	exit 13
+fi
+
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
 DEST_IMAGE="/tmp/electric-${BRANCH}-${VERSION_NUM}.img"
 
@@ -64,13 +65,6 @@ if [ -f "$DEST_IMAGE" ]; then
 	fi
 fi
 
-copy_to_external()
-{
-        N="${DESTINATION_NAME}_${BRANCH}"
-        cp "$TO" "$DESTINATION_AFTER_BUILD/${N}_${VERSION_NUM}.img"
-        cd "$DESTINATION_AFTER_BUILD" && ls -1 -tp ${N}* | grep -v '/$' | tail -n +2 | xargs -I {} rm {}
-}
-
 #############################
 ## THE PROCESS STARTS HERE ##
 #############################
@@ -83,12 +77,15 @@ cp "$SOURCE_IMG" "$DEST_IMAGE"
 sudo $PIIMG mount "$TO" "$MNT" > $ROOT/piimg-mount.txt
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 
+# TODO: and where this comes from for both production and dev builds.
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY
 sudo mv ./LAST_DEPLOY "$OPT"
 
-# TODO: make sure this goes into the development area.
+# TODO: publish the build to Google Drive or somewhere.
+# TODO: make sure this goes into the development area, and that the GPIO user/group is correctly done
+#       on startup as well.
 # sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
 sudo ../../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 sudo chroot "$MNT" < ./chroot-runtime.sh
@@ -98,10 +95,9 @@ sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
 
 sudo $PIIMG umount "$MNT"
 
-if [ -d "$DESTINATION_AFTER_BUILD" -a "$RES" -eq 0 ]; then
-	copy_to_external
-else
-	echo "$TO not moved, there was a problem"
-fi
+# TODO: clean up the /dev/loop devices - there are two of them, stored in $ROOT/piimg-mount.txt
+
+echo "Your SD Image build was a complete success, huzzzah!"
+echo "Burn this image to an SD card: $DEST_IMAGE"
 
 exit 0

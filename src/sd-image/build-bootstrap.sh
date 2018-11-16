@@ -152,4 +152,5 @@ sudo resize2fs /dev/loop${LOOPBACK}
 # and dismount, our job is done!
 sudo losetup -d /dev/loop${LOOPBACK}
 
-echo "All done - the image called ${WORKING_IMAGE} is ready to accept the build process"
+echo 
+echo "DONE - the image called ${WORKING_IMAGE} is ready to be used as input to the build process"

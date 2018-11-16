@@ -29,7 +29,7 @@ pyzmq==17.1.2
 readme-renderer==24.0
 requests==2.20.1
 requests-toolbelt==0.8.0
-#schematics==2.1.0
+# TODO: why does schematics==2.1.0 fail? worth upgrading?
 schematics==1.1.1
 six==1.11.0
 tqdm==4.28.1
