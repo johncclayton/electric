@@ -75,6 +75,7 @@ if [ ! -d "$ELEC_INSTALL" ]; then
     pushd .
     cd $HOME
     git clone https://github.com/johncclayton/electric.git 
+    cd electric
     git checkout -t origin/${BRANCH}
     popd
 fi
