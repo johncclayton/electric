@@ -45,7 +45,7 @@ echo "Unzipping Raspbian release..."
 unzip -o $ZIP_FILENAME 
 IMG_FILENAME=`ls -1 *raspbian*.img`
 
-echo "Copying latest image to a working image so we can resize the partitions..."
+echo "Copying latest image to a working image..."
 export WORKING_IMAGE=$SETUP_ROOT/template-image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 
@@ -59,7 +59,7 @@ else
     popd
 fi
 
-echo "Beginning adjustment of the working image: $WORKING_IMAGE"
+echo "Beginning partition adjustment of the working image: $WORKING_IMAGE"
 
 export LOOPBACK=`losetup -f | sed s,/dev/loop,,`
 echo "Discovered loopback is: ${LOOPBACK} (this should be an integer)"
