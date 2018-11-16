@@ -78,7 +78,7 @@ cp "$SOURCE_IMG" "$DEST_IMAGE"
 
 # store the output from PIIMG, because we can use it to scan for the loopback devices
 # that we're allocated - and thus we can free them up too (piimg doesnt do this properly?)
-sudo $PIIMG mount "$TO" "$MNT" > $ROOT/piimg-mount.txt
+sudo $PIIMG mount "$DEST_IMAGE" "$MNT" > $ROOT/piimg-mount.txt
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 
 # TODO: and where this comes from for both production and dev builds.
@@ -91,7 +91,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 # TODO: make sure this goes into the development area, and that the GPIO user/group is correctly done
 #       on startup as well.
 # sudo cp scripts/gpiomem.service "$MNT/etc/systemd/system/"
-sudo ../../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
+sudo ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 sudo chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
 
