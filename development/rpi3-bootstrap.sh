@@ -122,7 +122,7 @@ sudo mkdir -p /usr/lib/systemd/system
 
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
-echo <<-EOF > /usr/lib/systemd/system/electric-web.service
+sudo echo <<-EOF > /usr/lib/systemd/system/electric-web.service
     [Unit]
     Description=Electric Web Service
     After=multi-user.target
@@ -141,7 +141,7 @@ echo <<-EOF > /usr/lib/systemd/system/electric-web.service
     WantedBy=multi-user.target
 EOF
 
-echo <<-EOF > /usr/lib/systemd/system/electric-worker.service
+sudo echo <<-EOF > /usr/lib/systemd/system/electric-worker.service
     [Unit]
     Description=Electric Worker Service
     After=multi-user.target
@@ -159,7 +159,7 @@ echo <<-EOF > /usr/lib/systemd/system/electric-worker.service
     WantedBy=multi-user.target
 EOF
 
-echo <<-EOF > /usr/lib/systemd/system/electric-status.service
+sudo echo <<-EOF > /usr/lib/systemd/system/electric-status.service
     [Unit]
     Description=Electric Status Service
     After=multi-user.target
