@@ -40,11 +40,11 @@ fi
 
 sudo chmod 777 /opt
 
-cat <<-EOF > /opt/gpio.sh
-    sudo groupadd gpio
-    sudo adduser $MY_USER gpio
-    sudo chown root.gpio /dev/gpiomem
-    sudo chmod g+rw /dev/gpiomem
+cat <<EOF > /opt/gpio.sh
+sudo groupadd gpio
+sudo adduser $MY_USER gpio
+sudo chown root.gpio /dev/gpiomem
+sudo chmod g+rw /dev/gpiomem
 EOF
 
 sudo chmod +x /opt/gpio.sh

@@ -21,6 +21,7 @@ pathtools==0.1.2
 pbr==5.1.1
 pkginfo==1.4.2
 Pygments==2.2.0
+RPi.GPIO==0.6.3
 pyserial==3.4
 python-dateutil==2.7.5
 pytz==2018.7
