@@ -129,11 +129,11 @@ The build process will use these details in the resulting filename, as a way of 
 
 Something like this would do it - create_image.sh is used to run the SD image build process:
 
-    $ export BRANCH=master
-    $ export TRAVIS_BUILD_NUMBER=683
-    $ cd /buildkit/electric/sd-image
-    $ git checkout -t origin/${BRANCH}
-    $ ./create-image.sh 
+    export BRANCH=master
+    export TRAVIS_BUILD_NUMBER=683
+    cd /buildkit/electric/sd-image
+    git checkout -t origin/${BRANCH}
+    ./create-image.sh
 
 I.T. gods willing, you'll be presented with something along the following lines
 
