@@ -1,9 +1,0 @@
-[Unit]
-Description={{service_name}}
-
-[Service]
-Environment=PYTHONPATH=/home/{{user}}/electric/src/server/
-ExecStart=/home/{{user}}/.virtualenvs/electric/bin/python /home/{{user}}/electric/src/server/electric/main.py
-
-[Install]
-WantedBy=multi-user.target

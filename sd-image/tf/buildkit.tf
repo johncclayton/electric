@@ -67,6 +67,22 @@ resource "aws_security_group" "instance-sg" {
   }
 }
 
+# resource "aws_s3_bucket" "sd-image" {
+#   bucket = "sd-image-${var.project_name}"
+#    versioning {
+#     enabled = true
+#   }
+
+#   # lifecycle_rule {
+#   #   prefix = "/"
+#   #   enabled = true
+#   #   noncurrent_version_transition {
+#   #     days          = 30
+#   #     storage_class = "STANDARD_IA"
+#   #   }
+#   # }
+# }
+
 resource "aws_instance" "sdimage" {
   ami           = "${var.aws_ami}"
   instance_type = "${var.aws_instance_type}"

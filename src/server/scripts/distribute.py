@@ -22,27 +22,6 @@ config = {
     'files': {
         'setup.py': {
             "template": "setup.txt"
-        },
-        'electric-web.service': {
-            "template": "electric-web.service.txt",
-            "meta": {
-                "user": "pi",
-                "service_name": "Electric Web Service"
-            }
-        },
-        'electric-worker.service': {
-            "template": "electric-worker.service.txt",
-            "meta": {
-                "user": "pi",
-                "service_name": "Electric Worker Service"
-            }
-        },
-        'electric-status.service': {
-            "template": "electric-status.service.txt",
-            "meta": {
-                "user": "pi",
-                "service_name": "Electric Status Service"
-            }
         }
     }
 }
