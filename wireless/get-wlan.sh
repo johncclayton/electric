@@ -43,6 +43,7 @@ curl --remote-name --location https://raw.githubusercontent.com/johncclayton/ele
 tar xzf wireless.tar.gz
 
 find ${TEMP}/scripts -type f | xargs chmod +x
+find ${TEMP}/scripts -type f | xargs awk 'BEGIN{RS="^$";ORS="";getline;gsub("\r","");print>ARGV[1]}' 
 
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh
 . ${INSTALL_ROOT}/wireless/config/wlan.conf
