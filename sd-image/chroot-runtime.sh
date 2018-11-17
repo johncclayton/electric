@@ -8,7 +8,7 @@ set -u
 /opt/rpi3-bootstrap.sh
 
 # compile the enumeration_interfaces.c code for raspberry pi
-pushd . && cd /home/${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
+pushd . && cd ${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
 
 if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
     echo "Failure to produce enumerate_interfaces in /usr/local/bin - aborting..."
