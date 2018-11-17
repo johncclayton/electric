@@ -38,6 +38,8 @@ if [ -f /opt/gpio.sh ]; then
     sudo rm -f /opt/gpio.sh
 fi
 
+sudo chmod 777 /opt
+
 echo <<-EOF > /opt/gpio.sh
     sudo groupadd gpio
     sudo adduser $MY_USER gpio
@@ -182,7 +184,7 @@ WantedBy=multi-user.target
 EOF
 
 # compile the enumeration_interfaces.
-pushd . && cd ${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
+pushd . && cd ${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && sudo cp enumerate_interfaces /usr/local/bin/ && popd
 if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
     echo "Failure to produce enumerate_interfaces in /usr/local/bin - aborting..."
     exit 4
