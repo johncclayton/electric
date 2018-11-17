@@ -118,18 +118,16 @@ pip install -r "$REQUIREMENTS_FILE"
 
 # TODO: ensure that the web runs via gunicorn
 
-sudo mkdir -p /usr/lib/systemd/system
-
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
-sudo echo <<-EOF > /usr/lib/systemd/system/electric-web.service
+sudo echo <<-EOF > $T/electric-web.service
     [Unit]
     Description=Electric Web Service
     After=multi-user.target
     Requires=multi-user.target
 
     [Service]
-    Environment=PYTHONPATH=/home/{{user}}/electric/src/server/
+    Environment=PYTHONPATH=${HOME}/electric/src/server/
     ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/main.py
 
     Type=simple
@@ -141,7 +139,7 @@ sudo echo <<-EOF > /usr/lib/systemd/system/electric-web.service
     WantedBy=multi-user.target
 EOF
 
-sudo echo <<-EOF > /usr/lib/systemd/system/electric-worker.service
+sudo echo <<-EOF > $T/electric-worker.service
     [Unit]
     Description=Electric Worker Service
     After=multi-user.target
@@ -159,7 +157,7 @@ sudo echo <<-EOF > /usr/lib/systemd/system/electric-worker.service
     WantedBy=multi-user.target
 EOF
 
-sudo echo <<-EOF > /usr/lib/systemd/system/electric-status.service
+sudo echo <<-EOF > $T/electric-status.service
     [Unit]
     Description=Electric Status Service
     After=multi-user.target
@@ -185,6 +183,14 @@ if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
 fi
 
 # TODO: check that each of these service files are properly named / in-place.
+SYSTEMCTL_FILES=/usr/lib/systemd/system
+sudo mkdir -p $SYSTEMCTL_FILES
+sudo mv $T/electric-status.service $SYSTEMCTL_FILES/
+sudo mv $T/electric-web.service $SYSTEMCTL_FILES/
+sudo mv $T/electric-worker.service $SYSTEMCTL_FILES/
+
+sudo systemctl daemon-reload
+
 sudo systemctl enable electric-status.service
 sudo systemctl enable electric-worker.service
 sudo systemctl enable electric-web.service
