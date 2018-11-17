@@ -42,10 +42,6 @@ EOF
 
 sudo chmod +x /opt/gpio.sh
 
-# TODO: this is where I will throw the systemctl services onto the device.
-# TODO: make sure this goes into the development area, and that the GPIO user/group is correctly done
-#       on startup as well.
-
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ~/.bashrc
 R=$?
@@ -62,8 +58,6 @@ REQUIREMENTS_FILE="$REQUIREMENTS_DIR/requirements-all.txt"
 echo
 echo "electric will be installed to : $ELEC_INSTALL"
 echo
-
-# setup / check the virtualenv wrapper environment in the users home directory
 
 cd $HOME
 
@@ -87,11 +81,6 @@ if [ ! -d "$ELEC_INSTALL" ]; then
     popd
 fi
 
-#
-# decided to take this out as I'd rather run the remote sync/debugging from a desktop
-#echo 'cd ~/electric/src/server' >> ~/.virtualenvs/electric/bin/postactivate
-#
-
 echo
 echo "Checking for requirements files are present..."
 
@@ -112,7 +101,10 @@ workon electric
 
 echo 
 echo "Setting up /opt/prefs directory (stores GPIO state)"
-sudo mkdir -p /opt/prefs
+if [ ! -d /opt/prefs ]; then
+    sudo mkdir -p /opt/prefs
+fi
+
 sudo chown root:root /opt/prefs
 sudo chmod 777 /opt/prefs
 
@@ -125,6 +117,8 @@ echo "Installing the other Python packages..."
 pip install -r "$REQUIREMENTS_FILE"
 
 # TODO: ensure that the web runs via gunicorn
+
+sudo mkdir -p /usr/lib/systemd/system
 
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
@@ -200,8 +194,3 @@ echo "Pulling down the network configuration scripts and running them..."
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/get-wlan.sh
 chmod +x get-wlan.sh
 ./get-wlan.sh
-
-echo "******************************************************************************************"
-echo "DONE!  The Pi has now been configured as an Access Point - look for a WiFi called Electric"
-echo "******************************************************************************************"
-
