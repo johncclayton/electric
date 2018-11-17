@@ -34,10 +34,10 @@ sudo udevadm control --reload
 
 MY_USER=`whoami`
 echo <<-EOF > /opt/gpio.sh
-sudo groupadd gpio
-sudo adduser $MY_USER gpio
-sudo chown root.gpio /dev/gpiomem
-sudo chmod g+rw /dev/gpiomem
+    sudo groupadd gpio
+    sudo adduser $MY_USER gpio
+    sudo chown root.gpio /dev/gpiomem
+    sudo chmod g+rw /dev/gpiomem
 EOF
 
 sudo chmod +x /opt/gpio.sh
@@ -123,6 +123,77 @@ pip install hidapi
 echo
 echo "Installing the other Python packages..."
 pip install -r "$REQUIREMENTS_FILE"
+
+# TODO: ensure that the web runs via gunicorn
+
+echo
+echo "Installing systemd services in /usr/lib/systemd/"
+echo <<-EOF > /usr/lib/systemd/system/electric-web.service
+    [Unit]
+    Description=Electric Web Service
+    After=multi-user.target
+    Requires=multi-user.target
+
+    [Service]
+    Environment=PYTHONPATH=/home/{{user}}/electric/src/server/
+    ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/main.py
+
+    Type=simple
+    User=pi
+    Restart=on-failure
+    RestartSec=8
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+
+echo <<-EOF > /usr/lib/systemd/system/electric-worker.service
+    [Unit]
+    Description=Electric Worker Service
+    After=multi-user.target
+    Requires=multi-user.target
+
+    [Service]
+    Environment=PYTHONPATH=${HOME}/electric/src/electric/
+    ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/worker/main.py
+    Type=simple
+    User=pi
+    Restart=on-failure
+    RestartSec=8
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+
+echo <<-EOF > /usr/lib/systemd/system/electric-status.service
+    [Unit]
+    Description=Electric Status Service
+    After=multi-user.target
+    Requires=multi-user.target
+
+    [Service]
+    Environment=PYTHONPATH=${HOME}/electric/src/service/
+    ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/status/main.py
+    Type=simple
+    User=pi
+    Restart=on-failure
+    RestartSec=8
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+
+# compile the enumeration_interfaces.
+pushd . && cd ${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
+if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
+    echo "Failure to produce enumerate_interfaces in /usr/local/bin - aborting..."
+    exit 4
+fi
+
+# TODO: check that each of these service files are properly named / in-place.
+systemctl enable electric-status.service
+systemctl enable electric-worker.service
+systemctl enable electric-web.service
 
 echo
 echo "Pulling down the network configuration scripts and running them..."
