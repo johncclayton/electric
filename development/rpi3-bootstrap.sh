@@ -120,59 +120,59 @@ pip install -r "$REQUIREMENTS_FILE"
 
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
-echo <<-EOF > $T/electric-web.service
-    [Unit]
-    Description=Electric Web Service
-    After=multi-user.target
-    Requires=multi-user.target
+echo <<EOF > $T/electric-web.service
+[Unit]
+Description=Electric Web Service
+After=multi-user.target
+Requires=multi-user.target
 
-    [Service]
-    Environment=PYTHONPATH=${HOME}/electric/src/server/
-    ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/main.py
+[Service]
+Environment=PYTHONPATH=${HOME}/electric/src/server/
+ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/main.py
 
-    Type=simple
-    User=pi
-    Restart=on-failure
-    RestartSec=8
+Type=simple
+User=pi
+Restart=on-failure
+RestartSec=8
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
 
-echo <<-EOF > $T/electric-worker.service
-    [Unit]
-    Description=Electric Worker Service
-    After=multi-user.target
-    Requires=multi-user.target
+echo <<EOF > $T/electric-worker.service
+[Unit]
+Description=Electric Worker Service
+After=multi-user.target
+Requires=multi-user.target
 
-    [Service]
-    Environment=PYTHONPATH=${HOME}/electric/src/electric/
-    ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/worker/main.py
-    Type=simple
-    User=pi
-    Restart=on-failure
-    RestartSec=8
+[Service]
+Environment=PYTHONPATH=${HOME}/electric/src/electric/
+ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/worker/main.py
+Type=simple
+User=pi
+Restart=on-failure
+RestartSec=8
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
 
-echo <<-EOF > $T/electric-status.service
-    [Unit]
-    Description=Electric Status Service
-    After=multi-user.target
-    Requires=multi-user.target
+echo <<EOF > $T/electric-status.service
+[Unit]
+Description=Electric Status Service
+After=multi-user.target
+Requires=multi-user.target
 
-    [Service]
-    Environment=PYTHONPATH=${HOME}/electric/src/service/
-    ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/status/main.py
-    Type=simple
-    User=pi
-    Restart=on-failure
-    RestartSec=8
+[Service]
+Environment=PYTHONPATH=${HOME}/electric/src/service/
+ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/status/main.py
+Type=simple
+User=pi
+Restart=on-failure
+RestartSec=8
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
 
 # compile the enumeration_interfaces.
