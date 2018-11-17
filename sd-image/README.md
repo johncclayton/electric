@@ -104,13 +104,15 @@ Preparation is intended to be a one-off step that installs a bunch of open sourc
 
 To kick off the preparation script - run the following command (_hint_: change the word _master_ in the curl command below to target a different branch):
 
-    $ curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh > setup.sh
+    $ export BRANCH=unified-server
+    $ curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh > setup.sh
     $ chmod +x setup.sh
     $ bash -x ./setup.sh
 
 Or for the adventurous this is the same script but it's not stored on disk:
 
-    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh)
+    $ export BRANCH=unified-server
+    $ bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh)
 
 You'll see [quite a lot of stuff happen](https://google.com&q=understatement).  If there are problems, look at the script - its well documented  - because I will absolutely forget what it's doing in 1 month.
 
@@ -129,10 +131,11 @@ The build process will use these details in the resulting filename, as a way of 
 
 Something like this would do it - create_image.sh is used to run the SD image build process:
 
-    export BRANCH=master
+    export BRANCH=unified-server
     export TRAVIS_BUILD_NUMBER=683
-    cd /buildkit/electric/sd-image
+    cd /buildkit/electric
     git checkout -t origin/${BRANCH}
+    cd /buildkit/electric/sd-image
     ./create-image.sh
 
 I.T. gods willing, you'll be presented with something along the following lines

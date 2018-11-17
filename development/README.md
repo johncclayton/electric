@@ -1,5 +1,6 @@
 # Development
-* Useful if you want *really* fast debugging because you can setup remote debugging directly to a connected RPI3/charger combo. That means you can code + set breakpoints. Whew! 
+
+* Useful if you want *really* fast debugging - which is possible by setting up remote debugging directly to a connected RPI3/charger combo. That means you can code + set breakpoints. Whew! 
 * Unit tests can only be run on a Raspberry PI 3 with a charger connected to it.
 * You get to code on a real computer, sync that to the RPI3 and still stay sane.
 
@@ -13,7 +14,7 @@ First, you need to install the code and Python packages into their own virtualen
   1. log into the pi (user: pi, password: raspberry)
   1. then get the ball rolling by bootstrapping the whole thing... run the command below
   
-    $ bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
+    $ bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/development/rpi3-bootstrap.sh)
 
 
 ## Install the PyPi Packages

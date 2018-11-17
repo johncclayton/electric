@@ -31,7 +31,8 @@ subdrectories of the repo.
 
 ## Bootstrap the build machine
 
-    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/sd-image/build-bootstrap.sh)
+    export BRANCH=unified-server
+    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh)
 
 ## Create an SD Image
 
@@ -44,4 +45,5 @@ subdrectories of the repo.
 
 ## Bootstrap a RPI3 directly
 
-    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/master/development/rpi3-bootstrap.sh)
+    export BRANCH=unified-server
+    bash <(curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/development/rpi3-bootstrap.sh)

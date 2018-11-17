@@ -6,7 +6,7 @@ Requires=multi-user.target
 [Service]
 Type=simple
 ExecStart=electric-status
-User=pirate
+User=pi
 Restart=on-failure
 RestartSec=8
 

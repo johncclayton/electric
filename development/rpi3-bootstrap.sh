@@ -42,6 +42,10 @@ EOF
 
 sudo chmod +x /opt/gpio.sh
 
+# TODO: this is where I will throw the systemctl services onto the device.
+# TODO: make sure this goes into the development area, and that the GPIO user/group is correctly done
+#       on startup as well.
+
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ~/.bashrc
 R=$?
