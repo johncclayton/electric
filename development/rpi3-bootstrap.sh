@@ -120,7 +120,7 @@ pip install -r "$REQUIREMENTS_FILE"
 
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
-sudo echo <<-EOF > $T/electric-web.service
+echo <<-EOF > $T/electric-web.service
     [Unit]
     Description=Electric Web Service
     After=multi-user.target
@@ -139,7 +139,7 @@ sudo echo <<-EOF > $T/electric-web.service
     WantedBy=multi-user.target
 EOF
 
-sudo echo <<-EOF > $T/electric-worker.service
+echo <<-EOF > $T/electric-worker.service
     [Unit]
     Description=Electric Worker Service
     After=multi-user.target
@@ -157,7 +157,7 @@ sudo echo <<-EOF > $T/electric-worker.service
     WantedBy=multi-user.target
 EOF
 
-sudo echo <<-EOF > $T/electric-status.service
+echo <<-EOF > $T/electric-status.service
     [Unit]
     Description=Electric Status Service
     After=multi-user.target
