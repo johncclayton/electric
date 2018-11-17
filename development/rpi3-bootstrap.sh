@@ -40,7 +40,7 @@ fi
 
 sudo chmod 777 /opt
 
-echo <<-EOF > /opt/gpio.sh
+cat <<-EOF > /opt/gpio.sh
     sudo groupadd gpio
     sudo adduser $MY_USER gpio
     sudo chown root.gpio /dev/gpiomem
@@ -128,7 +128,7 @@ pip install -r "$REQUIREMENTS_FILE"
 
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
-echo <<EOF > $T/electric-web.service
+cat <<EOF > $T/electric-web.service
 [Unit]
 Description=Electric Web Service
 After=multi-user.target
@@ -147,7 +147,7 @@ RestartSec=8
 WantedBy=multi-user.target
 EOF
 
-echo <<EOF > $T/electric-worker.service
+cat <<EOF > $T/electric-worker.service
 [Unit]
 Description=Electric Worker Service
 After=multi-user.target
@@ -165,7 +165,7 @@ RestartSec=8
 WantedBy=multi-user.target
 EOF
 
-echo <<EOF > $T/electric-status.service
+cat <<EOF > $T/electric-status.service
 [Unit]
 Description=Electric Status Service
 After=multi-user.target
