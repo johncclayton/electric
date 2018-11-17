@@ -185,9 +185,9 @@ if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
 fi
 
 # TODO: check that each of these service files are properly named / in-place.
-systemctl enable electric-status.service
-systemctl enable electric-worker.service
-systemctl enable electric-web.service
+sudo systemctl enable electric-status.service
+sudo systemctl enable electric-worker.service
+sudo systemctl enable electric-web.service
 
 echo
 echo "Pulling down the network configuration scripts and running them..."
