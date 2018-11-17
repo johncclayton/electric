@@ -33,6 +33,11 @@ sudo chown root:root /etc/udev/rules.d/10-icharger.rules
 sudo udevadm control --reload
 
 MY_USER=`whoami`
+
+if [ -f /opt/gpio.sh ]; then
+    sudo rm -f /opt/gpio.sh
+fi
+
 echo <<-EOF > /opt/gpio.sh
     sudo groupadd gpio
     sudo adduser $MY_USER gpio
@@ -41,6 +46,7 @@ echo <<-EOF > /opt/gpio.sh
 EOF
 
 sudo chmod +x /opt/gpio.sh
+sudo chown ${USER}:${USER} /opt/gpio.sh
 
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ~/.bashrc

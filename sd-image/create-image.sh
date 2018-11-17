@@ -106,10 +106,8 @@ sudo mv ./LAST_DEPLOY "$OPT"
 # TODO: publish the build to Google Drive or somewhere.
 
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
-sudo HOME=/home/pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot "$MNT" < ./chroot-runtime.sh
+sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot "$MNT" < ./chroot-runtime.sh
 RES=$?
-
-sudo find "$OPT" -name "*.sh" -type f | sudo xargs chmod +x
 
 sudo $PIIMG umount "$MNT"
 
