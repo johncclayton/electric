@@ -14,6 +14,6 @@ ssh -o StrictHostKeyChecking=no \
     -o SendEnv=TRAVIS_BRANCH \
     -i ./travis_rsa.pem \
     -p 4545 \
-    builder@d1813.dyndns.org \
+    john@d1813.dyndns.org \
     "cd /buildkit/electric && git reset --hard HEAD && git checkout -f $TRAVIS_BRANCH && BRANCH=$TRAVIS_BRANCH ./create-image.sh"
 
