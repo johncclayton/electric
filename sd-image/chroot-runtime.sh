@@ -8,6 +8,6 @@ set -u
 /opt/rpi3-bootstrap.sh
 
 # ensure SSH is enabled
-touch /boot/ssh
+sudo touch /boot/ssh
 
 exit 0
