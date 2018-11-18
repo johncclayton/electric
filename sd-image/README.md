@@ -156,6 +156,17 @@ For example, your publish.sh might be something like this:
     #!/bin/bash
     scp "$1" my_username@my_hostname_somewhere:
 
+Note: you might also want to have the publish script only keep the last X copies of the executable.  
+
+## Other Considerations
+
+Our build box receives SSH connections from Travis in order to kick off the build.  This requires two environment variables to be sent along with the SSH connection, and by default sshd isn't configured to allow
+more than LANG and LC_*
+
+To make it possible to send TRAVIS_BUILD_NUMBER and TRAVIS_BRANCH, the following line needs to be placed into the /etc/ssh/sshd_config file.
+
+    $ AcceptEnv LANG LC_* TRAVIS_BUILD_NUMBER TRAVIS_BRANCH
+
 ## What happened?
 
 The SD image that the buildbox produces is suitable for use by end users.  
