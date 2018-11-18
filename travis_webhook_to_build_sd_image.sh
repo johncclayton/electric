@@ -1,7 +1,7 @@
 echo "The build number is: $TRAVIS_BUILD_NUMBER"
 echo "The branch is: $TRAVIS_BRANCH" 
 
-if [ "unified-server" = "$TRAVIS_BRANCH" ]; then
+if [ "unified-server" != "$TRAVIS_BRANCH" ]; then
 	echo "Not building for other branches at this point"
 	exit 5
 fi
