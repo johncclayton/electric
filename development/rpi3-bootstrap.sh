@@ -51,10 +51,10 @@ sudo chmod +x /opt/gpio.sh
 sudo chown ${USER}:${USER} /opt/gpio.sh
 
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
-grep 'source /usr/local/bin/virtualenvwrapper.sh' ~/.bashrc
+grep 'source /usr/local/bin/virtualenvwrapper.sh' ${HOME}/.bashrc
 R=$?
 if [ $R -ne 0 ]; then 
-    echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
+    echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ${HOME}/.bashrc
 fi
 
 source /usr/local/bin/virtualenvwrapper.sh
@@ -113,6 +113,7 @@ if [ ! -d /opt/prefs ]; then
     sudo mkdir -p /opt/prefs
 fi
 
+# TODO: suspect, should this be root:root or pi:users?  look at what reads/writes and the appropriate perms required.  root is bad!
 sudo chown root:root /opt/prefs
 sudo chmod 777 /opt/prefs
 

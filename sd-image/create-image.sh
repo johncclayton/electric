@@ -98,6 +98,7 @@ sudo $PIIMG mount "$DEST_IMAGE" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 
 # TODO: and where this comes from for both production and dev builds.
+
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY
@@ -106,7 +107,9 @@ sudo mv ./LAST_DEPLOY "$OPT"
 # TODO: publish the build to Google Drive or somewhere.
 
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
-sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot "$MNT" < ./chroot-runtime.sh
+
+# TODO: the --userspec arg should be used to impose pi:users as the user:group spec
+sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} --userspec=pi:users "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT"
