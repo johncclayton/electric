@@ -135,13 +135,21 @@ Something like this would do it - create_image.sh is used to run the SD image bu
     export TRAVIS_BUILD_NUMBER=683
     cd /buildkit/electric
     git checkout -t origin/${BRANCH}
-    cd /buildkit/electric/sd-image
-    ./create-image.sh
+    cd sd-image && ./create-image.sh
 
 I.T. gods willing, you'll be presented with something along the following lines
 
     Your SD Image build was a complete success, huzzzah!
     Burn this image to an SD card: /tmp/electric-master-683.img
+
+## Publishing the SD Image 
+
+The build system can publish each completed SD image automatically.  
+
+To enable automatic publishing of your SD images: 
+1. Copy the public part of the buildbox identity file (the ~/.ssh/id_rsa.pub file content) to the .ssh/authorized_keys in the destination host.
+1. Create a _/buildkit/publish.sh_ executable script file - this will be provided with one argument, the full path of the SD image file 
+1. Ensure that _publish.sh_ copies the SD image file to the desired host!  Done!
 
 ## What happened?
 

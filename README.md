@@ -40,8 +40,7 @@ subdrectories of the repo.
     export TRAVIS_BUILD_NUMBER=683
     cd /buildkit/electric
     git checkout -t origin/${BRANCH}
-    cd /buildkit/electric/sd-image
-    ./create-image.sh
+    cd sd-image && ./create-image.sh
 
 ## Bootstrap a RPI3 directly
 
