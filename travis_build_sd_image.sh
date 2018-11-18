@@ -6,6 +6,7 @@ if [ "unified-server" != "$TRAVIS_BRANCH" ]; then
 	exit 5
 fi
 
+# decode the key, using secrets embedded in the travis account
 openssl aes-256-cbc -K $encrypted_00ede72e53d7_key -iv $encrypted_00ede72e53d7_iv -in travis_rsa.pem.enc -out ./travis_rsa.pem -d
 chmod 0600 travis_rsa.pem
 
