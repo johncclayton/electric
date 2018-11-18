@@ -120,12 +120,13 @@ sudo chmod 777 /opt/prefs
 
 echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
-# export MAKEFLAGS=-j5
-pip install --install-option="--jobs=5" hidapi
+
+export MAKEFLAGS=-j5
+pip install hidapi
 
 echo
 echo "Installing the other Python packages..."
-pip install --install-option="--jobs=5" -r "$REQUIREMENTS_FILE"
+pip install -r "$REQUIREMENTS_FILE"
 
 # TODO: ensure that the web runs via gunicorn and not the default flask
 # TODO: watchmedo - reload code when it is touched
