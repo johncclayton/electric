@@ -144,12 +144,17 @@ I.T. gods willing, you'll be presented with something along the following lines
 
 ## Publishing the SD Image 
 
-The build system can publish each completed SD image automatically.  
+The build system can publish each completed SD image automatically.  The intent is to use the build machines SSH key pair to copy (scp) the resulting files somewhere else. 
 
 To enable automatic publishing of your SD images: 
 1. Copy the public part of the buildbox identity file (the ~/.ssh/id_rsa.pub file content) to the .ssh/authorized_keys in the destination host.
 1. Create a _/buildkit/publish.sh_ executable script file - this will be provided with one argument, the full path of the SD image file 
-1. Ensure that _publish.sh_ copies the SD image file to the desired host!  Done!
+1. Ensure that _publish.sh_ copies the SD image file to the desired host
+
+For example, your publish.sh might be something like this: 
+
+    #!/bin/bash
+    scp "$1" my_username@my_hostname_somewhere:
 
 ## What happened?
 
