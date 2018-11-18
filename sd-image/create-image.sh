@@ -124,6 +124,10 @@ if [ $RES -eq 0 ]; then
 	if [ -x ${PUBLISH_SH} ]; then
 		echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
 		${PUBLISH_SH} ${DEST_IMAGE}
+		COPY_RES=$?
+		if [ $COPY_RES -eq 0 ]; then
+			rm ${DEST_IMAGE}
+		fi
 	fi
 else
 	echo "Horrible failure during chroot - look at the logs please"
