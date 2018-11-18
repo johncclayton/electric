@@ -109,7 +109,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 
 # TODO: the --userspec arg should be used to impose pi:users as the user:group spec
-sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} --userspec=pi:users "$MNT" < ./chroot-runtime.sh
+sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT"
