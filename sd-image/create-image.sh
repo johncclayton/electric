@@ -113,16 +113,21 @@ cleanup_piimg
 
 sudo rm -rf "$MNT"
 
-echo "Your SD Image build was a complete success, huzzzah!"
-echo "Burn this image to an SD card: $DEST_IMAGE"
+if [ $RES -eq 0 ]; then
+	echo "Your SD Image build was a complete success, huzzzah!"
+	echo "Burn this image to an SD card: $DEST_IMAGE"
 
-# publish the build by copying it with scp using the given identity / path
-SETUP_ROOT=/buildkit
-PUBLISH_SH=${SETUP_ROOT}/publish.sh
+	# publish the build by copying it with scp using the given identity / path
+	SETUP_ROOT=/buildkit
+	PUBLISH_SH=${SETUP_ROOT}/publish.sh
 
-if [ -x ${PUBLISH_SH} ]; then
-	echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
-	${PUBLISH_SH} ${DEST_IMAGE}
+	if [ -x ${PUBLISH_SH} ]; then
+		echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
+		${PUBLISH_SH} ${DEST_IMAGE}
+	fi
+else
+	echo "Horrible failure during chroot - look at the logs please"
+	exit $RES
 fi
 
 exit 0
