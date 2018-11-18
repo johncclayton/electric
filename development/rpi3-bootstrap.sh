@@ -125,7 +125,7 @@ pip install --install-option="--jobs=5" hidapi
 
 echo
 echo "Installing the other Python packages..."
-pip install -r "$REQUIREMENTS_FILE"
+pip install --install-option="--jobs=5" -r "$REQUIREMENTS_FILE"
 
 # TODO: ensure that the web runs via gunicorn and not the default flask
 # TODO: watchmedo - reload code when it is touched
