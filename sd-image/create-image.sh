@@ -8,9 +8,9 @@ QEMU_ARM="/usr/bin/qemu-arm-static"
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
 
 # TRAVIS_BRANCH actually overrides the BRANCH setting.
-if [ ! -z ${TRAVIS_BRANCH} ]; then
-	BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[+*$%^!]/x/g'`
-fi
+# if [ ! -z ${TRAVIS_BRANCH} ]; then
+# 	BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[+*$%^!]/x/g'`
+# fi
 
 if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
 	echo "I can't detect the TRAVIS_BUILD_NUMBER - aborting..."
