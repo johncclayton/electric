@@ -97,18 +97,13 @@ sudo losetup -f > $PIIMG_STATE
 sudo $PIIMG mount "$DEST_IMAGE" "$MNT"
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
 
-# TODO: and where this comes from for both production and dev builds.
-
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > ./LAST_DEPLOY
 sudo mv ./LAST_DEPLOY "$OPT"
 
-# TODO: publish the build to Google Drive or somewhere.
-
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 
-# TODO: the --userspec arg should be used to impose pi:users as the user:group spec
 sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
 RES=$?
 
@@ -120,5 +115,14 @@ sudo rm -rf "$MNT"
 
 echo "Your SD Image build was a complete success, huzzzah!"
 echo "Burn this image to an SD card: $DEST_IMAGE"
+
+# publish the build by copying it with scp using the given identity / path
+SETUP_ROOT=/buildkit
+PUBLISH_SH=${SETUP_ROOT}/publish.sh
+
+if [ -x ${PUBLISH_SH} ]; then
+	echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
+	${PUBLISH_SH} ${DEST_IMAGE}
+fi
 
 exit 0

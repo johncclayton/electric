@@ -89,6 +89,8 @@ if [ ! -d "$ELEC_INSTALL" ]; then
     popd
 fi
 
+# TODO: inject github public keys into the image and switch to the GitHub protocol so it's possible to check code in
+
 echo
 echo "Checking for requirements files are present..."
 
@@ -113,8 +115,7 @@ if [ ! -d /opt/prefs ]; then
     sudo mkdir -p /opt/prefs
 fi
 
-# TODO: suspect, should this be root:root or pi:users?  look at what reads/writes and the appropriate perms required.  root is bad!
-sudo chown root:root /opt/prefs
+sudo chown pi:users /opt/prefs
 sudo chmod 777 /opt/prefs
 
 echo
@@ -125,7 +126,8 @@ echo
 echo "Installing the other Python packages..."
 pip install -r "$REQUIREMENTS_FILE"
 
-# TODO: ensure that the web runs via gunicorn
+# TODO: ensure that the web runs via gunicorn and not the default flask
+# TODO: watchmedo - reload code when it is touched
 
 echo
 echo "Installing systemd services in /usr/lib/systemd/"
@@ -191,8 +193,8 @@ if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
     exit 4
 fi
 
-# TODO: check that each of these service files are properly named / in-place.
 SYSTEMCTL_FILES=/usr/lib/systemd/system
+
 sudo mkdir -p $SYSTEMCTL_FILES
 sudo mv $T/electric-status.service $SYSTEMCTL_FILES/
 sudo mv $T/electric-web.service $SYSTEMCTL_FILES/

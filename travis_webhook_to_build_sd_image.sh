@@ -7,5 +7,5 @@ ssh -o StrictHostKeyChecking=no \
     -o SendEnv=TRAVIS_BRANCH \
     -i ./travis_rsa.pem \
     builder@coderage-software.com \
-    "cd /home/builder/electric/sd-image && git reset --hard HEAD && git checkout -f $TRAVIS_BRANCH && ./create-image.sh"
+    "cd /home/builder/electric/sd-image && git reset --hard HEAD && git checkout -f $TRAVIS_BRANCH && BRANCH=$TRAVIS_BRANCH ./create-image.sh"
 

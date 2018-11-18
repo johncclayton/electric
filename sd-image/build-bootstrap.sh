@@ -134,5 +134,15 @@ sudo resize2fs /dev/loop${LOOPBACK}
 # and dismount, our job is done!
 sudo losetup -d /dev/loop${LOOPBACK}
 
+# if there is no public key/pair, create one now
+if [ ! -f "$HOME/.ssh/id_rsa.pub" ]; then   
+    cat /dev/zero | ssh-keygen -b 4096 -t rsa -C "buildkit@somewhere" -q -N ""
+fi
+
 echo 
 echo "DONE - the image called ${WORKING_IMAGE} is ready to be used as input to the build process"
+echo
+echo "NOTE: please place the following key into the authorized_keys of the final system where binaries should be copied, and create a ${SETUP_ROOT}/publish.sh file"
+cat $HOME/.ssh/id_rsa.pub
+echo
+
