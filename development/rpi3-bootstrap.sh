@@ -159,8 +159,8 @@ After=multi-user.target
 Requires=multi-user.target
 
 [Service]
-Environment=PYTHONPATH=${HOME}/electric/src/electric/
-ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/worker/main.py
+Environment=PYTHONPATH=${HOME}/electric/src/server/
+ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/electric/worker/worker.py
 Type=simple
 User=pi
 Restart=on-failure
@@ -177,7 +177,7 @@ After=multi-user.target
 Requires=multi-user.target
 
 [Service]
-Environment=PYTHONPATH=${HOME}/electric/src/service/
+Environment=PYTHONPATH=${HOME}/electric/src/server/
 ExecStart=${HOME}/.virtualenvs/electric/bin/python ${HOME}/electric/src/server/status/main.py
 Type=simple
 User=pi
