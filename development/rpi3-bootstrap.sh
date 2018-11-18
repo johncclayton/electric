@@ -120,8 +120,8 @@ sudo chmod 777 /opt/prefs
 
 echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
-export MAKEFLAGS=-j5
-pip install hidapi
+# export MAKEFLAGS=-j5
+pip install --install-option="--jobs=5" hidapi
 
 echo
 echo "Installing the other Python packages..."
