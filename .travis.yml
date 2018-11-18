@@ -1,10 +1,6 @@
 sudo: required
-services:
-- docker
 language: bash
 jobs:
   include:
-    - stage: base
-      script: ./travis_build_base_image.sh
     - stage: build SD image
       script: ./travis_webhook_to_build_sd_image.sh
