@@ -117,6 +117,9 @@ if [ $RES -eq 0 ]; then
 	echo "Your SD Image build was a complete success, huzzzah!"
 	echo "Burn this image to an SD card: $DEST_IMAGE"
 
+	# TODO: ensure only the latest copy of the builds exists - document this - this isn't to be done here, rather in the publish.sh script
+	# along the lines of: ls -1tr | head -n -1 | xargs -d '\n' rm -f --
+
 	# publish the build by copying it with scp using the given identity / path
 	SETUP_ROOT=/buildkit
 	PUBLISH_SH=${SETUP_ROOT}/publish.sh

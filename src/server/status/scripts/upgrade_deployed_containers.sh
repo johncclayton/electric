@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: rename and ensure it works given the context of status server and tell Neil what it now does
+
 [ "root" != "$USER" ] && exec sudo $0 "$@"
 
 shutdown_existing() {

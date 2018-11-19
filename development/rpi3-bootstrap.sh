@@ -95,6 +95,8 @@ sudo chmod -R 777 /opt
 echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
 
+# TODO: can I apt-get or pip install zeromq to have this go lots quicker? 
+
 export MAKEFLAGS=-j5
 pip install hidapi
 

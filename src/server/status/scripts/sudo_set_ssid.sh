@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: sudo_set_sid.sh - test on RPI-3B+ and Normal
+
 # relaunch using sudo as required
 [ "root" != "$USER" ] && exec sudo $0 "$@"
 
