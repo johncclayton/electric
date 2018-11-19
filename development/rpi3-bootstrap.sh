@@ -5,8 +5,6 @@
 # Assumptions: this is run on a Raspberry Pi (GPIO packages will be installed).
 # 
 
-# TODO: upgrades - how do these work in dev & production?  presently using /LAST_VERSION 
-
 T=/tmp/electric-bootstrap
 
 if [ ! -d $T ]; then
@@ -25,30 +23,6 @@ sudo apt-get upgrade -y
 sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk
 
 sudo pip install virtualenv virtualenvwrapper
-
-# and the udev rules?
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
-sudo cp -f 10-icharger.rules /etc/udev/rules.d/ 
-sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
-sudo udevadm control --reload
-
-MY_USER=`whoami`
-
-if [ -f /opt/gpio.sh ]; then
-    sudo rm -f /opt/gpio.sh
-fi
-
-sudo chmod 777 /opt
-
-cat <<EOF > /opt/gpio.sh
-sudo groupadd gpio
-sudo adduser $MY_USER gpio
-sudo chown root.gpio /dev/gpiomem
-sudo chmod g+rw /dev/gpiomem
-EOF
-
-sudo chmod +x /opt/gpio.sh
-sudo chown ${USER}:${USER} /opt/gpio.sh
 
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ${HOME}/.bashrc
@@ -115,8 +89,8 @@ if [ ! -d /opt/prefs ]; then
     sudo mkdir -p /opt/prefs
 fi
 
-sudo chown pi:users /opt/prefs
-sudo chmod 777 /opt/prefs
+sudo chown -R pi:users /opt
+sudo chmod -R 777 /opt
 
 echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
@@ -127,6 +101,32 @@ pip install hidapi
 echo
 echo "Installing the other Python packages..."
 pip install -r "$REQUIREMENTS_FILE"
+
+# and the udev rule so that the charger is automatically available via USB
+curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
+sudo cp -f 10-icharger.rules /etc/udev/rules.d/ 
+sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
+
+# only really useful when running on a real raspberry Pi (pointless when creating an image)
+sudo udevadm control --reload
+
+MY_USER=`whoami`
+
+if [ -f /opt/gpio.sh ]; then
+    sudo rm -f /opt/gpio.sh
+fi
+
+sudo chmod 777 /opt
+
+cat <<EOF > /opt/gpio.sh
+sudo groupadd gpio
+sudo adduser $MY_USER gpio
+sudo chown root.gpio /dev/gpiomem
+sudo chmod g+rw /dev/gpiomem
+EOF
+
+sudo chmod +x /opt/gpio.sh
+sudo chown ${USER}:${USER} /opt/gpio.sh
 
 # TODO: ensure that the web runs via gunicorn and not the default flask
 # TODO: watchmedo - reload code when it is touched
@@ -188,7 +188,7 @@ RestartSec=8
 WantedBy=multi-user.target
 EOF
 
-# compile the enumeration_interfaces.
+# compile the enumeration_interfaces code (used by status service)
 pushd . && cd ${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && sudo cp enumerate_interfaces /usr/local/bin/ && popd
 if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
     echo "Failure to produce enumerate_interfaces in /usr/local/bin - aborting..."
