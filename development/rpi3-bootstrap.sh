@@ -32,17 +32,28 @@ sudo cp -f 10-icharger.rules /etc/udev/rules.d/
 sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
 sudo udevadm control --reload
 
-MY_USER=`whoami`
-
 if [ -f /opt/gpio.sh ]; then
     sudo rm -f /opt/gpio.sh
 fi
 
 sudo chmod 777 /opt
 
+# TODO: test that the gpio.sh fires on each boot of the device BEFORE anything else.  and that this script is sane. 
 cat <<EOF > /opt/gpio.sh
-sudo groupadd gpio
-sudo adduser $MY_USER gpio
+
+if [ ! $(getent group gpio) ]; then
+    echo "Creating new gpio group"
+    sudo groupadd gpio
+fi
+
+GROUP=gpio
+if id -nG "$USER" | grep -qw "$GROUP"; then
+    echo $USER belongs to $GROUP already
+else
+    echo $USER does not belong to $GROUP
+    sudo adduser $USER gpio
+fi
+
 sudo chown root.gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
 EOF
