@@ -8,9 +8,9 @@ QEMU_ARM="/usr/bin/qemu-arm-static"
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
 
 # TRAVIS_BRANCH actually overrides the BRANCH setting.
-if [ ! -z ${TRAVIS_BRANCH} ]; then
-	BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[-+*$%^!]/x/g'`
-fi
+# if [ ! -z ${TRAVIS_BRANCH} ]; then
+# 	BRANCH=`echo $TRAVIS_BRANCH | sed 's/\//_/g' | sed 's/[+*$%^!]/x/g'`
+# fi
 
 if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
 	echo "I can't detect the TRAVIS_BUILD_NUMBER - aborting..."
@@ -113,16 +113,25 @@ cleanup_piimg
 
 sudo rm -rf "$MNT"
 
-echo "Your SD Image build was a complete success, huzzzah!"
-echo "Burn this image to an SD card: $DEST_IMAGE"
+if [ $RES -eq 0 ]; then
+	echo "Your SD Image build was a complete success, huzzzah!"
+	echo "Burn this image to an SD card: $DEST_IMAGE"
 
-# publish the build by copying it with scp using the given identity / path
-SETUP_ROOT=/buildkit
-PUBLISH_SH=${SETUP_ROOT}/publish.sh
+	# publish the build by copying it with scp using the given identity / path
+	SETUP_ROOT=/buildkit
+	PUBLISH_SH=${SETUP_ROOT}/publish.sh
 
-if [ -x ${PUBLISH_SH} ]; then
-	echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
-	${PUBLISH_SH} ${DEST_IMAGE}
+	if [ -x ${PUBLISH_SH} ]; then
+		echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
+		${PUBLISH_SH} ${DEST_IMAGE}
+		COPY_RES=$?
+		if [ $COPY_RES -eq 0 ]; then
+			rm ${DEST_IMAGE}
+		fi
+	fi
+else
+	echo "Horrible failure during chroot - look at the logs please"
+	exit $RES
 fi
 
 exit 0

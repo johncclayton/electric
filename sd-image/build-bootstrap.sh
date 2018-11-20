@@ -9,7 +9,9 @@ sudo apt-get install -y unzip binfmt-support qemu qemu-user-static make g++ curl
 
 if [ ! -d "piimg" ]; then
     git clone https://github.com/johncclayton/piimg.git
+fi
 
+if [ -d "piimg" ]; then
     pushd .
     cd piimg && make && sudo cp src/piimg /usr/local/bin/
     popd 

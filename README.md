@@ -14,8 +14,7 @@ Well, that's pretty easy to explain - here's our list of unique selling points:
   1. Use the app at the field as well as on your home WIFI network.
 
 # Download a Raspberry Pi image
-TODO: Dropbox is dead, long live Google Drive or something
-TODO: Need to link to the latest download + instructions for installing / controlling it. 
+Grab the latest SD card images from [SD Card Images](https://d1813.dyndns.org:5001/sharing/yCyngDFW5)
 
 # Installation
 [Instructions to help you install the software on your Raspberry Pi 3.](https://docs.google.com/document/d/12vy4kCue40k26qsqJIa6b5kwuOIhKOWrTJteruaGcJk/edit?usp=sharing)
