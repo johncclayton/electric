@@ -22,10 +22,10 @@ RUN curl --remote-name --location https://raw.githubusercontent.com/johncclayton
 COPY docker-entrypoint.sh /
 
 # the publish script is used to copy OUT of the container to somewhere else, in this case it'll copy the image to the /output directory of the container
-COPY publish.sh /buildkit 
+COPY publish.sh /buildkit/
 
 RUN chmod +x /docker-entrypoint.sh
-RUN chmod +x /publish.sh
+RUN chmod +x /buildkit/publish.sh
 
 # the output directory should be mapped somewhere via a bind mount
 VOLUME /output
