@@ -13,7 +13,7 @@ if [ -z "$BRANCH" ]; then
 fi
 
 # BRANCH is required because the build stage pulls the build-bootstrap scripts from source control
-docker build -t --build-arg BRANCH="$BRANCH" electric-build:latest .
+docker build -t --build-arg BRANCH="$BRANCH" electric-build-${BRANCH}:latest .
 R=$?
 
 if [ $R -eq 0 ]; then

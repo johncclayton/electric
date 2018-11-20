@@ -17,6 +17,6 @@ fi
 
 mkdir -p $OUTPUT
 
-docker run -it --privileged=true --rm --mount type=bind,source=$OUTPUT,target=/output electric-build:latest
+docker run -it --privileged=true --rm --mount type=bind,source=$OUTPUT,target=/output electric-build-${BRANCH}:latest
 
 echo "TADAAAAA: the final image is now available here: $OUTPUT"

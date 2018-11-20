@@ -20,6 +20,7 @@ RUN curl --remote-name --location https://raw.githubusercontent.com/johncclayton
 
 # the entrypoint will prep the git repo and run the create_image script
 COPY docker-entrypoint.sh /
+
 # the publish script is used to copy OUT of the container to somewhere else, in this case it'll copy the image to the /output directory of the container
 COPY publish.sh /buildkit 
 
