@@ -14,5 +14,5 @@ ssh -o StrictHostKeyChecking=no \
     -i ./travis_rsa.pem \
     -p 4545 \
     john@d1813.dyndns.org \
-    "./construct-electric-sd-image.sh"
+    "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/scripts/construct-electric-sd-image.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
 
