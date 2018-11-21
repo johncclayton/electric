@@ -129,7 +129,7 @@ fi
 # do the resize!
 echo 
 echo "Mounted the second partition, checking & resizing now"
-sudo e2fsck -f /dev/loop${LOOPBACK}
+sudo e2fsck -f -y /dev/loop${LOOPBACK}
 sudo resize2fs /dev/loop${LOOPBACK}
 
 # and dismount, our job is done!
