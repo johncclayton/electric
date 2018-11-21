@@ -26,6 +26,9 @@ terraform init
 terraform apply -auto-approve -var-file="../../../../buildkit.tfvars"
 TA=$?
 
+echo "Waiting 30 seconds for the stars to align and the sirens to stop..."
+sleep 30 
+
 REMOTE_USER=ubuntu
 IP_ADDR=`terraform output buildkit_public_ip`
 SSH="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o SendEnv=TRAVIS_BUILD_NUMBER -o SendEnv=TRAVIS_BRANCH -i $HOME/buildkit-eu-west-1.pem "
@@ -35,7 +38,7 @@ if [ $TA -ne 0 ]; then
         terraform destroy -auto-approve -var-file="../../../../buildkit.tfvars"
         exit 2
 else
-        $SSH $REMOTE_USER@$IP_ADDR "sudo apt-get update && sudo apt-get install -y curl zip sudo"
+        $SSH $REMOTE_USER@$IP_ADDR "sudo apt-get update && sudo apt-get install -y curl zip"
         $SSH $REMOTE_USER@$IP_ADDR "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo systemctl restart ssh.service"
 fi
 
