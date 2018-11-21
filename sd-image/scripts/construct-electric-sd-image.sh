@@ -46,7 +46,8 @@ fi
 $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
 # exec the build once
 $SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH} && cd sd-image && ./create-image.sh"
-# TODO: get the image off the box into the NAS
+
+# TODO: get the image off the AWS box?  Maybe into an S3 bucket?  That'd make it MUCH easier for everyone else to download.
 
 # clean up the buils box
 cd $HOME/electric/sd-image/tf/aws
