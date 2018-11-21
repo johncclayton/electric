@@ -35,10 +35,10 @@ if [ $? -ne 0 ]; then
         terraform destroy -auto-approve -var-file="../../../../buildkit.tfvars"
         exit 2
 else
-        $SSH root@$IP_ADDR "sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo servicectl restart ssh.service"
-        $SSH root@$IP_ADDR "apt-get update && apt-get install -y curl zip sudo"
+        $SSH $REMOTE_USER@$IP_ADDR "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo servicectl restart ssh.service"
+        $SSH $REMOTE_USER@$IP_ADDR "sudo apt-get update && sudo apt-get install -y curl zip sudo"
 fi
 
-$SSH root@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
+$SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
 
 exit $?
