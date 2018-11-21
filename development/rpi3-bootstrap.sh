@@ -131,9 +131,8 @@ echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
 
 # TODO: can I apt-get or pip install zeromq to have this go lots quicker? 
-
-export MAKEFLAGS=-j5
-pip install hidapi
+pip install -v hidapi
+pip install -v pyzmq==17.1.2
 
 echo
 echo "Installing the other Python packages..."
