@@ -28,21 +28,21 @@ TA=$?
 
 REMOTE_USER=ubuntu
 IP_ADDR=`terraform output buildkit_public_ip`
-SSH="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o SendEnv=TRAVIS_BUILD_NUMBER -o SendEnv=TRAVIS_BRANCH -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR "
+SSH="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o SendEnv=TRAVIS_BUILD_NUMBER -o SendEnv=TRAVIS_BRANCH -i $HOME/buildkit-eu-west-1.pem "
 
 if [ $TA -ne 0 ]; then
         echo "Something went wrong during Terraform"
         terraform destroy -auto-approve -var-file="../../../../buildkit.tfvars"
         exit 2
 else
-        $SSH "sudo apt-get update && sudo apt-get install -y curl zip sudo"
-        $SSH "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo systemctl restart ssh.service"
+        $SSH $REMOTE_USER@$IP_ADDR "sudo apt-get update && sudo apt-get install -y curl zip sudo"
+        $SSH $REMOTE_USER@$IP_ADDR "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo systemctl restart ssh.service"
 fi
 
 # prepare the build box
-$SSH "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
+$SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
 # exec the build once
-$SSH "cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH} && cd sd-image && ./create-image.sh"
+$SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH} && cd sd-image && ./create-image.sh"
 # TODO: get the image off the box into the NAS
 
 # clean up the buils box
