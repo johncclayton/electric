@@ -14,6 +14,7 @@ First, you need to install the code and Python packages into their own virtualen
   1. log into the pi (user: pi, password: raspberry)
   1. then get the ball rolling by bootstrapping the whole thing... run the command below
   
+    $ export BRANCH=something
     $ bash <(curl -Ls https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/development/rpi3-bootstrap.sh)
 
 

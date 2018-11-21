@@ -7,8 +7,8 @@
 FROM ubuntu:18.04
 
 # the branch to build, e.g. master 
-ARG BRANCH
-ENV BRANCH ${BRANCH:-master}
+ARG TRAVIS_BRANCH
+ENV TRAVIS_BRANCH ${TRAVIS_BRANCH:-master}
 
 # we'll need some tools
 RUN apt-get update && apt-get install -y curl sudo vim zip
@@ -16,7 +16,7 @@ WORKDIR /buildkit
 
 # bring down the bootstrapping script - can't run it yet as we'll need priviledged mode and some /dev/loopX devices
 RUN chmod 777 /buildkit
-RUN curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh && chmod +x build-bootstrap.sh
+RUN curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/build-bootstrap.sh && chmod +x build-bootstrap.sh
 
 # the entrypoint will prep the git repo and run the create_image script
 COPY docker-entrypoint.sh /

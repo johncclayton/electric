@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -z "$BRANCH" ]; then
+if [ -z "$TRAVIS_BRANCH" ]; then
 	echo "I can't detect the name of the branch - aborting..."
 	exit 13
 fi
@@ -17,6 +17,6 @@ fi
 
 mkdir -p $OUTPUT
 
-docker run -e "BRANCH=${BRANCH}" -e "TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER" --privileged=true --rm --mount type=bind,source=$OUTPUT,target=/output electric-build-${BRANCH}:latest /docker-entrypoint.sh
+docker run -e "TRAVIS_BRANCH=${TRAVIS_BRANCH}" -e "TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER" --privileged=true --rm --mount type=bind,source=$OUTPUT,target=/output electric-build-${TRAVIS_BRANCH}:latest /docker-entrypoint.sh
 
 echo "TADAAAAA: the final image is now available here: $OUTPUT"

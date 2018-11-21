@@ -10,16 +10,16 @@ if [ $? -ne 0 ]; then
 fi
 
 # switch to the right branch
-git checkout -f ${BRANCH}
+git checkout -f ${TRAVIS_BRANCH}
 if [ $? -ne 0 ]; then
-    echo "Failed to checkout the branch: ${BRANCH}"
+    echo "Failed to checkout the branch: ${TRAVIS_BRANCH}"
     exit 2
 fi
 
 # and we're all up to date
 git pull
 if [ $? -ne 0 ]; then
-    echo "Failed to git pull after switching to branch ${BRANCH}"
+    echo "Failed to git pull after switching to branch ${TRAVIS_BRANCH}"
     exit 1
 fi
 

@@ -5,7 +5,7 @@ if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
         exit 13
 fi
 
-if [ -z "$BRANCH" ]; then
+if [ -z "$TRAVIS_BRANCH" ]; then
         echo "I can't detect the name of the branch - aborting..."
         exit 14
 fi
@@ -13,10 +13,8 @@ fi
 echo "The build number is: $TRAVIS_BUILD_NUMBER"
 echo "The branch is: $TRAVIS_BRANCH"
 
-BRANCH="${TRAVIS_BRANCH}"
-
 # check out electric
-cd electric && git reset --hard HEAD && git pull && git checkout -f ${BRANCH}
+cd electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH}
 if [ $? -ne 0 ]; then
         echo "Failure updating branch"
         exit 1
@@ -40,7 +38,7 @@ else
         $SSH $REMOTE_USER@$IP_ADDR "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo systemctl restart ssh.service"
 fi
 
-$SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
-$SSH $REMOTE_USER@$IP_ADDR "export BRANCH=$TRAVIS_BRANCH; cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${BRANCH} && cd sd-image && ./create-image.sh"
+$SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
+$SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH} && cd sd-image && ./create-image.sh"
 
 exit $?

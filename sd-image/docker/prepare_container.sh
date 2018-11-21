@@ -7,19 +7,19 @@
 # devices during build - so producing an sd-image must be done in two stages. 
 #
 
-if [ -z "$BRANCH" ]; then
+if [ -z "$TRAVIS_BRANCH" ]; then
 	echo "I can't detect the name of the branch - aborting..."
 	exit 13
 fi
 
-# BRANCH is required because the build stage pulls the build-bootstrap scripts from source control
-docker build --build-arg BRANCH="$BRANCH" -t electric-build-${BRANCH}:basic .
+# TRAVIS_BRANCH is required because the build stage pulls the build-bootstrap scripts from source control
+docker build --build-arg TRAVIS_BRANCH="$TRAVIS_BRANCH" -t electric-build-${TRAVIS_BRANCH}:basic .
 R=$?
 
 if [ $R -eq 0 ]; then
-    docker rm electric-build-${BRANCH}-basic
-    docker run --privileged=true --name electric-build-${BRANCH}-basic electric-build-${BRANCH}:basic /buildkit/build-bootstrap.sh
-    docker commit electric-build-${BRANCH}-basic electric-build-${BRANCH}:latest
+    docker rm electric-build-${TRAVIS_BRANCH}-basic
+    docker run --privileged=true --name electric-build-${TRAVIS_BRANCH}-basic electric-build-${TRAVIS_BRANCH}:basic /buildkit/build-bootstrap.sh
+    docker commit electric-build-${TRAVIS_BRANCH}-basic electric-build-${TRAVIS_BRANCH}:latest
     echo "SUCCESS: use the run_container.sh to produce an sd card image using Docker!"
 else
     echo "FAILED: there was an error preparing the Docker image"

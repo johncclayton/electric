@@ -5,6 +5,7 @@ set -x
 
 PIIMG=`which piimg`
 QEMU_ARM="/usr/bin/qemu-arm-static"
+
 VERSION_NUM="$TRAVIS_BUILD_NUMBER"
 
 # TRAVIS_BRANCH actually overrides the BRANCH setting.
@@ -17,6 +18,11 @@ if [ -z "$TRAVIS_BUILD_NUMBER" ]; then
 	exit 13
 fi
 
+if [ -z "$TRAVIS_BRANCH" ]; then
+	echo "I can't detect the name of the branch through TRAVIS_BRANCH - aborting..."
+	exit 14
+fi
+
 if [ ! -f "$QEMU_ARM" ]; then
 	echo "Whoa - expected to find $QEMU_ARM binary... and didn't"
 	exit 10
@@ -27,12 +33,7 @@ if [ -z "$PIIMG" ]; then
 	exit 11
 fi
 
-if [ -z "$BRANCH" ]; then
-	echo "I can't detect the name of the branch - aborting..."
-	exit 13
-fi
-
-ROOT="/buildkit/${BRANCH}/${VERSION_NUM}"
+ROOT="/buildkit/${TRAVIS_BRANCH}/${VERSION_NUM}"
 MNT="$ROOT/mnt"
 OPT="$MNT/opt"
 PIIMG_STATE="$ROOT/piimg.state"
@@ -51,9 +52,9 @@ if [ ! -f "$SOURCE_IMG" ]; then
 	exit 12
 fi
 
-DEST_IMAGE="$ROOT/electric-${BRANCH}-${VERSION_NUM}.img"
+DEST_IMAGE="$ROOT/electric-${TRAVIS_BRANCH}-${VERSION_NUM}.img"
 
-echo "Branch is: $BRANCH"
+echo "Branch is: $TRAVIS_BRANCH"
 echo "Latest version is: $VERSION_NUM"
 echo "Destination image: $DEST_IMAGE"
 
@@ -104,7 +105,7 @@ sudo mv ./LAST_DEPLOY "$OPT"
 
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 
-sudo HOME=/home/pi USER=pi BRANCH=${BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
+sudo HOME=/home/pi USER=pi BRANCH=${TRAVIS_BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT"
@@ -126,7 +127,7 @@ if [ $RES -eq 0 ]; then
 
 	if [ -x ${PUBLISH_SH} ]; then
 		echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
-		${PUBLISH_SH} "${DEST_IMAGE}" "${ROOT}" "${BRANCH}" "${VERSION_NUM}"
+		${PUBLISH_SH} "${DEST_IMAGE}" "${ROOT}" "${TRAVIS_BRANCH}" "${VERSION_NUM}"
 		COPY_RES=$?
 		if [ $COPY_RES -eq 0 ]; then
 			rm ${DEST_IMAGE}
