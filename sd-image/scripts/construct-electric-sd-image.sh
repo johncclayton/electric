@@ -28,7 +28,7 @@ terraform init
 terraform apply -auto-approve -var-file="../../../../buildkit.tfvars"
 IP_ADDR=`terraform output buildkit_public_ip`
 
-SSH="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o SendEnv=TRAVIS_BUILD_NUMBER -o SendEnv=TRAVIS_BRANCH -i $HOME/buildkit-eu-central-1.pem "
+SSH="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o SendEnv=TRAVIS_BUILD_NUMBER -o SendEnv=TRAVIS_BRANCH -i $HOME/buildkit-eu-west-1.pem "
 
 if [ $? -ne 0 ]; then
         echo "Something went wrong during Terraform"
