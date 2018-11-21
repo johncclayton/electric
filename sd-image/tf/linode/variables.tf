@@ -4,7 +4,7 @@ variable "linode_region" {
   default = "eu-central"
 }
 
-variable "root_password" {
+variable "linode_root_password" {
   default = "pa55word!"
 }
 

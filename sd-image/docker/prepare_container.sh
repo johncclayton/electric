@@ -17,8 +17,9 @@ docker build --build-arg BRANCH="$BRANCH" -t electric-build-${BRANCH}:basic .
 R=$?
 
 if [ $R -eq 0 ]; then
-    docker run --privileged=true electric-build-${BRANCH}:basic electric/sd-image/build-bootstrap.sh
-    docker commit electric-build-${BRANCH}:basic electric-build-${BRANCH}:latest
+    docker rm electric-build-${BRANCH}-basic
+    docker run --privileged=true --name electric-build-${BRANCH}-basic electric-build-${BRANCH}:basic /buildkit/build-bootstrap.sh
+    docker commit electric-build-${BRANCH}-basic electric-build-${BRANCH}:latest
     echo "SUCCESS: use the run_container.sh to produce an sd card image using Docker!"
 else
     echo "FAILED: there was an error preparing the Docker image"

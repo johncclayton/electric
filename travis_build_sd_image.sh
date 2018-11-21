@@ -14,5 +14,5 @@ ssh -o StrictHostKeyChecking=no \
     -i ./travis_rsa.pem \
     -p 4545 \
     john@d1813.dyndns.org \
-    "cd electric && git reset --hard HEAD && git checkout -f $TRAVIS_BRANCH && git pull && cd sd-image/docker && BRANCH=$TRAVIS_BRANCH ./prepare_container.sh && "
+    "./construct_electric_sd_image.sh"
 
