@@ -67,22 +67,6 @@ resource "aws_security_group" "instance-sg" {
   }
 }
 
-# resource "aws_s3_bucket" "sd-image" {
-#   bucket = "sd-image-${var.project_name}"
-#    versioning {
-#     enabled = true
-#   }
-
-#   # lifecycle_rule {
-#   #   prefix = "/"
-#   #   enabled = true
-#   #   noncurrent_version_transition {
-#   #     days          = 30
-#   #     storage_class = "STANDARD_IA"
-#   #   }
-#   # }
-# }
-
 resource "aws_instance" "sdimage" {
   ami           = "${var.aws_ami}"
   instance_type = "${var.aws_instance_type}"
@@ -125,10 +109,10 @@ resource "aws_security_group_rule" "allow_ssh" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
-output "aws_buildkit_public_dns" {
+output "buildkit_public_dns" {
   value = "${aws_instance.sdimage.public_dns}"
 }
 
-output "aws_buildkit_public_ip" {
+output "buildkit_public_ip" {
   value = "${aws_instance.sdimage.public_ip}"
 }

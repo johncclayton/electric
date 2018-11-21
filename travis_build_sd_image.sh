@@ -14,5 +14,5 @@ ssh -o StrictHostKeyChecking=no \
     -i ./travis_rsa.pem \
     -p 4545 \
     john@d1813.dyndns.org \
-    "./construct_electric_sd_image.sh"
+    "./construct-electric-sd-image.sh"
 
