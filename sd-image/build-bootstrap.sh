@@ -144,7 +144,4 @@ fi
 echo 
 echo "DONE - the image called ${WORKING_IMAGE} is ready to be used as input to the build process"
 echo
-echo "NOTE: please place the following key into the authorized_keys of the final system where binaries should be copied, and create a ${SETUP_ROOT}/publish.sh file"
-cat $HOME/.ssh/id_rsa.pub
-echo
 

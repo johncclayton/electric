@@ -27,6 +27,7 @@ cd sd-image/tf/aws
 terraform init
 terraform apply -auto-approve -var-file="../../../../buildkit.tfvars"
 IP_ADDR=`terraform output buildkit_public_ip`
+REMOTE_USER=ubuntu
 
 SSH="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o SendEnv=TRAVIS_BUILD_NUMBER -o SendEnv=TRAVIS_BRANCH -i $HOME/buildkit-eu-west-1.pem "
 
@@ -35,10 +36,11 @@ if [ $? -ne 0 ]; then
         terraform destroy -auto-approve -var-file="../../../../buildkit.tfvars"
         exit 2
 else
-        $SSH $REMOTE_USER@$IP_ADDR "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo servicectl restart ssh.service"
         $SSH $REMOTE_USER@$IP_ADDR "sudo apt-get update && sudo apt-get install -y curl zip sudo"
+        $SSH $REMOTE_USER@$IP_ADDR "sudo sed -i 's/AcceptEnv LANG LC_\*/AcceptEnv LANG LC_\* TRAVIS_BRANCH TRAVIS_BUILD_NUMBER/' /etc/ssh/sshd_config && sudo systemctl restart ssh.service"
 fi
 
 $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
+$SSH $REMOTE_USER@$IP_ADDR "export BRANCH=$TRAVIS_BRANCH; cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${BRANCH} && cd sd-image && ./create-image.sh"
 
 exit $?
