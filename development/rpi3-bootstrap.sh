@@ -18,14 +18,29 @@ if [ -z "${BRANCH}" ]; then
     exit 5
 fi
 
+function check() {
+	ERR=$1
+	if [ $ERR -ne 0 ]; then
+		echo "error result = $ERR: $*"
+		exit $ERR
+	fi
+}
+
 sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk
+check $? "apt-get for the basics failed"
+
+sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
+check $? "apt-get failed for the headers & cython"
 
 sudo pip install virtualenv virtualenvwrapper
+check $? "pip install for virtualenvwrapper failed"
 
 # and the udev rules?
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
+check $? "could not fetch the udev rules from github"
+
 sudo cp -f 10-icharger.rules /etc/udev/rules.d/ 
 sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
 sudo udevadm control --reload
@@ -98,7 +113,7 @@ if [ ! -d "$ELEC_INSTALL" ]; then
     popd
 fi
 
-# TODO: inject github public keys into the image and switch to the GitHub protocol so it's possible to check code in
+# TODO: dev - inject github public keys into the image and switch to the GitHub protocol so it's possible to check code in
 
 echo
 echo "Checking for requirements files are present..."
@@ -110,10 +125,6 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
     echo "- Is the earth still round?"
     exit
 fi
-
-echo
-echo "Installing required packages (might ask for sudo privs)..."
-sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
 
 echo "Switching to 'electric' virtualenv..."
 workon electric

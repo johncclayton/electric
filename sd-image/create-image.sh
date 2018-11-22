@@ -84,6 +84,14 @@ function cleanup_piimg() {
 	fi
 }
 
+function check() {
+	ERR=$1
+	if [ $ERR -ne 0 ]; then
+		echo "error result = $ERR: $*"
+		exit $ERR
+	fi
+}
+
 #############################
 ## THE PROCESS STARTS HERE ##
 #############################
@@ -95,8 +103,13 @@ cp "$SOURCE_IMG" "$DEST_IMAGE"
 # store the output from PIIMG, because we can use it to scan for the loopback devices
 # that we're allocated - and thus we can free them up too (piimg doesnt do this properly?)
 sudo losetup -f > $PIIMG_STATE
+check $? "failed to discover the next loopback device"
+
 sudo $PIIMG mount "$DEST_IMAGE" "$MNT"
+check $? "failed to mount $DEST_IMAGE against $MNT"
+
 sudo cp "$QEMU_ARM" "$MNT/usr/bin/"
+check $? "failed to copy the QEMU ARM binary to the mounted $MNT/usr/bin/ directory"
 
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
@@ -105,10 +118,15 @@ sudo mv ./LAST_DEPLOY "$OPT"
 
 sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
 
-sudo HOME=/home/pi USER=pi BRANCH=${TRAVIS_BRANCH} TRAVIS_BUILD_NUMBER=${VERSION_NUM} chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
+sudo HOME=/home/pi \
+	USER=pi \
+	BRANCH=${TRAVIS_BRANCH} \
+	TRAVIS_BUILD_NUMBER=${VERSION_NUM} \
+	chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT"
+check $? "failed to unmount the build image from $MNT"
 
 cleanup_piimg
 
