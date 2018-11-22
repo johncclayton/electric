@@ -51,7 +51,7 @@ $SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && gi
 cd $HOME
 SOURCE_DIR="/buildkit/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
 SOURCE_IMAGE="$SOURCE_DIR/electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img"
-scp -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_IMAGE john@d1813:/volume1/public/electric/
+scp -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_IMAGE john@192.168.178.26:/volume1/public/electric/
 
 # clean up the buils box
 cd $HOME/electric/sd-image/tf/aws
