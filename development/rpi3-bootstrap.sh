@@ -28,7 +28,7 @@ function check() {
 
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk
+sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk libzmq5
 check $? "apt-get for the basics failed"
 
 sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
@@ -141,13 +141,15 @@ sudo chmod -R 777 /opt
 echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
 
-# TODO: can I apt-get or pip install zeromq to have this go lots quicker? 
 pip install -v hidapi
+check $? "failed to install hidapi - whoa, that's bad"
 pip install -v pyzmq==17.1.2
+check $? "failed to install pyzmq - whoa, that's bad"
 
 echo
 echo "Installing the other Python packages..."
 pip install -r "$REQUIREMENTS_FILE"
+check $? "failed to install all the requirements - whoa, that's bad"
 
 # and the udev rule so that the charger is automatically available via USB
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
@@ -227,15 +229,18 @@ fi
 SYSTEMCTL_FILES=/usr/lib/systemd/system
 
 sudo mkdir -p $SYSTEMCTL_FILES
-sudo mv $T/electric-status.service $SYSTEMCTL_FILES/
+sudo mv $T/electric-status.service $SYSTEMCTL_FILES/ 
 sudo mv $T/electric-web.service $SYSTEMCTL_FILES/
 sudo mv $T/electric-worker.service $SYSTEMCTL_FILES/
 
 sudo systemctl daemon-reload
 
 sudo systemctl enable electric-status.service
+check $? "failed to enable electric-status service"
 sudo systemctl enable electric-worker.service
+check $? "failed to enable electric-worker service"
 sudo systemctl enable electric-web.service
+check $? "failed to enable electric-web service"
 
 echo
 echo "Pulling down the network configuration scripts and running them..."
