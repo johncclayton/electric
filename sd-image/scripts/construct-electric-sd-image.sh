@@ -47,7 +47,11 @@ $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclay
 # exec the build once
 $SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH} && cd sd-image && ./create-image.sh"
 
-# TODO: get the image off the AWS box?  Maybe into an S3 bucket?  That'd make it MUCH easier for everyone else to download.
+# get the image off the AWS box.
+cd $HOME
+SOURCE_DIR="/buildkit/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
+SOURCE_IMAGE="$SOURCE_DIR/electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img"
+scp -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_IMAGE john@d1813:/volume1/public/electric/
 
 # clean up the buils box
 cd $HOME/electric/sd-image/tf/aws
