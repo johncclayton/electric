@@ -3,7 +3,7 @@ provider "linode" {
 }
 
 resource "linode_sshkey" "local_key" {
-  label = "local_key"
+  label   = "local_key"
   ssh_key = "${chomp(file("~/.ssh/id_rsa.pub"))}"
 }
 
@@ -13,11 +13,11 @@ resource "linode_instance" "sdimage" {
   group  = "${var.project_name}"
   region = "${var.linode_region}"
 
-  type      = "${var.linode_machine_type}"
-  root_pass = "${var.linode_root_password}"
+  type            = "${var.linode_machine_type}"
+  root_pass       = "${var.linode_root_password}"
   authorized_keys = ["${linode_sshkey.local_key.ssh_key}"]
 
-  tags = [ "${var.project_name}" ]
+  tags = ["${var.project_name}"]
 }
 
 output "buildkit_public_ip" {

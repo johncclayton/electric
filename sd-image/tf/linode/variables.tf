@@ -20,7 +20,7 @@ variable "linode_image" {
 
 variable "linode_machine_type" {
   description = "The type of instance/CPU combo you want"
-  default = "g6-nanode-1"
+  default     = "g6-nanode-1"
 }
 
 variable "project_name" {

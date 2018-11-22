@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "bucket" {
   bucket = "electric-binaries-bucket"
   acl    = "public-read"
 
-   lifecycle_rule {
+  lifecycle_rule {
     id      = "master"
     enabled = true
 
@@ -32,5 +32,5 @@ resource "aws_s3_bucket" "bucket" {
     expiration {
       days = 90
     }
+  }
 }
-
