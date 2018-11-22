@@ -27,7 +27,7 @@ variable "aws_ami" {
 
 variable "aws_instance_type" {
   description = "I hope you have enough money to pay for this"
-  default     = "t3.medium"
+  default     = "t2.micro"
 }
 
 variable "project_name" {
