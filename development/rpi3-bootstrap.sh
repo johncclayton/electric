@@ -247,3 +247,13 @@ echo "Pulling down the network configuration scripts and running them..."
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/get-wlan.sh
 chmod +x get-wlan.sh
 ./get-wlan.sh
+RES=$?
+
+if [ $RES -ne 0 ]; then
+    echo "Error installing WiFi configuration via get-wlan.sh"
+    exit $RES
+fi
+
+echo "*** SUCCESS ***"
+
+exit 0
