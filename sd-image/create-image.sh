@@ -125,11 +125,14 @@ check $? "couldn't download the rpi3-bootstrap file from GitHub"
 sudo mv "$ROOT/rpi3-bootstrap.sh" "$MNT/opt/rpi3-bootstrap.sh"
 sudo chmod +x "$MNT/opt/rpi3-bootstrap.sh"
 
+curl -sL "https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/chroot-runtime.sh" > "$ROOT/chroot-runtime.sh"
+check $? "couldn't download the chroot-runtime.sh file from GitHub"
+
 sudo HOME=/home/pi \
 	USER=pi \
 	BRANCH=${TRAVIS_BRANCH} \
 	TRAVIS_BUILD_NUMBER=${VERSION_NUM} \
-	chroot --userspec=pi:users "$MNT" < ./chroot-runtime.sh
+	chroot --userspec=pi:users "$MNT" < $ROOT/chroot-runtime.sh
 RES=$?
 
 sudo $PIIMG umount "$MNT"
