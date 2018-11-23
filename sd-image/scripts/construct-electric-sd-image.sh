@@ -45,7 +45,7 @@ fi
 # prepare the build box
 $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/build-bootstrap.sh > ./setup.sh && chmod +x ./setup.sh && bash -x ./setup.sh"
 # exec the build once
-$SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && git pull && git checkout -f ${TRAVIS_BRANCH} && cd sd-image && ./create-image.sh"
+$SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/create-image.sh > ./create-image.sh && chmod +x ./create-image.sh && ./create-image.sh"
 
 # get the image off the AWS box.
 cd $HOME

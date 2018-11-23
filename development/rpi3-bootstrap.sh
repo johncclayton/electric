@@ -37,14 +37,6 @@ check $? "apt-get failed for the headers & cython"
 sudo pip install virtualenv virtualenvwrapper
 check $? "pip install for virtualenvwrapper failed"
 
-# and the udev rules?
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
-check $? "could not fetch the udev rules from github"
-
-sudo cp -f 10-icharger.rules /etc/udev/rules.d/ 
-sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
-sudo udevadm control --reload
-
 if [ -f /opt/gpio.sh ]; then
     sudo rm -f /opt/gpio.sh
 fi
@@ -87,14 +79,8 @@ ELEC_INSTALL="$HOME/electric"
 REQUIREMENTS_DIR="$ELEC_INSTALL/src"
 REQUIREMENTS_FILE="$REQUIREMENTS_DIR/requirements-all.txt"
 
-echo
-echo "electric will be installed to : $ELEC_INSTALL"
-echo
-
 cd $HOME
-
 PY=".virtualenvs/electric/bin/python"
-
 if [ ! -e "$PY" ]; then
     echo "$PY does not exist"
     echo "Creating a new virtual env..."
@@ -102,18 +88,22 @@ if [ ! -e "$PY" ]; then
 fi
 
 echo
-echo "Checking for the GitHub repo in ${HOME}/electric ..."
+echo "Checking for the GitHub repo in $ELEC_INSTALL ..."
+
+pushd .
+
+cd $HOME
 
 if [ ! -d "$ELEC_INSTALL" ]; then
-    pushd .
-    cd $HOME
     git clone https://github.com/johncclayton/electric.git 
-    cd electric
+else
+    cd $ELEC_INSTALL
+    git reset --hard HEAD
     git checkout -t origin/${BRANCH}
-    popd
+    git pull
 fi
 
-# TODO: dev - inject github public keys into the image and switch to the GitHub protocol so it's possible to check code in
+popd
 
 echo
 echo "Checking for requirements files are present..."

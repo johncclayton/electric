@@ -113,10 +113,12 @@ check $? "failed to copy the QEMU ARM binary to the mounted $MNT/usr/bin/ direct
 
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
-echo "$VERSION_NUM" > ./LAST_DEPLOY
-sudo mv ./LAST_DEPLOY "$OPT"
+echo "$VERSION_NUM" > $PIIMG_STATE/LAST_DEPLOY
+sudo mv $PIIMG_STATE/LAST_DEPLOY "$OPT"
 
-sudo cp ../development/rpi3-bootstrap.sh "$MNT/opt/rpi3-bootstrap.sh"
+curl -sL "https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/development/rpi3-bootstrap.sh" > "$PIIMG_STATE/rpi3-bootstrap.sh"
+sudo mv "$PIIMG_STATE/rpi3-bootstrap.sh" "$MNT/opt/rpi3-bootstrap.sh"
+sudo chmod +x "$MNT/opt/rpi3-bootstrap.sh"
 
 sudo HOME=/home/pi \
 	USER=pi \
@@ -135,22 +137,6 @@ sudo rm -rf "$MNT"
 if [ $RES -eq 0 ]; then
 	echo "Your SD Image build was a complete success, huzzzah!"
 	echo "Burn this image to an SD card: $DEST_IMAGE"
-
-	# TODO: ensure only the latest copy of the builds exists - document this - this isn't to be done here, rather in the publish.sh script
-	# along the lines of: ls -1tr | head -n -1 | xargs -d '\n' rm -f --
-
-	# publish the build by copying it with scp using the given identity / path
-	SETUP_ROOT=/buildkit
-	PUBLISH_SH=${SETUP_ROOT}/publish.sh
-
-	if [ -x ${PUBLISH_SH} ]; then
-		echo "Publishing ${DEST_IMAGE} using ${PUBLISH_SH}..."
-		${PUBLISH_SH} "${DEST_IMAGE}" "${ROOT}" "${TRAVIS_BRANCH}" "${VERSION_NUM}"
-		COPY_RES=$?
-		if [ $COPY_RES -eq 0 ]; then
-			rm ${DEST_IMAGE}
-		fi
-	fi
 else
 	echo "Horrible failure during chroot - look at the logs please"
 	exit $RES
