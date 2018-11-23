@@ -51,8 +51,12 @@ $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclay
 cd $HOME
 SOURCE_DIR="/buildkit/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
 SOURCE_IMAGE="electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img"
-scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_DIR/$SOURCE_IMAGE .
-scp $SOURCE_IMAGE john@192.168.178.26:/volume1/public/electric/ && rm $SOURCE_IMAGE
+SOURCE_IMAGE_SUCCESS="electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img-success"
+
+scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_DIR/$SOURCE_IMAGE_SUCCESS .
+if [ $? -eq 0 ]; then
+        scp $SOURCE_IMAGE_SUCCESS john@192.168.178.26:/volume1/public/electric/${SOURCE_IMAGE} && rm $SOURCE_IMAGE_SUCCESS
+fi
 
 # clean up the buils box
 cd $HOME/electric/sd-image/tf/aws
