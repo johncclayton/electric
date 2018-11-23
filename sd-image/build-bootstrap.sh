@@ -51,15 +51,15 @@ echo "Copying latest image to a working image..."
 export WORKING_IMAGE=$SETUP_ROOT/template-image.img
 cp $IMG_FILENAME $WORKING_IMAGE
 
-echo "Checking if our setup directory contains a copy of the code..."
-if [ ! -d ${SETUP_ROOT}/electric ]; then
-    echo "Downloading a copy of the electric git repo"
-    git clone https://github.com/johncclayton/electric.git
-else
-    pushd .
-    cd electric && git pull
-    popd
-fi
+# echo "Checking if our setup directory contains a copy of the code..."
+# if [ ! -d ${SETUP_ROOT}/electric ]; then
+#     echo "Downloading a copy of the electric git repo"
+#     git clone https://github.com/johncclayton/electric.git
+# else
+#     pushd .
+#     cd electric && git pull
+#     popd
+# fi
 
 echo "Beginning partition adjustment of the working image: $WORKING_IMAGE"
 
