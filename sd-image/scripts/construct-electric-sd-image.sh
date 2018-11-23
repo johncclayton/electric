@@ -50,8 +50,9 @@ $SSH $REMOTE_USER@$IP_ADDR "cd /buildkit/electric && git reset --hard HEAD && gi
 # get the image off the AWS box.
 cd $HOME
 SOURCE_DIR="/buildkit/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
-SOURCE_IMAGE="$SOURCE_DIR/electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img"
-scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_IMAGE john@192.168.178.26:/volume1/public/electric/
+SOURCE_IMAGE="electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img"
+scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_DIR/$SOURCE_IMAGE .
+scp $SOURCE_IMAGE john@192.168.178.26:/volume1/public/electric/ && rm $SOURCE_IMAGE
 
 # clean up the buils box
 cd $HOME/electric/sd-image/tf/aws
