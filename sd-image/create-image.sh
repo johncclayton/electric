@@ -113,11 +113,11 @@ check $? "failed to copy the QEMU ARM binary to the mounted $MNT/usr/bin/ direct
 
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
-echo "$VERSION_NUM" > $PIIMG_STATE/LAST_DEPLOY
-sudo mv $PIIMG_STATE/LAST_DEPLOY "$OPT"
+echo "$VERSION_NUM" > $ROOT/LAST_DEPLOY
+sudo mv $ROOT/LAST_DEPLOY "$OPT"
 
-curl -sL "https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/development/rpi3-bootstrap.sh" > "$PIIMG_STATE/rpi3-bootstrap.sh"
-sudo mv "$PIIMG_STATE/rpi3-bootstrap.sh" "$MNT/opt/rpi3-bootstrap.sh"
+curl -sL "https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/development/rpi3-bootstrap.sh" > "$ROOT/rpi3-bootstrap.sh"
+sudo mv "$ROOT/rpi3-bootstrap.sh" "$MNT/opt/rpi3-bootstrap.sh"
 sudo chmod +x "$MNT/opt/rpi3-bootstrap.sh"
 
 sudo HOME=/home/pi \
