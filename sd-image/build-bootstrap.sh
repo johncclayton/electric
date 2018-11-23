@@ -31,6 +31,7 @@ rm *.img
 ZIP_FILENAME=`ls -1 *.zip`
 
 # only download if the ZIP file isn't there.
+# TODO: we want to PIN the download to a specific version, but be notified when a new release is discovered.
 echo "Downloading the Raspbian release..."
 if [ -z "$ZIP_FILENAME" ]; then
     # download from here, following redirects.  
@@ -134,11 +135,6 @@ sudo resize2fs /dev/loop${LOOPBACK}
 
 # and dismount, our job is done!
 sudo losetup -d /dev/loop${LOOPBACK}
-
-# if there is no public key/pair, create one now
-if [ ! -f "$HOME/.ssh/id_rsa.pub" ]; then   
-    cat /dev/zero | ssh-keygen -b 4096 -t rsa -C "buildkit@somewhere" -q -N ""
-fi
 
 echo 
 echo "DONE - the image called ${WORKING_IMAGE} is ready to be used as input to the build process"

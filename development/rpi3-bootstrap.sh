@@ -28,7 +28,7 @@ function check() {
 
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk libzmq5
+sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk 
 check $? "apt-get for the basics failed"
 
 sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
