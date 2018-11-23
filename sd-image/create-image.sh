@@ -114,9 +114,14 @@ check $? "failed to copy the QEMU ARM binary to the mounted $MNT/usr/bin/ direct
 # you would think you can echo this directly into the $OPT area - you can't, perm. denied
 # so I create the file here and move it across - worth a groan or two.
 echo "$VERSION_NUM" > $ROOT/LAST_DEPLOY
+check $? "failed to copy version number to mnt point LAST_DEPLOY file"
+
 sudo mv $ROOT/LAST_DEPLOY "$OPT"
+check $? "even more problems - cant move LAST_DEPLOY file to the image file at $OPT"
 
 curl -sL "https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/development/rpi3-bootstrap.sh" > "$ROOT/rpi3-bootstrap.sh"
+check $? "couldn't download the rpi3-bootstrap file from GitHub"
+
 sudo mv "$ROOT/rpi3-bootstrap.sh" "$MNT/opt/rpi3-bootstrap.sh"
 sudo chmod +x "$MNT/opt/rpi3-bootstrap.sh"
 
