@@ -65,6 +65,11 @@ cp $IMG_FILENAME $WORKING_IMAGE
 echo "Beginning partition adjustment of the working image: $WORKING_IMAGE"
 
 export LOOPBACK=`losetup -f | sed s,/dev/loop,,`
+if [ $? -ne 0 -o -z "$LOOPBACK" ]; then   
+    echo "Failed to discover next available loopback device - aborting"
+    exit 5
+fi
+
 echo "Discovered loopback is: ${LOOPBACK} (this should be an integer)"
 if [ ${LOOPBACK} -le 0 -o ${LOOPBACK} -gt 99 ]; then
     echo "Unable to find a suitable/available loopback device - which is needed to manipulate the partition table of the raw Raspbian image"
