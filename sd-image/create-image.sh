@@ -144,7 +144,7 @@ sudo rm -rf "$MNT"
 
 if [ $RES -eq 0 ]; then
 	echo "Your SD Image build was a complete success, huzzzah!"
-	sudo mv "${DEST_IMAGE}"" "${DEST_IMAGE}-success"
+	sudo mv "${DEST_IMAGE}" "${DEST_IMAGE}-success"
 else
 	echo "Horrible failure during chroot - look at the logs please"
 	exit $RES
