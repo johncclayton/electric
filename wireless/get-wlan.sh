@@ -42,9 +42,13 @@ fi
 curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/wireless.tar.gz
 tar xzf wireless.tar.gz
 
+# <rant>
 # because, it seems hard to have Windows and Linux/Mac users in a Git repo AND to have the damn 
-# permissions and LF line endings right, I'm darn well gonna FORCE IT HERE.  It's MY ENVIRONMENT and I'll do what I want with it :-)  Sheesh.
+# permissions and LF line endings right, I'm going go FORCE IT here.  It's MY ENVIRONMENT and I'll do what I want with it :-)  Sheesh.
+# </rant>
 find ${TEMP}/scripts -type f | xargs chmod +x
+
+# and I *said* LF darn it.
 find ${TEMP}/scripts -type f | xargs awk 'BEGIN{RS="^$";ORS="";getline;gsub("\r","");print>ARGV[1]}' 
 
 . ${INSTALL_ROOT}/wireless/scripts/functions.sh

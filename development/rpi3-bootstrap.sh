@@ -245,6 +245,11 @@ if [ $RES -ne 0 ]; then
     exit $RES
 fi
 
-echo "*** SUCCESS ***"
+if [ ! -d "/opt/wireless" ]; then
+    echo "Error - couldnt find the /opt/wireless directory - get-wlan.sh appears to have failed"
+    exit 6
+else
+    echo "*** SUCCESS ***"
+fi
 
 exit 0
