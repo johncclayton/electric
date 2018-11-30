@@ -54,11 +54,15 @@ SOURCE_IMAGE="electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img"
 SOURCE_IMAGE_SUCCESS="electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img-success"
 
 scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_DIR/$SOURCE_IMAGE_SUCCESS .
+
+# great - it's now on the Linux host - the d1813 system will pick it up shortly (1 min cron job).
 if [ $? -eq 0 ]; then
-        scp $SOURCE_IMAGE_SUCCESS john@192.168.178.26:/volume1/public/electric/${SOURCE_IMAGE} && rm $SOURCE_IMAGE_SUCCESS
+        mv ${SOURCE_IMAGE_SUCCESS} $HOME/images/${SOURCE_IMAGE} 
+else
+        rm ${SOURCE_IMAGE_SUCCESS}
 fi
 
-# clean up the buils box
+# clean up the buildssh  box
 cd $HOME/electric/sd-image/tf/aws
 terraform destroy -auto-approve -var-file="../../../../buildkit.tfvars"
 
