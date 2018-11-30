@@ -29,3 +29,18 @@ copy_template() {
     eval "echo >$2 \"${template_str}\""
 
 }
+
+function error() {
+    ERR=$?
+    echo $*
+    exit $ERR
+}
+
+function check_error() {
+	ERR=$1
+	if [ $ERR -ne 0 ]; then        
+		echo "error result: $*"
+		exit $ERR
+	fi
+}
+

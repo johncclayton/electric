@@ -99,11 +99,12 @@ if [ ! -d "$ELEC_INSTALL" ]; then
 else
     cd $ELEC_INSTALL
     git reset --hard HEAD
-    git checkout -t origin/${BRANCH}
-    git pull
+    git pull 
 fi
 
-popd
+cd $ELEC_INSTALL
+git checkout -t origin/${BRANCH}
+check $? "Failed to switch to branch $BRANCH - abort"
 
 echo
 echo "Checking for requirements files are present..."
@@ -113,7 +114,7 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
     echo "- Did something break with the git checkout?"
     echo "- Are you on the right branch?"
     echo "- Is the earth still round?"
-    exit
+    exit 6
 fi
 
 echo "Switching to 'electric' virtualenv..."
