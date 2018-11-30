@@ -96,15 +96,8 @@ cd $HOME
 
 if [ ! -d "$ELEC_INSTALL" ]; then
     git clone https://github.com/johncclayton/electric.git 
-else
-    cd $ELEC_INSTALL
-    git reset --hard HEAD
-    git pull 
+    git checkout -t origin/${BRANCH}
 fi
-
-cd $ELEC_INSTALL
-git checkout -t origin/${BRANCH}
-check $? "Failed to switch to branch $BRANCH - abort"
 
 echo
 echo "Checking for requirements files are present..."
