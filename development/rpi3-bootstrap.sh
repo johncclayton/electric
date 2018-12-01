@@ -107,6 +107,11 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
     echo "- Did something break with the git checkout?"
     echo "- Are you on the right branch?"
     echo "- Is the earth still round?"
+
+    echo "Current working directory:" `pwd`
+    echo "Listing of $ELEC_INSTALL"
+    ls -l $ELEC_INSTALL
+
     exit 6
 fi
 
