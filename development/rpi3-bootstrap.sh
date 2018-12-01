@@ -96,8 +96,10 @@ cd $HOME
 
 if [ ! -d "$ELEC_INSTALL" ]; then
     git clone https://github.com/johncclayton/electric.git 
-    git checkout -t origin/${BRANCH}
+    cd $ELEC_INSTALL && git checkout -t origin/${BRANCH}
 fi
+
+cd $HOME
 
 echo
 echo "Checking for requirements files are present..."
