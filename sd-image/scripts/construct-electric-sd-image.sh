@@ -59,7 +59,7 @@ SOURCE_IMAGE_SUCCESS="electric-${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}.img-succe
 # get the .img file off the build machine (that is about to be destroyed)
 scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/buildkit-eu-west-1.pem $REMOTE_USER@$IP_ADDR:$SOURCE_DIR/$SOURCE_IMAGE_SUCCESS .
 
-# great - it's now on the Linux host - the d1813 system will pick it up shortly (1 min cron job).
+# great - it's now on the Linux host - the d1813 system will pick it up shortly (5 min cron job).
 if [ $? -eq 0 ]; then
         mv ${SOURCE_IMAGE_SUCCESS} $HOME/images/${SOURCE_IMAGE} 
 else
