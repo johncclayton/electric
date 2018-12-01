@@ -47,6 +47,9 @@ $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclay
 # exec the build once
 $SSH $REMOTE_USER@$IP_ADDR "curl -sL https://raw.githubusercontent.com/johncclayton/electric/${TRAVIS_BRANCH}/sd-image/create-image.sh > ./create-image.sh && chmod +x ./create-image.sh && ./create-image.sh"
 
+CREATE_IMAGE_RES=$?
+echo "Status of create-image.sh call on remote host: $CREATE_IMAGE_RES"
+
 # get the image off the AWS box.
 cd $HOME
 SOURCE_DIR="/buildkit/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
