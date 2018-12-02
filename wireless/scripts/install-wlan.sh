@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 # lets just say we're gonna install EVERYTHING here
 INSTALL_ROOT=/opt
 
@@ -8,7 +10,7 @@ if [ "$EUID" -ne 0 ]; then
   exit -2
 fi
 
-if [ ! -z ${SKIP_PI3_CHECK+x} ]; then
+if [ ! -z ${+x} ]; then
     if [ ! -f /proc/device-tree/model ]; then
         echo "You're not running this on a pi3, are you?"
         exit -1
@@ -51,9 +53,9 @@ if [ "${HAVE_WLAN1}x" = "x" ]; then
     iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
 fi
 
-# Fix the WLAN0 ssid/password
 echo "Configuring wlan0 to use $WLAN0_SSID"
-wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >/etc/wpa_supplicant/wpa_supplicant.conf
+cp ${INSTALL_ROOT}/wireless/scripts/wpa_supplicant_head.tpl /etc/wpa_supplicant/wpa_supplicant.conf
+wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >> /etc/wpa_supplicant/wpa_supplicant.conf
 
 # Bounce the interface to get wpa_supplicant to do its thing
 ifdown wlan0

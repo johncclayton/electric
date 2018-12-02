@@ -63,6 +63,8 @@ echo
 
 if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
-fi
+fi  
+
+# TODO: install-wlan.sh - is there a way to get this done even if the user hasnt entered their WIFI?  Because otherwise the setup / copy of files is not complete.
 
 exit 0;

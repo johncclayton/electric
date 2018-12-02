@@ -1,28 +1,18 @@
-pi3 wireless AP + Client on one Wifi interface.
+Pi Wireless Access Point + Client on a single Wifi interface.
 ---
 
-A phone can connect directly to either the "Electric" network (say, when you're at the field) and also have an IP address on your own internal network (when you're at home). This means you dont have to change anything in the app once it's configured the first time. Ta daa!
- - The server is hard configured to be at 192.168.10.1.
- - The pi3 picks up a new IP address when connected to your Wifi.
+The Pi provides a WIFI Access Point called ELECTRIC.  You can connect your phone to the ELECTRIC AP when you're at the field - this allows you to control
+the iCharger without having to hook up the Pi to an existing WIFI.
+
+At the same time; the Pi can be configured to connect to your WIFI network at home.  This allows you to leave your phone / computer connected to your home network
+and still be able to control the iCharger without having to change networking settings on the Pi. 
+
+Both the ELECTRIC Access Point and the Pi's connection to your home network can happen at the same time - this is not a "this" or "that" situation.
+
+On the ELECTRIC Access Point: 
+ - The server is configured to use IP Address 192.168.10.1.
+ - The Pi picks up a new IP address when connected to your home WIFI - assuming your home WIFI uses DHCP (almost all do).
  - The app tries *both* IP addresses when connecting, and picks one that works.
-
-Semi Automated Install
---
- - sudo apt-get update
- - sudo apt-get install dnsmasq hostapd gawk avahi-daemon
- - curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/get-wlan.sh | sudo bash -s
- - Configure as needed, i.e: edit the wlan.conf file in /opt/wireless/conf
- - cd /opt/wireless/scripts
- - sudo ./install-wlan.sh
- - If it fails with:
-
-      ```
-      wpa_supplicant: /sbin/wpa_supplicant daemon failed to start
-      run-parts: /etc/network/if-pre-up.d/wpasupplicant exited with return code 1
-      Failed to bring up wlan0.
-      ```
-
-   Just run the installer again.
 
 So what's happening here?
 --
