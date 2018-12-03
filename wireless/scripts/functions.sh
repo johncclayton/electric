@@ -10,6 +10,8 @@ add_wlan1_if_not_there() {
 }
 
 check_firewall_forwarding_rules() {
+    echo 1 >/proc/sys/net/ipv4/ip_forward
+
     HAVE_IP_RULES=$(iptables -S -t nat | grep wlan0)
     if [ "$HAVE_IP_RULES" != "-A POSTROUTING -o wlan0 -j MASQUERADE" ]; then
         echo "Adding in IP masquerade rules"
@@ -17,6 +19,13 @@ check_firewall_forwarding_rules() {
         iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
         iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
     fi
+}
+
+reset_wlan0_supplicant_config() {
+    local CFG_SSID="$1"
+    local CFG_PWD="$2"
+    cp /opt/wireless/scripts/wpa_supplicant_head.tpl /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+    wpa_passphrase "$CFG_SSID" "$CFG_PWD" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 }
 
 ask_question() {

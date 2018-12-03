@@ -54,8 +54,7 @@ if [ "${HAVE_WLAN1}x" = "x" ]; then
 fi
 
 echo "Configuring wlan0 to use $WLAN0_SSID"
-cp ${INSTALL_ROOT}/wireless/scripts/wpa_supplicant_head.tpl /etc/wpa_supplicant/wpa_supplicant.conf
-wpa_passphrase "$WLAN0_SSID" "$WLAN0_PASSWORD" >> /etc/wpa_supplicant/wpa_supplicant.conf
+reset_wlan0_supplicant_config $WLAN0_SSID $WLAN0_PASSWORD
 
 # Bounce the interface to get wpa_supplicant to do its thing
 ifdown wlan0

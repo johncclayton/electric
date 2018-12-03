@@ -37,7 +37,7 @@ Troubleshooting (hopefully in order)
         post-up /opt/wireless/scripts/after-wlan0-up
         post-down /opt/wireless/scripts/after-wlan0-down
 
-    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
     ```
 - Check the 'after wlan0 is up' script: https://github.com/johncclayton/electric/blob/master/wireless/scripts/after-wlan0-up.
     - Check that your local copy in /opt/wireless/scripts is identical.
@@ -101,7 +101,7 @@ Troubleshooting (hopefully in order)
     ```
   - If not wlan1, then there's a problem with the 'iw dev wlan0 interface add __ap' part of the script (see /opt/wireless/scripts/after-wlan0-up). It might be that wlan0 isn't configured in 'managed' mode (it might be in AP mode)
   - Does wlan0 have an ip?
-  - Does /etc/wpa_supplicant/wpa_supplicant.conf have the right details? i.e: an ssid and psk?
+  - Does /etc/wpa_supplicant/wpa_supplicant-wlan0.conf have the right details? i.e: an ssid and psk?
 
     ```
     network={
@@ -109,7 +109,7 @@ Troubleshooting (hopefully in order)
             #psk="blah blah blah"
             psk=4510ad5bdbee70922cc907bb9f7c3504d29ffedf31afb2c60d80774925e3215c
     }
-    /etc/wpa_supplicant/wpa_supplicant.conf (END)
+    /etc/wpa_supplicant/wpa_supplicant-wlan0.conf (END)
     ```
   - Does wlan1 have an ip? It'd better have! It's static. 192.168.10.1
 - NAT / Masquerading
@@ -117,26 +117,3 @@ Troubleshooting (hopefully in order)
     - -A POSTROUTING -o wlan0 -j MASQUERADE
     - (there should be more, but stuffed if I can get iptables to show me something sensible)
 
-
-
-Manual Install (don't do this, it's painful)
----
-Full configuration files are included (within the /etc/ folder).  They are what is used by the automated install, and were lovingly hand crafted from a working AP+Client install.
-
-- sudo apt-get update
-- sudo apt-get install dnsmasq hostapd
-- Setup config
-  - Copy wlan0 and wlan1 to /etc/network/interfaces.d/
-  - Copy hostapd.conf to /etc/hostapd/
-  - Copy dnsmasq.d/wlan1 to /etc/dnsmasq.d/
-  - Copy wpa_supplicant.conf to /etc/wpa_supplicant/
-- Configure hostapd
-  - IMPORTANT: Setup the channel to match wlan0. Do a "iwlist channel" from terminal, and make sure /etc/hostapd/hostapd.conf channel is the same (otherwise none of this will work, it'll hang, and look like a dns problem, your eth0 will also stop working, dragons will spawn and the sun will explode)
-  - Change your password from 'electric' if you want.
-- Setup default
-  - /etc/default/hostapd: DAEMON_CONF="/etc/hostapd/hostapd.conf"
-- Make it run on start
-  - Copy start-wlan1.sh to /opt/wireless/scripts.
-  - chown root.root /opt/wireless/scripts/start-wlan1.sh
-  - chmod +x /opt/wireless/scripts/start-wlan1.sh
-  - rc.local: add /opt/wireless/scripts/start-wlan1.sh to the file someplace.

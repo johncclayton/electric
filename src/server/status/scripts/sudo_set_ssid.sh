@@ -18,7 +18,8 @@ fi
 /sbin/ifdown wlan0
 
 # sets the current configured SSID/PSK value in the wpa_supplicant.conf file
-/usr/bin/wpa_passphrase "$WIFINAME" "$WIFIPWD" > /etc/wpa_supplicant/wpa_supplicant.conf
+cp /opt/wireless/scripts/wpa_supplicant_head.tpl /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+/usr/bin/wpa_passphrase "$WIFINAME" "$WIFIPWD" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 
 /sbin/ifup wlan0
 

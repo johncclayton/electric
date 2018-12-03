@@ -44,7 +44,8 @@ tar xzf wireless.tar.gz
 
 # <rant>
 # because, it seems hard to have Windows and Linux/Mac users in a Git repo AND to have the damn 
-# permissions and LF line endings right, I'm going go FORCE IT here.  It's MY ENVIRONMENT and I'll do what I want with it :-)  Sheesh.
+# permissions and LF line endings right, I'm simply going to DO IT MY WAY.  
+# It's MY ENVIRONMENT and I'll do what I want ... do what I want ... la la la laaaaa
 # </rant>
 find ${TEMP}/scripts -type f | xargs chmod +x
 
@@ -65,6 +66,6 @@ if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
 fi  
 
-# TODO: install-wlan.sh - is there a way to get this done even if the user hasnt entered their WIFI?  Because otherwise the setup / copy of files is not complete.
+${INSTALL_ROOT}/wireless/scripts/install-wlan.sh
 
 exit 0;
