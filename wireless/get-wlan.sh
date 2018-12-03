@@ -59,13 +59,13 @@ echo "Ready to configure."
 echo "Please modify the wlan.conf, to specify a WLAN SSID and password. Suitable command follows..."
 echo
 echo "sudo nano /opt/wireless/config/wlan.conf"
-echo "Then run sudo /opt/wireless/scripts/install-wlan.sh"
 echo
+
+echo Installing files into /etc...
+cp -avR ${TEMP}/etc/* /etc
 
 if [ -f wireless.tar.gz ]; then
     rm -f wireless.tar.gz
 fi  
-
-${INSTALL_ROOT}/wireless/scripts/install-wlan.sh
 
 exit 0;
