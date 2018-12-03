@@ -10,18 +10,18 @@ if [ "$EUID" -ne 0 ]; then
   exit -2
 fi
 
-if [ ! -z ${+x} ]; then
-    if [ ! -f /proc/device-tree/model ]; then
-        echo "You're not running this on a pi3, are you?"
-        exit -1
-    fi
+# if [ ! -z ${+x} ]; then
+#     if [ ! -f /proc/device-tree/model ]; then
+#         echo "You're not running this on a pi3, are you?"
+#         exit -1
+#     fi
 
-    PI_MODEL=$(cat /proc/device-tree/model | awk '{print $1 $2 $3}')
-    if [ ${PI_MODEL} != 'RaspberryPi3' ]; then
-        echo "This computer doesn't appear to be a pi3"
-        exit -1
-    fi
-fi
+#     PI_MODEL=$(cat /proc/device-tree/model | awk '{print $1 $2 $3}')
+#     if [ ${PI_MODEL} != 'RaspberryPi3' ]; then
+#         echo "This computer doesn't appear to be a pi3"
+#         exit -1
+#     fi
+# fi
 
 TEMP=${INSTALL_ROOT}/wireless
 
@@ -37,21 +37,6 @@ fi
 
 echo Installing files into /etc...
 cp -avR ${TEMP}/etc/* /etc
-
-# do the iw dev wlan0 add... etc, if the interface wlan1 doesn't already exist.
-HAVE_WLAN1=$(iw dev | grep 'wlan1')
-if [ "${HAVE_WLAN1}x" = "x" ]; then
-    echo "Adding wlan1 AP interface..."
-
-    # Add the wlan1 interface
-    iw dev wlan0 interface add wlan1 type __ap
-
-    # Enable IP forwarding and masq.
-    echo 1 >/proc/sys/net/ipv4/ip_forward
-    iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
-    iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-    iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
-fi
 
 echo "Configuring wlan0 to use $WLAN0_SSID"
 reset_wlan0_supplicant_config $WLAN0_SSID $WLAN0_PASSWORD
