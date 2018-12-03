@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-. /opt/wireless/scripts/functions.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source $DIR/functions.sh
+
+. $DIR/../config/wlan.conf
 
 # quit if we're called for the loopback
 if [ "$IFACE" = lo ]; then
@@ -14,3 +17,5 @@ fi
 #
 add_wlan1_if_not_there
 
+# and if the user changed wlan0 auth settings, re-write the supplicant file.
+reset_wlan0_supplicant_config "$WLAN0_SSID" "$WLAN0_PASSWORD"

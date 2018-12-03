@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-. /functions.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source $DIR/functions.sh
 
 # TODO: get_ip_address - test on RPI-3B+ and Normal
 

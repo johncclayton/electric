@@ -159,9 +159,9 @@ class StatusResource(Resource):
             json_dict = request.json
             run_electric_pi = json_dict["electric-pi.service"]["running"]
             if run_electric_pi:
-                self._systemctl_start("electric-pi")
+                self._systemctl_start("electric-web")
             else:
-                self._systemctl_stop("electric-pi")
+                self._systemctl_stop("electric-web")
 
         except Exception:
             pass
@@ -179,13 +179,16 @@ class StatusResource(Resource):
             [script_path("get_ip_address.sh"), "wlan1"], "wlan1 device not found")
 
         last_deployed_version = get_last_deployed_version()
+        svc_status_running = self._systemctl_running("electric-status")
+        svc_worker_running = self._systemctl_running("electric-worker")
+        svc_web_running = self._systemctl_running("electric-web")
 
         res["services"] = {
             "dnsmasq": self._systemctl_running("dnsmasq"),
             "hostapd": self._systemctl_running("hostapd"),
-            "electric-pi.service": self._systemctl_running("electric-web"),
-            "electric-pi-worker.service": self._systemctl_running("electric-worker"),
-            "electric-pi-status.service": self._systemctl_running("electric-status"),
+            "electric-pi.service": svc_web_running,
+            "electric-pi-worker.service": svc_worker_running,
+            "electric-pi-status.service": svc_status_running
             "docker":  False,
         }
 
@@ -206,10 +209,10 @@ class StatusResource(Resource):
         }
 
         server_status = {
-            "exception": "the electric-pi web service is not running"
+            "exception": "the electric web service is not running"
         }
 
-        if web_image_running:
+        if svc_web_running:
             server_status = self.get_server_status()
 
         res["server_status"] = server_status
