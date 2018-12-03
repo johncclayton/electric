@@ -66,6 +66,10 @@ else
         rm ${SOURCE_IMAGE_SUCCESS}
 fi
 
+# keep the last 3 of each branch type...
+cd $HOME/images
+ls -tp electric-${TRAVIS_BRANCH}-* | grep -v '/$' | tail -n +3 | xargs -I {} rm -- {}
+
 # clean up the buildssh  box
 cd $HOME/electric/sd-image/tf/aws
 terraform destroy -auto-approve -var-file="../../../../buildkit.tfvars"

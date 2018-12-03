@@ -1,4 +1,0 @@
-[console_scripts]
-electric-server = electric.main:run_server
-electric-worker = electric.worker.worker:run_worker
-
