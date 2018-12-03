@@ -66,6 +66,11 @@ EOF
 sudo chmod +x /opt/gpio.sh
 sudo chown ${USER}:${USER} /opt/gpio.sh
 
+cat <<EOF >> /etc/dhcpcd.conf
+nohook wpa_supplicant
+noarp
+EOF
+
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ${HOME}/.bashrc
 R=$?
