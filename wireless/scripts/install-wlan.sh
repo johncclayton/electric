@@ -37,13 +37,3 @@ fi
 
 echo Installing files into /etc...
 cp -avR ${TEMP}/etc/* /etc
-
-echo "Configuring wlan0 to use $WLAN0_SSID"
-reset_wlan0_supplicant_config $WLAN0_SSID $WLAN0_PASSWORD
-
-# Bounce the interface to get wpa_supplicant to do its thing
-ifdown wlan0
-ifup wlan0
-
-# Cannot check for the actual channel until its connected.
-# This is done in a post-up script of wlan0 (see after-wlan0-up)
