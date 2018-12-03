@@ -5,15 +5,4 @@ if [ "$IFACE" = lo ]; then
     exit 0
 fi
 
-#
-# Taking out for now.
-# If we find that refreshing wlan0 requires that these services restart, we can do that here
-#
-
-#echo "Restarting hostapd..."
-#/etc/init.d/hostapd restart
-#
-#echo "Restarting dnsmasq..."
-#/etc/init.d/dnsmasq restart
-
 exit 0

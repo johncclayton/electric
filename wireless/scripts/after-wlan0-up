@@ -16,12 +16,6 @@ fi
 
 add_wlan1_if_not_there
 
-# Enable IP forwarding and masq.
-#echo 1 >/proc/sys/net/ipv4/ip_forward
-
-# Cannot check for the actual channel until its connected.
-# So this script is run in /etc/network
-
 # Make sure the channel number is the same
 WLAN0_CHANNEL=$(iwlist channel 2>/dev/null | grep Current | grep 'Current' | gawk '{print gensub(/\(Channel ([0-9]+)\)/, "\\1", "g");  }' | awk '{print $4}')
 if [ "${WLAN0_CHANNEL}x" = "x" ]; then
@@ -36,20 +30,21 @@ fi
 
 # Find existing channel number in the hostapd.config
 
-# EXISTING_CHANNEL=99
-# EXISTING_NAME=Electric
-# if [ -f /etc/hostapd/hostapd.conf ]; then
-#     EXISTING_CHANNEL=$(cat /etc/hostapd/hostapd.conf  | grep channel | awk -F= '{print $2}')
-#     EXISTING_NAME=$(cat /etc/hostapd/hostapd.conf  | grep ssid | head -1 | awk -F= '{print $2}')
-# fi
+if [ -f /etc/hostapd/hostapd.conf ]; then
+    EXISTING_CHANNEL=$(cat /etc/hostapd/hostapd.conf  | grep channel | awk -F= '{print $2}')
+    EXISTING_NAME=$(cat /etc/hostapd/hostapd.conf  | grep ssid | head -1 | awk -F= '{print $2}')
+else
+    EXISTING_CHANNEL=99
+    EXISTING_NAME=Electric
+fi
 
-# if [ "$EXISTING_CHANNEL" != "$WLAN0_CHANNEL" ] || [ "$EXISTING_NAME" != "${WLAN1_NAME}" ] ; then
-#     echo "Changing hostapd channel to $WLAN0_CHANNEL..."
-#     echo "WLAN1 name will be: ${WLAN1_NAME}"
+if [ "$EXISTING_CHANNEL" != "$WLAN0_CHANNEL" ] || [ "$EXISTING_NAME" != "${WLAN1_NAME}" ] ; then
+    echo "Changing hostapd channel to $WLAN0_CHANNEL..."
+    echo "WLAN1 name will be: ${WLAN1_NAME}"
 
-#     hostapd_template_str=$(cat /etc/hostapd/hostapd.conf.template)
-#     eval "echo >/etc/hostapd/hostapd.conf \"${hostapd_template_str}\""
-# fi
+    hostapd_template_str=$(cat /etc/hostapd/hostapd.conf.template)
+    eval "echo >/etc/hostapd/hostapd.conf \"${hostapd_template_str}\""
+fi
 
 check_firewall_forwarding_rules
 

@@ -2,5 +2,7 @@ allow-hotplug wlan0
 
 auto wlan0 
 iface wlan0 inet dhcp
-
+ pre-up /opt/wireless/scripts/before-wlan0-up
+ post-up /opt/wireless/scripts/after-wlan0-up
+ post-down /opt/wireless/scripts/after-wlan0-down
 wpa-conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
