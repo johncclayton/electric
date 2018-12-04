@@ -31,7 +31,7 @@ def get_last_deployed_version():
 
 
 def script_path(name):
-    return os.path.join("/opt/status/scripts", name)
+    return os.path.join("/home/pi/electric/src/server/status/scripts", name)
 
 
 def read_output_for(args, default_on_error=None):
