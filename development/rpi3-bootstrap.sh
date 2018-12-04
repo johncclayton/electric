@@ -147,7 +147,7 @@ if [ ! -d /opt/prefs ]; then
     mkdir -p /opt/prefs
 fi
 
-chown -R pi:users /opt
+chown -R ${SUD_USER}:users /opt
 chmod -R 777 /opt
 
 echo
@@ -231,7 +231,7 @@ WantedBy=multi-user.target
 EOF
 
 # compile the enumeration_interfaces code (used by status service)
-pushd . && cd ${HOME}/electric/src/server/status && gcc -o enumerate_interfaces enumerate_interfaces.c && sudo cp enumerate_interfaces /usr/local/bin/ && popd
+pushd . && cd ${HOME}/electric/src/server/status && sudo -u $SUD_USER gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
 if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
     echo "Failure to produce enumerate_interfaces in /usr/local/bin - aborting..."
     exit 4
