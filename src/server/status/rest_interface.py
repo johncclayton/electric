@@ -188,7 +188,7 @@ class StatusResource(Resource):
             "hostapd": self._systemctl_running("hostapd"),
             "electric-pi.service": svc_web_running,
             "electric-pi-worker.service": svc_worker_running,
-            "electric-pi-status.service": svc_status_running
+            "electric-pi-status.service": svc_status_running,
             "docker":  False,
         }
 
