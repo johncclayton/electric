@@ -28,7 +28,9 @@ reset_wlan0_supplicant_config() {
     wpa_passphrase "$CFG_SSID" "$CFG_PWD" >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 
     # remove stupid config file - we should not have a global one
-    rm /etc/wpa_supplicant/wpa_supplicant.conf
+    if [ -f "/etc/wpa_supplicant/wpa_supplicant.conf" ]; then
+        rm /etc/wpa_supplicant/wpa_supplicant.conf
+    fi
 }
 
 ask_question() {
