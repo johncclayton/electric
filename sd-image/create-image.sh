@@ -130,7 +130,7 @@ check $? "couldn't download the chroot-runtime.sh file from GitHub"
 
 sudo HOME=/home/pi \
 	USER=pi \
-	BRANCH=${TRAVIS_BRANCH} \
+	TRAVIS_BRANCH=${TRAVIS_BRANCH} \
 	TRAVIS_BUILD_NUMBER=${VERSION_NUM} \
 	chroot --userspec=pi:users "$MNT" < $ROOT/chroot-runtime.sh
 RES=$?

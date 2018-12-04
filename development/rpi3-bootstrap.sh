@@ -17,19 +17,18 @@ if [ -z "$SUDO_USER" ]; then
     exit 5
 fi
 
+if [ -z "${TRAVIS_BRANCH}" ]; then
+    echo "You must set a TRAVIS_BRANCH env to something, e.g. master or unified-server for example"
+    exit 5
+fi
+
+T=/tmp/electric-bootstrap
 if [ ! -d $T ]; then
     mkdir -p "$T"
     chown ${SUDO_USER}:${SUDO_USER} "$T"
 fi
 
-T=/tmp/electric-bootstrap
-
 cd $T
-
-if [ -z "${BRANCH}" ]; then
-    echo "You must set a BRANCH env to something, e.g. master or unified-server for example"
-    exit 5
-fi
 
 function check() {
 	ERR=$1
@@ -91,7 +90,8 @@ fi
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ${HOME}/.bashrc
 if [ $? -ne 0 ]; then 
-    echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ${HOME}/.bashrc
+    sudo -u $SUDO_USER touch ${HOME}/.bashrc
+    echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ${HOME}/.bashrc    
 fi
 
 source /usr/local/bin/virtualenvwrapper.sh
@@ -117,7 +117,7 @@ cd $HOME
 
 if [ ! -d "$ELEC_INSTALL" ]; then
     sudo -u $SUDO_USER git clone https://github.com/johncclayton/electric.git 
-    cd $ELEC_INSTALL && sudo -u $SUDO_USER git checkout -t origin/${BRANCH}
+    cd $ELEC_INSTALL && sudo -u $SUDO_USER git checkout -t origin/${TRAVIS_BRANCH}
 fi
 
 cd $HOME
