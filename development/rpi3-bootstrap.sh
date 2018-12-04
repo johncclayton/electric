@@ -5,11 +5,24 @@
 # Assumptions: this is run on a Raspberry Pi (GPIO packages will be installed).
 # 
 
-T=/tmp/electric-bootstrap
+[ "root" != "$USER" ] && exec sudo -E $0 "$@"
+
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (or sudo me)"
+  exit -2
+fi
+
+if [ -z "$SUDO_USER" ]; then
+    echo "Failed - the script must have SUDO_USER defined so we know which user we're running on behalf of"
+    exit 5
+fi
 
 if [ ! -d $T ]; then
     mkdir -p "$T"
+    chown ${SUDO_USER}:${SUDO_USER} "$T"
 fi
+
+T=/tmp/electric-bootstrap
 
 cd $T
 
@@ -26,22 +39,22 @@ function check() {
 	fi
 }
 
-sudo apt-get update
-sudo apt-get upgrade -y
-sudo apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk 
+apt-get update
+apt-get upgrade -y
+apt-get install -y gcc python-dev python-pip git g++ avahi-daemon dnsmasq hostapd gawk 
 check $? "apt-get for the basics failed"
 
-sudo apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
+apt-get install -y linux-headers-rpi libusb-1.0-0-dev libudev-dev cython 
 check $? "apt-get failed for the headers & cython"
 
-sudo pip install virtualenv virtualenvwrapper
+pip install virtualenv virtualenvwrapper
 check $? "pip install for virtualenvwrapper failed"
 
 if [ -f /opt/gpio.sh ]; then
-    sudo rm -f /opt/gpio.sh
+    rm -f /opt/gpio.sh
 fi
 
-sudo chmod 777 /opt
+chmod 777 /opt
 
 # TODO: test that the gpio.sh fires on each boot of the device BEFORE anything else.  and that this script is sane. 
 cat <<EOF > /opt/gpio.sh
@@ -63,18 +76,21 @@ sudo chown root.gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
 EOF
 
-sudo chmod +x /opt/gpio.sh
-sudo chown ${USER}:${USER} /opt/gpio.sh
+chmod +x /opt/gpio.sh
+chown ${SUDO_USER}:${SUDO_USER} /opt/gpio.sh
 
-cat <<EOF >> /etc/dhcpcd.conf
-nohook wpa_supplicant
-noarp
+# find settings in dhcpcd.conf
+grep 'nohook wpa_supplicant' /etc/dhcpcd.conf
+if [ $? -ne 0 ]; then
+    cat <<-EOF >> /etc/dhcpcd.conf
+        nohook wpa_supplicant
+        noarp
 EOF
+fi
 
 # check if the virtualenv wrapper line is already in .bashrc and add if required.
 grep 'source /usr/local/bin/virtualenvwrapper.sh' ${HOME}/.bashrc
-R=$?
-if [ $R -ne 0 ]; then 
+if [ $? -ne 0 ]; then 
     echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ${HOME}/.bashrc
 fi
 
@@ -89,7 +105,7 @@ PY=".virtualenvs/electric/bin/python"
 if [ ! -e "$PY" ]; then
     echo "$PY does not exist"
     echo "Creating a new virtual env..."
-    mkvirtualenv electric
+    sudo -u $SUDO_USER mkvirtualenv electric
 fi
 
 echo
@@ -100,8 +116,8 @@ pushd .
 cd $HOME
 
 if [ ! -d "$ELEC_INSTALL" ]; then
-    git clone https://github.com/johncclayton/electric.git 
-    cd $ELEC_INSTALL && git checkout -t origin/${BRANCH}
+    sudo -u $SUDO_USER git clone https://github.com/johncclayton/electric.git 
+    cd $ELEC_INSTALL && sudo -u $SUDO_USER git checkout -t origin/${BRANCH}
 fi
 
 cd $HOME
@@ -123,37 +139,36 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
 fi
 
 echo "Switching to 'electric' virtualenv..."
-workon electric
+sudo -u $SUDO_USER workon electric
 
 echo 
 echo "Setting up /opt/prefs directory (stores GPIO state)"
 if [ ! -d /opt/prefs ]; then
-    sudo mkdir -p /opt/prefs
+    mkdir -p /opt/prefs
 fi
 
-sudo chown -R pi:users /opt
-sudo chmod -R 777 /opt
+chown -R pi:users /opt
+chmod -R 777 /opt
 
 echo
 echo "Installation of hidapi/zeromq - this will take about 30m... patience..."
 
-pip install -v hidapi
+sudo -u $SUDO_USER pip install -v hidapi
 check $? "failed to install hidapi - whoa, that's bad"
-pip install -v pyzmq==17.1.2
+sudo -u $SUDO_USER pip install -v pyzmq==17.1.2
 check $? "failed to install pyzmq - whoa, that's bad"
 
 echo
 echo "Installing the other Python packages..."
-pip install -r "$REQUIREMENTS_FILE"
+sudo -u $SUDO_USER pip install -r "$REQUIREMENTS_FILE"
 check $? "failed to install all the requirements - whoa, that's bad"
 
 # and the udev rule so that the charger is automatically available via USB
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/src/server/scripts/10-icharger.rules
-sudo cp -f 10-icharger.rules /etc/udev/rules.d/ 
-sudo chown root:root /etc/udev/rules.d/10-icharger.rules 
+cp -f $ELEC_INSTALL/src/server/scripts/10-icharger.rules /etc/udev/rules.d/ 
+chown root:root /etc/udev/rules.d/10-icharger.rules 
 
 # only really useful when running on a real raspberry Pi (pointless when creating an image)
-sudo udevadm control --reload
+udevadm control --reload
 
 # TODO: ensure that the web runs via gunicorn and not the default flask
 # TODO: watchmedo - reload code when it is touched
@@ -224,37 +239,46 @@ fi
 
 SYSTEMCTL_FILES=/usr/lib/systemd/system
 
-sudo mkdir -p $SYSTEMCTL_FILES
-sudo mv $T/electric-status.service $SYSTEMCTL_FILES/ 
-sudo mv $T/electric-web.service $SYSTEMCTL_FILES/
-sudo mv $T/electric-worker.service $SYSTEMCTL_FILES/
+mkdir -p $SYSTEMCTL_FILES
+mv $T/electric-status.service $SYSTEMCTL_FILES/ 
+mv $T/electric-web.service $SYSTEMCTL_FILES/
+mv $T/electric-worker.service $SYSTEMCTL_FILES/
 
-sudo systemctl daemon-reload
+systemctl daemon-reload
 
-sudo systemctl enable electric-status.service
+systemctl enable electric-status.service
 check $? "failed to enable electric-status service"
-sudo systemctl enable electric-worker.service
+systemctl enable electric-worker.service
 check $? "failed to enable electric-worker service"
-sudo systemctl enable electric-web.service
+systemctl enable electric-web.service
 check $? "failed to enable electric-web service"
 
+# lets just say we're gonna install EVERYTHING here
+INSTALL_ROOT=/opt
+
+TEMP=${INSTALL_ROOT}/wireless
+mkdir -p ${TEMP}
+cd ${TEMP}
+
+# the /etc stuff is copied into /opt/wireless as well as into /etc 
+cp -avR $ELEC_INSTALL/wireless/scripts .
+cp -avR $ELEC_INSTALL/wireless/etc .
+cp -avR $ELEC_INSTALL/wireless/etc/* /etc/
+cp -avR $ELEC_INSTALL/wireless/config .
+
+# <rant>
+# because, it seems hard to have Windows and Linux/Mac users in a Git repo AND to have the damn 
+# permissions and LF line endings right, I'm simply going to DO IT MY WAY.  
+# It's MY ENVIRONMENT and I'll do what I want ... do what I want ... la la la laaaaa
+# </rant>
+find ${TEMP}/scripts -type f | xargs chmod +x
+
+# and I *said* LF darn it.
+find ${TEMP}/scripts -type f | xargs awk 'BEGIN{RS="^$";ORS="";getline;gsub("\r","");print>ARGV[1]}' 
+
+echo "Please modify the wlan.conf, to specify a WLAN SSID and password. Suitable command follows..."
 echo
-echo "Pulling down the network configuration scripts and running them..."
-curl --remote-name --location https://raw.githubusercontent.com/johncclayton/electric/${BRANCH}/wireless/get-wlan.sh
-chmod +x get-wlan.sh
-./get-wlan.sh
-RES=$?
-
-if [ $RES -ne 0 ]; then
-    echo "Error installing WiFi configuration via get-wlan.sh"
-    exit $RES
-fi
-
-if [ ! -d "/opt/wireless" ]; then
-    echo "Error - couldnt find the /opt/wireless directory - get-wlan.sh appears to have failed"
-    exit 6
-else
-    echo "*** SUCCESS ***"
-fi
+echo "sudo nano /opt/wireless/config/wlan.conf"
+echo
 
 exit 0

@@ -41,7 +41,7 @@ Troubleshooting (hopefully in order)
     ```
 - Check the 'after wlan0 is up' script: https://github.com/johncclayton/electric/blob/master/wireless/scripts/after-wlan0-up.
     - Check that your local copy in /opt/wireless/scripts is identical.
-    - Run "curl --location https://raw.githubusercontent.com/johncclayton/electric/master/wireless/get-wlan.sh | sudo bash -s" again if you're unsure.
+    - Run electric/wireless/get-wlan.sh again if you are unsure
     - This is important because this script is responsible for bringing up wlan1 (static 192.168.10.1) and also for ensuring the channel number of hostapd is the same as what the wlan0 network is using.
 - Linux Wireless (aka: iw)
   - does "iw dev" show wlan0 as being in "managed" mode? if not, you need to change it to "managed". You can't run wlan1 as an "AP" unless wlan0 is in "managed" mode.
