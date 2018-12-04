@@ -25,7 +25,7 @@ fi
 T=/tmp/electric-bootstrap
 if [ ! -d $T ]; then
     mkdir -p "$T"
-    chown ${SUDO_USER}:${SUDO_USER} "$T"
+    chown ${SUDO_USER}:users "$T"
 fi
 
 cd $T
@@ -76,7 +76,7 @@ sudo chmod g+rw /dev/gpiomem
 EOF
 
 chmod +x /opt/gpio.sh
-chown ${SUDO_USER}:${SUDO_USER} /opt/gpio.sh
+chown ${SUDO_USER}:users /opt/gpio.sh
 
 # find settings in dhcpcd.conf
 grep 'nohook wpa_supplicant' /etc/dhcpcd.conf
@@ -147,7 +147,7 @@ if [ ! -d /opt/prefs ]; then
     mkdir -p /opt/prefs
 fi
 
-chown -R ${SUD_USER}:users /opt
+chown -R ${SUDO_USER}:users /opt
 chmod -R 777 /opt
 
 echo
@@ -231,7 +231,7 @@ WantedBy=multi-user.target
 EOF
 
 # compile the enumeration_interfaces code (used by status service)
-pushd . && cd ${HOME}/electric/src/server/status && sudo -u $SUD_USER gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
+pushd . && cd ${HOME}/electric/src/server/status && sudo -u $SUDO_USER gcc -o enumerate_interfaces enumerate_interfaces.c && cp enumerate_interfaces /usr/local/bin/ && popd
 if [ ! -x /usr/local/bin/enumerate_interfaces ]; then
     echo "Failure to produce enumerate_interfaces in /usr/local/bin - aborting..."
     exit 4
