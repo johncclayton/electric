@@ -1,26 +1,23 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Routes, RouterModule } from '@angular/router';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {RouterModule, Routes} from '@angular/router';
 
-import { IonicModule } from '@ionic/angular';
+import {IonicModule} from '@ionic/angular';
 
-import { PresetListPage } from './preset-list.page';
+import {PresetListPage} from './preset-list.page';
 
-const routes: Routes = [
-  {
-    path: '',
-    component: PresetListPage
-  }
-];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    RouterModule.forChild(routes)
-  ],
-  declarations: [PresetListPage]
+    imports: [
+        CommonModule,
+        FormsModule,
+        IonicModule,
+        RouterModule.forChild([
+            {path: '', component: PresetListPage}
+        ])
+    ],
+    declarations: [PresetListPage]
 })
-export class PresetListPageModule {}
+export class PresetListPageModule {
+}

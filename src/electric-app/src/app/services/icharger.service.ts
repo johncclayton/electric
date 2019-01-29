@@ -219,6 +219,7 @@ export class iChargerService {
 
     isConnectedToCharger(): boolean {
         if (!this.isConnectedToServer()) {
+            this.logger.debug(`We're not connected`);
             return false;
         }
 

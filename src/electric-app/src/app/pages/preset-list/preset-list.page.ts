@@ -1,4 +1,4 @@
-import {AfterContentInit, Component, OnDestroy, ViewChild} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, OnDestroy, ViewChild} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
 import {IonList, NavController, IonRefresher, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
@@ -33,13 +33,17 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
     }
 
     ngAfterContentInit() {
-        if (!this.chargerService.isConnectedToCharger()) {
-            setTimeout(() => {
-                this.navCtrl.navigateBack(['']);
-            }, 500);
-        } else {
-            this.refreshPresets();
+        if (this.chargerService) {
+            if (!this.chargerService.isConnectedToCharger()) {
+                this.logger.error(`Not connected to charger, so going back`);
+                setTimeout(() => {
+                    this.navCtrl.navigateBack(['']);
+                }, 500);
+                return;
+            }
         }
+
+        this.refreshPresets();
     }
 
     ngOnDestroy() {
