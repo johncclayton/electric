@@ -15,6 +15,35 @@ Install _fastlane_ using
 or alternatively using `brew cask install fastlane`
 
 # Available Actions
+## iOS
+### ios dev
+```
+fastlane ios dev
+```
+Just build the thing
+### ios frames
+```
+fastlane ios frames
+```
+
+### ios screenshots
+```
+fastlane ios screenshots
+```
+
+### ios alpha
+```
+fastlane ios alpha
+```
+
+### ios prod
+```
+fastlane ios prod
+```
+
+
+----
+
 ## Android
 ### android internal
 ```

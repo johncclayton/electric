@@ -5,37 +5,29 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.001655">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.001061">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: Switch to android build_ionic lane" time="0.001551">
+      <testcase classname="fastlane.lanes" name="1: Switch to ios build_ionic lane" time="0.001012">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: npm run bump:build" time="0.523772">
+      <testcase classname="fastlane.lanes" name="2: npm run bump:build" time="0.51657">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: npm run copy:version" time="0.527483">
+      <testcase classname="fastlane.lanes" name="3: npm run copy:version" time="0.383313">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: ionic" time="66.386929">
+      <testcase classname="fastlane.lanes" name="4: ionic" time="145.93992">
         
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="5: gradle" time="28.848649">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="6: upload_to_play_store" time="28.438352">
+          <failure message="/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/actions/actions_helper.rb:48:in `execute_action'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:232:in `block in execute_action'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:227:in `chdir'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:227:in `execute_action'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:157:in `trigger_action_by_name'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/fast_file.rb:154:in `method_missing'&#10;Fastfile:28:in `block in parsing_binding'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/lane.rb:33:in `call'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:204:in `try_switch_to_lane'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:146:in `trigger_action_by_name'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/fast_file.rb:154:in `method_missing'&#10;Fastfile:63:in `block (2 levels) in parsing_binding'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/lane.rb:33:in `call'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:49:in `block in execute'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:45:in `chdir'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/runner.rb:45:in `execute'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/lane_manager.rb:56:in `cruise_lane'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/command_line_handler.rb:36:in `handle'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/commands_generator.rb:108:in `block (2 levels) in run'&#10;/Users/neil/.rvm/gems/ruby-2.3.0/gems/commander-fastlane-4.4.6/lib/commander/command.rb:178:in `call'&#10;/Users/neil/.rvm/gems/ruby-2.3.0/gems/commander-fastlane-4.4.6/lib/commander/command.rb:153:in `run'&#10;/Users/neil/.rvm/gems/ruby-2.3.0/gems/commander-fastlane-4.4.6/lib/commander/runner.rb:476:in `run_active_command'&#10;/Users/neil/.rvm/rubies/ruby-2.3.0/lib/ruby/gems/2.3.0/gems/fastlane-2.115.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:76:in `run!'&#10;/Users/neil/.rvm/gems/ruby-2.3.0/gems/commander-fastlane-4.4.6/lib/commander/delegates.rb:15:in `run!'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/commands_generator.rb:333:in `run'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/commands_generator.rb:41:in `start'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/fastlane/lib/fastlane/cli_tools_distributor.rb:113:in `take_off'&#10;/Users/neil/.rvm/gems/ruby-2.3.0@global/gems/fastlane-2.115.0/bin/fastlane:23:in `&lt;top (required)&gt;'&#10;/Users/neil/.rvm/gems/ruby-2.3.0/bin/fastlane:23:in `load'&#10;/Users/neil/.rvm/gems/ruby-2.3.0/bin/fastlane:23:in `&lt;main&gt;'&#10;&#10;Exit status of command 'ionic cordova compile ios --release --device --prod -- --packageType=app-store --developmentTeam=PMJ275ZTUX' was 1 instead of 0.&#10;&gt; cordova compile ios --release --device --packageType=app-store --developmentTeam=PMJ275ZTUX&#10;Building project: /Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/Electric.xcworkspace&#10;	Configuration: Release&#10;	Platform: device&#10;User defaults from command line:&#10;    IDEArchivePathOverride = /Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/Electric.xcarchive&#10;&#10;Build settings from command line:&#10;    CONFIGURATION_BUILD_DIR = /Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/build/device&#10;    SHARED_PRECOMPS_DIR = /Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/build/sharedpch&#10;&#10;Build settings from configuration file '/Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/cordova/build-release.xcconfig':&#10;    CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES&#10;    CODE_SIGN_ENTITLEMENTS = $(PROJECT_DIR)/$(PROJECT_NAME)/Entitlements-$(CONFIGURATION).plist&#10;    CODE_SIGN_IDENTITY = iPhone Distribution&#10;    DEVELOPMENT_TEAM = PMJ275ZTUX&#10;    ENABLE_BITCODE = NO&#10;    HEADER_SEARCH_PATHS = &quot;$(TARGET_BUILD_DIR)/usr/local/lib/include&quot; &quot;$(OBJROOT)/UninstalledProducts/include&quot; &quot;$(OBJROOT)/UninstalledProducts/$(PLATFORM_NAME)/include&quot; &quot;$(BUILT_PRODUCTS_DIR)&quot;&#10;    OTHER_LDFLAGS = -ObjC&#10;    SWIFT_OBJC_BRIDGING_HEADER = $(PROJECT_DIR)/$(PROJECT_NAME)/Bridging-Header.h&#10;&#10;Non-system Ruby in use. This may cause packaging to fail.&#10;If you use RVM, please run `rvm use system`.&#10;If you use chruby, please run `chruby system`.&#10;error: archive not found at path '/Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/Electric.xcarchive'&#10;** EXPORT FAILED **&#10;&#10;Error: Error code 65 for command: xcodebuild with args: -exportArchive,-archivePath,Electric.xcarchive,-exportOptionsPlist,/Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/exportOptions.plist,-exportPath,/Users/neil/GitDevelopment/electric/src/electric-app/platforms/ios/build/device&#10;[ERROR] An error occurred while running subprocess cordova.&#10;        &#10;        cordova compile ios --release --device --packageType=app-store --developmentTeam... exited with exit code 1.&#10;        &#10;        Re-running this command with the --verbose flag may provide more information.&#10;" />
         
       </testcase>
     

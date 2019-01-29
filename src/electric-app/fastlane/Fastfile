@@ -23,14 +23,72 @@ private_lane :build_ionic do |options|
         sh("npm", "run", "bump:build")
     end
     sh("npm", "run", "copy:version")
+    keychain_entry = CredentialsManager::AccountManager.new(user: "electric")
+    password = keychain_entry.password
     ionic(
         platform: lane_context[SharedValues::PLATFORM_NAME].to_s,
         prod: (options[:prod] ? true : false),
         keystore_path: '../../../electric-certs/google_play/electric-release.keystore',
         keystore_alias: 'electric-charger',
-        keystore_password: ENV["ELECTRIC_KEYSTORE_PWD"]
+        keystore_password: password
     )
 end
+
+platform :ios do
+  desc "Just build the thing"
+  lane :dev do
+    build_ionic
+    match(type: "appstore", readonly: true)
+    build_app(
+        export_method: "app-store",
+        export_options: {
+            provisioningProfiles: {
+                "com.electric.icharger.app" => "match Development com.electric.icharger.app"
+            }
+        }
+    )
+  end
+
+  lane :frames do
+    frame_screenshots(path: "./fastlane/screenshots")
+  end
+
+  lane :screenshots do
+    capture_screenshots
+    frames
+    upload_to_app_store
+  end
+
+  lane :alpha do
+    build_ionic(prod: true)
+    match(type: "appstore", readonly: true)
+    build_app(
+        export_method: "app-store",
+        export_options: {
+            provisioningProfiles: {
+                "com.electric.icharger.app" => "match AppStore com.electric.icharger.app"
+            }
+        }
+    )
+    upload_to_testflight
+  end
+
+  lane :prod do
+    build_ionic(prod: true, bump: true)
+    match(type: "appstore", readonly: true)
+    build_app(
+        export_method: "app-store",
+        export_options: {
+            provisioningProfiles: {
+                "com.electric.icharger.app" => "match AppStore com.electric.icharger.app"
+            }
+        }
+    )
+
+    # Yet to add 'deliver' to this
+  end
+end
+
 
 platform :android do
 #  desc "Runs all the tests"
