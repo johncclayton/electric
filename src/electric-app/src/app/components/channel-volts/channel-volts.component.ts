@@ -49,7 +49,7 @@ export class ChannelVoltsComponent {
         }
         let cells = this.channel.cells;
         if (!cells) {
-            return [];
+            return [{v:999}, {v:999}, {v:999}];
         }
 
         // Pad so there's an even divisible number of cells by cellChunking()

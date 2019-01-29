@@ -1,6 +1,6 @@
 import {AfterContentInit, Component, OnDestroy, ViewChild} from '@angular/core';
 import {ChemistryType, Preset} from '../../models/preset-class';
-import {List, NavController, Refresher, ToastController} from '@ionic/angular';
+import {IonList, NavController, IonRefresher, ToastController} from '@ionic/angular';
 import {Subject} from 'rxjs';
 import {iChargerService} from '../../services/icharger.service';
 import {takeUntil} from 'rxjs/operators';
@@ -18,8 +18,8 @@ export class PresetListPage implements OnDestroy, AfterContentInit {
     failedToGetPresets: boolean = false;
     loadingPresets: boolean = true;
     public presets: Array<Preset>;
-    @ViewChild(List) list: List;
-    @ViewChild(Refresher) refresher: Refresher;
+    @ViewChild(IonList) list: IonList;
+    @ViewChild(IonRefresher) refresher: IonRefresher;
 
     private ngUnsubscribe: Subject<void> = new Subject<void>();
     private logger: NGXLogger;
