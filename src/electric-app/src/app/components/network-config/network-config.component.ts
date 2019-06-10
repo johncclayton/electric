@@ -7,6 +7,7 @@ import {BehaviorSubject, Subject} from 'rxjs';
 import {NgRedux} from '@angular-redux/store';
 import {IAppState} from '../../models/state/configure';
 import {takeUntil} from 'rxjs/operators';
+import {SWBSafeJSON} from '../../utils/safe-json';
 
 class Section {
     key: string;
@@ -67,6 +68,13 @@ export class NetworkConfigComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.ngUnsubscribe.next();
         this.ngUnsubscribe.complete();
+    }
+
+    get readableCurrentIPAddress(): string {
+        if (this.current_ip_address) {
+            return SWBSafeJSON.stringify(this.current_ip_address);
+        }
+        return this.current_ip_address;
     }
 
     autoDetect() {

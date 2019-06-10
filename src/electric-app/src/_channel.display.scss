@@ -34,7 +34,6 @@ channel {
   .channelNumber {
     $size: 35px;
     position: relative;
-    top: 3px;
 
     width: $size !important;
     height: $size !important;
@@ -100,6 +99,7 @@ channel {
   .label {
     font-size: 0.9em;
   }
+
   .summary {
     :last-child {
       text-align: right;
@@ -109,6 +109,7 @@ channel {
   .unused {
     opacity: 0.25;
   }
+
   .empty {
     opacity: 0.0;
   }
@@ -141,31 +142,37 @@ channel {
         transform: scale(-1) translateY(-$balance-height);
         background: red;
       }
+
       .b1 {
         right: ($balance-width / 2.0) + $balance-offset * 4;
         height: ($balance-height * 0.2);
         background: mix(red, yellow, 8%);
       }
+
       .b2 {
         right: ($balance-width / 2.0) + $balance-offset * 3;
         height: ($balance-height * 0.4);
         background: mix(red, yellow, 25%);
       }
+
       .b3 {
         right: ($balance-width / 2.0) + $balance-offset * 2;
         height: ($balance-height * 0.6);
         background: mix(red, yellow, 50%);
       }
+
       .b4 {
         right: ($balance-width / 2.0) + $balance-offset;
         height: ($balance-height * 0.8);
         background: mix(red, yellow, 75%);
       }
+
       .b5 {
         right: ($balance-width / 2.0);
         height: $balance-height;
         background: mix(red, yellow, 100%);
       }
+
       .off {
         background: $balance-off-color !important;
       }

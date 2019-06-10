@@ -35,6 +35,7 @@ export class SystemSettingsPage implements OnInit, OnDestroy, ICanDeactivate {
         private toastController: ToastController,
         private messaging: ToastHelper,
         private localNotifications: LocalNotifications,
+        private systemActions: SystemActions,
         private alertController: AlertController,
         private ngRedux: NgRedux<IAppState>) {
     }
@@ -156,4 +157,11 @@ export class SystemSettingsPage implements OnInit, OnDestroy, ICanDeactivate {
             });
         });
     }
+
+    refreshSystemInfo(event) {
+        this.systemActions.fetchSystemFromCharger(() => {
+            event.target.complete();
+        });
+    }
+
 }

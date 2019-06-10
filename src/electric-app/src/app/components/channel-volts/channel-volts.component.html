@@ -1,5 +1,7 @@
 <ion-grid no-padding>
+    <!--Len: {{chunkedCells().length}}-->
     <ion-row *ngFor="let r of chunkedCells(); let y=index" class="cells">
+        <!--<ion-col>{{y}}</ion-col>-->
         <ion-col
                 [ngClass]="{'unused' : isCellUnused(cell), 'empty' : isCellPadding(cell)}"
                 no-padding

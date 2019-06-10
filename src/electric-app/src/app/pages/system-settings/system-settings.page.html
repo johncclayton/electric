@@ -11,6 +11,9 @@
 </ion-header>
 
 <ion-content>
+    <ion-refresher (ionRefresh)="refreshSystemInfo($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
     <system
             [system]="system$|async"
             [ui]="ui$|async"

@@ -7,8 +7,8 @@
 
     <ion-toolbar *ngIf="showCapacityAndC">
         <ion-segment [(ngModel)]="chargeMethod">
-            <ion-segment-button value="presets">Presets</ion-segment-button>
-            <ion-segment-button value="capacity">Capacity & C</ion-segment-button>
+            <ion-segment-button value="presets"><ion-label>Presets</ion-label></ion-segment-button>
+            <ion-segment-button value="capacity"><ion-label>Capacity & C</ion-label></ion-segment-button>
         </ion-segment>
     </ion-toolbar>
 </ion-header>
@@ -20,11 +20,11 @@
             <div *ngSwitchCase="'presets'">
                 <!--<h4 text-center>By Preset</h4>-->
                 <ion-segment [(ngModel)]="chemistryFilter">
-                    <ion-segment-button value="All">All</ion-segment-button>
-                    <ion-segment-button value="LP">Lipo</ion-segment-button>
-                    <ion-segment-button value="LL">Lilo</ion-segment-button>
-                    <ion-segment-button value="LF">LiFe</ion-segment-button>
-                    <ion-segment-button value="NM">NiMh</ion-segment-button>
+                    <ion-segment-button value="All"><ion-label>All</ion-label></ion-segment-button>
+                    <ion-segment-button value="LP"><ion-label>Lipo</ion-label></ion-segment-button>
+                    <ion-segment-button value="LL"><ion-label>Lilo</ion-label></ion-segment-button>
+                    <ion-segment-button value="LF"><ion-label>LiFe</ion-label></ion-segment-button>
+                    <ion-segment-button value="NM"><ion-label>NiMh</ion-label></ion-segment-button>
                 </ion-segment>
 
                 <ion-grid *ngIf="filteredPresets$|async as fp; else stillLoading">

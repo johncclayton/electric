@@ -8,7 +8,7 @@
         <ion-content>
             <ion-list>
                 <ion-menu-toggle auto-hide="false" *ngFor="let p of pages">
-                    <ion-item [routerDirection]="'root'" [href]="p.url" [disabled]="!p.visible()">
+                    <ion-item [routerDirection]="'root'" [routerLink]="p.url" [disabled]="!p.visible()">
                         <!--<ion-icon slot="start" [name]="p.icon"></ion-icon>-->
                         <ion-label>
                             {{p.title}}
@@ -17,6 +17,31 @@
                 </ion-menu-toggle>
             </ion-list>
         </ion-content>
+
+        <ion-footer>
+            <ion-toolbar class="env">
+                <ion-grid>
+                    <ion-row>
+                        <ion-col size="4" align-self-start>Version</ion-col>
+                        <ion-col size="8" align-self-end>{{versionNumber}} ({{buildNumber}})</ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-toolbar>
+            <ion-toolbar class="env">
+                <ion-grid>
+                    <ion-row>
+                        <ion-col size="4" align-self-start>Platform</ion-col>
+                        <ion-col size="8" align-self-end>{{ platformsString() }}</ion-col>
+                    </ion-row>
+                    <div *ngIf="!isProduction">
+                        <ion-row *ngFor="let key of environmentKeys()">
+                            <ion-col size="4" align-self-end>{{key}}</ion-col>
+                            <ion-col size="8" align-self-start>{{environmentValue(key)}}</ion-col>
+                        </ion-row>
+                    </div>
+                </ion-grid>
+            </ion-toolbar>
+        </ion-footer>
     </ion-menu>
     <ion-router-outlet main></ion-router-outlet>
 </ion-app>

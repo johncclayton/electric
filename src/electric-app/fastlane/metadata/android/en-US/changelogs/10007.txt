@@ -1,0 +1,5 @@
+Upgrade Ionic from 3 -> 4
+Fixed loads of bugs
+Faster connection time to the server
+Better server polling
+Better detection of changed presets, and prompting to save those presets

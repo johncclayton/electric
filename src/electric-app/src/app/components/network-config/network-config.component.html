@@ -31,7 +31,7 @@
 
         <div class="sections">
             <ion-list-header class="current" color="secondary" lines="none" *ngIf="current_ip_address != null">
-                Current IP Address: {{current_ip_address}}
+                Current IP Address: {{readableCurrentIPAddress}}
             </ion-list-header>
             <div *ngIf="sections$|async as sections">
                 <div *ngFor="let section of sections">

@@ -5,7 +5,7 @@ package_name("com.electric.icharger.app") # e.g. com.krausefx.app
 
 
 # iOS
-# app_identifier("com.electric.icharger.app")
-# apple_id("build@shinywhitebox.com")
-# itc_team_id("291361")
-# team_id("PMJ275ZTUX")
+app_identifier("com.electric.icharger.app")
+apple_id("build@shinywhitebox.com")
+itc_team_id("291361")
+team_id("PMJ275ZTUX")

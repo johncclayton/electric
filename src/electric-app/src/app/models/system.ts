@@ -9,8 +9,16 @@ export interface IChargerCaseFan {
 }
 
 export class System {
-    public static CELSIUS: string = "°C";
-    public static FARENHEIGHT: string = "°F";
+    public static CELSIUS = '°C';
+    public static FARENHEIGHT = '°F';
+
+    constructor(private system_data: {}) {
+        // console.debug(`System object created. Data: ${JSON.stringify(system_data)}`);
+        if (this.has_capabilities) {
+            const keys = Object.keys(this.system_data['capabilities']);
+            console.debug(`System Capabilities: ${keys.join(',')}. Env: ${System.environment.ionicEnvName}`);
+        }
+    }
 
     static unitsOfMeasure(celcius: boolean): string {
         if (celcius) {
@@ -19,32 +27,21 @@ export class System {
         return System.FARENHEIGHT;
     }
 
-    constructor(private system_data: {}) {
-        // console.debug(`System object created. Data: ${JSON.stringify(system_data)}`);
-        if (this.has_capabilities) {
-            let keys = Object.keys(this.system_data['capabilities']);
-            console.debug(`System Capabilities: ${keys.join(",")}. Env: ${System.environment.ionicEnvName}`);
-        }
-    }
-
     static get environment(): any {
         return environment;
     }
 
     static get isProduction(): boolean {
-        return System.environment.ionicEnvName == 'prod';
+        return System.environment.ionicEnvName === 'prod';
     }
 
     static environmentStrings(): string[] {
-        let callbackfn = (value): string => {
-            return value + " = " + System.environment[value];
-        };
-        return Object.keys(System.environment).map(callbackfn);
+        return Object.keys(System.environment).map(value => `${value} = ${System.environment[value]}`);
     }
 
     clone(): System {
-        let system: System = new System({});
-        for (let k in this.system_data) {
+        const system: System = new System({});
+        for (const k in this.system_data) {
             system.system_data[k] = this.system_data[k];
         }
         return system;
@@ -52,8 +49,8 @@ export class System {
 
     json() {
         // Exclude the 'capabilities' as these cannot be saved
-        let copied_dict = {...this.system_data};
-        if(this.has_capabilities) {
+        const copied_dict = {...this.system_data};
+        if (this.has_capabilities) {
             delete copied_dict['capabilities'];
         }
         return JSON.stringify(copied_dict);
@@ -67,9 +64,9 @@ export class System {
         return 'capabilities' in this.system_data;
     }
 
-    get has_case_fan() : boolean {
+    get has_case_fan(): boolean {
         // console.log(`Capabilities: ${this.has_capabilities}, and: ${this.system_data['capabilities']}`);
-        return this.has_capability('case_fan')
+        return this.has_capability('case_fan');
     }
 
     public has_capability(capability_name: string): boolean {
@@ -121,9 +118,9 @@ export class System {
 
     get unitsOfMeasure(): string {
         if (this.isCelsius) {
-            return "°C";
+            return '°C';
         }
-        return "°F";
+        return '°F';
     }
 
     get brightness(): number {

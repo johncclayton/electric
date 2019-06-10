@@ -1,0 +1,1 @@
+Fixes a problem that caused the config screen to show on startup.

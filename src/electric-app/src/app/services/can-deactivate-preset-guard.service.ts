@@ -24,15 +24,19 @@ export class GenericDeactivateGuard implements CanDeactivate<ICanDeactivate> {
         // this.logger.log(`Next state: ${nextState}`);
 
         if (component) {
-            this.logger.log(`${this.constructor.name}.canDeactivate called for: ${component}, current route: ${currentRoute} going to: ${nextState.url}`);
-
+            let componentName = component ? component.constructor.name : "<none>";
             const guardOnlyTheseURLs = component.guardOnlyTheseURLs();
+            this.logger.log(`${this.constructor.name}.canDeactivate called for: ${componentName}. Guarding URLs: ${guardOnlyTheseURLs}. Current route: ${currentRoute} going to: ${nextState.url}`);
+
             if(guardOnlyTheseURLs) {
-                if(nextState.url in guardOnlyTheseURLs) {
-                    this.logger.log(`Component: ${component ? component.constructor.name : 'null'} checking via canDeactivate()`);
+                if(guardOnlyTheseURLs.includes(nextState.url)) {
+                    this.logger.log(`Component: ${componentName} checking via canDeactivate()`);
                     return component.canDeactivate();
+                } else {
+                    this.logger.debug(`Guard not called as ${nextState.url} not in ${guardOnlyTheseURLs}`);
                 }
             } else {
+                this.logger.debug(`Guard not called as ${componentName} didn't return any guardURLs`);
                 return component.canDeactivate();
             }
 

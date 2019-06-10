@@ -44,8 +44,24 @@ fs.readFile('config.xml', 'utf8', function (err, data) {
         }
 
         // Increment build numbers (separately for iOS and Android)
-        obj['widget']['$']['ios-CFBundleVersion']++;
-        obj['widget']['$']['android-versionCode']++;
+        // Or; if ENV['BUILD_NUMBER'] or 'ELECTRICAPP_NUMBER' is present, use that instead
+        //
+        // ELECTRICAPP_NUMBER is used by the iOS build. It's a parameter only introduced for the parameterized iOS build.
+        // If it exists, it means 'build using version ELECTRICAPP_NUMBER - as that's what we published'
+        //
+        if(process.env['ELECTRICAPP_NUMBER']) {
+            console.log(`Build number set to ${process.env['ELECTRICAPP_NUMBER']} from process.env['ELECTRICAPP_NUMBER']`);
+            obj['widget']['$']['ios-CFBundleVersion'] = process.env['ELECTRICAPP_NUMBER'];
+            obj['widget']['$']['android-versionCode'] = process.env['ELECTRICAPP_NUMBER'];
+        } else if(process.env['BUILD_NUMBER']) {
+            console.log(`Build number set to ${process.env['BUILD_NUMBER']} from process.env['BUILD_NUMBER']`);
+            obj['widget']['$']['ios-CFBundleVersion'] = process.env['BUILD_NUMBER'];
+            obj['widget']['$']['android-versionCode'] = process.env['BUILD_NUMBER'];
+        } else {
+            console.log('Build number successfully incremented');
+            obj['widget']['$']['ios-CFBundleVersion']++;
+            obj['widget']['$']['android-versionCode']++;
+        }
 
         // Build XML from JS Obj
         var builder = new xml2js.Builder();
@@ -57,7 +73,7 @@ fs.readFile('config.xml', 'utf8', function (err, data) {
                 return console.log(err);
             }
 
-            console.log('Build number successfully incremented');
+            console.log('Build number successfully saved to config.xml');
         });
 
     });
