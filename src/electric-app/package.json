@@ -10,7 +10,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "lint4": "npx tslint -c ionic-migration.json -p tsconfig.json",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "bump:build": "node scripts/increment-build-number.js",
+    "bump:build:version": "node scripts/increment-build-number.js version"
   },
   "private": true,
   "dependencies": {
@@ -33,7 +35,7 @@
     "@ionic/ng-toolkit": "^1.1.0",
     "@ionic/schematics-angular": "1.0.0",
     "@ionic/storage": "2.2.0",
-    "cordova-android": "7.1.2",
+    "cordova-android": "7.1.4",
     "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-device": "^2.0.2",

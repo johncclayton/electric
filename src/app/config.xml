@@ -90,8 +90,6 @@
     <allow-navigation href="http://192.168.1.168:8100" />
     <allow-navigation href="http://192.168.1.168:8101" />
     <allow-navigation href="http://192.168.10.15:8101" />
-    <engine name="android" spec="~6.3.0" />
-    <engine name="ios" spec="~4.5.3" />
     <plugin name="cordova-plugin-device" spec="^1.1.6" />
     <plugin name="cordova-plugin-splashscreen" spec="^4.0.3" />
     <plugin name="cordova-plugin-statusbar" spec="^2.2.3" />
@@ -104,4 +102,6 @@
     <plugin name="cordova-plugin-zeroconf" spec="^1.2.8" />
     <plugin name="cordova-plugin-networkinterface" spec="^1.2.0" />
     <plugin name="de.appplant.cordova.plugin.local-notification" spec="^0.8.5" />
+    <engine name="android" spec="6.3.0" />
+    <engine name="ios" spec="~4.5.3" />
 </widget>

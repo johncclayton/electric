@@ -20,11 +20,11 @@ private_lane :build_ionic do |options|
     # TODO: Bump versions
 
     ionic(
-        platform: labe_context[SharedValues::PLATFORM_NAME].to_s,
+        platform: lane_context[SharedValues::PLATFORM_NAME].to_s,
         prod: (options[:prod] ? true : false),
-        keystore_path: '../electric-certs/google_play/android-release-keys.jks',
-        keystore_alias: 'my-alias',
-        keystore_password: 'electric'
+        keystore_path: '/Users/neil/GitDevelopment/electric-certs/google_play/electric-release.keystore',
+        keystore_alias: 'electric-charger',
+        keystore_password: 'boca instant mugwump murrain'
     )
 end
 
@@ -36,7 +36,11 @@ platform :android do
 
   desc "Deploy a new beta version"
   lane :alpha do
-    gradle(task: "clean assembleRelease", project_dir: './platforms/android')
+    build_ionic()
+    gradle(
+        task: "clean assembleRelease",
+        project_dir: './platforms/android'
+    )
     upload_to_play_store(track: 'alpha')
   end
 
