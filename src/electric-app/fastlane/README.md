@@ -50,6 +50,11 @@ fastlane ios prod
 fastlane android internal
 ```
 Deploy a new internal version
+### android alpha
+```
+fastlane android alpha
+```
+Deploy a new alpha version
 ### android beta
 ```
 fastlane android beta

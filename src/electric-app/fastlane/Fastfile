@@ -91,25 +91,21 @@ end
 
 
 platform :android do
-#  desc "Runs all the tests"
-#  lane :test do
-#    gradle(task: "test")
-#  end
-
   desc "Deploy a new internal version"
   lane :internal do
-    build_ionic
+    build_ionic()
     gradle(task: "clean assembleRelease", project_dir: './platforms/android')
     upload_to_play_store(track: 'internal')
   end
 
-  desc "Deploy a new beta version"
-
+  desc "Deploy a new alpha version"
   lane :alpha do
     build_ionic(prod: true)
     gradle(task: "clean assembleRelease", project_dir: './platforms/android')
     upload_to_play_store(track: 'alpha')
+  end
 
+  desc "Deploy a new beta version"
   lane :beta do
     build_ionic(prod: true)
     gradle(task: "clean assembleRelease", project_dir: './platforms/android')
