@@ -9,7 +9,7 @@ funcsigs==1.0.2
 gunicorn==19.7.1
 hidapi==0.7.99.post21
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 MarkupSafe==1.0
 mock==2.0.0
 modbus-tk==0.5.4

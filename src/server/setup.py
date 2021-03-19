@@ -34,7 +34,7 @@ setup(
         
             'itsdangerous==0.24',
         
-            'Jinja2==2.9.6',
+            'Jinja2==2.11.3',
         
             'MarkupSafe==1.0',
         
