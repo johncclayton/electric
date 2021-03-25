@@ -18,7 +18,7 @@ pbr==3.1.1
 pyserial==3.1
 python-dateutil==2.6.1
 pytz==2017.2
-PyYAML==3.12
+PyYAML==5.4
 pyzmq==16.0.2
 RPi.GPIO==0.6.3
 schematics==1.1.1
