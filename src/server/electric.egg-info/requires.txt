@@ -2,7 +2,7 @@ aniso8601==1.2.1
 click==6.7
 configparser==3.5.0
 Flask==0.12.2
-Flask-Cors==3.0.3
+Flask-Cors==3.0.9
 Flask-RESTful==0.3.6
 gunicorn==19.7.1
 itsdangerous==0.24

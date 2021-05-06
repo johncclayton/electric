@@ -26,7 +26,7 @@ setup(
         
             'Flask==0.12.2',
         
-            'Flask-Cors==3.0.3',
+            'Flask-Cors==3.0.9',
         
             'Flask-RESTful==0.3.6',
         
