@@ -24,7 +24,7 @@
     "@angular/common": "4.4.4",
     "@angular/compiler": "4.4.4",
     "@angular/compiler-cli": "4.4.4",
-    "@angular/core": "4.4.4",
+    "@angular/core": "11.0.5",
     "@angular/forms": "4.4.4",
     "@angular/http": "4.4.4",
     "@angular/platform-browser": "4.4.4",
